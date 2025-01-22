@@ -15,7 +15,7 @@
   ],
 
   // Use 'postCreateCommand' to run commands after the container is created.
-  "postCreateCommand": "pip install -r server/requirements.txt",
+  "postCreateCommand": "python -m venv .venv && .venv/bin/pip install -r server/requirements.txt",
 
   // Configure tool-specific properties.
    "customizations": {
