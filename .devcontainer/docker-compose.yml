@@ -2,10 +2,12 @@ services:
   app:
     build:
       context: ..
-      dockerfile: DockerfileApp
+      dockerfile: .devcontainer/DockerfileApp
+    image: ft_transcendence_devcontainer_app:latest
 
-#    volumes:
-#      - ../..:/workspaces:cached
+    volumes:
+      - ../..:/workspaces:cached
+
     command: sleep infinity
     network_mode: service:db
 
@@ -18,9 +20,6 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_DB: postgres
       POSTGRES_PASSWORD: postgres
-
-    # Add "forwardPorts": ["5432"] to **devcontainer.json** to forward PostgreSQL locally.
-    # (Adding the "ports" property to this file will not forward from a Codespace.)
 
 volumes:
   postgres-data:

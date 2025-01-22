@@ -13,13 +13,16 @@
   "forwardPorts": [
     5432
   ],
+
   // Use 'postCreateCommand' to run commands after the container is created.
   "postCreateCommand": "pip install -r server/requirements.txt",
+
   // Configure tool-specific properties.
-  "customizations": {
-    "jetbrains": {
-      "backend": "PyCharm"
-    }
-  },
+   "customizations": {
+     "jetbrains": {
+       "backend": "PyCharm"
+     }
+   },
+
   "remoteUser": "root"
 }
