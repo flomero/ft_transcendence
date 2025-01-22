@@ -1,6 +1,6 @@
 FROM python:3.13.1-bookworm
 
-ENV PYTHONUNBUFFERED=1
+#ENV PYTHONUNBUFFERED=1
 
 # [Optional] If your requirements rarely change, uncomment this section to add them to the image.
 #COPY server/requirements.txt /tmp/pip-tmp/

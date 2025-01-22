@@ -1,14 +1,15 @@
 services:
   app:
-    build:
-      context: ..
-      dockerfile: .devcontainer/DockerfileApp
-    image: ft_transcendence_devcontainer_app:latest
+#    build:
+#      context: .
+#      dockerfile: DockerfileApp
+#    image: ft_transcendence_devcontainer_app:latest
+
+    image: python:3.13.1-bookworm
 
     volumes:
       - ../..:/workspaces:cached
-
-    command: sleep infinity
+    command: "sleep infinity"
     network_mode: service:db
 
   db:
