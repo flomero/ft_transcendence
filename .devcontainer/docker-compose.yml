@@ -7,8 +7,9 @@ services:
 
     image: python:3.13.1-bookworm
 
-    volumes:
-      - ../..:/workspaces:cached
+#    volumes:
+#      - ../..:/workspaces:cached
+
     command: "sleep infinity"
     network_mode: service:db
 

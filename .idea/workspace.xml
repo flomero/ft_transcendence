@@ -4,10 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="41ad8d9a-fdb6-406e-83a4-59209521b735" name="Changes" comment="more additions to the devcontainer.json">
-      <change beforePath="$PROJECT_DIR$/.devcontainer/DockerfileApp" beforeDir="false" afterPath="$PROJECT_DIR$/.devcontainer/DockerfileApp" afterDir="false" />
+    <list default="true" id="41ad8d9a-fdb6-406e-83a4-59209521b735" name="Changes" comment="basic devcontainer working">
       <change beforePath="$PROJECT_DIR$/.devcontainer/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.devcontainer/docker-compose.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -118,7 +116,7 @@
       <workItem from="1737547848629" duration="1038000" />
       <workItem from="1737558641401" duration="1521000" />
       <workItem from="1737560483263" duration="414000" />
-      <workItem from="1737561748340" duration="1963000" />
+      <workItem from="1737561748340" duration="2204000" />
     </task>
     <task id="LOCAL-00001" summary="more additions to the devcontainer.json">
       <option name="closed" value="true" />
@@ -144,7 +142,15 @@
       <option name="project" value="LOCAL" />
       <updated>1737563910505</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="basic devcontainer working">
+      <option name="closed" value="true" />
+      <created>1737564495906</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1737564495906</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -163,6 +169,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="more additions to the devcontainer.json" />
-    <option name="LAST_COMMIT_MESSAGE" value="more additions to the devcontainer.json" />
+    <MESSAGE value="basic devcontainer working" />
+    <option name="LAST_COMMIT_MESSAGE" value="basic devcontainer working" />
   </component>
 </project>
