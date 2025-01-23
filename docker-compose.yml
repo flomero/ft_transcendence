@@ -1,0 +1,53 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:14
+    container_name: my_postgres
+    environment:
+      POSTGRES_DB: django_db
+      POSTGRES_USER: django_user
+      POSTGRES_PASSWORD: django_password
+    depends_on:
+      vault:
+        condition: service_healthy
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  vault: # dev setup for easy testing
+    image: vault:1.12.3
+    container_name: my_vault
+    command: sh -c "vault server -dev -dev-root-token-id=root -dev-listen-address=0.0.0.0:8200 & sleep 2 && vault kv put secret/django POSTGRES_DB=django_db POSTGRES_USER=django_user POSTGRES_PASSWORD=django_password SECRET_KEY=dev_secret_key && wait"
+    environment:
+      VAULT_ADDR: "http://0.0.0.0:8200"
+    ports:
+      - "8200:8200"
+    cap_add:
+      - IPC_LOCK
+    healthcheck:
+      test: ["CMD", "vault", "status"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: my_django_app
+    command: python manage.py runserver 0.0.0.0:8000 # For some reason, the ip is necessary
+    volumes:
+      - ./server:/app  # Mount your code inside the container (helpful for local dev)
+    ports:
+      - "8000:8000"
+    depends_on:
+      vault:
+        condition: service_healthy # Wait for vault to be healthy before starting this service, necessary for secrets
+    environment:
+      - VAULT_ADDR=http://vault:8200
+      - VAULT_TOKEN=root
+
+volumes:
+  db_data:
