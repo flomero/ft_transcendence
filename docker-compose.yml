@@ -16,7 +16,7 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
 
-  vault:
+  vault: # dev setup for easy testing
     image: vault:1.12.3
     container_name: my_vault
     command: sh -c "vault server -dev -dev-root-token-id=root -dev-listen-address=0.0.0.0:8200 & sleep 2 && vault kv put secret/django POSTGRES_DB=django_db POSTGRES_USER=django_user POSTGRES_PASSWORD=django_password SECRET_KEY=dev_secret_key && wait"
@@ -44,7 +44,7 @@ services:
       - "8000:8000"
     depends_on:
       vault:
-        condition: service_healthy
+        condition: service_healthy # Wait for vault to be healthy before starting this service, necessary for secrets
     environment:
       - VAULT_ADDR=http://vault:8200
       - VAULT_TOKEN=root
