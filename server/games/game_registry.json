@@ -1,0 +1,7 @@
+{
+  "pong": {
+    "base_class": "BasePong",
+    "variants": ["DefaultPongVariant", "SoloPongVariant"],
+    "modifiers": ["SpeedBoost", "InvisibleBall"]
+  }
+}
