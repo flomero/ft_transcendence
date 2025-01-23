@@ -1,7 +1,12 @@
 {
   "pong": {
-    "base_class": "BasePong",
-    "variants": ["DefaultPongVariant", "SoloPongVariant"],
-    "modifiers": ["SpeedBoost", "InvisibleBall"]
+    "variants": {
+      "default_pong": "DefaultPong",
+      "solo_pong": "SoloPong"
+    },
+    "modifiers": {
+      "speed_boost": "SpeedBoost",
+      "invisible_ball": "InvisibleBall"
+    }
   }
 }

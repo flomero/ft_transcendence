@@ -17,24 +17,23 @@ def load_game_registry():
 
     # Import all games, variants, and modifiers dynamically
     for game, data in GAME_REGISTRY.items():
-        base_class = f"games.game_logic.{game}.{data['base_class']}"
-        GAME_REGISTRY[game]["base_class"] = import_class(base_class)
 
         GAME_REGISTRY[game]["variants"] = {
-            variant: import_class(f"games.game_logic.{game}.{variant}")
-            for variant in data["variants"]
+            variant: import_class(f"games.{game}.game_modes.{variant}", class_name)
+            for variant, class_name in data["variants"].items()
         }
 
         GAME_REGISTRY[game]["modifiers"] = {
-            mod: import_class(f"games.game_logic.modifiers.{mod}")
-            for mod in data["modifiers"]
+            mod: import_class(f"games.{game}.modifiers.{mod}", class_name)
+            for mod, class_name in data["modifiers"].items()
         }
 
 # Import Class Helper
-def import_class(full_class_path):
-    """Dynamically import a class given its full path."""
-    module_name, class_name = full_class_path.rsplit(".", 1)
-    module = importlib.import_module(module_name)
+def import_class(module_path, class_name):
+    """Dynamically import a class given its module path and class name."""
+    module = importlib.import_module(module_path)
+    if not hasattr(module, class_name):
+        raise AttributeError(f"Module '{module_path}' does not have class '{class_name}'")
     return getattr(module, class_name)
 
 # Base Class for All Games
