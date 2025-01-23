@@ -11,22 +11,31 @@ https://docs.djangoproject.com/en/dev/ref/settings/
 """
 
 from pathlib import Path
+import hvac
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Initialize the Vault client
+client = hvac.Client(
+    url=os.getenv('VAULT_ADDR', 'http://127.0.0.1:8200'),
+    token=os.getenv('VAULT_TOKEN', 'root')
+)
+
+# Fetch secrets from Vault
+secret = client.secrets.kv.v2.read_secret_version(path='django')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/dev/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-mt#c10nz^1#&9^c$_3#ru(6mr9boi^3zo7l9fg_4!+qr%o#r01'
+SECRET_KEY = secret['data']['data']['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['0.0.0.0']
 
 # Application definition
 
@@ -54,7 +63,7 @@ ROOT_URLCONF = 'ft_transcendence.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -68,21 +77,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ft_transcendence.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
+        'NAME': secret['data']['data']['POSTGRES_DB'],
+        'USER': secret['data']['data']['POSTGRES_USER'],
+        'PASSWORD': secret['data']['data']['POSTGRES_PASSWORD'],
         'HOST': 'db',
         'PORT': '5432',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/dev/ref/settings/#auth-password-validators
@@ -102,7 +109,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/dev/topics/i18n/
 
@@ -113,7 +119,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/dev/howto/static-files/

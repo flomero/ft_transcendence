@@ -2,3 +2,4 @@ asgiref==3.8.1
 Django==5.1.5
 sqlparse==0.5.3
 psycopg2==2.9.10
+hvac==0.11.2

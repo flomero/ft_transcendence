@@ -1,0 +1,45 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:14
+    container_name: my_postgres
+    environment:
+      POSTGRES_DB: django_db
+      POSTGRES_USER: django_user
+      POSTGRES_PASSWORD: django_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  vault:
+    image: vault:1.12.3
+    container_name: my_vault
+    command: server -dev -dev-root-token-id=root -dev-listen-address=0.0.0.0:8200
+    environment:
+      VAULT_ADDR: "http://0.0.0.0:8200"
+    ports:
+      - "8200:8200"
+    cap_add:
+      - IPC_LOCK
+
+  web:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: my_django_app
+    command: python manage.py runserver
+    volumes:
+      - ./server:/app  # Mount your code inside the container (helpful for local dev)
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - vault
+    environment:
+      - VAULT_ADDR=http://vault:8200
+      - VAULT_TOKEN=root
+
+volumes:
+  db_data:
