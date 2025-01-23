@@ -16,7 +16,7 @@ services:
   vault:
     image: vault:1.12.3
     container_name: my_vault
-    command: server -dev -dev-root-token-id=root -dev-listen-address=0.0.0.0:8200
+    command: sh -c "vault server -dev -dev-root-token-id=root -dev-listen-address=0.0.0.0:8200 & sleep 5 && vault kv put secret/django POSTGRES_DB=django_db POSTGRES_USER=django_user POSTGRES_PASSWORD=django_password SECRET_KEY=dev_secret_key && wait"
     environment:
       VAULT_ADDR: "http://0.0.0.0:8200"
     ports:
