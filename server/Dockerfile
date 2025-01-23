@@ -14,12 +14,14 @@ RUN apt-get update && apt-get install -y \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
+# Copy the requirements file
+COPY server/requirements.txt /app/requirements.txt
+
 # Install Python dependencies
-#COPY server/requirements.txt /app/
-RUN pip install --no-cache-dir -r server/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
 # Copy the Django project
-#COPY server /app/
+COPY server /app/
 
 # Expose the port the app runs on
 EXPOSE 8000
