@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Game Selection</title>
+    <script>
+      let selectedGame = "pong";
+      let selectedMode = "default_pong";
+      let selectedModifiers = [];
+
+      function startGame() {
+        const params = new URLSearchParams({
+          game: selectedGame,
+          game_mode: selectedMode,
+          modifiers: selectedModifiers.join(","),
+        });
+        window.location.href = `/play/?${params.toString()}`;
+      }
+    </script>
+    <style>
+      body {
+        text-align: center;
+        background-color: black;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Select Game</h1>
+    <select onchange="selectedGame = this.value">
+      <option value="pong">Pong</option>
+    </select>
+
+    <h2>Select Mode</h2>
+    <select onchange="selectedMode = this.value">
+      <option value="default_pong">Default Pong</option>
+      <option value="solo_pong">Solo Pong</option>
+    </select>
+
+    <h2>Modifiers</h2>
+    <label
+      ><input
+        type="checkbox"
+        value="SpeedBoost"
+        onclick="selectedModifiers.push(this.value)"
+      />
+      Speed Boost</label
+    >
+    <label
+      ><input
+        type="checkbox"
+        value="InvisibleBall"
+        onclick="selectedModifiers.push(this.value)"
+      />
+      Invisible Ball</label
+    >
+
+    <button onclick="startGame()">Start Game</button>
+  </body>
+</html>
