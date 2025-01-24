@@ -10,19 +10,20 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/dev/ref/settings/
 """
 import json
+import os
 from logging import Formatter, StreamHandler, FileHandler
 from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
+
 import hvac
-import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Initialize the Vault client
 client = hvac.Client(
-    url=os.getenv('VAULT_ADDR', 'http://127.0.0.1:8200'),
-    token=os.getenv('VAULT_TOKEN', 'root')
+	url=os.getenv('VAULT_ADDR', 'http://127.0.0.1:8200'),
+	token=os.getenv('VAULT_TOKEN', 'root')
 )
 
 # Fetch secrets from Vault
@@ -42,40 +43,40 @@ ALLOWED_HOSTS = ['0.0.0.0']
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'my_example_app'
+	'django.contrib.admin',
+	'django.contrib.auth',
+	'django.contrib.contenttypes',
+	'django.contrib.sessions',
+	'django.contrib.messages',
+	'django.contrib.staticfiles',
+	'my_example_app'
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+	'django.middleware.security.SecurityMiddleware',
+	'django.contrib.sessions.middleware.SessionMiddleware',
+	'django.middleware.common.CommonMiddleware',
+	'django.middleware.csrf.CsrfViewMiddleware',
+	'django.contrib.auth.middleware.AuthenticationMiddleware',
+	'django.contrib.messages.middleware.MessageMiddleware',
+	'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 ROOT_URLCONF = 'ft_transcendence.urls'
 
 TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
+	{
+		'BACKEND': 'django.template.backends.django.DjangoTemplates',
+		'DIRS': [BASE_DIR / 'templates'],
+		'APP_DIRS': True,
+		'OPTIONS': {
+			'context_processors': [
+				'django.template.context_processors.request',
+				'django.contrib.auth.context_processors.auth',
+				'django.contrib.messages.context_processors.messages',
+			],
+		},
+	},
 ]
 
 WSGI_APPLICATION = 'ft_transcendence.wsgi.application'
@@ -84,92 +85,111 @@ WSGI_APPLICATION = 'ft_transcendence.wsgi.application'
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': secret['data']['data']['POSTGRES_DB'],
-        'USER': secret['data']['data']['POSTGRES_USER'],
-        'PASSWORD': secret['data']['data']['POSTGRES_PASSWORD'],
-        'HOST': 'db',
-        'PORT': '5432',
-    }
+	'default': {
+		'ENGINE': 'django.db.backends.postgresql',
+		'NAME': secret['data']['data']['POSTGRES_DB'],
+		'USER': secret['data']['data']['POSTGRES_USER'],
+		'PASSWORD': secret['data']['data']['POSTGRES_PASSWORD'],
+		'HOST': 'db',
+		'PORT': '5432',
+	}
 }
 
 # Password validation
 # https://docs.djangoproject.com/en/dev/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+	{
+		'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+	},
+	{
+		'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+	},
+	{
+		'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+	},
+	{
+		'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+	},
 ]
 
-#Ensure logs directory exists
+# Ensure logs directory exists
 LOG_DIR = os.path.join(BASE_DIR, 'logs')
 os.makedirs(LOG_DIR, exist_ok=True)
 
+
 # Costume JSON formatter
 class JsonFormatter(Formatter):
-    def format(self, record):
-        log_record = {
-            "timestamp": self.formatTime(record, self.datefmt),
-            "level": record.levelname,
-            "name": record.name,
-            "message": record.getMessage(),
-            "pathname": record.pathname,
-            "lineno": record.lineno,
-            "module": record.module,
-        }
-        return json.dumps(log_record)
+	def format(self, record):
+		log_record = {
+			"timestamp": self.formatTime(record, self.datefmt),
+			"level": record.levelname,
+			"name": record.name,
+			"message": record.getMessage(),
+			"pathname": record.pathname,
+			"lineno": record.lineno,
+			"module": record.module,
+		}
+		return json.dumps(log_record)
+
+
+class ColoredFormatter(Formatter):
+	COLORS = {
+		'DEBUG': '\033[37m',  # white
+		'INFO': '\033[32m',  # green
+		'WARNING': '\033[33m',  # yellow
+		'ERROR': '\033[31m',  # red
+		'CRITICAL': '\033[1;31m',  # bold red
+	}
+	RESET = '\033[0m'
+
+	def format(self, record):
+		log_color = self.COLORS.get(record.levelname, self.RESET)
+		record.levelname = f"{log_color}{record.levelname}{self.RESET}"
+		return super().format(record)
+
 
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'json': {
-            '()': JsonFormatter,
-        },
-        'default': {
-            'format': '%(levelname)s %(message)s',
-        },
-    },
-    'handlers': {
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.handlers.TimedRotatingFileHandler',
-            'filename': os.path.join(LOG_DIR, 'app.log'),
-            'when': 'midnight',
-            'backupCount': 7,
-            'formatter': 'json',
-        },
-        'console': {
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
-            'formatter': 'default',
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['file', 'console'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-        'my_example_app': {
-            'handlers': ['file', 'console'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-    },
+	'version': 1,
+	'disable_existing_loggers': False,
+	'formatters': {
+		'json': {
+			'()': JsonFormatter,
+		},
+		'default': {
+			'format': '%(asctime)s %(levelname)s %(message)s',
+			'datefmt': '%H:%M',
+			'()': ColoredFormatter,
+		},
+	},
+	'handlers': {
+		'file': {
+			'level': 'INFO',
+			'class': 'logging.handlers.TimedRotatingFileHandler',
+			'filename': os.path.join(LOG_DIR, 'app.log'),
+			'when': 'midnight',
+			'backupCount': 7,
+			'formatter': 'json',
+		},
+		'console': {
+			'level': 'INFO',
+			'class': 'logging.StreamHandler',
+			'formatter': 'default',
+		},
+	},
+	'loggers': {
+		'django': {
+			'handlers': ['file', 'console'],
+			'level': 'INFO',
+			'propagate': True,
+		},
+		'my_example_app': {
+			'handlers': ['file', 'console'],
+			'level': 'INFO',
+			'propagate': True,
+		},
+	},
 }
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/dev/topics/i18n/
