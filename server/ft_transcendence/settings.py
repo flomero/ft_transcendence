@@ -9,7 +9,9 @@ https://docs.djangoproject.com/en/dev/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/dev/ref/settings/
 """
-
+import json
+from logging import Formatter, StreamHandler, FileHandler
+from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
 import hvac
 import os
@@ -109,6 +111,65 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+#Ensure logs directory exists
+LOG_DIR = os.path.join(BASE_DIR, 'logs')
+os.makedirs(LOG_DIR, exist_ok=True)
+
+# Costume JSON formatter
+class JsonFormatter(Formatter):
+    def format(self, record):
+        log_record = {
+            "timestamp": self.formatTime(record, self.datefmt),
+            "level": record.levelname,
+            "name": record.name,
+            "message": record.getMessage(),
+            "pathname": record.pathname,
+            "lineno": record.lineno,
+            "module": record.module,
+        }
+        return json.dumps(log_record)
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'json': {
+            '()': JsonFormatter,
+        },
+        'default': {
+            'format': '%(levelname)s %(message)s',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': os.path.join(LOG_DIR, 'app.log'),
+            'when': 'midnight',
+            'backupCount': 7,
+            'formatter': 'json',
+        },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'default',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'my_example_app': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/dev/topics/i18n/
