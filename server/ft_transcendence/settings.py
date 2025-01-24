@@ -178,9 +178,14 @@ LOGGING = {
 		},
 	},
 	'loggers': {
-		'django': {
+		'django.server': {
 			'handlers': ['file', 'console'],
 			'level': 'INFO',
+			'propagate': True,
+		},
+		'django.utils': {
+			'handlers': ['file', 'console'],
+			'level': 'WARNING',
 			'propagate': True,
 		},
 		'my_example_app': {
