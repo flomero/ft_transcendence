@@ -23,6 +23,6 @@ from . import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     # for testing
-    path('', include('my_app.urls')),
+    path('', include('my_example_app.urls')),
 
 ]
