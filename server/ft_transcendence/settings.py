@@ -38,7 +38,7 @@ SECRET_KEY = secret['data']['data']['SECRET_KEY']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['0.0.0.0']
+ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1']
 
 # Application definition
 
@@ -95,6 +95,14 @@ DATABASES = {
 		'PORT': '5432',
 	}
 }
+
+# 42 API configuration
+OAUTH2_CLIENT_ID = '***REMOVED***'
+OAUTH2_CLIENT_SECRET = '***REMOVED***'
+OAUTH2_REDIRECT_URI = 'http://localhost:8000/auth/callback/'
+OAUTH2_AUTHORIZE_URL = 'https://api.intra.42.fr/oauth/authorize'
+OAUTH2_TOKEN_URL = 'https://api.intra.42.fr/oauth/token'
+OAUTH2_API_URL = 'https://api.intra.42.fr/v2/me'
 
 # Password validation
 # https://docs.djangoproject.com/en/dev/ref/settings/#auth-password-validators
@@ -182,7 +190,7 @@ LOGGING = {
 		'django.server': {
 			'handlers': ['file', 'console'],
 			'level': 'INFO',
-			'propagate': True,
+			'propagate': False,
 		},
 		'django.utils': {
 			'handlers': ['file', 'console'],
@@ -190,6 +198,11 @@ LOGGING = {
 			'propagate': True,
 		},
 		'my_example_app': {
+			'handlers': ['file', 'console'],
+			'level': 'INFO',
+			'propagate': True,
+		},
+		'users': {
 			'handlers': ['file', 'console'],
 			'level': 'INFO',
 			'propagate': True,
