@@ -22,3 +22,10 @@ class User(AbstractUser):
 	display_name = models.CharField(max_length=100, blank=True, null=True)
 	profile_pic = models.FileField(upload_to='profile_pics/', blank=True, null=True,
 								   validators=[validate_file_size, validate_image_type])
+
+
+class OAuthToken(models.Model):
+	user = models.OneToOneField('User', on_delete=models.CASCADE, related_name='oauth_token')
+	refresh_token = models.CharField(max_length=255, blank=True, null=True)
+	access_token = models.CharField(max_length=255, blank=True, null=True)
+	expires_at = models.DateTimeField(null=True, blank=True)  # Token expiration time

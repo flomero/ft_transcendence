@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime, timedelta
 
 import requests
 from django.conf import settings
@@ -7,7 +8,7 @@ from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.shortcuts import redirect, render
 
-from .models import User
+from .models import User, OAuthToken
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +37,8 @@ def oauth_callback(request):
 	token_response = requests.post(settings.OAUTH2_TOKEN_URL, data=token_data)
 	if token_response.status_code != 200:
 		return render(request, 'auth/error.html', {"error": "Failed to fetch access token."})
+
+	logger.warning(f"Token response: {token_response.json()}")
 
 	access_token = token_response.json().get('access_token')
 
@@ -68,9 +71,12 @@ def oauth_callback(request):
 					user.full_clean()  # This will run the validators
 				except ValidationError as e:
 					logger.error(f"Validation error: {e}")
-					# Handle the validation error (e.g., set a default image, notify the user, etc.)
+					# TODO Handle the validation error (e.g., set a default image, notify the user, etc.)
 					user.profile_pic = None  # Or set a default image
+
 		user.save()
+
+	save_oauth_token(token_response, user)
 
 	# Log the user in
 	login(request, user)
@@ -83,3 +89,23 @@ def oauth_logout(request):
 	from django.contrib.auth import logout
 	logout(request)
 	return redirect('/')
+
+
+def save_oauth_token(token_response, user):
+	access_token = token_response.json().get('access_token')
+	refresh_token = token_response.json().get('refresh_token')
+
+	# Calculate the token expiration time
+	created_at = datetime.fromtimestamp(token_response.json().get('created_at'))
+	expires_in = timedelta(seconds=token_response.json().get('expires_in'))
+	expires_at = created_at + expires_in
+
+	# Save the token in the database
+	OAuthToken.objects.update_or_create(
+		user=user,
+		defaults={
+			'refresh_token': refresh_token,
+			'access_token': access_token,
+			'expires_at': expires_at,
+		}
+	)

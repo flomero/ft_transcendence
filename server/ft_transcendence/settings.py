@@ -28,6 +28,7 @@ client = hvac.Client(
 
 # Fetch secrets from Vault
 secret = client.secrets.kv.v2.read_secret_version(path='django')
+oauth_secrets = client.secrets.kv.v2.read_secret_version(path='oauth')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/dev/howto/deployment/checklist/
@@ -38,7 +39,7 @@ SECRET_KEY = secret['data']['data']['SECRET_KEY']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1', '1-e-17.42heilbronn.de']
 
 # Application definition
 
@@ -97,9 +98,9 @@ DATABASES = {
 }
 
 # 42 API configuration
-OAUTH2_CLIENT_ID = '***REMOVED***'
-OAUTH2_CLIENT_SECRET = '***REMOVED***'
-OAUTH2_REDIRECT_URI = 'http://localhost:8000/auth/callback/'
+OAUTH2_CLIENT_ID = oauth_secrets['data']['data']['OAUTH2_CLIENT_ID']
+OAUTH2_CLIENT_SECRET = oauth_secrets['data']['data']['OAUTH2_CLIENT_SECRET']
+OAUTH2_REDIRECT_URI = 'http://1-e-17.42heilbronn.de:8000/auth/callback/'
 OAUTH2_AUTHORIZE_URL = 'https://api.intra.42.fr/oauth/authorize'
 OAUTH2_TOKEN_URL = 'https://api.intra.42.fr/oauth/token'
 OAUTH2_API_URL = 'https://api.intra.42.fr/v2/me'
