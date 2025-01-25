@@ -3,6 +3,7 @@ import logging
 import requests
 from django.conf import settings
 from django.contrib.auth import login
+from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.shortcuts import redirect, render
 
@@ -62,8 +63,13 @@ def oauth_callback(request):
 			pic_response = requests.get(pic_url)
 			if pic_response.status_code == 200:
 				profile_pic = pic_response.content
-				user.profile_pic.save(f"{username}_profile_pic.jpg", ContentFile(profile_pic), save=False)
-
+				try:
+					user.profile_pic.save(f"{username}_profile_pic.jpg", ContentFile(profile_pic), save=False)
+					user.full_clean()  # This will run the validators
+				except ValidationError as e:
+					logger.error(f"Validation error: {e}")
+					# Handle the validation error (e.g., set a default image, notify the user, etc.)
+					user.profile_pic = None  # Or set a default image
 		user.save()
 
 	# Log the user in
