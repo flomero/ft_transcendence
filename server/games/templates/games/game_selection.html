@@ -4,7 +4,7 @@
     <title>Game Selection</title>
     <script>
       let selectedGame = "pong";
-      let selectedMode = "default_pong";
+      let selectedMode = "pong_base";
       let selectedModifiers = [];
 
       function startGame() {
@@ -30,17 +30,11 @@
       <option value="pong">Pong</option>
     </select>
 
-    <h2>Select Mode</h2>
-    <select onchange="selectedMode = this.value">
-      <option value="default_pong">Default Pong</option>
-      <option value="solo_pong">Solo Pong</option>
-    </select>
-
     <h2>Modifiers</h2>
     <label
       ><input
         type="checkbox"
-        value="SpeedBoost"
+        value="speed_boost_modifier"
         onclick="selectedModifiers.push(this.value)"
       />
       Speed Boost</label
@@ -48,7 +42,7 @@
     <label
       ><input
         type="checkbox"
-        value="InvisibleBall"
+        value="invisible_ball_modifier"
         onclick="selectedModifiers.push(this.value)"
       />
       Invisible Ball</label

@@ -3,96 +3,83 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pong Game</title>
+    <title>Multiplayer Pong</title>
     <style>
-      body {
-        text-align: center;
-        background-color: black;
-        color: white;
-      }
-      #game-container {
-        width: 600px;
-        height: 300px;
-        border: 2px solid white;
-        position: relative;
+      canvas {
+        background: black;
+        display: block;
         margin: auto;
-      }
-      .paddle {
-        width: 10px;
-        height: 60px;
-        background: white;
-        position: absolute;
-      }
-      .ball {
-        width: 10px;
-        height: 10px;
-        background: white;
-        position: absolute;
-      }
-      #paddle-left {
-        left: 5px;
-      }
-      #paddle-right {
-        right: 5px;
       }
     </style>
   </head>
   <body>
-    <h1>Pong Game</h1>
-    <div id="game-container">
-      <div id="paddle-left" class="paddle"></div>
-      <div id="paddle-right" class="paddle"></div>
-      <div id="ball" class="ball"></div>
-    </div>
-
+    <canvas id="gameCanvas"></canvas>
     <script>
-      const socket = new WebSocket("ws://127.0.0.1:8000/ws/game/");
+      const canvas = document.getElementById("gameCanvas");
+      const ctx = canvas.getContext("2d");
+      canvas.width = 600;
+      canvas.height = 600;
+
+      const socket = new WebSocket("ws://localhost:8000/ws/game/");
 
       socket.onopen = function () {
         console.log("✅ WebSocket connected");
         socket.send(
           JSON.stringify({
             game: "pong",
-            game_mode: "default_pong",
+            game_mode: "multiplayer_pong",
             modifiers: [],
             start_game: true,
           })
         );
       };
 
-      socket.onmessage = function (event) {
-        const gameState = JSON.parse(event.data);
+      let gameState = {};
+      let lastUpdateTime = performance.now();
 
-        // Update ball position
-        document.getElementById("ball").style.left = gameState.ball.x + "%";
-        document.getElementById("ball").style.top = gameState.ball.y + "%";
-
-        // Update paddle positions
-        if (gameState.paddles.left) {
-          document.getElementById("paddle-left").style.top =
-            gameState.paddles.left.y + "%";
-        }
-        if (gameState.paddles.right) {
-          document.getElementById("paddle-right").style.top =
-            gameState.paddles.right.y + "%";
-        }
+      socket.onmessage = (event) => {
+        gameState = JSON.parse(event.data);
+        lastUpdateTime = performance.now();
       };
 
-      socket.onclose = function () {
-        console.log("🔴 WebSocket Closed");
-      };
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (!gameState.ball) return;
 
-      document.addEventListener("keydown", (event) => {
-        let action = null;
-        if (event.key === "ArrowUp") action = "RIGHT_UP";
-        if (event.key === "ArrowDown") action = "RIGHT_DOWN";
-        if (event.key === "w") action = "LEFT_UP";
-        if (event.key === "s") action = "LEFT_DOWN";
+        // Draw ball
+        ctx.fillStyle = "white";
+        ctx.beginPath();
+        ctx.arc(gameState.ball.x * 6, gameState.ball.y * 6, 5, 0, Math.PI * 2);
+        ctx.fill();
 
-        if (action) {
-          socket.send(JSON.stringify({ action }));
+        // Draw paddles
+        gameState.player_paddles?.forEach((paddle) => {
+          ctx.fillRect(
+            paddle.x * 6 - paddle.width * 3,
+            paddle.y * 6 - paddle.height * 3,
+            paddle.width * 6,
+            paddle.height * 6
+          );
+        });
+      }
+
+      function update() {
+        let deltaTime = (performance.now() - lastUpdateTime) / 1000;
+        if (gameState.ball) {
+          gameState.ball.x +=
+            gameState.ball.dx * gameState.ball.speed * deltaTime;
+          gameState.ball.y +=
+            gameState.ball.dy * gameState.ball.speed * deltaTime;
         }
-      });
+      }
+
+      function gameLoop() {
+        update();
+        draw();
+        requestAnimationFrame(gameLoop);
+      }
+
+      gameLoop();
     </script>
   </body>
 </html>
