@@ -3,8 +3,10 @@ import logging
 import requests
 from django.conf import settings
 from django.contrib.auth import login
-from django.contrib.auth.models import User
+from django.core.files.base import ContentFile
 from django.shortcuts import redirect, render
+
+from .models import User
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +55,15 @@ def oauth_callback(request):
 	user, created = User.objects.get_or_create(username=username, defaults={"email": email})
 	if created:
 		user.set_unusable_password()  # You won't use passwords with 42 OAuth
+
+		# Save the profile picture
+		pic_url = user_data.get('image', {}).get('versions', {}).get('medium')
+		if pic_url:
+			pic_response = requests.get(pic_url)
+			if pic_response.status_code == 200:
+				profile_pic = pic_response.content
+				user.profile_pic.save(f"{username}_profile_pic.jpg", ContentFile(profile_pic), save=False)
+
 		user.save()
 
 	# Log the user in

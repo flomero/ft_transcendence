@@ -104,6 +104,9 @@ OAUTH2_AUTHORIZE_URL = 'https://api.intra.42.fr/oauth/authorize'
 OAUTH2_TOKEN_URL = 'https://api.intra.42.fr/oauth/token'
 OAUTH2_API_URL = 'https://api.intra.42.fr/v2/me'
 
+# Set auth to use costume user model
+AUTH_USER_MODEL = 'users.User'
+
 # Password validation
 # https://docs.djangoproject.com/en/dev/ref/settings/#auth-password-validators
 
