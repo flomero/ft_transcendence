@@ -53,6 +53,9 @@ INSTALLED_APPS = [
 	'my_example_app',
 	'authentication',
 	'users',
+
+    'games',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -83,7 +86,9 @@ TEMPLATES = [
 	},
 ]
 
-WSGI_APPLICATION = 'ft_transcendence.wsgi.application'
+# WSGI_APPLICATION = 'ft_transcendence.wsgi.application'
+ASGI_APPLICATION = 'ft_transcendence.asgi.application'
+
 
 # Database
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases

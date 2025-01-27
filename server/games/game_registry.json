@@ -1,0 +1,18 @@
+{
+  "pong": {
+    "game_modes": {
+      "multiplayer_pong": "MultiplayerPong"
+    },
+    "modifiers": {
+      "invisible_ball_modifier": {
+        "class_name": "InvisibleBallModifier",
+        "duration": 100
+      },
+      "speed_boost_modifier": {
+        "class_name": "SpeedBoostModifier",
+        "duration": 100,
+        "ramp_up_strength": 0.1
+      }
+    }
+  }
+}
