@@ -28,6 +28,7 @@ client = hvac.Client(
 
 # Fetch secrets from Vault
 secret = client.secrets.kv.v2.read_secret_version(path='django')
+oauth_secrets = client.secrets.kv.v2.read_secret_version(path='oauth')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/dev/howto/deployment/checklist/
@@ -38,7 +39,7 @@ SECRET_KEY = secret['data']['data']['SECRET_KEY']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['0.0.0.0']
+ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1', '1-e-17.42heilbronn.de']
 
 # Application definition
 
@@ -49,7 +50,9 @@ INSTALLED_APPS = [
 	'django.contrib.sessions',
 	'django.contrib.messages',
 	'django.contrib.staticfiles',
-	'my_example_app'
+	'my_example_app',
+	'authentication',
+	'users',
 ]
 
 MIDDLEWARE = [
@@ -60,6 +63,7 @@ MIDDLEWARE = [
 	'django.contrib.auth.middleware.AuthenticationMiddleware',
 	'django.contrib.messages.middleware.MessageMiddleware',
 	'django.middleware.clickjacking.XFrameOptionsMiddleware',
+	'authentication.middleware.RefreshTokenMiddleware',
 ]
 
 ROOT_URLCONF = 'ft_transcendence.urls'
@@ -94,6 +98,17 @@ DATABASES = {
 		'PORT': '5432',
 	}
 }
+
+# 42 API configuration
+OAUTH2_CLIENT_ID = oauth_secrets['data']['data']['OAUTH2_CLIENT_ID']
+OAUTH2_CLIENT_SECRET = oauth_secrets['data']['data']['OAUTH2_CLIENT_SECRET']
+OAUTH2_REDIRECT_URI = 'http://1-e-17.42heilbronn.de:8000/auth/callback/'
+OAUTH2_AUTHORIZE_URL = 'https://api.intra.42.fr/oauth/authorize'
+OAUTH2_TOKEN_URL = 'https://api.intra.42.fr/oauth/token'
+OAUTH2_API_URL = 'https://api.intra.42.fr/v2/me'
+
+# Set auth to use costume user model
+AUTH_USER_MODEL = 'users.User'
 
 # Password validation
 # https://docs.djangoproject.com/en/dev/ref/settings/#auth-password-validators
@@ -181,7 +196,7 @@ LOGGING = {
 		'django.server': {
 			'handlers': ['file', 'console'],
 			'level': 'INFO',
-			'propagate': True,
+			'propagate': False,
 		},
 		'django.utils': {
 			'handlers': ['file', 'console'],
@@ -193,6 +208,16 @@ LOGGING = {
 			'level': 'INFO',
 			'propagate': True,
 		},
+		'authentication': {
+			'handlers': ['console'],
+			'level': 'INFO',
+			'propagate': True,
+		},
+		'users': {
+			'handlers': ['console', 'file'],
+			'level': 'INFO',
+			'propagate': True,
+		},
 	},
 }
 
@@ -201,11 +226,14 @@ LOGGING = {
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# Set the correct time zone
+TIME_ZONE = 'Europe/Berlin'
 
+# Enable timezone-aware datetimes
 USE_I18N = True
-
+USE_L10N = True
 USE_TZ = True
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/dev/howto/static-files/
