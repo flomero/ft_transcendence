@@ -1,11 +1,11 @@
 import logging
 
 import requests
-from datetime import timedelta
-from django.utils.timezone import now, localtime
 from django.conf import settings
+from django.contrib.auth import logout
 
 logger = logging.getLogger(__name__)
+
 
 def refresh_access_token(oauth_token):
 	refresh_token = oauth_token.refresh_token
@@ -26,9 +26,10 @@ def refresh_access_token(oauth_token):
 
 	if response.status_code != 200:
 		logger.error("Failed to refresh access token.")
-		raise ValueError("Failed to refresh access token.")
+		return False
 
 	oauth_token.update_from_token_response(response)
+	return True
 
 
 class RefreshTokenMiddleware:
@@ -36,12 +37,19 @@ class RefreshTokenMiddleware:
 		self.get_response = get_response
 
 	def __call__(self, request):
-		if request.user.is_authenticated and hasattr(request.user, 'oauth_token'): # TODO maybe handle case where user has no oauth_token
+		if request.user.is_authenticated:
+			if not hasattr(request.user, 'oauth_token'):
+				logger.error("No OAuth token found for user %s.", request.user)
+				logout(request)
+
 			oauth_token = request.user.oauth_token
 
 			# Check if the access token is expired
 			if oauth_token.is_expired():
-				logger.info("Access token is expired. Refreshing...")
-				refresh_access_token(oauth_token)
+				logger.info("Access token is expired for user %s. Refreshing ...", request.user)
+				if not refresh_access_token(oauth_token):
+					logger.error("Failed to refresh access token. Logging out user.")
+					logout(request)
+				# TODO: Redirect to login page with a message
 
 		return self.get_response(request)
