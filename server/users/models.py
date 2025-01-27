@@ -3,6 +3,7 @@ import os
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils.timezone import now
 
 
 def validate_file_size(file):
@@ -29,3 +30,6 @@ class OAuthToken(models.Model):
 	refresh_token = models.CharField(max_length=255, blank=True, null=True)
 	access_token = models.CharField(max_length=255, blank=True, null=True)
 	expires_at = models.DateTimeField(null=True, blank=True)  # Token expiration time
+
+	def is_expired(self):
+		return self.expires_at <= now() if self.expires_at else True
