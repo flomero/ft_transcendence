@@ -1,5 +1,4 @@
 import logging
-from datetime import datetime, timedelta
 
 import requests
 from django.conf import settings
@@ -92,20 +91,5 @@ def oauth_logout(request):
 
 
 def save_oauth_token(token_response, user):
-	access_token = token_response.json().get('access_token')
-	refresh_token = token_response.json().get('refresh_token')
-
-	# Calculate the token expiration time
-	created_at = datetime.fromtimestamp(token_response.json().get('created_at'))
-	expires_in = timedelta(seconds=token_response.json().get('expires_in'))
-	expires_at = created_at + expires_in
-
-	# Save the token in the database
-	OAuthToken.objects.update_or_create(
-		user=user,
-		defaults={
-			'refresh_token': refresh_token,
-			'access_token': access_token,
-			'expires_at': expires_at,
-		}
-	)
+	oauth_token, _ = OAuthToken.objects.update_or_create(user=user)
+	oauth_token.update_from_token_response(token_response)

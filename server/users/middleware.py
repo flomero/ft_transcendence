@@ -2,7 +2,7 @@ import logging
 
 import requests
 from datetime import timedelta
-from django.utils.timezone import now
+from django.utils.timezone import now, localtime
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
@@ -28,11 +28,7 @@ def refresh_access_token(oauth_token):
 		logger.error("Failed to refresh access token.")
 		raise ValueError("Failed to refresh access token.")
 
-	token_data = response.json()
-	oauth_token.access_token = token_data.get('access_token')
-	oauth_token.refresh_token = token_data.get('refresh_token')
-	oauth_token.expires_at = now() + timedelta(seconds=token_data.get('expires_in'))
-	oauth_token.save()
+	oauth_token.update_from_token_response(response)
 
 
 class RefreshTokenMiddleware:
@@ -40,7 +36,7 @@ class RefreshTokenMiddleware:
 		self.get_response = get_response
 
 	def __call__(self, request):
-		if request.user.is_authenticated and hasattr(request.user, 'oauth_token'):
+		if request.user.is_authenticated and hasattr(request.user, 'oauth_token'): # TODO maybe handle case where user has no oauth_token
 			oauth_token = request.user.oauth_token
 
 			# Check if the access token is expired
