@@ -9,64 +9,81 @@ https://docs.djangoproject.com/en/dev/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/dev/ref/settings/
 """
-
+import json
+import os
+from logging import Formatter, StreamHandler, FileHandler
+from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
+
+import hvac
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Initialize the Vault client
+client = hvac.Client(
+	url=os.getenv('VAULT_ADDR', 'http://127.0.0.1:8200'),
+	token=os.getenv('VAULT_TOKEN', 'root')
+)
+
+# Fetch secrets from Vault
+secret = client.secrets.kv.v2.read_secret_version(path='django')
+oauth_secrets = client.secrets.kv.v2.read_secret_version(path='oauth')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/dev/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-mt#c10nz^1#&9^c$_3#ru(6mr9boi^3zo7l9fg_4!+qr%o#r01'
+SECRET_KEY = secret['data']['data']['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1', '1-e-17.42heilbronn.de']
 
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
+	'django.contrib.admin',
+	'django.contrib.auth',
+	'django.contrib.contenttypes',
+	'django.contrib.sessions',
+	'django.contrib.messages',
+	'django.contrib.staticfiles',
+	'my_example_app',
+	'authentication',
+	'users',
 
     'games',
     'channels',
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+	'django.middleware.security.SecurityMiddleware',
+	'django.contrib.sessions.middleware.SessionMiddleware',
+	'django.middleware.common.CommonMiddleware',
+	'django.middleware.csrf.CsrfViewMiddleware',
+	'django.contrib.auth.middleware.AuthenticationMiddleware',
+	'django.contrib.messages.middleware.MessageMiddleware',
+	'django.middleware.clickjacking.XFrameOptionsMiddleware',
+	'authentication.middleware.RefreshTokenMiddleware',
 ]
 
 ROOT_URLCONF = 'ft_transcendence.urls'
 
 TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
+	{
+		'BACKEND': 'django.template.backends.django.DjangoTemplates',
+		'DIRS': [BASE_DIR / 'templates'],
+		'APP_DIRS': True,
+		'OPTIONS': {
+			'context_processors': [
+				'django.template.context_processors.request',
+				'django.contrib.auth.context_processors.auth',
+				'django.contrib.messages.context_processors.messages',
+			],
+		},
+	},
 ]
 
 # WSGI_APPLICATION = 'ft_transcendence.wsgi.application'
@@ -77,51 +94,149 @@ ASGI_APPLICATION = 'ft_transcendence.asgi.application'
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+	'default': {
+		'ENGINE': 'django.db.backends.postgresql',
+		'NAME': secret['data']['data']['POSTGRES_DB'],
+		'USER': secret['data']['data']['POSTGRES_USER'],
+		'PASSWORD': secret['data']['data']['POSTGRES_PASSWORD'],
+		'HOST': 'db',
+		'PORT': '5432',
+	}
 }
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'postgres',
-#         'USER': 'postgres',
-#         'PASSWORD': 'postgres',
-#         'HOST': 'db',
-#         'PORT': '5432',
-#     }
-# }
 
+# 42 API configuration
+OAUTH2_CLIENT_ID = oauth_secrets['data']['data']['OAUTH2_CLIENT_ID']
+OAUTH2_CLIENT_SECRET = oauth_secrets['data']['data']['OAUTH2_CLIENT_SECRET']
+OAUTH2_REDIRECT_URI = 'http://1-e-17.42heilbronn.de:8000/auth/callback/'
+OAUTH2_AUTHORIZE_URL = 'https://api.intra.42.fr/oauth/authorize'
+OAUTH2_TOKEN_URL = 'https://api.intra.42.fr/oauth/token'
+OAUTH2_API_URL = 'https://api.intra.42.fr/v2/me'
+
+# Set auth to use costume user model
+AUTH_USER_MODEL = 'users.User'
 
 # Password validation
 # https://docs.djangoproject.com/en/dev/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+	{
+		'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+	},
+	{
+		'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+	},
+	{
+		'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+	},
+	{
+		'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+	},
 ]
 
+# Ensure logs directory exists
+LOG_DIR = os.path.join(BASE_DIR, 'logs')
+os.makedirs(LOG_DIR, exist_ok=True)
+
+
+# Costume JSON formatter
+class JsonFormatter(Formatter):
+	def format(self, record):
+		log_record = {
+			"timestamp": self.formatTime(record, self.datefmt),
+			"level": record.levelname,
+			"name": record.name,
+			"message": record.getMessage(),
+			"pathname": record.pathname,
+			"lineno": record.lineno,
+			"module": record.module,
+		}
+		return json.dumps(log_record)
+
+
+class ColoredFormatter(Formatter):
+	COLORS = {
+		'DEBUG': '\033[37m',  # white
+		'INFO': '\033[32m',  # green
+		'WARNING': '\033[33m',  # yellow
+		'ERROR': '\033[31m',  # red
+		'CRITICAL': '\033[1;31m',  # bold red
+	}
+	RESET = '\033[0m'
+
+	def format(self, record):
+		log_color = self.COLORS.get(record.levelname, self.RESET)
+		record.levelname = f"{log_color}{record.levelname}{self.RESET}"
+		return super().format(record)
+
+
+LOGGING = {
+	'version': 1,
+	'disable_existing_loggers': False,
+	'formatters': {
+		'json': {
+			'()': JsonFormatter,
+		},
+		'default': {
+			'format': '%(asctime)s %(levelname)s %(message)s',
+			'datefmt': '%H:%M',
+			'()': ColoredFormatter,
+		},
+	},
+	'handlers': {
+		'file': {
+			'level': 'INFO',
+			'class': 'logging.handlers.TimedRotatingFileHandler',
+			'filename': os.path.join(LOG_DIR, 'app.log'),
+			'when': 'midnight',
+			'backupCount': 7,
+			'formatter': 'json',
+		},
+		'console': {
+			'level': 'INFO',
+			'class': 'logging.StreamHandler',
+			'formatter': 'default',
+		},
+	},
+	'loggers': {
+		'django.server': {
+			'handlers': ['file', 'console'],
+			'level': 'INFO',
+			'propagate': False,
+		},
+		'django.utils': {
+			'handlers': ['file', 'console'],
+			'level': 'WARNING',
+			'propagate': True,
+		},
+		'my_example_app': {
+			'handlers': ['file', 'console'],
+			'level': 'INFO',
+			'propagate': True,
+		},
+		'authentication': {
+			'handlers': ['console'],
+			'level': 'INFO',
+			'propagate': True,
+		},
+		'users': {
+			'handlers': ['console', 'file'],
+			'level': 'INFO',
+			'propagate': True,
+		},
+	},
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/dev/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# Set the correct time zone
+TIME_ZONE = 'Europe/Berlin'
 
+# Enable timezone-aware datetimes
 USE_I18N = True
-
+USE_L10N = True
 USE_TZ = True
 
 

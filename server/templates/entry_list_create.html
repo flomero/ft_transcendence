@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Entry List and Create</title>
+</head>
+<body>
+<h1>Create a new Entry</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+</form>
+
+<h2>Entries</h2>
+<ul>
+    {% for entry in entries %}
+        <li>
+            {{ entry.title }}: {{ entry.content }}
+            <a href="{% url 'delete_entry' entry.id %}" style="color: red;">X</a>
+        </li>
+    {% endfor %}
+</ul>
+</body>
+</html>
