@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.utils.timezone import now
+from django.utils.timezone import now, make_aware
 
 logging = logging.getLogger(__name__)
 
@@ -26,10 +26,18 @@ class OAuthToken(models.Model):
 	def update_from_token_response(self, token_response):
 		access_token = token_response.json().get('access_token')
 		refresh_token = token_response.json().get('refresh_token')
-		created_at = token_response.json().get('created_at')
-		expires_in = token_response.json().get('expires_in')
+		created_at = token_response.json().get('created_at')  # Should be a timestamp
+		expires_in = token_response.json().get('expires_in')  # Should be in seconds
 
+		# Ensure created_at is a timezone-aware datetime
+		created_at_dt = datetime.fromtimestamp(created_at)  # Convert timestamp to naive datetime
+		created_at_aware = make_aware(created_at_dt)  # Make it timezone-aware
+
+		# Calculate the expiration time
+		expires_at = created_at_aware + timedelta(seconds=expires_in)
+
+		# Update fields
 		self.access_token = access_token
 		self.refresh_token = refresh_token
-		self.set_expires_at(created_at, expires_in)
+		self.expires_at = expires_at  # Save timezone-aware datetime
 		self.save()
