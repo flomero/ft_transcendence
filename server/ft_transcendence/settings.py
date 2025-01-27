@@ -51,7 +51,8 @@ INSTALLED_APPS = [
 	'django.contrib.messages',
 	'django.contrib.staticfiles',
 	'my_example_app',
-	'users'
+	'authentication',
+	'users',
 ]
 
 MIDDLEWARE = [
@@ -62,7 +63,7 @@ MIDDLEWARE = [
 	'django.contrib.auth.middleware.AuthenticationMiddleware',
 	'django.contrib.messages.middleware.MessageMiddleware',
 	'django.middleware.clickjacking.XFrameOptionsMiddleware',
-	'users.middleware.RefreshTokenMiddleware',
+	'authentication.middleware.RefreshTokenMiddleware',
 ]
 
 ROOT_URLCONF = 'ft_transcendence.urls'
@@ -207,8 +208,13 @@ LOGGING = {
 			'level': 'INFO',
 			'propagate': True,
 		},
+		'authentication': {
+			'handlers': ['console'],
+			'level': 'INFO',
+			'propagate': True,
+		},
 		'users': {
-			'handlers': ['file', 'console'],
+			'handlers': ['console', 'file'],
 			'level': 'INFO',
 			'propagate': True,
 		},
