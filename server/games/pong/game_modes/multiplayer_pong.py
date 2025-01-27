@@ -13,8 +13,8 @@ class MultiplayerPong(GameBase):
 
     WALL_DISTANCE = 50  # Distance from the center to walls
     PADDLE_OFFSET = 3   # Gap between paddle and wall
-    PADDLE_WIDTH = 5    # Paddle width
-    PADDLE_HEIGHT = 15  # Paddle height
+    PADDLE_WIDTH = 20    # Paddle width
+    PADDLE_HEIGHT = 1  # Paddle height
 
     def __init__(self, player_count=2, modifiers=None):
         super().__init__(modifiers)
@@ -27,6 +27,7 @@ class MultiplayerPong(GameBase):
                 "dx": 2,
                 "dy": 1,
                 "speed": 3,
+                "size": 2,
             }
         tmp = math.sqrt(self.ball["dx"]**2 + self.ball["dy"]**2)
         self.ball["dx"] /= tmp

@@ -62,6 +62,6 @@ class GameConsumer(AsyncWebsocketConsumer):
             await self.send(json.dumps(self.game.get_state_snapshot()))
             await asyncio.sleep(0.03)
 
-            if update_count > 32:
+            if update_count > 480:
                 break
         print("end of game_loop")
