@@ -46,4 +46,4 @@ COPY server /app/
 EXPOSE 8000
 
 # Run the Django development server
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["uvicorn", "ft_transcendence.asgi:application", "--host", "0.0.0.0", "--port", "8000", "--reload", "--reload-include", "*.html"]

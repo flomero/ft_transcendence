@@ -11,8 +11,7 @@ https://docs.djangoproject.com/en/dev/ref/settings/
 """
 import json
 import os
-from logging import Formatter, StreamHandler, FileHandler
-from logging.handlers import TimedRotatingFileHandler
+from logging import Formatter
 from pathlib import Path
 
 import hvac
@@ -40,6 +39,8 @@ SECRET_KEY = secret['data']['data']['SECRET_KEY']
 DEBUG = True
 
 ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1', '1-e-17.42heilbronn.de']
+
+DEFAULT_RUNSERVER_COMMAND = 'uvicorn'
 
 # Application definition
 
@@ -214,7 +215,7 @@ LOGGING = {
 			'propagate': True,
 		},
 		'authentication': {
-			'handlers': ['console'],
+			'handlers': ['console', 'file'],
 			'level': 'INFO',
 			'propagate': True,
 		},
@@ -244,6 +245,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/dev/howto/static-files/
 
 STATIC_URL = 'static/'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/dev/ref/settings/#default-auto-field
