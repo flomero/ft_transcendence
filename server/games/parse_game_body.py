@@ -8,18 +8,23 @@ def pars_game_body(message: str):
     mode_name = mode_name_get(data, game_name)
     modifiers = modifiers_dict_get(data, game_name)
 
-    return {"game_name": game_name, "mode_name": mode_name, "modifiers": modifiers}
+    game_body_dict = {
+        "game_name": game_name,
+        "mode_name": mode_name,
+        "modifiers": modifiers
+    }
+    return game_body_dict
 
 def game_name_get(data: dict):
     game_name = data.get("game", "pong")
     if game_name not in GAME_REGISTRY:
         print(f"Unknown game: {game_name}, defaulting to Pong")
         game_name = "pong"
-    return (game_name)
+    return game_name
 
 def mode_name_get(data: dict, game_name: str):
     mode_name = data.get("game_mode", f"multiplayer_{game_name}")
-    return (mode_name)
+    return mode_name
 
 def modifiers_dict_get(data: dict, game_name: str):
     modifiers = []
@@ -29,4 +34,4 @@ def modifiers_dict_get(data: dict, game_name: str):
     for mod in modifier_names:
         if mod in available_modifiers:
             modifiers.append(available_modifiers[mod]())
-    return (modifiers)
+    return modifiers
