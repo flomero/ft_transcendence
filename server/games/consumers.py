@@ -43,7 +43,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 
         # Handle Player Actions
         if data.get("action") and self.running:
-            print(f"Received: {data.get("action")}")
+            print(f"Received: {data.get('action')}")
             self.game.handle_action(data["action"])
 
     async def start_game(self):

@@ -40,6 +40,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1', '1-e-17.42heilbronn.de']
 
+DEFAULT_RUNSERVER_COMMAND = 'uvicorn'
+
 # Application definition
 
 INSTALLED_APPS = [
