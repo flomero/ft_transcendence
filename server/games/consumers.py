@@ -4,11 +4,14 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from .game_base import GAME_REGISTRY
 
 class GameConsumer(AsyncWebsocketConsumer):
+    game = None
+    game_class = "MultiplayerPong"
+    modifiers = []
+    player_count = 2
+    running = False
+
     async def connect(self):
         """Accept WebSocket connection."""
-        self.game_class = None  # No game selected yet
-        self.modifiers = []
-        self.running = False
         await self.accept()
 
     async def receive(self, text_data):
@@ -37,6 +40,8 @@ class GameConsumer(AsyncWebsocketConsumer):
         available_modifiers = GAME_REGISTRY[game_name]["modifiers"]
         self.modifiers = [available_modifiers[mod]() for mod in modifier_names if mod in available_modifiers]
 
+        self.player_count = data.get("player_count")
+
         # Start Game if Requested
         if data.get("start_game"):
             await self.start_game()
@@ -48,7 +53,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     async def start_game(self):
         """Start a new game instance with the selected settings."""
-        self.game = self.game_class(modifiers=self.modifiers)
+        self.game = self.game_class(player_count=self.player_count, modifiers=self.modifiers)
         self.game.start_game()
         self.running = True
         asyncio.create_task(self.run_game_loop())
@@ -62,6 +67,10 @@ class GameConsumer(AsyncWebsocketConsumer):
             await self.send(json.dumps(self.game.get_state_snapshot()))
             await asyncio.sleep(0.03)
 
-            if update_count > 480:
+            # if update_count > 160:
+            #     break
+
+            if  self.game.ball["x"] < 0 or self.game.ball["x"] > 100 or \
+                self.game.ball["y"] < 0 or self.game.ball["y"] > 100:
                 break
         print("end of game_loop")

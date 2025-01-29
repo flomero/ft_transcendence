@@ -1,7 +1,7 @@
 import math
 from .modifiers.pong_modifier_base import PongModifierBase
 
-EPSILON = 1e-6
+EPSILON = 1e-2
 
 class PongPhysicsEngine:
     @staticmethod
@@ -10,7 +10,7 @@ class PongPhysicsEngine:
         remaining_distance = ball["speed"]
         loop_counter = 0
 
-        while remaining_distance > 0:
+        while remaining_distance > EPSILON:
             paddle_collision = PongPhysicsEngine.detect_collision(ball, remaining_distance, game.player_paddles, True)
             wall_collision = PongPhysicsEngine.detect_collision(ball, remaining_distance, game.walls, False)
 
@@ -32,9 +32,9 @@ class PongPhysicsEngine:
                 PongPhysicsEngine.resolve_collision(ball, collision)
 
                 # Handle modifiers
-                if collision["type"] == "paddle":
+                if collision["ty_1pe"] == "paddle":
                     game.trigger_modifiers("on_bounce", player_id=collision["object_id"])
-                elif collision["type"] == "wall":
+                elif collision["ty_1pe"] == "wall":
                     if collision["object_id"] % 2 == 0:  # Goal wall
                         game.trigger_modifiers("on_goal", player_id=game.last_player_hit)
                     else:
@@ -51,7 +51,7 @@ class PongPhysicsEngine:
             print(f"  |- remaining_distance: {remaining_distance}")
             print(f"  |- collision: {collision}\n")
             loop_counter += 1
-            if loop_counter > ball["speed"] + 1:
+            if loop_counter > (ball["speed"] * 2.0) + 1:
                 break
 
     @staticmethod
@@ -64,7 +64,7 @@ class PongPhysicsEngine:
             # print(f"  |-> collision: {collision}")
             if collision and (not closest_collision or collision["distance"] < closest_collision["distance"]):
                 collision["object_id"] = i
-                collision["type"] = "paddle" if is_paddle else "wall"
+                collision["ty_1pe"] = "paddle" if is_paddle else "wall"
                 closest_collision = collision
 
         return closest_collision
@@ -74,23 +74,25 @@ class PongPhysicsEngine:
         """Checks if the ball collides with a rotated object."""
         rx, ry = obj["x"], obj["y"]
         rdx, rdy = obj["dx"], obj["dy"]
+        rnx, rny = obj["nx"], obj["ny"]
         rw, rh = obj["width"], obj["height"]
+        # alpha = obj["alpha"]
 
         bx, by = ball["x"], ball["y"]
         bdx, bdy = ball["dx"], ball["dy"]
         br = ball["size"]
         bs = distance
 
-        rd_length = math.sqrt(rdx**2 + rdy**2)
-        if rd_length > EPSILON:
-            rdx /= rd_length
-            rdy /= rd_length
+        # rd_length = math.sqrt(rdx**2 + rdy**2)
+        # if rd_length > EPSILON:
+        #     rdx /= rd_length
+        #     rdy /= rd_length
 
         # Transforms ball properties to object's base
-        alpha = (- math.atan2(rdy, rdx)) if rdx != 0 else rdy * math.pi / 2.0
+        alpha = (math.atan2(rdy, rdx)) if rdx != 0 else rdy * math.pi / 2.0
 
         dx, dy = (bx - rx), (by - ry)
-        ca, sa = round(math.cos(alpha), ndigits=2), round(math.sin(alpha), ndigits=2)
+        ca, sa = round(math.cos(alpha), ndigits=3), round(math.sin(alpha), ndigits=3)
 
         r_bx = (dx * ca + dy * sa)
         r_by = (-dx * sa + dy * ca)
@@ -98,72 +100,126 @@ class PongPhysicsEngine:
         r_bdy = (-bdx * sa + bdy * ca)
 
         collision = []
-        # n_x = (-rdy) * rdx + rdx * (-rdy)
-        # n_y = (-rdy) * rdy + rdx * rdx
 
-        # First checks:
-        # If there exist a t such that
-        #  - rt_bx <= (br + rw / 2.0) -> possible solution, else None
-        # or
-        #  - rt_by <= (br + rh / 2.0) -> possible solution, else None
-
-        # abs_r_bx = abs(r_bx)
-        # abs_r_by = abs(r_by)
-
-        # abs_r_bdx = r_bdx if r_bx >= 0 else -r_bdx
-        # abs_r_bdy = r_bdy if r_by >= 0 else -r_bdy
-
-        tx = abs((br + rw / 2.0 - r_bx) / r_bdx) if abs(r_bdx) >= EPSILON else None
-        ty = abs((br + rh / 2.0 - r_by) / r_bdy) if abs(r_bdy) >= EPSILON else None
-
-        if not tx and r_bx > (br + rw / 2.0):
-            print(f"Early stop, no collisions possible")
+        # Disable collisions if inside the object
+        if  (abs(r_bx) <= (rw / 2.0 + br)) and \
+            (abs(r_by) <= (rh / 2.0 + br)):
+            # print(f"Skipping collisions from within")
+            # print(f"ball:")
+            # print(f"  |- pos     : {(bx, by)}")
+            # print(f"  |- dir     : {(bdx, bdy)}")
+            # print(f"  |- pos in R: {(r_bx, r_by)}")
+            # print(f"  |- dir in R: {(r_bdx, r_bdy)}")
+            # print(f"obj:")
+            # print(f"  |- pos: {(rx, ry)}")
+            # print(f"    |- dx: {dx}")
+            # print(f"    |- dy: {dy}")
+            # print(f"  |- dir: {(rdx, rdy)}")
             return None
 
-        if not ty and r_by > (br + rh / 2.0):
-            print(f"Early stop, no collisions possible")
+        if  abs(r_bdx) < EPSILON and \
+            abs(r_bdy) < EPSILON:
+            # print(f"The ball doesn't move so there shouldn't be any collisions")
+            # print(f"ball:")
+            # print(f"  |- pos     : {(bx, by)}")
+            # print(f"  |- dir     : {(bdx, bdy)}")
+            # print(f"  |- pos in R: {(r_bx, r_by)}")
+            # print(f"  |- dir in R: {(r_bdx, r_bdy)}")
+            # print(f"obj:")
+            # print(f"  |- pos: {(rx, ry)}")
+            # print(f"    |- dx: {dx}")
+            # print(f"    |- dy: {dy}")
+            # print(f"  |- dir: {(rdx, rdy)}")
             return None
 
-        min_t = min(tx, ty)
+        tx_1 = ((br + rw / 2.0 - r_bx) / r_bdx) if abs(r_bdx) >= EPSILON else None
+        tx_2 = ((- br - rw / 2.0 - r_bx) / r_bdx) if abs(r_bdx) >= EPSILON else None
+        ty_1 = ((br + rh / 2.0 - r_by) / r_bdy) if abs(r_bdy) >= EPSILON else None
+        ty_2 = ((- br - rh / 2.0 - r_by) / r_bdy) if abs(r_bdy) >= EPSILON else None
 
-        if  EPSILON < min_t <= bs and \
-            ((r_bx + min_t * r_bdx) <= (br + rw / 2.0)) and \
-            ((r_by + min_t * r_bdy) <= (br + rh / 2.0)):
-            # print(f"Collision: dist = {min_t}")
-            collision.append({"distance": min_t, "normal": (-rdy, rdx)})
+        if not tx_1 and abs(r_bx) > (br + rw / 2.0):
+            # print(f"Early stop, no collisions possible")
+            # print(f"ball:")
+            # print(f"  |- pos     : {(bx, by)}")
+            # print(f"  |- dir     : {(bdx, bdy)}")
+            # print(f"  |- pos in R: {(r_bx, r_by)}")
+            # print(f"  |- dir in R: {(r_bdx, r_bdy)}")
+            # print(f"obj:")
+            # print(f"  |- pos: {(rx, ry)}")
+            # print(f"    |- dx: {dx}")
+            # print(f"    |- dy: {dy}")
+            # print(f"  |- dir: {(rdx, rdy)}")
+            return None
 
+        if not ty_1 and abs(r_by) > (br + rh / 2.0):
+            # print(f"Early stop, no collisions possible")
+            # print(f"ball:")
+            # print(f"  |- pos     : {(bx, by)}")
+            # print(f"  |- dir     : {(bdx, bdy)}")
+            # print(f"  |- pos in R: {(r_bx, r_by)}")
+            # print(f"  |- dir in R: {(r_bdx, r_bdy)}")
+            # print(f"obj:")
+            # print(f"  |- pos: {(rx, ry)}")
+            # print(f"    |- dx: {dx}")
+            # print(f"    |- dy: {dy}")
+            # print(f"  |- dir: {(rdx, rdy)}")
+            return None
 
-        # if tx and ty and abs(tx - ty) < EPSILON and 0 <= tx <= bs:
-        #     collision.append({"distance": tx, "normal": (-rdy, rdx)})
+        # if abs(rx - 60) <= 1 and abs(ry - 18) <= 1:
+        #     print(f"  |--> Solutions: {tx_1}/{tx_2} | {ty_1}/{ty_2}")
+        if not tx_1 or not (EPSILON < tx_1 <= bs):
+            tx_1 = math.inf
+        if not tx_2 or not (EPSILON < tx_2 <= bs):
+            tx_2 = math.inf
+        if not ty_1 or not (EPSILON < ty_1 <= bs):
+            ty_1 = math.inf
+        if not ty_2 or not (EPSILON < ty_2 <= bs):
+            ty_2 = math.inf
+        min_t = [
+            t
+            for t in sorted([tx_1, tx_2, ty_1, ty_2])
+            if  (EPSILON < t <= bs) and \
+                (abs(r_bx + t * r_bdx) <= (br + rw / 2.0 + EPSILON)) and \
+                (abs(r_by + t * r_bdy) <= (br + rh / 2.0 + EPSILON))
+        ]
 
-        # if tx and 0 <= tx <= bs:
-        #     # TODO: handle side check to compute the normal
-        #     collision.append({"distance": tx, "normal": (-rdy, rdx)})
-
-        # if ty and 0 <= ty <= bs:
-        #     # TODO: handle side check to compute the normal
-        #     collision.append({"distance": ty, "normal": (-rdy, rdx)})
-
-        if len(collision) == 0:
-            # if min_t <= bs:
+        if len(min_t) == 0:
+            # if abs(rx - 23) <= 1 and abs(ry - 69) <= 1:
             #     print(f"ball:")
             #     print(f"  |- pos     : {(bx, by)}")
             #     print(f"  |- dir     : {(bdx, bdy)}")
             #     print(f"  |- pos in R: {(r_bx, r_by)}")
             #     print(f"  |- dir in R: {(r_bdx, r_bdy)}")
             #     print(f"obj:")
-            #     print(f"  |- pos: {(rx, ry)}\t| format: {(rw, rh)}")
+            #     print(f"  |- pos: {(rx, ry)}")
             #     print(f"    |- dx: {dx}")
             #     print(f"    |- dy: {dy}")
             #     print(f"  |- dir: {(rdx, rdy)}")
             #     print(f"  |- alpha: {alpha}\t| {math.degrees(alpha)}")
             #     print(f"    |- cos(alpha): {ca}")
             #     print(f"    |- sin(alpha): {sa}")
-            #     print(f"  |--> No collision: {tx} | {ty}")
-            #     print(f"    |--> new pos:     {(r_bx + min_t * r_bdx, r_by + min_t * r_bdy)}")
+            #     print(f"  |--> Solutions: {tx_1}/{tx_2} | {ty_1}/{ty_2}  -->  {min_t}")
+            #     if min_t:
+            #         print(f"    |--> new pos:     {(r_bx + min_t * r_bdx, r_by + min_t * r_bdy)}")
             #     print(f"    |--> should be <= {(br + rw/2, br + rh/2)}")
             #     print()
             return None
+
+        min_t = min_t[0]
+        #  and (EPSILON < min_t <= bs) and \
+        #  (abs(r_bx + min_t * r_bdx) <= (br + rw / 2.0 + EPSILON)) and \
+        #  (abs(r_by + min_t * r_bdy) <= (br + rh / 2.0 + EPSILON))
+            # Compute which side was hit
+        if (r_bx + min_t * r_bdx) >= (rw / 2.0):  # Right side
+            normal_x, normal_y = rdx, rdy
+        elif (r_bx + min_t * r_bdx) <= -(rw / 2.0): # Left side
+            normal_x, normal_y = -rdx, -rdy
+        elif (r_by + min_t * r_bdy) >= (rh / 2.0):  # Top side
+            normal_x, normal_y = -rdy, rdx
+        else:
+            normal_x, normal_y = rdy, -rdx
+
+        collision.append({"distance": min_t, "normal": (normal_x, normal_y)})
 
         # Get the minimum distance
         min_index, min_value = 0, collision[0]["distance"]
@@ -184,109 +240,13 @@ class PongPhysicsEngine:
         print(f"  |- alpha: {alpha}\t| {math.degrees(alpha)}")
         print(f"    |- cos(alpha): {ca}")
         print(f"    |- sin(alpha): {sa}")
-        print(f"  |--> Solutions: {tx} | {ty}")
+        print(f"  |--> Solutions: {tx_1}/{tx_2} | {ty_1}/{ty_2}  -->  {min_t}")
         print(f"    |--> new pos:     {(r_bx + min_t * r_bdx, r_by + min_t * r_bdy)}")
         print(f"    |--> should be <= {(br + rw/2, br + rh/2)}")
         print(f"  |--> collision: {collision[min_index]}\n")
         print()
 
         return collision[min_index]
-
-        # FIRST TEST
-
-        # # Transforms ball properties to object's base
-        # # r_bx, r_by = (bx - rx), (by - ry)
-        # r_bx = (bx - rx) * rdx + (by - ry) * rdy
-        # r_by = (bx - rx) * (-rdy) + (by - ry) * rdx
-        # # alpha = math.atan2(rdy, rdx) if rdx != 0 else 0
-        # r_bdx = bdx * rdx + bdy * rdy
-        # r_bdy = bdx * (-rdy) + bdy * rdx
-        # # r_bdx, r_bdy = (bdx * math.cos(-alpha) - bdy * math.sin(-alpha)), (-bdx * math.sin(-alpha) + bdy * math.cos(-alpha))
-
-        # # All possible ball positions in the object's base along it's direction
-        # # In range if 0 <= t <= bs
-        # #   - rt_bx = r_bx + t * r_bdx
-        # #   - rt_by = r_by + t * r_bdy
-
-        # # First checks:
-        # # If there exist a t such that
-        # #  - rt_bx <= (br + rw / 2.0) -> possible solution, else None
-        # # or
-        # #  - rt_by <= (br + rh / 2.0) -> possible solution, else None
-        # tx = (br + rw / 2.0 - r_bx) / r_bdx if abs(r_bdx) >= EPSILON else None
-        # ty = (br + rh / 2.0 - r_by) / r_bdy if abs(r_bdy) >= EPSILON else None
-
-        # # if  not ((tx and 0 <= tx <= bs) or \
-        # #     (ty and 0 <= ty <= bs)):
-        # #     print(f"Early stop, no collisions possible")
-        # #     return None
-        # # if  (not tx and r_bx > (br + rw / 2.0)) or \
-        # #     (not ty and r_by > (br + rh / 2.0)):
-        # #     print(f"Early stop, no collisions possible")
-        # #     return None
-
-
-        # # Computes the solutions of the equations: (close side check)
-        # # If there exist a 0 <= t <= bs such that
-        # #   - rt_bx <= rw / 2.0 -> collision (to compute)
-        # # or
-        # #   - rt_by <= rh / 2.0 -> collision (to compute)
-        # tx = (rw / 2.0 - r_bx) / r_bdx if abs(r_bdx) >= EPSILON else None
-        # ty = (rh / 2.0 - r_by) / r_bdy if abs(r_bdy) >= EPSILON else None
-
-        # collision = None
-        # n_x = (-rdy) * rdx + rdx * (-rdy)
-        # n_y = (-rdy) * rdy + rdx * rdx
-
-        # if tx and 0 <= tx <= bs:
-        #     collision = {"distance": tx, "normal": (n_x, n_y)}
-
-        # if ty and 0 <= ty <= bs:
-        #     temp_collision = {"distance": ty, "normal": (n_x, n_y)}
-        #     if not collision or (temp_collision and temp_collision["distance"] < collision["distance"]):
-        #         collision = temp_collision
-
-        # # Computes the solutions of the equation: (corner check)
-        # # If there exist a 0 <= t <= bs such that
-        # #   - (rt_bx - rw / 2.0)^2 + (rt_by - rh / 2.0)^2 <= br^2
-        # # Then compute the collision and return it
-        # a = r_bdx**2 + r_bdy**2
-        # b = 2.0 * r_bx * r_bdx - r_bdx * rw + 2.0 * r_by * r_bdy - r_bdy * rh
-        # c = r_bx**2 + (rw**2) / 4.0 - r_bx * rw + r_by**2 + (rh**2) / 4.0 - r_by * rh - br**2
-        # delta = b**2 - 4.0 * a * c
-        # t1, t2 = None, None
-
-        # if delta >= 0:
-        #     t1 = (-b - math.sqrt(delta)) / (2.0 * a)
-
-        #     if 0 <= t1 <= bs:
-        #         temp_collision = {"distance": t1, "normal": (n_x, n_y)}
-        #         if not collision or (temp_collision and temp_collision["distance"] < collision["distance"]):
-        #             collision = temp_collision
-
-        #     if delta >= EPSILON:
-        #         t2 = (-b + math.sqrt(delta)) / (2.0 * a)
-        #         if 0 <= t2 <= bs:
-        #             temp_collision = {"distance": t2, "normal": (n_x, n_y)}
-        #             if not collision or (temp_collision and temp_collision["distance"] < collision["distance"]):
-        #                 collision = temp_collision
-
-        if collision:
-            print(f"ball:")
-            print(f"  |- pos in R: {(r_bx, r_by)}")
-            print(f"  |- dir in R: {(r_bdx, r_bdy)}")
-            print(f"obj:")
-            print(f"  |- pos: {(rx, ry)}")
-            print(f"  |- dir: {(rdx, rdy)}")
-            print(f"  |- 1st check solutions: {(tx, ty)}")
-            print(f"  |- 2nd check: {(a, b, c)}\t| {delta}")
-            if t1:
-                print(f"    |- t1: {t1}")
-            if t2:
-                print(f"    |- t2: {t2}")
-            print(f"  |-> collision: {collision}")
-
-        return collision
 
     @staticmethod
     def compute_collision(t, r_bx, r_by, r_bdx, r_bdy, rw, rh, br):
@@ -323,3 +283,7 @@ class PongPhysicsEngine:
         speed = math.sqrt(ball["dx"]**2 + ball["dy"]**2)
         ball["dx"] /= speed
         ball["dy"] /= speed
+
+        # Move the ball slightly outside the collision surface to prevent sticking
+        ball["x"] += normal[0] * EPSILON * 10
+        ball["y"] += normal[1] * EPSILON * 10

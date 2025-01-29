@@ -17,8 +17,11 @@
     <script>
       const canvas = document.getElementById("gameCanvas");
       const ctx = canvas.getContext("2d");
-      canvas.width = 600;
-      canvas.height = 600;
+      canvas.width = 800;
+      canvas.height = 800;
+
+      width_percent = canvas.width / 100.0;
+      height_percent = canvas.height / 100.0;
 
       const socket = new WebSocket("ws://localhost:8000/ws/game/");
 
@@ -29,6 +32,7 @@
             game: "pong",
             game_mode: "multiplayer_pong",
             modifiers: [],
+            player_count: 7,
             start_game: true,
           })
         );
@@ -49,21 +53,57 @@
         // Draw ball
         ctx.fillStyle = "white";
         ctx.beginPath();
-        ctx.arc(gameState.ball.x * 6, gameState.ball.y * 6, 5, 0, Math.PI * 2);
+        ctx.arc(
+          gameState.ball.x * width_percent,
+          gameState.ball.y * height_percent,
+          gameState.ball.size * width_percent,
+          0,
+          Math.PI * 2
+        );
         ctx.fill();
 
         // Draw paddles
         gameState.player_paddles?.forEach((paddle) => {
+          ctx.save(); // Save the current transformation state
+
+          // Move the origin to the paddle's position
+          ctx.translate(paddle.x * width_percent, paddle.y * height_percent);
+
+          // Rotate using the paddle's direction
+          let angle = Math.atan2(paddle.dy, paddle.dx);
+          ctx.rotate(angle);
+
+          // Draw the paddle (centered at the new origin)
           ctx.fillRect(
-            paddle.x * 6 - paddle.width * 3,
-            paddle.y * 6 - paddle.height * 3,
-            paddle.width * 6,
-            paddle.height * 6
+            -(paddle.width * width_percent) / 2, // Center along width
+            -(paddle.height * height_percent) / 2, // Center along height
+            paddle.width * width_percent,
+            paddle.height * height_percent
           );
+
+          ctx.restore(); // Restore the previous transformation state
+        });
+
+        // Draw the walls -> For debugging purposes
+        gameState.walls?.forEach((wall) => {
+          ctx.save();
+          ctx.translate(wall.x * width_percent, wall.y * height_percent);
+          let angle = Math.atan2(wall.dy, wall.dx);
+          ctx.rotate(angle);
+
+          ctx.strokeStyle = "red";
+          ctx.strokeRect(
+            (-wall.width * width_percent) / 2,
+            (-wall.height * height_percent) / 2,
+            wall.width * width_percent,
+            wall.height * height_percent
+          );
+
+          ctx.restore();
         });
       }
 
-      function update() {
+      {% comment %} function update() {
         let deltaTime = (performance.now() - lastUpdateTime) / 1000;
         if (gameState.ball) {
           gameState.ball.x +=
@@ -71,10 +111,10 @@
           gameState.ball.y +=
             gameState.ball.dy * gameState.ball.speed * deltaTime;
         }
-      }
+      } {% endcomment %}
 
       function gameLoop() {
-        update();
+        {% comment %} update(); {% endcomment %}
         draw();
         requestAnimationFrame(gameLoop);
       }
