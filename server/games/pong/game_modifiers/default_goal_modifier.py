@@ -1,6 +1,6 @@
 import random
 import math
-from .pong_modifier_base import PongModifierBase
+from ..pong_modifier_base import PongModifierBase
 
 
 class DefaultGoalModifier(PongModifierBase):

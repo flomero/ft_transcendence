@@ -25,13 +25,22 @@ def load_game_registry():
             for game_mode, class_name in data["game_modes"].items()
         }
 
-        # Load modifiers with additional metadata
-        GAME_REGISTRY[game]["modifiers"] = {
+        # Load game_modifiers with additional metadata
+        GAME_REGISTRY[game]["game_modifiers"] = {
             mod: {
-                "class": import_class(f"games.{game}.modifiers.{mod}", mod_data["class_name"]),
+                "class": import_class(f"games.{game}.game_modifiers.{mod}", mod_data["class_name"]),
                 **mod_data  # additional properties like duration
             }
-            for mod, mod_data in data["modifiers"].items()
+            for mod, mod_data in data["game_modifiers"].items()
+        }
+
+        # Load power_ups with additional metadata
+        GAME_REGISTRY[game]["power_ups"] = {
+            mod: {
+                "class": import_class(f"games.{game}.power_ups.{mod}", mod_data["class_name"]),
+                **mod_data  # additional properties like duration
+            }
+            for mod, mod_data in data["power_ups"].items()
         }
 
 # Import Class Helper

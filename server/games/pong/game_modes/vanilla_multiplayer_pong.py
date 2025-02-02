@@ -20,7 +20,7 @@ class VanillaMultiplayerPong(MultiplayerPong):
                 "y": 50,
                 "dx": 2,
                 "dy": 1,
-                "speed": 1.25,
+                "speed": 1.75,
                 "size": 0.75,
             }
         tmp = math.sqrt(self.ball["dx"]**2 + self.ball["dy"]**2)
@@ -49,8 +49,8 @@ class VanillaMultiplayerPong(MultiplayerPong):
                     "x": round((VanillaMultiplayerPong.WALL_DISTANCE * 3.0 / 5.0) * math.cos(math.pi * (i + 1.0) / self.player_count + math.pi), ndigits=3),
                     "y": round((VanillaMultiplayerPong.WALL_DISTANCE * 3.0 / 5.0) * math.sin(math.pi * (i + 1.0) / self.player_count + math.pi), ndigits=3),
                     "alpha": round(math.pi + math.pi * (i + 1.0) / self.player_count, ndigits=3),
-                    "width": VanillaMultiplayerPong.WALL_HEIGHT / 2.5,  # Long enough to form a closed arena
-                    "height": wall_wdith / 4.5,  # Thin walls
+                    "width": VanillaMultiplayerPong.WALL_HEIGHT / 2.5,
+                    "height": wall_wdith / 6.5,  # Thin walls
                 }
                 for i in range(0, 2 * self.player_count, 2)
             ]

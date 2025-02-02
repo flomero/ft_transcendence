@@ -1,6 +1,5 @@
 from games.game_base import GameBase
 from games.pong.pong_physics_engine import PongPhysicsEngine
-from games.pong.modifiers.pong_modifier_base import PongModifierBase
 
 
 class MultiplayerPong(GameBase):

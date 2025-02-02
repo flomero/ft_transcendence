@@ -1,5 +1,5 @@
 import random
-from .pong_time_limited_modifier_base import PongTimeLimitedModifierBase
+from games.pong.pong_time_limited_modifier_base import PongTimeLimitedModifierBase
 from games.game_base import GAME_REGISTRY
 from games.pong.multiplayer_pong import MultiplayerPong
 

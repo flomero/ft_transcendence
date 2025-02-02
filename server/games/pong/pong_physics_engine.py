@@ -1,5 +1,5 @@
 import math
-from .modifiers.pong_modifier_base import PongModifierBase
+from .pong_modifier_base import PongModifierBase
 
 EPSILON = 1e-2
 
@@ -69,7 +69,6 @@ class PongPhysicsEngine:
 
         return closest_collision
 
-    @staticmethod
     @staticmethod
     def ball_rect_collision(ball, distance, obj):
         """Checks if the ball collides with a rotated object, including corner collisions."""

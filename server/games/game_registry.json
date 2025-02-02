@@ -6,10 +6,12 @@
       "vanilla_multiplayer_pong": "VanillaMultiplayerPong",
       "moded_multiplayer_pong": "ModedMultiplayerPong"
     },
-    "modifiers": {
+    "game_modifiers": {
       "default_goal_modifier": {
         "class_name": "DefaultGoalModifier"
-      },
+      }
+    },
+    "power_ups": {
       "invisible_ball_modifier": {
         "class_name": "InvisibleBallModifier",
         "duration": 100
