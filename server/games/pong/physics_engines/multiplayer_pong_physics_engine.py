@@ -1,9 +1,8 @@
 import math
-from .pong_modifier_base import PongModifierBase
 
 EPSILON = 1e-2
 
-class PongPhysicsEngine:
+class MultiplayerPongPhysicsEngine:
     @staticmethod
     def do_collision_check(ball, game):
         """Moves the ball while handling precise collision resolution."""
@@ -11,8 +10,8 @@ class PongPhysicsEngine:
         loop_counter = 0
 
         while remaining_distance > EPSILON:
-            paddle_collision = PongPhysicsEngine.detect_collision(ball, remaining_distance, game.player_paddles, True)
-            wall_collision = PongPhysicsEngine.detect_collision(ball, remaining_distance, game.walls, False)
+            paddle_collision = MultiplayerPongPhysicsEngine.detect_collision(ball, remaining_distance, game.player_paddles, True)
+            wall_collision = MultiplayerPongPhysicsEngine.detect_collision(ball, remaining_distance, game.walls, False)
 
             # Determine the closest collision
             collision = None
@@ -29,7 +28,7 @@ class PongPhysicsEngine:
                 ball["x"] += round(ball["dx"] * travel_distance, ndigits=2)
                 ball["y"] += round(ball["dy"] * travel_distance, ndigits=2)
 
-                PongPhysicsEngine.resolve_collision(ball, collision)
+                MultiplayerPongPhysicsEngine.resolve_collision(ball, collision)
 
                 # Handle modifiers
                 if collision["type"] == "paddle":
@@ -47,9 +46,9 @@ class PongPhysicsEngine:
                 ball["y"] += round(ball["dy"] * remaining_distance, ndigits=2)
                 break
 
-            print(f"Stuck in do_collision_check: {loop_counter}")
-            print(f"  |- remaining_distance: {remaining_distance}")
-            print(f"  |- collision: {collision}\n")
+            # print(f"Stuck in do_collision_check: {loop_counter}")
+            # print(f"  |- remaining_distance: {remaining_distance}")
+            # print(f"  |- collision: {collision}\n")
             loop_counter += 1
             if loop_counter > (ball["speed"] * 2.0) + 1:
                 break
@@ -60,7 +59,7 @@ class PongPhysicsEngine:
         closest_collision = None
 
         for i in range(len(objects)):
-            collision = PongPhysicsEngine.ball_rect_collision(ball, distance, objects[i])
+            collision = MultiplayerPongPhysicsEngine.ball_rect_collision(ball, distance, objects[i])
             # print(f"  |-> collision: {collision}")
             if collision and (not closest_collision or collision["distance"] < closest_collision["distance"]):
                 collision["object_id"] = i
@@ -180,18 +179,17 @@ class PongPhysicsEngine:
             # No collision detected.
             return None
 
-        # (Optional) You may print debugging information here.
-        print(f"ball:")
-        print(f"  |- pos     : {(bx, by)}")
-        print(f"  |- dir     : {(bdx, bdy)}")
-        print(f"  |- pos in local: {(r_bx, r_by)}")
-        print(f"  |- dir in local: {(r_bdx, r_bdy)}")
-        print(f"obj:")
-        print(f"  |- pos: {(rx, ry)}")
-        print(f"  |- angle (rad): {alpha}  | (deg): {math.degrees(alpha)}")
-        print(f"  |- corners: {corners}")
-        print(f"  |--> collision t: {min_t}")
-        print(f"  |--> collision normal (global): {normal_global}\n")
+        # print(f"ball:")
+        # print(f"  |- pos     : {(bx, by)}")
+        # print(f"  |- dir     : {(bdx, bdy)}")
+        # print(f"  |- pos in local: {(r_bx, r_by)}")
+        # print(f"  |- dir in local: {(r_bdx, r_bdy)}")
+        # print(f"obj:")
+        # print(f"  |- pos: {(rx, ry)}")
+        # print(f"  |- angle (rad): {alpha}  | (deg): {math.degrees(alpha)}")
+        # print(f"  |- corners: {corners}")
+        # print(f"  |--> collision t: {min_t}")
+        # print(f"  |--> collision normal (global): {normal_global}\n")
 
         return {"distance": min_t, "normal": normal_global}
 
@@ -212,7 +210,7 @@ class PongPhysicsEngine:
             norm_length = math.sqrt(normal_x**2 + normal_y**2)
             normal = (normal_x / norm_length, normal_y / norm_length)
 
-        print(f"compute_collision called: distance: {t}, normal: {normal}")
+        # print(f"compute_collision called: distance: {t}, normal: {normal}")
         return {"distance": t, "normal": normal}
 
     @staticmethod
@@ -225,7 +223,7 @@ class PongPhysicsEngine:
         ball["dx"] -= dot_product * normal[0]
         ball["dy"] -= dot_product * normal[1]
 
-        print(f"new ball direction: {ball}")
+        # print(f"new ball direction: {ball}")
 
         # Normalize direction
         speed = math.sqrt(ball["dx"]**2 + ball["dy"]**2)

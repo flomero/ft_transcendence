@@ -1,5 +1,5 @@
 from games.game_base import GameBase
-from games.pong.pong_physics_engine import PongPhysicsEngine
+from games.pong.physics_engines.multiplayer_pong_physics_engine import MultiplayerPongPhysicsEngine
 
 
 class MultiplayerPong(GameBase):
@@ -20,7 +20,7 @@ class MultiplayerPong(GameBase):
 
     def update(self):
         """Calulcate the next game state"""
-        PongPhysicsEngine.do_collision_check(self.ball, self)
+        MultiplayerPongPhysicsEngine.do_collision_check(self.ball, self)
         super().trigger_modifiers("on_update")
 
     def handle_action(self, action):

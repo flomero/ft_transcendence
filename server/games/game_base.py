@@ -99,6 +99,7 @@ class GameBase():
 
     def trigger_modifiers(self, method, *args, **kwargs):
         """Triggers method on modifiers if applicable, forwarding extra arguments."""
+
         for modifier in self.modifiers:
             try:
                 getattr(modifier, method)(self, *args, **kwargs)
