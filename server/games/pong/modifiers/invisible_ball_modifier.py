@@ -1,7 +1,7 @@
 import random
 from .pong_time_limited_modifier_base import PongTimeLimitedModifierBase
 from games.game_base import GAME_REGISTRY
-from games.pong.game_modes.multiplayer_pong import MultiplayerPong
+from games.pong.multiplayer_pong import MultiplayerPong
 
 class InvisibleBallModifier(PongTimeLimitedModifierBase):
     """Makes the ball disappear & randomly change direction."""

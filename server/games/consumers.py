@@ -38,7 +38,12 @@ class GameConsumer(AsyncWebsocketConsumer):
         # Modifier Selection (with fallback to [])
         modifier_names = data.get("modifiers", [])
         available_modifiers = GAME_REGISTRY[game_name]["modifiers"]
-        self.modifiers = [available_modifiers[mod]() for mod in modifier_names if mod in available_modifiers]
+        print(f"available modifiers:\n{available_modifiers}")
+        # self.modifiers = [
+        #     modifier
+        #     for
+        # ]
+        self.modifiers = [available_modifiers[mod]["class"]() for mod in modifier_names if mod in available_modifiers]
 
         self.player_count = data.get("player_count")
 

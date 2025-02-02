@@ -1,9 +1,15 @@
 {
   "pong": {
     "game_modes": {
-      "multiplayer_pong": "MultiplayerPong"
+      "vanilla_duel_pong": "VanillaDuelPong",
+      "moded_duel_pong": "ModedDuelPong",
+      "vanilla_multiplayer_pong": "VanillaMultiplayerPong",
+      "moded_multiplayer_pong": "ModedMultiplayerPong"
     },
     "modifiers": {
+      "default_goal_modifier": {
+        "class_name": "DefaultGoalModifier"
+      },
       "invisible_ball_modifier": {
         "class_name": "InvisibleBallModifier",
         "duration": 100
