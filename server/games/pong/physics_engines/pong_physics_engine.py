@@ -2,7 +2,7 @@ import math
 
 EPSILON = 1e-2
 
-class MultiplayerPongPhysicsEngine:
+class PongPhysicsEngine:
     @staticmethod
     def do_collision_check(ball, game):
         """Moves the ball while handling precise collision resolution."""
@@ -10,8 +10,8 @@ class MultiplayerPongPhysicsEngine:
         loop_counter = 0
 
         while remaining_distance > EPSILON:
-            paddle_collision = MultiplayerPongPhysicsEngine.detect_collision(ball, remaining_distance, game.player_paddles, True)
-            wall_collision = MultiplayerPongPhysicsEngine.detect_collision(ball, remaining_distance, game.walls, False)
+            paddle_collision = PongPhysicsEngine.detect_collision(ball, remaining_distance, game.player_paddles, True)
+            wall_collision = PongPhysicsEngine.detect_collision(ball, remaining_distance, game.walls, False)
 
             # Determine the closest collision
             collision = None
@@ -28,7 +28,7 @@ class MultiplayerPongPhysicsEngine:
                 ball["x"] += round(ball["dx"] * travel_distance, ndigits=2)
                 ball["y"] += round(ball["dy"] * travel_distance, ndigits=2)
 
-                MultiplayerPongPhysicsEngine.resolve_collision(ball, collision)
+                PongPhysicsEngine.resolve_collision(ball, collision)
 
                 # Handle modifiers
                 if collision["type"] == "paddle":
@@ -59,7 +59,7 @@ class MultiplayerPongPhysicsEngine:
         closest_collision = None
 
         for i in range(len(objects)):
-            collision = MultiplayerPongPhysicsEngine.ball_rect_collision(ball, distance, objects[i])
+            collision = PongPhysicsEngine.ball_rect_collision(ball, distance, objects[i])
             # print(f"  |-> collision: {collision}")
             if collision and (not closest_collision or collision["distance"] < closest_collision["distance"]):
                 collision["object_id"] = i
