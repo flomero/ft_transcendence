@@ -1,7 +1,7 @@
 import json
 from .game_base import GAME_REGISTRY
 
-def pars_game_body(message: str):
+def pars_game_body(message: str) -> dict:
     data = json.loads(message)
 
     game_name = game_name_get(data)
@@ -15,18 +15,18 @@ def pars_game_body(message: str):
     }
     return game_body_dict
 
-def game_name_get(data: dict):
+def game_name_get(data: dict) -> str:
     game_name = data.get("game", "pong")
     if game_name not in GAME_REGISTRY:
         print(f"Unknown game: {game_name}, defaulting to Pong")
         game_name = "pong"
     return game_name
 
-def mode_name_get(data: dict, game_name: str):
+def mode_name_get(data: dict, game_name: str) -> str:
     mode_name = data.get("game_mode", f"multiplayer_{game_name}")
     return mode_name
 
-def modifiers_dict_get(data: dict, game_name: str):
+def modifiers_dict_get(data: dict, game_name: str) -> list:
     modifiers = []
     modifier_names = data.get("modifiers", [])
     available_modifiers = GAME_REGISTRY[game_name]["modifiers"]
