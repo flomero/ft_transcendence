@@ -9,6 +9,9 @@
     "game_modifiers": {
       "default_goal_modifier": {
         "class_name": "DefaultGoalModifier"
+      },
+      "default_last_hit_tracker_modifier": {
+        "class_name": "DefaultLastHitTrackerModifier"
       }
     },
     "power_ups": {

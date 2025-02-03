@@ -32,12 +32,12 @@ class PongPhysicsEngine:
 
                 # Handle modifiers
                 if collision["type"] == "paddle":
-                    game.trigger_modifiers("on_bounce", player_id=collision["object_id"])
+                    game.trigger_modifiers("on_paddle_bounce", player_id=collision["object_id"])
                 elif collision["type"] == "wall":
                     if collision["object_id"] % 2 == 0:  # Goal wall
                         game.trigger_modifiers("on_goal", player_id=game.last_player_hit)
                     else:
-                        game.trigger_modifiers("on_bounce")
+                        game.trigger_modifiers("on_wall_bounce")
 
                 remaining_distance -= travel_distance
             else:

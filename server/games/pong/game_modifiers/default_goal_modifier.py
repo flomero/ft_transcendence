@@ -10,7 +10,7 @@ class DefaultGoalModifier(PongModifierBase):
         super().__init__()
 
 
-    def on_goal(self, game, player_id):
+    def on_goal(self, game, player_id=-1):
         random_angle = random.uniform(0, 360)  # Random angle in degrees
         game.ball["x"] = 50
         game.ball["y"] = 50
