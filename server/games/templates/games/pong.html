@@ -31,8 +31,8 @@
           JSON.stringify({
             game: "pong",
             game_mode: "vanilla_multiplayer_pong",
-            modifiers: ["default_last_hit_tracker_modifier"],
-            player_count: 5,
+            modifiers: ["default_goal_modifier", "default_survival_game_modifier", "default_time_limited_game_modifier"],
+            player_count: 7,
             start_game: true,
           })
         );
@@ -64,24 +64,26 @@
 
         // Draw paddles
         gameState.player_paddles?.forEach((paddle) => {
-          ctx.save(); // Save the current transformation state
+          if (paddle.visible){
+            ctx.save(); // Save the current transformation state
 
-          // Move the origin to the paddle's position
-          ctx.translate(paddle.x * width_percent, paddle.y * height_percent);
+            // Move the origin to the paddle's position
+            ctx.translate(paddle.x * width_percent, paddle.y * height_percent);
 
-          // Rotate using the paddle's direction
-          let angle = Math.atan2(paddle.dy, paddle.dx);
-          ctx.rotate(angle);
+            // Rotate using the paddle's direction
+            let angle = Math.atan2(paddle.dy, paddle.dx);
+            ctx.rotate(angle);
 
-          // Draw the paddle (centered at the new origin)
-          ctx.fillRect(
-            -(paddle.width * width_percent) / 2, // Center along width
-            -(paddle.height * height_percent) / 2, // Center along height
-            paddle.width * width_percent,
-            paddle.height * height_percent
-          );
+            // Draw the paddle (centered at the new origin)
+            ctx.fillRect(
+              -(paddle.width * width_percent) / 2, // Center along width
+              -(paddle.height * height_percent) / 2, // Center along height
+              paddle.width * width_percent,
+              paddle.height * height_percent
+              );
 
-          ctx.restore(); // Restore the previous transformation state
+              ctx.restore(); // Restore the previous transformation state
+            }
         });
 
         // Draw the walls -> For debugging purposes

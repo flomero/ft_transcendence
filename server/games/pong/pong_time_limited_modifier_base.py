@@ -15,7 +15,7 @@ class PongTimeLimitedModifierBase(PongModifierBase):
 
         self.ticks -= 1
         if self.ticks <= 0:
-            self.deactivate()
+            self.deactivate(game)
 
     def deactivate(self, game):
         """Deactivate the modifier"""

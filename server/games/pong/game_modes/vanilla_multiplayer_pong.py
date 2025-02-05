@@ -1,4 +1,5 @@
 import math
+import random
 from games.pong.multiplayer_pong import MultiplayerPong
 
 
@@ -15,13 +16,16 @@ class VanillaMultiplayerPong(MultiplayerPong):
     def __init__(self, player_count=4, modifiers=None):
         super().__init__(player_count, modifiers)
 
+        random_angle = random.random() * math.pi * 2.0
+        ca, sa = math.cos(random_angle), math.sin(random_angle)
         self.ball = {
-                "x": 50,
-                "y": 50,
-                "dx": 2,
-                "dy": 1,
-                "speed": 1.75,
+                "x": 50 + 2.0 * ca,
+                "y": 50 + 2.0 * sa,
+                "dx": ca,
+                "dy": sa,
+                "speed": 2.25,
                 "size": 0.75,
+                "visible": True
             }
         tmp = math.sqrt(self.ball["dx"]**2 + self.ball["dy"]**2)
         self.ball["dx"] /= tmp
@@ -39,6 +43,7 @@ class VanillaMultiplayerPong(MultiplayerPong):
                 "alpha": round(math.pi + math.pi * i / self.player_count, ndigits=3),
                 "width": wall_wdith,  # Long enough to form a closed arena
                 "height": VanillaMultiplayerPong.WALL_HEIGHT,  # Thin walls
+                "visible": True
             }
             for i in range(2 * self.player_count)
         ]
@@ -51,6 +56,7 @@ class VanillaMultiplayerPong(MultiplayerPong):
                     "alpha": round(math.pi + math.pi * (i + 1.0) / self.player_count, ndigits=3),
                     "width": VanillaMultiplayerPong.WALL_HEIGHT / 2.5,
                     "height": wall_wdith / 6.5,  # Thin walls
+                    "visible": True
                 }
                 for i in range(0, 2 * self.player_count, 2)
             ]
@@ -65,6 +71,7 @@ class VanillaMultiplayerPong(MultiplayerPong):
                 "alpha": round(math.pi + math.pi * i / self.player_count, ndigits=3),
                 "width": paddle_width,
                 "height": VanillaMultiplayerPong.PADDLE_HEIGHT,
+                "visible": True
             }
             for i in range(0, 2 * self.player_count, 2)
         ]
@@ -96,3 +103,18 @@ class VanillaMultiplayerPong(MultiplayerPong):
             wall["dx"] = wall["ny"]
             wall["dy"] = - wall["nx"]
             print(f"  |- {i}: {wall}")
+
+        self.walls.append(
+            {
+                "x": VanillaMultiplayerPong.WALL_DISTANCE,
+                "y": VanillaMultiplayerPong.WALL_DISTANCE,
+                "alpha": math.pi / 4.0,
+                "width": 1.0,
+                "height": 1.0,
+                "visible": True,
+                "nx": math.sin(math.pi / 4.0),
+                "ny": math.cos(math.pi / 4.0),
+                "dx": math.cos(math.pi / 4.0),
+                "dy": -math.sin(math.pi / 4.0),
+            }
+        )

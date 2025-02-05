@@ -7,20 +7,29 @@ class MultiplayerPong(GameBase):
 
     name = "multiplayer_pong"
 
-    def __init__(self, player_count=4, modifiers=None):
+    def __init__(self, player_count=4, modifiers=None, goal_objective=7, game_duration=300):
         super().__init__(modifiers)
 
+        # Players & related
         self.player_count = player_count
-
+        self.player_goals = [0] * player_count
+        self.results = [0] * player_count
         self.last_player_hit = None
+
+        # Game modifiers related
+        self.goal_objective = goal_objective   # Used by the goal limited modifier, else useless (time limited game)
+        self.game_duration = game_duration     # Used by the time limited modifier, else useless (goal limited game)
+
+        # Game objects -> w/ collisions
         self.ball = None
         self.walls = None
         self.player_paddles = None
 
     def update(self):
         """Calulcate the next game state"""
-        PongPhysicsEngine.do_collision_check(self.ball, self)
-        super().trigger_modifiers("on_update")
+        if self.start_game:
+            PongPhysicsEngine.do_collision_check(self.ball, self)
+            super().trigger_modifiers("on_update")
 
     def handle_action(self, action):
         """Handle client action"""

@@ -69,6 +69,7 @@ class GameBase():
         """Starts the game"""
         self.running = True
         print(f"Game started")
+        self.trigger_modifiers('on_game_start')
 
     def rewind(self, to_tick):
         """Rewind the game state to a specific time"""

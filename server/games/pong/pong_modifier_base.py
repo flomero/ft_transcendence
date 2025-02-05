@@ -38,3 +38,7 @@ class PongModifierBase:
     def on_activation(self, game, player_id=-1):
         """Called when the modifier is activated"""
         pass
+
+    def on_game_start(self, game):
+        """Called when then game starts"""
+        pass

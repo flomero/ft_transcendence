@@ -12,6 +12,13 @@
       },
       "default_last_hit_tracker_modifier": {
         "class_name": "DefaultLastHitTrackerModifier"
+      },
+      "default_survival_game_modifier": {
+        "class_name": "DefaultSurvivalGameModifier"
+      },
+      "default_time_limited_game_modifier": {
+        "class_name": "DefaultTimeLimitedGameModifier",
+        "duration": 60
       }
     },
     "power_ups": {

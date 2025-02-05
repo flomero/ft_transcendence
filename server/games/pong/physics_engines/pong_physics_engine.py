@@ -34,8 +34,10 @@ class PongPhysicsEngine:
                 if collision["type"] == "paddle":
                     game.trigger_modifiers("on_paddle_bounce", player_id=collision["object_id"])
                 elif collision["type"] == "wall":
-                    if collision["object_id"] % 2 == 0:  # Goal wall
-                        game.trigger_modifiers("on_goal", player_id=game.last_player_hit)
+                    if  (collision["object_id"] % 2 == 0) and \
+                        (collision["object_id"] in range(0, 2 * game.player_count, 2)) and \
+                        game.player_paddles[(collision["object_id"] // 2)]["visible"]:  # Goal wall
+                        game.trigger_modifiers("on_goal", player_id=(collision["object_id"] // 2))
                     else:
                         game.trigger_modifiers("on_wall_bounce")
 
@@ -59,6 +61,8 @@ class PongPhysicsEngine:
         closest_collision = None
 
         for i in range(len(objects)):
+            if not objects[i]["visible"]:
+                continue
             collision = PongPhysicsEngine.ball_rect_collision(ball, distance, objects[i])
             # print(f"  |-> collision: {collision}")
             if collision and (not closest_collision or collision["distance"] < closest_collision["distance"]):
