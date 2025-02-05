@@ -1,17 +1,18 @@
 import random
+import math
 from games.pong.pong_time_limited_modifier_base import PongTimeLimitedModifierBase
 from games.game_base import GAME_REGISTRY
 from games.pong.multiplayer_pong import MultiplayerPong
 
 class InvisibleBallModifier(PongTimeLimitedModifierBase):
     """Makes the ball disappear & randomly change direction."""
-
     name = "invisible_ball_modifier"
 
     def __init__(self):
         super().__init__()
 
-        self.duration = GAME_REGISTRY["pong"]["modifiers"][InvisibleBallModifier.name]["duration"]
+        self.spawn_weight = GAME_REGISTRY["pong"]["power_ups"][self.name]["spawn_weight"]
+        self.duration = GAME_REGISTRY["pong"]["power_ups"][self.name]["duration"]
         self.initial_ball_speed = 0
 
     def on_activation(self, game: MultiplayerPong):
@@ -28,4 +29,5 @@ class InvisibleBallModifier(PongTimeLimitedModifierBase):
 
         # Randomly launch in a direction (improve balancing later)
         random_angle = random.uniform(0, 360)  # Random angle in degrees
-        game.ball["direction"] = (random_angle)
+        game.ball["dx"] = math.cos(random_angle)
+        game.ball["dy"] = math.sin(random_angle)

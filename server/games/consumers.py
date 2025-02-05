@@ -38,9 +38,14 @@ class GameConsumer(AsyncWebsocketConsumer):
         # Modifier Selection (with fallback to [])
         modifier_names = data.get("modifiers", [])
         available_game_modifiers = GAME_REGISTRY[game_name]["game_modifiers"]
-        available_power_ups = GAME_REGISTRY[game_name]["power_ups"]
         print(f"available modifiers:\n{available_game_modifiers}")
-        self.modifiers = [available_game_modifiers[mod]["class"]() for mod in modifier_names if mod in available_game_modifiers] + [available_power_ups[mod]["class"]() for mod in modifier_names if mod in available_power_ups]
+        self.game_modifiers = [available_game_modifiers[mod]["class"]() for mod in modifier_names if mod in available_game_modifiers]
+
+        self.power_ups = data.get("power_ups", [])
+        # power_ups_names = data.get("power_ups", [])
+        # available_power_ups = GAME_REGISTRY[game_name]["power_ups"]
+        # print(f"available power_ups:\n{available_power_ups}")
+        # self.power_ups = [available_power_ups[mod]["class"]() for mod in power_ups_names if mod in available_power_ups]
 
         self.player_count = data.get("player_count")
 
@@ -55,7 +60,11 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     async def start_game(self):
         """Start a new game instance with the selected settings."""
-        self.game = self.game_class(player_count=self.player_count, modifiers=self.modifiers)
+        print(f"\n\nCreating the game w/:")
+        print(f" |- game_modifiers: {self.game_modifiers}")
+        print(f" |- power_ups: {self.power_ups}")
+        print(f"\n")
+        self.game = self.game_class(player_count=self.player_count, modifiers=self.game_modifiers, power_ups=self.power_ups)
         self.game.start_game()
         self.running = True
         asyncio.create_task(self.run_game_loop())

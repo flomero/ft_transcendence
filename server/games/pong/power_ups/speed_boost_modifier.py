@@ -4,14 +4,14 @@ from games.pong.multiplayer_pong import MultiplayerPong
 
 class SpeedBoostModifier(PongTimeLimitedModifierBase):
     """Increases ball speed every updates for a duration."""
-
     name = "speed_boost_modifier"
 
     def __init__(self):
         super().__init__()
 
-        self.duration = GAME_REGISTRY["pong"]["modifiers"][SpeedBoostModifier.name]["duration"]
-        self.ramp_up_strength = GAME_REGISTRY["pong"]["modifiers"][SpeedBoostModifier.name]["ramp_up_strength"]
+        self.spawn_weight = GAME_REGISTRY["pong"]["power_ups"][self.name]["spawn_weight"]
+        self.duration = GAME_REGISTRY["pong"]["power_ups"][self.name]["duration"]
+        self.ramp_up_strength = GAME_REGISTRY["pong"]["power_ups"][self.name]["ramp_up_strength"]
         self.initial_ball_speed = 0
 
     def on_activation(self, game: MultiplayerPong, player_id=-1):

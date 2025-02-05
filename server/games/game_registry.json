@@ -19,15 +19,22 @@
       "default_time_limited_game_modifier": {
         "class_name": "DefaultTimeLimitedGameModifier",
         "duration": 60
+      },
+      "default_power_up_spawner_game_modifier": {
+        "class_name": "DefaultPowerUpSpawnerGameModifier",
+        "spawn_interval_center": 30,
+        "spawn_interval_deviation": 10
       }
     },
     "power_ups": {
       "invisible_ball_modifier": {
         "class_name": "InvisibleBallModifier",
+        "spawn_weight": 1.0,
         "duration": 100
       },
       "speed_boost_modifier": {
         "class_name": "SpeedBoostModifier",
+        "spawn_weight": 1.0,
         "duration": 100,
         "ramp_up_strength": 0.1
       }

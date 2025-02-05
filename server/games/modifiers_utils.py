@@ -58,3 +58,44 @@ def compute_reset_angle(player_count: int, scoring_player_id: int, resolution=36
             return thetas[i]
 
     return thetas[-1]
+
+def spawn_powerup_bell(arena_radius, margin, bell_center, obstacles=[], max_attempts=1000):
+    # Allowed radial interval:
+    R_min = margin
+    R_max = arena_radius - margin
+    span = R_max - R_min
+    sigma = span * 2.0
+
+    # Precompute normalization factor for the radial PDF.
+    # The unnormalized CDF is: F(r) = ∫ exp(-((s-bell_center)**2)/(sigma**2)) ds.
+    # We have: ∫ exp(-((s-bell_center)**2)/(sigma**2)) ds = sigma * sqrt(pi)/2 * erf((s - bell_center)/sigma) + C.
+    # Thus, the normalization constant is:
+    norm = (math.erf((R_max - bell_center) / sigma) - math.erf((R_min - bell_center) / sigma))
+
+    def sample_r():
+        """Sample a radial coordinate from the truncated Gaussian."""
+        # Draw u in [0,1] and invert the CDF:
+        u = random.random()
+        # The target value in the erf-space:
+        target = math.erf((R_min - bell_center) / sigma) + u * norm
+        # Invert the erf to get:
+        r = bell_center + sigma * math.erfc(target)
+        return r
+
+    def in_any_obstacle(x, y):
+        """Return True if (x,y) falls inside any obstacle's exclusion circle."""
+        for obs in obstacles:
+            exclusion_radius = max(obs["width"], obs["height"]) / 2.0
+            if math.hypot(x - obs["x"], y - obs["y"]) < exclusion_radius:
+                return True
+        return False
+
+    for _ in range(max_attempts):
+        r = sample_r()
+        theta = random.random() * 2 * math.pi
+        x = r * math.cos(theta)
+        y = r * math.sin(theta)
+        if not in_any_obstacle(x, y):
+            return x, y
+
+    raise RuntimeError("Could not find a valid power-up position after {} attempts.".format(max_attempts))
