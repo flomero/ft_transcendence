@@ -26,7 +26,7 @@ class MultiplayerPong(GameBase):
         """Calulcate the next game state"""
         if self.start_game:
             PongPhysicsEngine.do_collision_check(self.ball, self)
-            super().trigger_modifiers("on_update")
+            self.trigger_modifiers('on_update')
 
     def handle_action(self, action):
         """Handle client action"""

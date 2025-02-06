@@ -24,6 +24,11 @@
         "class_name": "DefaultPowerUpSpawnerGameModifier",
         "spawn_interval_center": 15,
         "spawn_interval_deviation": 0.25
+      },
+      "extra_walls_movement_game_modifier": {
+        "class_name": "ExtraWallsMovementGameModifier",
+        "amplitude": 12,
+        "speed": 0.25
       }
     },
     "power_ups": {

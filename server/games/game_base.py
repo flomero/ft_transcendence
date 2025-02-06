@@ -106,6 +106,7 @@ class GameBase():
                 getattr(modifier, method)(self, *args, **kwargs)
             except AttributeError:
                 print(f"Unknown method: {method}, for modifier: {modifier}")
+                print(f"Available methods:\n  |- {dir(modifier)}")
 
 # Load registry at startup
 load_game_registry()
