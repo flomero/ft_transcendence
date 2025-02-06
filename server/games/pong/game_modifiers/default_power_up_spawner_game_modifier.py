@@ -2,7 +2,6 @@ import random
 import math
 from ..pong_time_limited_modifier_base import PongTimeLimitedModifierBase
 from ...game_base import GAME_REGISTRY
-from ..multiplayer_pong import MultiplayerPong
 from ...modifiers_utils import spawn_powerup_bell
 
 
@@ -17,6 +16,8 @@ class DefaultPowerUpSpawnerGameModifier(PongTimeLimitedModifierBase):
 
         self.duration = random.gauss(self.spawn_interval_center, self.spawn_interval_deviation)
 
+        self.pos_cdf = init_pos_cdf()
+
     def on_game_start(self, game):
         self.activate(game)
 
@@ -24,10 +25,11 @@ class DefaultPowerUpSpawnerGameModifier(PongTimeLimitedModifierBase):
         """Spawns a power_up, then reactivate with a random duration"""
         try:
             random_pos = spawn_powerup_bell(
-                arena_radius=game.WALL_DISTANCE,
-                margin=game.PADDLE_OFFSET,
-                bell_center=game.WALL_DISTANCE * 2.0 / 10.0,
-                obstacles=game.walls[game.player_count * 2 + 1:]   # only the extra walls
+                center=(game.WALL_DISTANCE, game.WALL_DISTANCE),
+                radius=game.WALL_DISTANCE - game.WALL_HEIGHT,
+                margin=(1.5 * game.PADDLE_OFFSET, 3.0 * (game.PADDLE_OFFSET + game.WALL_HEIGHT)),
+                pos_cdf = self.pos_cdf,
+                obstacles=game.walls[game.player_count * 2:]   # only the extra walls
             )
             game.spawn_power_up(random_pos)
         except RuntimeError:
@@ -39,3 +41,24 @@ class DefaultPowerUpSpawnerGameModifier(PongTimeLimitedModifierBase):
 
         self.duration = random.gauss(self.spawn_interval_center, self.spawn_interval_deviation)
         self.activate(game)
+
+def init_pos_cdf(pos_center=0.6, pos_span=0.05, steps=1000):
+    sample_x = [x/steps for x in range(steps)]
+    pos_pdf = [
+        math.exp(-((x - pos_center)**2) / (2.0 * pos_span**2))
+        for x in sample_x
+    ]
+
+    total_pdf = sum(pos_pdf)
+    pos_pdf = [
+        p / total_pdf
+        for p in pos_pdf
+    ]
+
+    pos_cdf = []
+    cumulative = 0.0
+    for p in pos_pdf:
+        cumulative += p
+        pos_cdf.append(cumulative)
+
+    return pos_cdf

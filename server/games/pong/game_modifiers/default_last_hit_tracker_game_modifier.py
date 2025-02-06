@@ -2,8 +2,8 @@ from ..pong_modifier_base import PongModifierBase
 from ..multiplayer_pong import MultiplayerPong
 
 
-class DefaultLastHitTrackerModifier(PongModifierBase):
-    name = "default_last_hit_tracker_modifier"
+class DefaultLastHitTrackerGameModifier(PongModifierBase):
+    name = "default_last_hit_tracker_game_modifier"
 
     def __init__(self):
         super().__init__()

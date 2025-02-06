@@ -108,12 +108,20 @@
         // Draw the power_ups
         gameState.power_ups?.forEach((power_up) => {
           if (power_up.visible){
-            ctx.fillStyle = "red";
+            switch(power_up.object_type) {
+              case "speed_boost_modifier":
+                ctx.fillStyle = "red";
+                break;
+
+              case "invisible_ball_modifier":
+                ctx.fillStyle = "blue"
+                break;
+            }
             ctx.beginPath();
             ctx.arc(
               power_up.x * width_percent,
               power_up.y * height_percent,
-              20,
+              power_up.size * width_percent,
               0,
               Math.PI * 2
             );

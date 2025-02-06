@@ -59,42 +59,33 @@ def compute_reset_angle(player_count: int, scoring_player_id: int, resolution=36
 
     return thetas[-1]
 
-def spawn_powerup_bell(arena_radius, margin, bell_center, obstacles=[], max_attempts=1000):
-    # Allowed radial interval:
-    R_min = margin
-    R_max = arena_radius - margin
-    span = R_max - R_min
-    sigma = span * 2.0
-
-    # Precompute normalization factor for the radial PDF.
-    # The unnormalized CDF is: F(r) = ∫ exp(-((s-bell_center)**2)/(sigma**2)) ds.
-    # We have: ∫ exp(-((s-bell_center)**2)/(sigma**2)) ds = sigma * sqrt(pi)/2 * erf((s - bell_center)/sigma) + C.
-    # Thus, the normalization constant is:
-    norm = (math.erf((R_max - bell_center) / sigma) - math.erf((R_min - bell_center) / sigma))
-
-    def sample_r():
-        """Sample a radial coordinate from the truncated Gaussian."""
-        # Draw u in [0,1] and invert the CDF:
-        u = random.random()
-        # The target value in the erf-space:
-        target = math.erf((R_min - bell_center) / sigma) + u * norm
-        # Invert the erf to get:
-        r = bell_center + sigma * math.erfc(target)
-        return r
+def spawn_powerup_bell(center, radius, margin: tuple, pos_cdf, obstacles=None, max_attempts=1000):
+    def sample_pos(pos_cdf):
+        rnd = random.random()
+        for c in pos_cdf:
+            if rnd < c:
+                return c
 
     def in_any_obstacle(x, y):
         """Return True if (x,y) falls inside any obstacle's exclusion circle."""
         for obs in obstacles:
-            exclusion_radius = max(obs["width"], obs["height"]) / 2.0
+            exclusion_radius = max(obs["width"], obs["height"]) * 1.05
             if math.hypot(x - obs["x"], y - obs["y"]) < exclusion_radius:
                 return True
         return False
 
     for _ in range(max_attempts):
-        r = sample_r()
-        theta = random.random() * 2 * math.pi
-        x = r * math.cos(theta)
-        y = r * math.sin(theta)
+        # Generate a random magnitude in [0; 1] following a gaussian distribution
+        u_r = sample_pos(pos_cdf)
+
+        # Map the generated magnitude to [in_margin; radius - (in_margin + out_margin)]
+        r = margin[0] + (radius - margin[0] - margin[1]) * u_r
+
+        # Generates a ranomd angle to form a point in polar coordinates
+        theta = random.random() * math.pi * 2.0
+
+        x = r * math.cos(theta) + center[0]
+        y = r * math.sin(theta) + center[1]
         if not in_any_obstacle(x, y):
             return x, y
 

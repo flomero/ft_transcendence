@@ -7,7 +7,7 @@ class MultiplayerPong(GameBase):
 
     name = "multiplayer_pong"
 
-    def __init__(self, player_count=4, modifiers=None, goal_objective=7, game_duration=300):
+    def __init__(self, player_count=4, modifiers=None):
         super().__init__(modifiers)
 
         # Players & related
@@ -16,14 +16,11 @@ class MultiplayerPong(GameBase):
         self.results = [0] * player_count
         self.last_player_hit = None
 
-        # Game modifiers related
-        self.goal_objective = goal_objective   # Used by the goal limited modifier, else useless (time limited game)
-        self.game_duration = game_duration     # Used by the time limited modifier, else useless (goal limited game)
-
         # Game objects -> w/ collisions
         self.ball = None
         self.walls = None
         self.player_paddles = None
+        self.power_ups = None
 
     def update(self):
         """Calulcate the next game state"""

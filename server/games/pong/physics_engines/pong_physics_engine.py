@@ -6,40 +6,52 @@ class PongPhysicsEngine:
     @staticmethod
     def do_collision_check(ball, game):
         """Moves the ball while handling precise collision resolution."""
+
+        def get_closest_collision(collisions):
+            min_index, min_value = -1, math.inf
+
+            for k, collision in enumerate(collisions):
+                if not collision:
+                    continue
+
+                if collision["distance"] < min_value:
+                    min_value = collision["distance"]
+                    min_index = k
+
+            return collisions[min_index]
+
         remaining_distance = ball["speed"]
         loop_counter = 0
 
         while remaining_distance > EPSILON:
-            paddle_collision = PongPhysicsEngine.detect_collision(ball, remaining_distance, game.player_paddles, True)
-            wall_collision = PongPhysicsEngine.detect_collision(ball, remaining_distance, game.walls, False)
+            paddle_collision = PongPhysicsEngine.detect_collision(ball, remaining_distance, game.player_paddles, "paddle")
+            wall_collision = PongPhysicsEngine.detect_collision(ball, remaining_distance, game.walls, "wall")
+
+            power_up_collision = None if not game.power_ups else PongPhysicsEngine.detect_collision(ball, remaining_distance, game.power_ups, "power_up")
 
             # Determine the closest collision
-            collision = None
-            # print(f"\nball pos: {(ball["x"], ball["y"])}")
-            # print(f"  |- collision: {collision}")
-            if paddle_collision and (not wall_collision or paddle_collision["distance"] < wall_collision["distance"]):
-                collision = paddle_collision
-            elif wall_collision:
-                collision = wall_collision
-
+            collision = get_closest_collision([paddle_collision, wall_collision, power_up_collision])
 
             if collision:
                 travel_distance = collision["distance"]
                 ball["x"] += round(ball["dx"] * travel_distance, ndigits=2)
                 ball["y"] += round(ball["dy"] * travel_distance, ndigits=2)
 
-                PongPhysicsEngine.resolve_collision(ball, collision)
+                if not collision["type"] == "power_up":
+                    PongPhysicsEngine.resolve_collision(ball, collision)
 
-                # Handle modifiers
-                if collision["type"] == "paddle":
-                    game.trigger_modifiers("on_paddle_bounce", player_id=collision["object_id"])
-                elif collision["type"] == "wall":
-                    if  (collision["object_id"] % 2 == 0) and \
-                        (collision["object_id"] in range(0, 2 * game.player_count, 2)) and \
-                        game.player_paddles[(collision["object_id"] // 2)]["visible"]:  # Goal wall
-                        game.trigger_modifiers("on_goal", player_id=(collision["object_id"] // 2))
-                    else:
-                        game.trigger_modifiers("on_wall_bounce")
+                    # Handle modifiers
+                    if collision["type"] == "paddle":
+                        game.trigger_modifiers("on_paddle_bounce", player_id=collision["object_id"])
+                    elif collision["type"] == "wall":
+                        if  (collision["object_id"] % 2 == 0) and \
+                            (collision["object_id"] in range(0, 2 * game.player_count, 2)) and \
+                            game.player_paddles[(collision["object_id"] // 2)]["visible"]:  # Goal wall
+                            game.trigger_modifiers("on_goal", player_id=(collision["object_id"] // 2))
+                        else:
+                            game.trigger_modifiers("on_wall_bounce")
+                # else:
+                #     print(f"player {game.last_player_hit} took a power_up")
 
                 remaining_distance -= travel_distance
             else:
@@ -56,18 +68,21 @@ class PongPhysicsEngine:
                 break
 
     @staticmethod
-    def detect_collision(ball, distance, objects, is_paddle):
+    def detect_collision(ball, distance, objects, object_type):
         """Checks for collisions with paddles or walls."""
         closest_collision = None
 
         for i in range(len(objects)):
             if not objects[i]["visible"]:
                 continue
-            collision = PongPhysicsEngine.ball_rect_collision(ball, distance, objects[i])
+            if not object_type == "power_up":
+                collision = PongPhysicsEngine.ball_rect_collision(ball, distance, objects[i])
+            else:
+                collision = PongPhysicsEngine.ball_circle_collision(ball, distance, objects[i])
             # print(f"  |-> collision: {collision}")
             if collision and (not closest_collision or collision["distance"] < closest_collision["distance"]):
                 collision["object_id"] = i
-                collision["type"] = "paddle" if is_paddle else "wall"
+                collision["type"] = object_type
                 closest_collision = collision
 
         return closest_collision
@@ -183,18 +198,6 @@ class PongPhysicsEngine:
             # No collision detected.
             return None
 
-        # print(f"ball:")
-        # print(f"  |- pos     : {(bx, by)}")
-        # print(f"  |- dir     : {(bdx, bdy)}")
-        # print(f"  |- pos in local: {(r_bx, r_by)}")
-        # print(f"  |- dir in local: {(r_bdx, r_bdy)}")
-        # print(f"obj:")
-        # print(f"  |- pos: {(rx, ry)}")
-        # print(f"  |- angle (rad): {alpha}  | (deg): {math.degrees(alpha)}")
-        # print(f"  |- corners: {corners}")
-        # print(f"  |--> collision t: {min_t}")
-        # print(f"  |--> collision normal (global): {normal_global}\n")
-
         return {"distance": min_t, "normal": normal_global}
 
 
@@ -237,3 +240,22 @@ class PongPhysicsEngine:
         # Move the ball slightly outside the collision surface to prevent sticking
         ball["x"] += normal[0] * EPSILON * 10
         ball["y"] += normal[1] * EPSILON * 10
+
+    @staticmethod
+    def ball_circle_collision(ball, distance, obj):
+        """Computes ball-circle collision (mainly for power_ups)"""
+
+        a = ball["dx"]**2 + ball["dy"]**2
+        b = 2.0 * (ball["dx"] * (ball["x"] - obj["x"]) + ball["dy"] * (ball["y"] - obj["y"]))
+        c = (ball["x"]**2 + obj["x"]**2 - 2.0 * ball["x"] * obj["x"]) \
+            + (ball["y"]**2 + obj["y"]**2 - 2.0 * ball["y"] * obj["y"]) \
+            - (ball["size"]**2 + obj["size"]**2)
+
+        delta = b**2 - 4.0 * a * c
+        if delta < 0:
+            return None
+
+        sqrt_delta = math.sqrt(delta)
+        t = (-b - sqrt_delta) / (2.0 * a)
+        if EPSILON < t <= distance:
+            return {"distance": t}

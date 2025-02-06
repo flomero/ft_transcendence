@@ -43,7 +43,7 @@ class ModedMultiplayerPong(MultiplayerPong):
                 "y": 50 + 2.0 * sa,
                 "dx": ca,
                 "dy": sa,
-                "speed": 0,
+                "speed": 2,
                 "size": 0.75,
                 "visible": True
             }
@@ -169,12 +169,13 @@ class ModedMultiplayerPong(MultiplayerPong):
                     {
                         "x": position[0],
                         "y": position[1],
+                        "size": 0.45,
                         "object_type": self.power_ups_names[i],
                         "visible": True
                     }
                 )
 
-                print(f"Created a power_up:\n{self.power_ups[-1]}")
+                # print(f"Created a power_up:\n{self.power_ups[-1]}")
                 break
 
     def get_state_snapshot(self):
