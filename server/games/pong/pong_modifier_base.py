@@ -1,6 +1,7 @@
 
 
 class PongModifierBase:
+    name = ""
     def __init__(self):
         self.spawn_weight = 0       # used for spwan chance calculations
         self.player_id = -1         # -1 Until added to a player inventory
@@ -27,12 +28,12 @@ class PongModifierBase:
         """Called when a goal is scored."""
         pass
 
-    def on_modifier_pickup(self, game, player_id=-1):
-        """Triggers when player pickup a modifier"""
+    def on_power_up_pickup(self, game, power_up, player_id=-1):
+        """Triggers when player pickup a power_up"""
         pass
 
-    def on_modifier_pickup_overflow(self, game, player_id=-1):
-        """Triggers when player pickup a modifier, on a full modifier inventory"""
+    def on_power_up_pickup_overflow(self, game, power_up, player_id=-1):
+        """Triggers when player pickup a power_up, on a full power_up inventory"""
         pass
 
     def on_activation(self, game, player_id=-1):
@@ -41,4 +42,8 @@ class PongModifierBase:
 
     def on_game_start(self, game):
         """Called when then game starts"""
+        pass
+
+    def on_power_up_spawn(self, game, power_up):
+        """Called when a power up is spawned"""
         pass

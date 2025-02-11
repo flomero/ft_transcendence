@@ -2,7 +2,7 @@ import math
 
 EPSILON = 1e-2
 
-class PongPhysicsEngine:
+class PhysicsEngine:
     @staticmethod
     def do_collision_check(ball, game):
         """Moves the ball while handling precise collision resolution."""
@@ -24,10 +24,12 @@ class PongPhysicsEngine:
         loop_counter = 0
 
         while remaining_distance > EPSILON:
-            paddle_collision = PongPhysicsEngine.detect_collision(ball, remaining_distance, game.player_paddles, "paddle")
-            wall_collision = PongPhysicsEngine.detect_collision(ball, remaining_distance, game.walls, "wall")
+            paddle_collision = PhysicsEngine.detect_collision(ball, remaining_distance, game.player_paddles, "paddle")
+            wall_collision = PhysicsEngine.detect_collision(ball, remaining_distance, game.walls, "wall")
 
-            power_up_collision = None if not game.power_ups else PongPhysicsEngine.detect_collision(ball, remaining_distance, game.power_ups, "power_up")
+            power_up_collision = None if not game.power_ups else PhysicsEngine.detect_collision(ball, remaining_distance, game.power_ups, "power_up")
+            if not ball["do_goal"]:
+                power_up_collision = None
 
             # Determine the closest collision
             collision = get_closest_collision([paddle_collision, wall_collision, power_up_collision])
@@ -38,7 +40,7 @@ class PongPhysicsEngine:
                 ball["y"] += round(ball["dy"] * travel_distance, ndigits=2)
 
                 if not collision["type"] == "power_up":
-                    PongPhysicsEngine.resolve_collision(ball, collision)
+                    PhysicsEngine.resolve_collision(ball, collision)
 
                     # Handle modifiers
                     if collision["type"] == "paddle":
@@ -46,12 +48,15 @@ class PongPhysicsEngine:
                     elif collision["type"] == "wall":
                         if  (collision["object_id"] % 2 == 0) and \
                             (collision["object_id"] in range(0, 2 * game.player_count, 2)) and \
-                            game.player_paddles[(collision["object_id"] // 2)]["visible"]:  # Goal wall
+                            game.player_paddles[(collision["object_id"] // 2)]["visible"] and \
+                            ball["do_goal"]:  # Goal wall
                             game.trigger_modifiers("on_goal", player_id=(collision["object_id"] // 2))
                         else:
                             game.trigger_modifiers("on_wall_bounce")
-                # else:
-                #     print(f"player {game.last_player_hit} took a power_up")
+                else:
+                    # print(f"player {game.last_player_hit} took a power_up")
+                    game.trigger_modifiers("on_power_up_pickup", power_up=game.power_ups[collision["object_id"]], player_id=game.last_player_hit)
+                    game.power_ups.remove(game.power_ups[collision["object_id"]])
 
                 remaining_distance -= travel_distance
             else:
@@ -76,9 +81,9 @@ class PongPhysicsEngine:
             if not objects[i]["visible"]:
                 continue
             if not object_type == "power_up":
-                collision = PongPhysicsEngine.ball_rect_collision(ball, distance, objects[i])
+                collision = PhysicsEngine.ball_rect_collision(ball, distance, objects[i])
             else:
-                collision = PongPhysicsEngine.ball_circle_collision(ball, distance, objects[i])
+                collision = PhysicsEngine.ball_circle_collision(ball, distance, objects[i])
             # print(f"  |-> collision: {collision}")
             if collision and (not closest_collision or collision["distance"] < closest_collision["distance"]):
                 collision["object_id"] = i

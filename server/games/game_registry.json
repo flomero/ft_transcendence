@@ -22,19 +22,22 @@
       },
       "default_power_up_spawner_game_modifier": {
         "class_name": "DefaultPowerUpSpawnerGameModifier",
-        "spawn_interval_center": 15,
+        "spawn_interval_center": 5,
         "spawn_interval_deviation": 0.25
       },
       "extra_walls_movement_game_modifier": {
         "class_name": "ExtraWallsMovementGameModifier",
         "amplitude": 12,
         "speed": 0.25
+      },
+      "power_ups_tester": {
+        "class_name": "PowerUpsTester"
       }
     },
     "power_ups": {
       "invisible_ball_modifier": {
         "class_name": "InvisibleBallModifier",
-        "spawn_weight": 10.0,
+        "spawn_weight": 1.0,
         "duration": 100
       },
       "speed_boost_modifier": {
@@ -42,6 +45,13 @@
         "spawn_weight": 1.0,
         "duration": 100,
         "ramp_up_strength": 0.1
+      },
+      "multiball_modifier": {
+        "class_name": "MultiballModifier",
+        "spawn_weight": 1.0,
+        "duration": 240,
+        "split_angle_to_pi": 6.0,
+        "spawn_count_per_side": 4
       }
     }
   }

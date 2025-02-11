@@ -9,6 +9,11 @@ class PongTimeLimitedModifierBase(PongModifierBase):
         self.active = False
         self.ticks = 0              # ticks count since activation
 
+    def activate(self, game, player_id=-1):
+        self.active = True
+        self.ticks = self.duration
+        self.on_activation(game)
+
     def on_update(self, game):
         if not self.active:
             return
@@ -25,9 +30,10 @@ class PongTimeLimitedModifierBase(PongModifierBase):
 
     def on_activation(self, game):
         """Called when the modifier is activated"""
-        self.ticks = self.duration
-        self.active = True
+        # game.active_power_ups.append(self)
+        pass
 
     def on_deactivation(self, game):
         """Called when the modifier is deactivated"""
+        # game.active_power_ups.remove(self)
         pass

@@ -1,3 +1,4 @@
+import random
 from ..pong_modifier_base import PongModifierBase
 from ...game_base import GAME_REGISTRY
 
@@ -36,5 +37,15 @@ class ExtraWallsMovementGameModifier(PongModifierBase):
             }
             for wall in self.extra_walls
         ]
+
+        for i, pos in enumerate(self.positions):
+            rnd_step = random.randint(-self.amplitude + 1, self.amplitude - 1)
+            rnd_direction = 1.0 if random.random() < 0.5 else -1.0
+
+            pos["direction"] = rnd_direction
+            pos["steps"] = rnd_step
+
+            game.walls[self.first_wall + i]["x"] += pos["steps"] * self.speed * game.walls[self.first_wall + i]["nx"]
+            game.walls[self.first_wall + i]["y"] += pos["steps"] * self.speed * game.walls[self.first_wall + i]["ny"]
 
 

@@ -58,6 +58,7 @@ class GameBase():
         self.last_update_time = time.time()
         self.current_time = time.time()
         self.modifiers = modifiers
+        self.active_power_ups = []
         self.running = False
         self.tick_data = deque(maxlen=self.MAX_TICKS)
 
@@ -107,6 +108,12 @@ class GameBase():
             except AttributeError:
                 print(f"Unknown method: {method}, for modifier: {modifier}")
                 print(f"Available methods:\n  |- {dir(modifier)}")
+        for power_up in self.active_power_ups:
+            try:
+                getattr(power_up, method)(self, *args, **kwargs)
+            except AttributeError:
+                print(f"Unknown method: {method}, for power_up: {power_up}")
+                print(f"Available methods:\n  |- {dir(power_up)}")
 
 # Load registry at startup
 load_game_registry()

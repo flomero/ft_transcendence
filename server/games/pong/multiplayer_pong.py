@@ -1,5 +1,7 @@
+import math
+import random
 from games.game_base import GameBase
-from games.pong.physics_engines.pong_physics_engine import PongPhysicsEngine
+from games.physics_engine import PhysicsEngine
 
 
 class MultiplayerPong(GameBase):
@@ -17,7 +19,7 @@ class MultiplayerPong(GameBase):
         self.last_player_hit = None
 
         # Game objects -> w/ collisions
-        self.ball = None
+        self.balls = []
         self.walls = None
         self.player_paddles = None
         self.power_ups = None
@@ -25,7 +27,9 @@ class MultiplayerPong(GameBase):
     def update(self):
         """Calulcate the next game state"""
         if self.start_game:
-            PongPhysicsEngine.do_collision_check(self.ball, self)
+            for ball in self.balls:
+                if ball["do_collision"]:
+                    PhysicsEngine.do_collision_check(ball, self)
             self.trigger_modifiers('on_update')
 
     def handle_action(self, action):
@@ -42,7 +46,7 @@ class MultiplayerPong(GameBase):
         """Returns the current game state"""
         game_state = super().get_state_snapshot()
 
-        game_state["ball"] = self.ball
+        game_state["balls"] = self.balls
         game_state["player_paddles"] = self.player_paddles
         game_state["walls"] = self.walls
         return game_state
@@ -51,12 +55,21 @@ class MultiplayerPong(GameBase):
         self.ball = snapshot["ball"]
         self.player_paddles = snapshot["player_paddles"]
 
-    def reset_ball(self, direction=1):
+    def reset_ball(self):
         """Reset ball position and speed."""
-        self.ball = {
-            "x": 50,
-            "y": 50,
-            "dx": 1,
-            "dy": 0,
-            "speed": 3,
+        random_angle = random.random() * math.pi * 2.0
+        ca, sa = math.cos(random_angle), math.sin(random_angle)
+
+        # Reset all balls
+        self.balls[0] = {
+            "x": 50 + 2.0 * ca,
+            "y": 50 + 2.0 * sa,
+            "dx": ca,
+            "dy": sa,
+            "speed": 2,
+            "size": 0.75,
+            "visible": True,
+            "do_collision": True,
+            "do_goal": True
         }
+

@@ -15,6 +15,7 @@ class DefaultPowerUpSpawnerGameModifier(PongTimeLimitedModifierBase):
         self.spawn_interval_deviation = GAME_REGISTRY["pong"]["game_modifiers"][self.name]["spawn_interval_deviation"] * 30.0
 
         self.duration = random.gauss(self.spawn_interval_center, self.spawn_interval_deviation)
+        print(f"Next power_up spawn in {self.duration} ticks")
 
         self.pos_cdf = init_pos_cdf()
 
@@ -40,6 +41,7 @@ class DefaultPowerUpSpawnerGameModifier(PongTimeLimitedModifierBase):
 			)
 
         self.duration = random.gauss(self.spawn_interval_center, self.spawn_interval_deviation)
+        print(f"Next power_up spawn in {self.duration} ticks")
         self.activate(game)
 
 def init_pos_cdf(pos_center=0.6, pos_span=0.05, steps=1000):

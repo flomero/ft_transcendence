@@ -10,4 +10,4 @@ class DefaultLastHitTrackerGameModifier(PongModifierBase):
 
     def on_paddle_bounce(self, game: MultiplayerPong, player_id):
         game.last_player_hit = player_id
-        print(f"last_hit: {game.last_player_hit}")
+        # print(f"last_hit: {game.last_player_hit}")

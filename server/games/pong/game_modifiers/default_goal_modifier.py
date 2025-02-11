@@ -19,13 +19,13 @@ class DefaultGoalModifier(PongModifierBase):
             return
 
         game.player_goals[player_id] += 1
-        print("Scores:")
-        for k in range(game.player_count):
-            print(f"  |- player {k}: {game.player_goals[k]}")
-        print()
+        # print("Scores:")
+        # for k in range(game.player_count):
+        #     print(f"  |- player {k}: {game.player_goals[k]}")
+        # print()
 
         if game.player_goals[player_id] >= 3:
-            print(f"Player {player_id} lost, removing it's paddle")
+            # print(f"Player {player_id} lost, removing it's paddle")
             game.player_paddles[player_id]["visible"] = False
             game.results[player_id] = len(
                 [
@@ -34,12 +34,6 @@ class DefaultGoalModifier(PongModifierBase):
                     if paddle["visible"]
                 ]
             )
-            print(f"current results: {game.results}")
+            # print(f"current results: {game.results}")
 
-        random_angle = compute_reset_angle(game.player_count, player_id) + game.player_paddles[player_id]["alpha"]
-        ca, sa = math.cos(random_angle), math.sin(random_angle)
-
-        game.ball["x"] = 50 + 2.0 * ca
-        game.ball["y"] = 50 + 2.0 * sa
-        game.ball["dx"] = ca
-        game.ball["dy"] = sa
+        game.reset_ball()

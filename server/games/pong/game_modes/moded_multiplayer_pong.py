@@ -24,34 +24,34 @@ class ModedMultiplayerPong(MultiplayerPong):
             if power_up in self.power_ups_names
         ]
 
-        print(f"Available power ups:\n{self.available_power_ups}")
-
         self.power_ups_pdf = [
             power_up["spawn_weight"] + 0.0
             for power_up in self.available_power_ups
         ]
         self.total_power_ups_weight = sum(self.power_ups_pdf)
-        print(f"Total power_ups weights: {self.total_power_ups_weight}")
         self.power_ups = []
+        self.active_power_ups = []
         self.power_ups_cdf = []
         self.init_power_ups()
 
         random_angle = random.random() * math.pi * 2.0
         ca, sa = math.cos(random_angle), math.sin(random_angle)
-        self.ball = {
+        self.balls.append(
+            {
                 "x": 50 + 2.0 * ca,
                 "y": 50 + 2.0 * sa,
                 "dx": ca,
                 "dy": sa,
                 "speed": 2,
                 "size": 0.75,
-                "visible": True
+                "visible": True,
+                "do_collision": True,
+                "do_goal": True
             }
-        tmp = math.sqrt(self.ball["dx"]**2 + self.ball["dy"]**2)
-        self.ball["dx"] /= tmp
-        self.ball["dy"] /= tmp
-
-        # print(f"ball: {self.ball}")
+        )
+        tmp = math.sqrt(self.balls[0]["dx"]**2 + self.balls[0]["dy"]**2)
+        self.balls[0]["dx"] /= tmp
+        self.balls[0]["dy"] /= tmp
 
         wall_wdith = 2.0 * math.sin(math.pi / (2.0 * self.player_count)) * (self.WALL_DISTANCE * (1 + 1 / (player_count + 0.5)))
 
@@ -96,7 +96,6 @@ class ModedMultiplayerPong(MultiplayerPong):
             for i in range(0, 2 * self.player_count, 2)
         ]
 
-        # print(f"player paddles:")
         for i, paddle in enumerate(self.player_paddles):
             tmp = math.sqrt(paddle["x"]**2 + paddle["y"]**2)
             if tmp != 0:
@@ -108,9 +107,7 @@ class ModedMultiplayerPong(MultiplayerPong):
 
             paddle["dx"] = paddle["ny"]
             paddle["dy"] = - paddle["nx"]
-            # print(f"  |- {i}: {paddle}")
 
-        # print(f"walls:")
         for i, wall in enumerate(self.walls):
             tmp = math.sqrt(wall["x"]**2 + wall["y"]**2)
             if tmp != 0:
@@ -122,7 +119,6 @@ class ModedMultiplayerPong(MultiplayerPong):
 
             wall["dx"] = wall["ny"]
             wall["dy"] = - wall["nx"]
-            # print(f"  |- {i}: {wall}")
 
         self.walls.append(
             {
@@ -147,7 +143,6 @@ class ModedMultiplayerPong(MultiplayerPong):
             return
 
         # Normalize the Probabilistic Density Function
-        print(f"pdfs: {self.power_ups_pdf}")
         self.power_ups_pdf = [p / self.total_power_ups_weight for p in self.power_ups_pdf]
 
         # Compute the Cumulative Density Function
@@ -155,9 +150,6 @@ class ModedMultiplayerPong(MultiplayerPong):
         for p in self.power_ups_pdf:
             cumul += p
             self.power_ups_cdf.append(cumul)
-
-        print(f"normalized pdfs: {self.power_ups_pdf}")
-        print(f"  |-> cdfs: {self.power_ups_cdf}")
 
     def spawn_power_up(self, position: tuple):
         """Spawns a power_up at the designated position"""
@@ -169,20 +161,17 @@ class ModedMultiplayerPong(MultiplayerPong):
                     {
                         "x": position[0],
                         "y": position[1],
-                        "size": 0.45,
+                        "size": 1.75,
                         "object_type": self.power_ups_names[i],
                         "visible": True
                     }
                 )
-
-                # print(f"Created a power_up:\n{self.power_ups[-1]}")
+                self.trigger_modifiers("on_power_up_spawn", power_up=self.power_ups[-1])
                 break
+
 
     def get_state_snapshot(self):
         snapshot = super().get_state_snapshot()
 
         snapshot["power_ups"] = self.power_ups
-        # if len(self.power_ups) > 0:
-        #     print(f"snapshot: {snapshot}")
-
         return snapshot

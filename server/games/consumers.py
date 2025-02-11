@@ -81,7 +81,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             # if update_count > 160:
             #     break
 
-            if  self.game.ball["x"] < 0 or self.game.ball["x"] > 100 or \
-                self.game.ball["y"] < 0 or self.game.ball["y"] > 100:
+            if  self.game.balls[0]["x"] < 0 or self.game.balls[0]["x"] > 100 or \
+                self.game.balls[0]["y"] < 0 or self.game.balls[0]["y"] > 100:
                 break
         print("end of game_loop")
