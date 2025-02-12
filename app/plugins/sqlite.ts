@@ -18,4 +18,10 @@ export default fp(async (fastify) => {
   });
 
   fastify.decorate('sqlite', db);
+
+  fastify.addHook('onReady', async function () {
+    db.migrate({
+      migrationsPath: '../app/services/database/migrations'
+    });
+  });
 })
