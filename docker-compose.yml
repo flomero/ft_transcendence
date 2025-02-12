@@ -42,6 +42,8 @@ services:
       - /app/node_modules  # Prevent overwriting node_modules
     ports:
       - "3000:3000"
+    env_file:
+      - .env
     depends_on:
       vault:
         condition: service_healthy
