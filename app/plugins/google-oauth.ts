@@ -1,7 +1,7 @@
 import { FastifyPluginAsync } from 'fastify';
 import fp from 'fastify-plugin'
 import oauthPlugin from '@fastify/oauth2';
-import { OAuth2Token, OAuth2Namespace } from '@fastify/oauth2';
+import { Token, OAuth2Namespace } from '@fastify/oauth2';
 
 interface GoogleUserInfo {
     id: string;
@@ -31,7 +31,7 @@ async function getGoogleProfile(accessToken: string): Promise<GoogleUserInfo> {
 export interface JWTContent {
     id: string;
     name: string;
-    token: OAuth2Token;
+    token: Token;
 }
 
 declare module 'fastify' {
@@ -48,11 +48,15 @@ const googleOAuthPlugin: FastifyPluginAsync = async (fastify, opts) => {
                 id: process.env.GOOGLE_CLIENT_ID!,
                 secret: process.env.GOOGLE_CLIENT_SECRET!
             },
-            auth: oauthPlugin.GOOGLE_CONFIGURATION
+            auth: oauthPlugin.GOOGLE_CONFIGURATION,
         },
         scope: ['profile', 'email'],
         startRedirectPath: '/login/google',
-        callbackUri: 'http://localhost:3000/login/google/callback'
+        callbackUri: process.env.PUBLIC_URL + '/login/google/callback',
+        callbackUriParams: {
+            access_type: 'offline',
+            prompt: 'consent'
+        }
     });
 
     fastify.get('/login/google/callback', async (request, reply) => {
@@ -66,7 +70,7 @@ const googleOAuthPlugin: FastifyPluginAsync = async (fastify, opts) => {
             const jwtContent: JWTContent = {
                 id: userInfo.id,
                 name: userInfo.name,
-                token: token
+                token: token.token
             }
 
             const jwtToken = await fastify.jwt.sign(jwtContent, {
