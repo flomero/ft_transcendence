@@ -29,12 +29,11 @@ export default fp(async (fastify) => {
             if (err.code === 'FAST_JWT_EXPIRED') {
                 try {
                     const decoded = fastify.jwt.decode<JWTContent>(token);
-                    console.log('Decoded refresh token', decoded);
                     if (!decoded) {
                         throw new Error('Could not decode expired token');
                     }
 
-                    console.log('Refreshing token...');
+                    fastify.log.debug('Decoded refresh token', decoded);
                     const refreshedToken = await fastify.googleOAuth2.getNewAccessTokenUsingRefreshToken(decoded.token, {})
 
                     decoded.token.access_token = refreshedToken.token.access_token;
@@ -42,7 +41,7 @@ export default fp(async (fastify) => {
                     decoded.token.expires_in = refreshedToken.token.expires_in;
                     decoded.token.id_token = refreshedToken.token.id_token;
 
-                    console.log('Refreshed token', refreshedToken);
+                    fastify.log.debug('Refreshed token', refreshedToken);
                     const jwtContent: JWTContent = {
                         id: decoded.id,
                         name: decoded.name,
