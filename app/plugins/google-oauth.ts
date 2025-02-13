@@ -4,6 +4,7 @@ import oauthPlugin from '@fastify/oauth2';
 import { OAuth2Namespace } from '@fastify/oauth2';
 import { signJWT } from '../services/auth/jwt';
 import { getGoogleProfile } from '../services/auth/google-api';
+import { insertUserIfNotExists } from '../services/database/user';
 
 declare module 'fastify' {
     interface FastifyInstance {
@@ -37,6 +38,11 @@ const googleOAuthPlugin: FastifyPluginAsync = async (fastify, opts) => {
             if (!userInfo.verified_email) {
                 throw new Error('Google account not verified');
             }
+
+            await insertUserIfNotExists(fastify, {
+                id: userInfo.id,
+                username: userInfo.name
+            });
 
             const jwtToken = await signJWT(fastify, {
                 id: userInfo.id,

@@ -1,7 +1,4 @@
 CREATE TABLE IF NOT EXISTS users (
-	id TEXT PRIMARY KEY,
-	username TEXT NOT NULL,
-	password TEXT,
-	totptoken TEXT,
-	oauthtoken TEXT
+	id TEXT PRIMARY KEY UNIQUE,
+	username TEXT NOT NULL
 );
