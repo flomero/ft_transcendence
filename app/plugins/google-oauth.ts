@@ -1,7 +1,8 @@
 import { FastifyPluginAsync } from 'fastify';
 import fp from 'fastify-plugin'
 import oauthPlugin from '@fastify/oauth2';
-import { Token, OAuth2Namespace } from '@fastify/oauth2';
+import { OAuth2Namespace } from '@fastify/oauth2';
+import { JWTContent, signJWT } from '../services/auth/jwt';
 
 interface GoogleUserInfo {
     id: string;
@@ -26,12 +27,6 @@ async function getGoogleProfile(accessToken: string): Promise<GoogleUserInfo> {
 
     const data = await response.json();
     return data as GoogleUserInfo;
-}
-
-export interface JWTContent {
-    id: string;
-    name: string;
-    token: Token;
 }
 
 declare module 'fastify' {
@@ -73,9 +68,7 @@ const googleOAuthPlugin: FastifyPluginAsync = async (fastify, opts) => {
                 token: token.token
             }
 
-            const jwtToken = await fastify.jwt.sign(jwtContent, {
-                expiresIn: token.token.expires_in,
-            });
+            const jwtToken = await signJWT(fastify, jwtContent);
 
             reply.cookie('token', jwtToken, {
                 path: '/',

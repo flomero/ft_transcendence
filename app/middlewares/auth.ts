@@ -1,5 +1,6 @@
 import fp from 'fastify-plugin'
-import { JWTContent } from '../plugins/google-oauth';
+import { decodeJWT, verifyJWT } from '../services/auth/jwt';
+import { refreshJWT } from '../services/auth/google-oauth';
 
 declare module 'fastify' {
     interface FastifyRequest {
@@ -21,43 +22,27 @@ export default fp(async (fastify) => {
         }
 
         try {
-            const decoded = await fastify.jwt.verify<JWTContent>(token);
+            const decoded = await verifyJWT(fastify, token);
             req.userId = decoded.id;
             req.userName = decoded.name;
             req.isAuthenticated = true;
         } catch (err: any) {
             if (err.code === 'FAST_JWT_EXPIRED') {
+                fastify.log.debug('Token expired, refreshing...');
                 try {
-                    const decoded = fastify.jwt.decode<JWTContent>(token);
+                    const decoded = await decodeJWT(fastify, token);
                     if (!decoded) {
                         throw new Error('Could not decode expired token');
                     }
 
-                    fastify.log.debug('Decoded refresh token', decoded);
-                    const refreshedToken = await fastify.googleOAuth2.getNewAccessTokenUsingRefreshToken(decoded.token, {})
+                    const refreshedJWT = await refreshJWT(fastify, decoded);
 
-                    decoded.token.access_token = refreshedToken.token.access_token;
-                    decoded.token.expires_at = refreshedToken.token.expires_at;
-                    decoded.token.expires_in = refreshedToken.token.expires_in;
-                    decoded.token.id_token = refreshedToken.token.id_token;
-
-                    fastify.log.debug('Refreshed token', refreshedToken);
-                    const jwtContent: JWTContent = {
-                        id: decoded.id,
-                        name: decoded.name,
-                        token: decoded.token
-                    }
-        
-                    const jwtToken = await fastify.jwt.sign(jwtContent, {
-                        expiresIn: decoded.token.expires_in,
-                    });
-        
-                    reply.cookie('token', jwtToken, {
+                    reply.cookie('token', refreshedJWT, {
                         path: '/',
                     });
 
                     req.userId = decoded.id;
-                    req.userName = decoded.name; 
+                    req.userName = decoded.name;
                     req.isAuthenticated = true;
                 } catch (err) {
                     fastify.log.error('Error refreshing token: ', err);
