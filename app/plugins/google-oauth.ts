@@ -1,7 +1,7 @@
 import { FastifyPluginAsync } from 'fastify';
 import fp from 'fastify-plugin'
 import oauthPlugin from '@fastify/oauth2';
-import { OAuth2Token } from '@fastify/oauth2';
+import { OAuth2Token, OAuth2Namespace } from '@fastify/oauth2';
 
 interface GoogleUserInfo {
     id: string;
@@ -34,6 +34,12 @@ export interface JWTContent {
     token: OAuth2Token;
 }
 
+declare module 'fastify' {
+    interface FastifyInstance {
+        googleOAuth2: OAuth2Namespace;
+    }
+}
+
 const googleOAuthPlugin: FastifyPluginAsync = async (fastify, opts) => {
     fastify.register(oauthPlugin, {
         name: 'googleOAuth2',
@@ -51,7 +57,7 @@ const googleOAuthPlugin: FastifyPluginAsync = async (fastify, opts) => {
 
     fastify.get('/login/google/callback', async (request, reply) => {
         try {
-            const token = await (fastify as any).googleOAuth2.getAccessTokenFromAuthorizationCodeFlow(request) as OAuth2Token;
+            const token = await fastify.googleOAuth2.getAccessTokenFromAuthorizationCodeFlow(request);
             const userInfo = await getGoogleProfile(token.token.access_token);
             if (!userInfo.verified_email) {
                 throw new Error('Google account not verified');
