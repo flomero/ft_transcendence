@@ -31,6 +31,13 @@ const app: FastifyPluginAsync<AppOptions> = async (
     dir: join(__dirname, 'routes'),
     options: opts
   })
+
+  // This loads all plugins defined in middlewares
+  // define your middlewares in one of these
+  void fastify.register(AutoLoad, {
+    dir: join(__dirname, 'middlewares'),
+    options: opts
+  })
 };
 
 export default app;

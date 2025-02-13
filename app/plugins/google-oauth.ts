@@ -73,7 +73,9 @@ const googleOAuthPlugin: FastifyPluginAsync = async (fastify, opts) => {
                 expiresIn: token.token.expires_in,
             });
 
-            reply.cookie('token', jwtToken);
+            reply.cookie('token', jwtToken, {
+                path: '/',
+            });
             reply.redirect('/');
         } catch (error) {
             fastify.log.error(error);
