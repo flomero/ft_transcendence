@@ -8,7 +8,7 @@ export interface JWTContent {
 
 export async function signJWT(fastify: FastifyInstance, content: JWTContent): Promise<string> {
     return await fastify.jwt.sign(content, {
-        expiresIn: '1s',
+        expiresIn: content.token.expires_in,
     });
 }
 
