@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS turnaments (
+	id TEXT PRIMARY KEY UNIQUE,
+	status TEXT NOT NULL,
+	mode TEXT NOT NULL
+);
