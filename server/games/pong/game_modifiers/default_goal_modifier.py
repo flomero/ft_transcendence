@@ -19,13 +19,8 @@ class DefaultGoalModifier(PongModifierBase):
             return
 
         game.player_goals[player_id] += 1
-        # print("Scores:")
-        # for k in range(game.player_count):
-        #     print(f"  |- player {k}: {game.player_goals[k]}")
-        # print()
 
         if game.player_goals[player_id] >= 3:
-            # print(f"Player {player_id} lost, removing it's paddle")
             game.player_paddles[player_id]["visible"] = False
             game.results[player_id] = len(
                 [
@@ -34,6 +29,5 @@ class DefaultGoalModifier(PongModifierBase):
                     if paddle["visible"]
                 ]
             )
-            # print(f"current results: {game.results}")
 
         game.reset_ball()

@@ -19,8 +19,11 @@ def load_game_registry():
     for game, data in GAME_REGISTRY.items():
         # Load game modes
         GAME_REGISTRY[game]["game_modes"] = {
-            game_mode: import_class(f"games.{game}.game_modes.{game_mode}", class_name)
-            for game_mode, class_name in data["game_modes"].items()
+            game_mode: {
+                "class": import_class(f"games.{game}.game_modes.{game_mode}", mod_data["class_name"]),
+                **mod_data
+            }
+            for game_mode, mod_data in data["game_modes"].items()
         }
 
         # Load game_modifiers with additional metadata

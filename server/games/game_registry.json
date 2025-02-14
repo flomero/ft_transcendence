@@ -1,11 +1,36 @@
 {
   "pong": {
     "game_modes": {
-      "vanilla_duel_pong": "VanillaDuelPong",
-      "moded_duel_pong": "ModedDuelPong",
-      "vanilla_multiplayer_pong": "VanillaMultiplayerPong",
-      "moded_multiplayer_pong": "ModedMultiplayerPong"
+      "vanilla_duel_pong": {
+        "class_name": "VanillaDuelPong",
+        "arena_settings": {}
+      },
+      "moded_duel_pong": {
+        "class_name": "ModedDuelPong",
+        "arena_settings": {}
+      },
+      "vanilla_multiplayer_pong": {
+        "class_name": "VanillaMultiplayerPong",
+        "arena_settings": {
+          "wall_distance": 50,
+          "wall_height": 2,
+          "paddle_offset": 2.5,
+          "paddle_coverage": 25,
+          "paddle_height": 1
+        }
+      },
+      "moded_multiplayer_pong": {
+        "class_name": "ModedMultiplayerPong",
+        "arena_settings": {
+          "wall_distance": 50,
+          "wall_height": 2,
+          "paddle_offset": 2.5,
+          "paddle_coverage": 25,
+          "paddle_height": 1
+        }
+      }
     },
+
     "game_modifiers": {
       "default_goal_modifier": {
         "class_name": "DefaultGoalModifier"
@@ -34,6 +59,7 @@
         "class_name": "PowerUpsTester"
       }
     },
+
     "power_ups": {
       "invisible_ball_modifier": {
         "class_name": "InvisibleBallModifier",

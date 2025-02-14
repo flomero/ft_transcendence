@@ -8,14 +8,20 @@ class ModedMultiplayerPong(MultiplayerPong):
 
     name = "moded_multiplayer_pong"
 
-    WALL_HEIGHT = 2
-    WALL_DISTANCE = 50  # Distance from the center to walls
-    PADDLE_OFFSET = 2 + WALL_HEIGHT / 2.0   # Gap between paddle and wall
-    PADDLE_PERCENT = 25  # percentage of the goal the paddle should cover
-    PADDLE_HEIGHT = 1  # Paddle height
+    # WALL_HEIGHT = 2
+    # WALL_DISTANCE = 50  # Distance from the center to walls
+    # PADDLE_OFFSET = 2 + WALL_HEIGHT / 2.0   # Gap between paddle and wall
+    # PADDLE_PERCENT = 25  # percentage of the goal the paddle should cover
+    # PADDLE_HEIGHT = 1  # Paddle height
 
     def __init__(self, player_count=4, modifiers=[], power_ups=[]):
         super().__init__(player_count, modifiers, power_ups)
+
+        self.wall_distance = GAME_REGISTRY["pong"]["game_modes"][self.name]["arena_settings"]["wall_distance"]
+        self.wall_height = GAME_REGISTRY["pong"]["game_modes"][self.name]["arena_settings"]["wall_height"]
+        self.paddle_offset = GAME_REGISTRY["pong"]["game_modes"][self.name]["arena_settings"]["paddle_offset"] + self.wall_height / 2.0
+        self.paddle_coverage = GAME_REGISTRY["pong"]["game_modes"][self.name]["arena_settings"]["paddle_coverage"]
+        self.paddle_height = GAME_REGISTRY["pong"]["game_modes"][self.name]["arena_settings"]["paddle_height"]
 
         random_angle = random.random() * math.pi * 2.0
         ca, sa = math.cos(random_angle), math.sin(random_angle)
@@ -36,16 +42,16 @@ class ModedMultiplayerPong(MultiplayerPong):
         self.balls[0]["dx"] /= tmp
         self.balls[0]["dy"] /= tmp
 
-        wall_wdith = 2.0 * math.sin(math.pi / (2.0 * self.player_count)) * (self.WALL_DISTANCE * (1 + 1 / (player_count + 0.5)))
+        wall_wdith = 2.0 * math.sin(math.pi / (2.0 * self.player_count)) * (self.wall_distance * (1 + 1 / (player_count + 0.5)))
 
         # Create walls (2 * player count) forming a regular polygon
         self.walls = [
             {
-                "x": round((self.WALL_DISTANCE - (self.WALL_HEIGHT * ((i) % 2) * 1.0)) * math.cos(math.pi * i / self.player_count + math.pi), ndigits=3),
-                "y": round((self.WALL_DISTANCE - (self.WALL_HEIGHT * ((i) % 2) * 1.0)) * math.sin(math.pi * i / self.player_count + math.pi), ndigits=3),
+                "x": round((self.wall_distance - (self.wall_height * ((i) % 2) * 1.0)) * math.cos(math.pi * i / self.player_count + math.pi), ndigits=3),
+                "y": round((self.wall_distance - (self.wall_height * ((i) % 2) * 1.0)) * math.sin(math.pi * i / self.player_count + math.pi), ndigits=3),
                 "alpha": round(math.pi + math.pi * i / self.player_count, ndigits=3),
                 "width": wall_wdith,  # Long enough to form a closed arena
-                "height": self.WALL_HEIGHT,  # Thin walls
+                "height": self.wall_height,  # Thin walls
                 "visible": True
             }
             for i in range(2 * self.player_count)
@@ -54,26 +60,26 @@ class ModedMultiplayerPong(MultiplayerPong):
         if self.player_count > 2: # Adds a small wall in between players to provide more bounces
             self.walls += [
                 {
-                    "x": round((self.WALL_DISTANCE * 3.0 / 5.0) * math.cos(math.pi * (i + 1.0) / self.player_count + math.pi), ndigits=3),
-                    "y": round((self.WALL_DISTANCE * 3.0 / 5.0) * math.sin(math.pi * (i + 1.0) / self.player_count + math.pi), ndigits=3),
+                    "x": round((self.wall_distance * 3.0 / 5.0) * math.cos(math.pi * (i + 1.0) / self.player_count + math.pi), ndigits=3),
+                    "y": round((self.wall_distance * 3.0 / 5.0) * math.sin(math.pi * (i + 1.0) / self.player_count + math.pi), ndigits=3),
                     "alpha": round(math.pi + math.pi * (i + 1.0) / self.player_count, ndigits=3),
-                    "width": self.WALL_HEIGHT / 2.5,
+                    "width": self.wall_height / 2.5,
                     "height": wall_wdith / 6.5,  # Thin walls
                     "visible": True
                 }
                 for i in range(0, 2 * self.player_count, 2)
             ]
 
-        paddle_width = (self.WALL_DISTANCE - self.PADDLE_OFFSET) * math.sin(math.pi / self.player_count) * (self.PADDLE_PERCENT / 100.0)
+        paddle_width = (self.wall_distance - self.paddle_offset) * math.sin(math.pi / self.player_count) * (self.paddle_coverage / 100.0)
 
         # Create paddles centered on every other wall
         self.player_paddles = [
             {
-                "x": round((self.WALL_DISTANCE - (self.PADDLE_OFFSET)) * math.cos(math.pi * i / self.player_count + math.pi), ndigits=3),
-                "y": round((self.WALL_DISTANCE - (self.PADDLE_OFFSET)) * math.sin(math.pi * i / self.player_count + math.pi), ndigits=3),
+                "x": round((self.wall_distance - (self.paddle_offset)) * math.cos(math.pi * i / self.player_count + math.pi), ndigits=3),
+                "y": round((self.wall_distance - (self.paddle_offset)) * math.sin(math.pi * i / self.player_count + math.pi), ndigits=3),
                 "alpha": round(math.pi + math.pi * i / self.player_count, ndigits=3),
                 "width": paddle_width,
-                "height": self.PADDLE_HEIGHT,
+                "height": self.paddle_height,
                 "visible": True
             }
             for i in range(0, 2 * self.player_count, 2)
@@ -85,8 +91,8 @@ class ModedMultiplayerPong(MultiplayerPong):
                 paddle["nx"] = - paddle["x"] / tmp
                 paddle["ny"] = - paddle["y"] / tmp
 
-            paddle["x"] += self.WALL_DISTANCE
-            paddle["y"] += self.WALL_DISTANCE
+            paddle["x"] += self.wall_distance
+            paddle["y"] += self.wall_distance
 
             paddle["dx"] = paddle["ny"]
             paddle["dy"] = - paddle["nx"]
@@ -97,16 +103,16 @@ class ModedMultiplayerPong(MultiplayerPong):
                 wall["nx"] = - wall["x"] / tmp
                 wall["ny"] = - wall["y"] / tmp
 
-            wall["x"] += self.WALL_DISTANCE
-            wall["y"] += self.WALL_DISTANCE
+            wall["x"] += self.wall_distance
+            wall["y"] += self.wall_distance
 
             wall["dx"] = wall["ny"]
             wall["dy"] = - wall["nx"]
 
         self.walls.append(
             {
-                "x": self.WALL_DISTANCE,
-                "y": self.WALL_DISTANCE,
+                "x": self.wall_distance,
+                "y": self.wall_distance,
                 "alpha": math.pi / 4.0,
                 "width": 1.0,
                 "height": 1.0,

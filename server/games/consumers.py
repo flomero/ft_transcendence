@@ -30,10 +30,10 @@ class GameConsumer(AsyncWebsocketConsumer):
         mode_name = data.get("game_mode", f"multiplayer_{game_name}")
         game_modes = GAME_REGISTRY[game_name]["game_modes"]
         if mode_name in game_modes:
-            self.game_class = game_modes[mode_name]
+            self.game_class = game_modes[mode_name]["class"]
         else:
             print(f"Unknown mode: {mode_name}, defaulting to {list(game_modes.keys())[0]}")
-            self.game_class = list(game_modes.values())[0]  # Default to first variant
+            self.game_class = list(game_modes.values())[0]["class"]  # Default to first variant
 
         # Modifier Selection (with fallback to [])
         modifier_names = data.get("modifiers", [])

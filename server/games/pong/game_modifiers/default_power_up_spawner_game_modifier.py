@@ -26,9 +26,9 @@ class DefaultPowerUpSpawnerGameModifier(PongTimeLimitedModifierBase):
         """Spawns a power_up, then reactivate with a random duration"""
         try:
             random_pos = spawn_powerup_bell(
-                center=(game.WALL_DISTANCE, game.WALL_DISTANCE),
-                radius=game.WALL_DISTANCE - game.WALL_HEIGHT,
-                margin=(1.5 * game.PADDLE_OFFSET, 3.0 * (game.PADDLE_OFFSET + game.WALL_HEIGHT)),
+                center=(game.wall_distance, game.wall_distance),
+                radius=game.wall_distance - game.wall_height,
+                margin=(1.5 * game.paddle_offset, 3.0 * (game.paddle_offset + game.wall_height)),
                 pos_cdf = self.pos_cdf,
                 obstacles=game.walls[game.player_count * 2:]   # only the extra walls
             )
@@ -36,8 +36,8 @@ class DefaultPowerUpSpawnerGameModifier(PongTimeLimitedModifierBase):
             print(f"There was an error generating the position")
             random_angle = random.random() * math.pi * 2.0
             random_pos = (
-                game.WALL_DISTANCE * math.cos(random_angle),
-                game.WALL_DISTANCE * math.sin(random_angle)
+                game.wall_distance * math.cos(random_angle),
+                game.wall_distance * math.sin(random_angle)
             )
 
         game.spawn_power_up(random_pos)
