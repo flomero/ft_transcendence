@@ -1,7 +1,7 @@
 import json
 import asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
-from .game_base import GAME_REGISTRY
+from .game_registry import GAME_REGISTRY
 
 class GameConsumer(AsyncWebsocketConsumer):
     game = None
@@ -83,5 +83,5 @@ class GameConsumer(AsyncWebsocketConsumer):
 
             if  self.game.balls[0]["x"] < 0 or self.game.balls[0]["x"] > 100 or \
                 self.game.balls[0]["y"] < 0 or self.game.balls[0]["y"] > 100:
-                break
+                self.game.reset_ball()
         print("end of game_loop")

@@ -10,8 +10,8 @@ class MultiplayerPong(GameBase):
 
     name = "multiplayer_pong"
 
-    def __init__(self, player_count=4, modifiers=None):
-        super().__init__(modifiers)
+    def __init__(self, player_count=4, modifiers=[], power_ups=[]):
+        super().__init__(modifiers, power_ups)
 
         # Players & related
         self.player_count = player_count
@@ -23,7 +23,6 @@ class MultiplayerPong(GameBase):
         self.balls = []
         self.walls = None
         self.player_paddles = None
-        self.power_ups = None
 
     def update(self):
         """Calulcate the next game state"""
@@ -97,7 +96,7 @@ class MultiplayerPong(GameBase):
             paddle_collision = PhysicsEngine.detect_collision(ball, remaining_distance, self.player_paddles, "paddle")
             wall_collision = PhysicsEngine.detect_collision(ball, remaining_distance, self.walls, "wall")
 
-            power_up_collision = None if not self.power_ups else PhysicsEngine.detect_collision(ball, remaining_distance, self.power_ups, "power_up")
+            power_up_collision = None if not self.power_up_manager.spawned_power_ups else PhysicsEngine.detect_collision(ball, remaining_distance, self.power_up_manager.spawned_power_ups, "power_up")
             if not ball["do_goal"]:
                 power_up_collision = None
 
@@ -125,8 +124,8 @@ class MultiplayerPong(GameBase):
                             self.trigger_modifiers("on_wall_bounce")
                 else:
                     # print(f"player {self.last_player_hit} took a power_up")
-                    self.trigger_modifiers("on_power_up_pickup", power_up=self.power_ups[collision["object_id"]], player_id=self.last_player_hit)
-                    self.power_ups.remove(self.power_ups[collision["object_id"]])
+                    self.trigger_modifiers("on_power_up_pickup", power_up=self.power_up_manager.spawned_power_ups[collision["object_id"]], player_id=self.last_player_hit)
+                    self.power_up_manager.spawned_power_ups.remove(self.power_up_manager.spawned_power_ups[collision["object_id"]])
 
                 remaining_distance -= travel_distance
             else:

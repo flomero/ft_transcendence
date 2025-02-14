@@ -30,10 +30,8 @@ class PongTimeLimitedModifierBase(PongModifierBase):
 
     def on_activation(self, game):
         """Called when the modifier is activated"""
-        # game.active_power_ups.append(self)
         pass
 
     def on_deactivation(self, game):
         """Called when the modifier is deactivated"""
-        # game.active_power_ups.remove(self)
         pass

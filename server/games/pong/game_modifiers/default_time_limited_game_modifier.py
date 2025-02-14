@@ -1,6 +1,6 @@
 from ..pong_time_limited_modifier_base import PongTimeLimitedModifierBase
 from ..multiplayer_pong import MultiplayerPong
-from ...game_base import GAME_REGISTRY
+from ...game_registry import GAME_REGISTRY
 
 
 class DefaultTimeLimitedGameModifier(PongTimeLimitedModifierBase):

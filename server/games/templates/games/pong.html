@@ -130,7 +130,7 @@
         // Draw the power_ups
         gameState.power_ups?.forEach((power_up) => {
           if (power_up.visible) {
-            switch (power_up.object_type) {
+            switch (power_up.type) {
               case "speed_boost_modifier":
                 ctx.fillStyle = "red";
                 break;

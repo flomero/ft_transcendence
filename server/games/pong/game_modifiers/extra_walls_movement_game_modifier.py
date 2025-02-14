@@ -1,6 +1,6 @@
 import random
 from ..pong_modifier_base import PongModifierBase
-from ...game_base import GAME_REGISTRY
+from ...game_registry import GAME_REGISTRY
 
 
 class ExtraWallsMovementGameModifier(PongModifierBase):

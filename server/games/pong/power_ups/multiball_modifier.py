@@ -1,7 +1,7 @@
 import math
 import random
 from ..pong_time_limited_modifier_base import PongTimeLimitedModifierBase
-from ...game_base import GAME_REGISTRY
+from ...game_registry import GAME_REGISTRY
 
 
 class MultiballModifier(PongTimeLimitedModifierBase):
@@ -17,9 +17,8 @@ class MultiballModifier(PongTimeLimitedModifierBase):
 
         self.new_balls = []
 
-    def on_update(self, game):
-        super().on_update(game)
-        print(f"{self.ticks} / {self.duration}")
+    # def on_update(self, game):
+    #     super().on_update(game)
 
     def on_activation(self, game):
         """Splits the ball into several balls with different angles.
@@ -49,12 +48,7 @@ class MultiballModifier(PongTimeLimitedModifierBase):
         og_ball["dy"] = math.sin(chosen_angle)
         # The original ball should still be able to score, so we leave its do_goal flag untouched.
 
-        print(f"angles: {len(angles)}")
-        for k, angle in enumerate(angles):
-            print(f"  |- {k}: {angle}")
-        print()
         # Create extra balls for each of the other angles.
-
         self.new_balls = [
             {
                 "x": og_ball["x"],
@@ -77,5 +71,5 @@ class MultiballModifier(PongTimeLimitedModifierBase):
         for ball in self.new_balls:
             if ball in game.balls:
                 game.balls.remove(ball)
-        game.active_power_ups.remove(self)
+        game.power_up_manager.active_power_ups.remove(self)
 
