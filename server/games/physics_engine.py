@@ -3,74 +3,6 @@ import math
 EPSILON = 1e-2
 
 class PhysicsEngine:
-    @staticmethod
-    def do_collision_check(ball, game):
-        """Moves the ball while handling precise collision resolution."""
-
-        def get_closest_collision(collisions):
-            min_index, min_value = -1, math.inf
-
-            for k, collision in enumerate(collisions):
-                if not collision:
-                    continue
-
-                if collision["distance"] < min_value:
-                    min_value = collision["distance"]
-                    min_index = k
-
-            return collisions[min_index]
-
-        remaining_distance = ball["speed"]
-        loop_counter = 0
-
-        while remaining_distance > EPSILON:
-            paddle_collision = PhysicsEngine.detect_collision(ball, remaining_distance, game.player_paddles, "paddle")
-            wall_collision = PhysicsEngine.detect_collision(ball, remaining_distance, game.walls, "wall")
-
-            power_up_collision = None if not game.power_ups else PhysicsEngine.detect_collision(ball, remaining_distance, game.power_ups, "power_up")
-            if not ball["do_goal"]:
-                power_up_collision = None
-
-            # Determine the closest collision
-            collision = get_closest_collision([paddle_collision, wall_collision, power_up_collision])
-
-            if collision:
-                travel_distance = collision["distance"]
-                ball["x"] += round(ball["dx"] * travel_distance, ndigits=2)
-                ball["y"] += round(ball["dy"] * travel_distance, ndigits=2)
-
-                if not collision["type"] == "power_up":
-                    PhysicsEngine.resolve_collision(ball, collision)
-
-                    # Handle modifiers
-                    if collision["type"] == "paddle":
-                        game.trigger_modifiers("on_paddle_bounce", player_id=collision["object_id"])
-                    elif collision["type"] == "wall":
-                        if  (collision["object_id"] % 2 == 0) and \
-                            (collision["object_id"] in range(0, 2 * game.player_count, 2)) and \
-                            game.player_paddles[(collision["object_id"] // 2)]["visible"] and \
-                            ball["do_goal"]:  # Goal wall
-                            game.trigger_modifiers("on_goal", player_id=(collision["object_id"] // 2))
-                        else:
-                            game.trigger_modifiers("on_wall_bounce")
-                else:
-                    # print(f"player {game.last_player_hit} took a power_up")
-                    game.trigger_modifiers("on_power_up_pickup", power_up=game.power_ups[collision["object_id"]], player_id=game.last_player_hit)
-                    game.power_ups.remove(game.power_ups[collision["object_id"]])
-
-                remaining_distance -= travel_distance
-            else:
-                # Move ball normally if no collision
-                ball["x"] += round(ball["dx"] * remaining_distance, ndigits=2)
-                ball["y"] += round(ball["dy"] * remaining_distance, ndigits=2)
-                break
-
-            # print(f"Stuck in do_collision_check: {loop_counter}")
-            # print(f"  |- remaining_distance: {remaining_distance}")
-            # print(f"  |- collision: {collision}\n")
-            loop_counter += 1
-            if loop_counter > (ball["speed"] * 2.0) + 1:
-                break
 
     @staticmethod
     def detect_collision(ball, distance, objects, object_type):
@@ -84,7 +16,6 @@ class PhysicsEngine:
                 collision = PhysicsEngine.ball_rect_collision(ball, distance, objects[i])
             else:
                 collision = PhysicsEngine.ball_circle_collision(ball, distance, objects[i])
-            # print(f"  |-> collision: {collision}")
             if collision and (not closest_collision or collision["distance"] < closest_collision["distance"]):
                 collision["object_id"] = i
                 collision["type"] = object_type
@@ -222,7 +153,6 @@ class PhysicsEngine:
             norm_length = math.sqrt(normal_x**2 + normal_y**2)
             normal = (normal_x / norm_length, normal_y / norm_length)
 
-        # print(f"compute_collision called: distance: {t}, normal: {normal}")
         return {"distance": t, "normal": normal}
 
     @staticmethod
@@ -234,8 +164,6 @@ class PhysicsEngine:
         dot_product = 2 * (ball["dx"] * normal[0] + ball["dy"] * normal[1])
         ball["dx"] -= dot_product * normal[0]
         ball["dy"] -= dot_product * normal[1]
-
-        # print(f"new ball direction: {ball}")
 
         # Normalize direction
         speed = math.sqrt(ball["dx"]**2 + ball["dy"]**2)
