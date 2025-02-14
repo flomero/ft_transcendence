@@ -83,5 +83,5 @@ class GameConsumer(AsyncWebsocketConsumer):
 
             if  self.game.balls[0]["x"] < 0 or self.game.balls[0]["x"] > 100 or \
                 self.game.balls[0]["y"] < 0 or self.game.balls[0]["y"] > 100:
-                self.game.reset_ball()
+                self.game.reset_ball(ball_id=0)
         print("end of game_loop")

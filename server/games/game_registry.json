@@ -3,11 +3,19 @@
     "game_modes": {
       "vanilla_duel_pong": {
         "class_name": "VanillaDuelPong",
-        "arena_settings": {}
+        "arena_settings": {},
+        "default_ball_settings": {
+          "speed": 2.0,
+          "size": 0.75
+        }
       },
       "moded_duel_pong": {
         "class_name": "ModedDuelPong",
-        "arena_settings": {}
+        "arena_settings": {},
+        "default_ball_settings": {
+          "speed": 2.0,
+          "size": 0.75
+        }
       },
       "vanilla_multiplayer_pong": {
         "class_name": "VanillaMultiplayerPong",
@@ -17,6 +25,10 @@
           "paddle_offset": 2.5,
           "paddle_coverage": 25,
           "paddle_height": 1
+        },
+        "default_ball_settings": {
+          "speed": 2.0,
+          "size": 0.75
         }
       },
       "moded_multiplayer_pong": {
@@ -27,6 +39,10 @@
           "paddle_offset": 2.5,
           "paddle_coverage": 25,
           "paddle_height": 1
+        },
+        "default_ball_settings": {
+          "speed": 2.0,
+          "size": 0.75
         }
       }
     },

@@ -55,7 +55,7 @@ class MultiplayerPong(GameBase):
         self.ball = snapshot["ball"]
         self.player_paddles = snapshot["player_paddles"]
 
-    def reset_ball(self):
+    def reset_ball(self, ball_id=-1):
         """Reset ball position and speed."""
         random_angle = random.random() * math.pi * 2.0
         ca, sa = math.cos(random_angle), math.sin(random_angle)

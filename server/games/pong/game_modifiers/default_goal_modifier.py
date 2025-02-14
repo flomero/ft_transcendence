@@ -30,4 +30,4 @@ class DefaultGoalModifier(PongModifierBase):
                 ]
             )
 
-        game.reset_ball()
+        game.reset_ball(ball_id=0)

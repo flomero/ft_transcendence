@@ -8,12 +8,6 @@ class ModedMultiplayerPong(MultiplayerPong):
 
     name = "moded_multiplayer_pong"
 
-    # WALL_HEIGHT = 2
-    # WALL_DISTANCE = 50  # Distance from the center to walls
-    # PADDLE_OFFSET = 2 + WALL_HEIGHT / 2.0   # Gap between paddle and wall
-    # PADDLE_PERCENT = 25  # percentage of the goal the paddle should cover
-    # PADDLE_HEIGHT = 1  # Paddle height
-
     def __init__(self, player_count=4, modifiers=[], power_ups=[]):
         super().__init__(player_count, modifiers, power_ups)
 
@@ -23,6 +17,9 @@ class ModedMultiplayerPong(MultiplayerPong):
         self.paddle_coverage = GAME_REGISTRY["pong"]["game_modes"][self.name]["arena_settings"]["paddle_coverage"]
         self.paddle_height = GAME_REGISTRY["pong"]["game_modes"][self.name]["arena_settings"]["paddle_height"]
 
+        self.default_ball_speed = GAME_REGISTRY["pong"]["game_modes"][self.name]["default_ball_settings"]["speed"]
+        self.default_ball_size = GAME_REGISTRY["pong"]["game_modes"][self.name]["default_ball_settings"]["size"]
+
         random_angle = random.random() * math.pi * 2.0
         ca, sa = math.cos(random_angle), math.sin(random_angle)
         self.balls.append(
@@ -31,8 +28,8 @@ class ModedMultiplayerPong(MultiplayerPong):
                 "y": 50 + 2.0 * sa,
                 "dx": ca,
                 "dy": sa,
-                "speed": 2,
-                "size": 0.75,
+                "speed": self.default_ball_speed,
+                "size": self.default_ball_size,
                 "visible": True,
                 "do_collision": True,
                 "do_goal": True
@@ -129,3 +126,34 @@ class ModedMultiplayerPong(MultiplayerPong):
 
         snapshot["power_ups"] = self.power_up_manager.spawned_power_ups
         return snapshot
+
+    def reset_ball(self, ball_id=-1):
+        random_angle = random.random() * math.pi * 2.0
+        ca, sa = math.cos(random_angle), math.sin(random_angle)
+
+        if not ball_id in range(len(self.balls)):
+            self.balls = [
+                {
+                    "x": self.wall_distance + self.paddle_offset * ca,
+                    "y": self.wall_distance + self.paddle_offset * sa,
+                    "dx": ca,
+                    "dy": sa,
+                    "speed": self.default_ball_speed,
+                    "size": self.default_ball_size,
+                    "visible": True,
+                    "do_collision": True,
+                    "do_goal": True
+                }
+            ]
+        else:
+            self.balls[ball_id] = {
+                    "x": self.wall_distance + self.paddle_offset * ca,
+                    "y": self.wall_distance + self.paddle_offset * sa,
+                    "dx": ca,
+                    "dy": sa,
+                    "speed": self.default_ball_speed,
+                    "size": self.default_ball_size,
+                    "visible": True,
+                    "do_collision": True,
+                    "do_goal": True
+                }
