@@ -41,7 +41,7 @@
           "paddle_height": 1
         },
         "default_ball_settings": {
-          "speed": 2.0,
+          "speed": 2.15,
           "size": 0.75
         }
       }
@@ -85,8 +85,9 @@
       "speed_boost_modifier": {
         "class_name": "SpeedBoostModifier",
         "spawn_weight": 1.0,
-        "duration": 100,
-        "ramp_up_strength": 0.1
+        "duration": 60,
+        "ramp_up_strength": 0.1,
+        "ramp_up_frequency": 15
       },
       "multiball_modifier": {
         "class_name": "MultiballModifier",

@@ -71,5 +71,6 @@ class MultiballModifier(PongTimeLimitedModifierBase):
         for ball in self.new_balls:
             if ball in game.balls:
                 game.balls.remove(ball)
-        game.power_up_manager.active_power_ups.remove(self)
+        if self in game.power_up_manager.active_power_ups:
+            game.power_up_manager.active_power_ups.remove(self)
 
