@@ -6,13 +6,13 @@ from .power_up_manager import PowerUpManager
 class GameBase():
     MAX_TICKS = 100     # If a client is more than MAX_TICKS ticks behind the server -> disconnect
 
-    def __init__(self, modifiers=[], power_ups=[]):
+    def __init__(self, game_name, game_mode, modifiers=[], power_ups=[]):
         self.last_update_time = time.time()
         self.current_time = time.time()
         self.modifiers = modifiers
         self.running = False
         self.tick_data = deque(maxlen=self.MAX_TICKS)
-        self.power_up_manager = PowerUpManager(power_ups)
+        self.power_up_manager = PowerUpManager(power_ups, game_name, game_mode)
 
     def update(self):
         """Advances the game by 1 tick"""

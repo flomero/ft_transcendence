@@ -10,8 +10,8 @@ class MultiplayerPong(GameBase):
 
     name = "multiplayer_pong"
 
-    def __init__(self, player_count=4, modifiers=[], power_ups=[]):
-        super().__init__(modifiers, power_ups)
+    def __init__(self, game_mode, player_count=4, modifiers=[], power_ups=[]):
+        super().__init__("pong", game_mode, modifiers, power_ups)
 
         # Players & related
         self.player_count = player_count

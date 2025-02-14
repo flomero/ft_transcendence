@@ -11,8 +11,10 @@ class PowerUpManager():
     spawned_power_ups = []
     active_power_ups = []
 
-    def __init__(self, power_ups):
+    def __init__(self, power_ups, game_name, game_mode):
         self.power_up_names = power_ups
+
+        self.default_power_up_size = GAME_REGISTRY[game_name]["game_modes"][game_mode]["default_power_up_settings"]["size"]
 
         # Get the power_up from the registry
         self.available_power_ups = [
@@ -55,7 +57,7 @@ class PowerUpManager():
             {
                 "x": position[0],
                 "y": position[1],
-                "size": 2,
+                "size": self.default_power_up_size,
                 "type": power_up,
                 "visible": True
             }

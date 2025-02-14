@@ -15,6 +15,9 @@
         "default_ball_settings": {
           "speed": 2.0,
           "size": 0.75
+        },
+        "default_power_up_settings": {
+          "size": 0.8
         }
       },
       "vanilla_multiplayer_pong": {
@@ -43,6 +46,9 @@
         "default_ball_settings": {
           "speed": 2.15,
           "size": 0.75
+        },
+        "default_power_up_settings": {
+          "size": 0.8
         }
       }
     },
@@ -63,7 +69,7 @@
       },
       "default_power_up_spawner_game_modifier": {
         "class_name": "DefaultPowerUpSpawnerGameModifier",
-        "spawn_interval_center": 5,
+        "spawn_interval_center": 15,
         "spawn_interval_deviation": 0.25
       },
       "extra_walls_movement_game_modifier": {
@@ -80,7 +86,8 @@
       "invisible_ball_modifier": {
         "class_name": "InvisibleBallModifier",
         "spawn_weight": 1.0,
-        "duration": 100
+        "duration": 33,
+        "speed_boost_coef": 0.2
       },
       "speed_boost_modifier": {
         "class_name": "SpeedBoostModifier",
@@ -92,9 +99,9 @@
       "multiball_modifier": {
         "class_name": "MultiballModifier",
         "spawn_weight": 1.0,
-        "duration": 240,
-        "split_angle_to_pi": 6.0,
-        "spawn_count_per_side": 4
+        "duration": 166,
+        "split_angle_to_pi": 7.0,
+        "spawn_count_per_side": 5
       }
     }
   }

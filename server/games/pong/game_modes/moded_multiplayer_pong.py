@@ -9,7 +9,7 @@ class ModedMultiplayerPong(MultiplayerPong):
     name = "moded_multiplayer_pong"
 
     def __init__(self, player_count=4, modifiers=[], power_ups=[]):
-        super().__init__(player_count, modifiers, power_ups)
+        super().__init__(self.name, player_count, modifiers, power_ups)
 
         self.wall_distance = GAME_REGISTRY["pong"]["game_modes"][self.name]["arena_settings"]["wall_distance"]
         self.wall_height = GAME_REGISTRY["pong"]["game_modes"][self.name]["arena_settings"]["wall_height"]
@@ -20,28 +20,10 @@ class ModedMultiplayerPong(MultiplayerPong):
         self.default_ball_speed = GAME_REGISTRY["pong"]["game_modes"][self.name]["default_ball_settings"]["speed"]
         self.default_ball_size = GAME_REGISTRY["pong"]["game_modes"][self.name]["default_ball_settings"]["size"]
 
-        random_angle = random.random() * math.pi * 2.0
-        ca, sa = math.cos(random_angle), math.sin(random_angle)
-        self.balls.append(
-            {
-                "x": 50 + 2.0 * ca,
-                "y": 50 + 2.0 * sa,
-                "dx": ca,
-                "dy": sa,
-                "speed": self.default_ball_speed,
-                "size": self.default_ball_size,
-                "visible": True,
-                "do_collision": True,
-                "do_goal": True
-            }
-        )
-        tmp = math.sqrt(self.balls[0]["dx"]**2 + self.balls[0]["dy"]**2)
-        self.balls[0]["dx"] /= tmp
-        self.balls[0]["dy"] /= tmp
-
-        wall_wdith = 2.0 * math.sin(math.pi / (2.0 * self.player_count)) * (self.wall_distance * (1 + 1 / (player_count + 0.5)))
+        self.reset_ball()
 
         # Create walls (2 * player count) forming a regular polygon
+        wall_wdith = 2.0 * math.sin(math.pi / (2.0 * self.player_count)) * (self.wall_distance * (1 + 1 / (player_count + 0.5)))
         self.walls = [
             {
                 "x": round((self.wall_distance - (self.wall_height * ((i) % 2) * 1.0)) * math.cos(math.pi * i / self.player_count + math.pi), ndigits=3),
@@ -67,9 +49,9 @@ class ModedMultiplayerPong(MultiplayerPong):
                 for i in range(0, 2 * self.player_count, 2)
             ]
 
-        paddle_width = (self.wall_distance - self.paddle_offset) * math.sin(math.pi / self.player_count) * (self.paddle_coverage / 100.0)
 
         # Create paddles centered on every other wall
+        paddle_width = (self.wall_distance - self.paddle_offset) * math.sin(math.pi / self.player_count) * (self.paddle_coverage / 100.0)
         self.player_paddles = [
             {
                 "x": round((self.wall_distance - (self.paddle_offset)) * math.cos(math.pi * i / self.player_count + math.pi), ndigits=3),
