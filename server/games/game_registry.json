@@ -54,9 +54,8 @@
     },
 
     "game_modifiers": {
-      "default_goal_modifier": {
-        "class_name": "DefaultGoalModifier",
-        "lives_count": 1
+      "default_goal_tracker_game_modifier": {
+        "class_name": "DefaultGoalTrackerGameModifier"
       },
       "default_last_hit_tracker_game_modifier": {
         "class_name": "DefaultLastHitTrackerGameModifier"
@@ -87,6 +86,10 @@
       "default_wall_bounce_speedboost_game_modifier": {
         "class_name": "DefaultWallBounceSpeedboostGameModifier",
         "ramp_up_strength": 0.012
+      },
+      "goal_count_based_elimination_game_modifier": {
+        "class_name": "GoalCountBasedEliminationGameModifier",
+        "life_count": 1
       }
     },
 
