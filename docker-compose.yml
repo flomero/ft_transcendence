@@ -52,6 +52,11 @@ services:
       - VAULT_TOKEN=root
       - NODE_ENV=development
     command: npm run dev  # Use development mode with hot reload
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
   db_data:
