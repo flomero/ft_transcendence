@@ -1,8 +1,8 @@
-CREATE TABLE IF NOT EXISTS r_users_turnament (
+CREATE TABLE IF NOT EXISTS r_users_tournament (
 	userId TEXT NOT NULL,
-	turnament TEXT NOT NULL,
+	tournament TEXT NOT NULL,
 	position INTEGER,
-	PRIMARY KEY (userId, turnament),
+	PRIMARY KEY (userId, tournament),
 	FOREIGN KEY (userId) REFERENCES users(id),
-	FOREIGN KEY (turnament) REFERENCES turnaments(id)
+	FOREIGN KEY (tournament) REFERENCES turnaments(id)
 );
