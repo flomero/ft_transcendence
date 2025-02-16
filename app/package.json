@@ -15,6 +15,9 @@
   "license": "ISC",
   "dependencies": {
     "@fastify/autoload": "^6.1.0",
+    "@fastify/cookie": "^11.0.2",
+    "@fastify/jwt": "^9.0.4",
+    "@fastify/oauth2": "^8.1.2",
     "@fastify/sensible": "^6.0.3",
     "@fastify/websocket": "^11.0.2",
     "fastify": "^5.2.1",

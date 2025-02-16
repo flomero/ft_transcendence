@@ -32,22 +32,26 @@ services:
       timeout: 5s
       retries: 5
 
-  web:
+  app:
     build:
-      context: .
-      dockerfile: server/Dockerfile
-    container_name: my_django_app
-#    command: uvicorn ft_transcendence.asgi:application --host 0.0.0.0 --port 8000 --reload --reload-include server/*
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: transcendence_node_app
     volumes:
-      - ./server:/app  # Mount your code inside the container (helpful for local dev)
+      - ./app:/app  # Mount for development
+      - /app/node_modules  # Prevent overwriting node_modules
     ports:
-      - "8000:8000"
+      - "3000:3000"
+    env_file:
+      - .env
     depends_on:
       vault:
-        condition: service_healthy # Wait for vault to be healthy before starting this service, necessary for secrets
+        condition: service_healthy
     environment:
       - VAULT_ADDR=http://vault:8200
       - VAULT_TOKEN=root
+      - NODE_ENV=development
+    command: npm run dev  # Use development mode with hot reload
 
 volumes:
   db_data:
