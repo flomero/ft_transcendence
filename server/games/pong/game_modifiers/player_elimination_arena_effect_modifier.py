@@ -42,7 +42,7 @@ class PlayerEliminationArenaEffectModifier(PongModifierBase):
             "x": (leftmost["x"] + rightmost["x"]) / 2.0,
             "y": (leftmost["y"] + rightmost["y"]) / 2.0,
             "alpha": self.walls[1]["alpha"],
-            "width": math.sqrt((rightmost["x"] - leftmost["x"])**2 + (rightmost["y"] - leftmost["y"])**2),
+            "width": math.sqrt((rightmost["x"] - leftmost["x"])**2 + (rightmost["y"] - leftmost["y"])**2),# + self.walls[1]["height"] / 2.0,
             "height": self.walls[1]["height"],
             "visible": True,
             "dx": self.walls[1]["dx"],
@@ -52,5 +52,19 @@ class PlayerEliminationArenaEffectModifier(PongModifierBase):
         game.walls[wall_ids[0]]["width"] /= 1.05
         game.walls[wall_ids[1]] = self.walls[-1]
         game.walls[wall_ids[2]]["width"] /= 1.05
+
+        # If a non-goal wall is surrounded by 2 players that got eliminated, hide it.
+        # Check whether adjacent players are eliminated
+        adjacent_players_status = [
+            -1 if (game.results[(player_id - 1) % game.player_count] != 0) else None,
+            +1 if (game.results[(player_id + 1) % game.player_count] != 0) else None,
+        ]
+
+        # Hide the corresponding wall
+        for wall_id in adjacent_players_status:
+            if wall_id:
+                game.walls[(2 * player_id + wall_id) % (2 * game.player_count)]["visible"] = False
+                extra_id = player_id if wall_id > 0 else (player_id + game.player_count + wall_id) % game.player_count
+                game.walls[2 * game.player_count + extra_id]["visible"] = False
 
 

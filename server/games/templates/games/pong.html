@@ -114,20 +114,22 @@
 
         // Draw the walls -> For debugging purposes
         gameState.walls?.forEach((wall) => {
-          ctx.save();
-          ctx.translate(wall.x * width_percent, wall.y * height_percent);
-          let angle = Math.atan2(wall.dy, wall.dx);
-          ctx.rotate(angle);
+          if (wall.visible) {
+            ctx.save();
+            ctx.translate(wall.x * width_percent, wall.y * height_percent);
+            let angle = Math.atan2(wall.dy, wall.dx);
+            ctx.rotate(angle);
 
-          ctx.strokeStyle = "red";
-          ctx.strokeRect(
-            (-wall.width * width_percent) / 2,
-            (-wall.height * height_percent) / 2,
-            wall.width * width_percent,
-            wall.height * height_percent
-          );
+            ctx.strokeStyle = "red";
+            ctx.strokeRect(
+              (-wall.width * width_percent) / 2,
+              (-wall.height * height_percent) / 2,
+              wall.width * width_percent,
+              wall.height * height_percent
+              );
 
-          ctx.restore();
+              ctx.restore();
+          }
         });
 
         // Draw the power_ups
