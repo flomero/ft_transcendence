@@ -27,7 +27,7 @@ export default fp(async (fastify) => {
 
   fastify.addHook('onReady', async function () {
     await db.migrate({
-      migrationsPath: '../app/services/database/migrations'
+      migrationsPath: '../app/database/migrations'
     });
   });
 })
