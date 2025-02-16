@@ -1,7 +1,7 @@
-import sqlite3 from 'sqlite3'
-import fp from 'fastify-plugin'
-import { open, Database } from 'sqlite'
-import path from 'path'
+import sqlite3 from 'sqlite3';
+import fp from 'fastify-plugin';
+import { open, Database } from 'sqlite';
+import path from 'path';
 
 /**
  * This plugins adds sqlite3 support
@@ -9,19 +9,26 @@ import path from 'path'
  * @see https://www.npmjs.com/package/sqlite
 **/
 
+declare module 'fastify' {
+  interface FastifyInstance {
+    sqlite: Database;
+  }
+}
+
 export default fp(async (fastify) => {
   const dbPath = path.resolve(__dirname, '../../database/db.sqlite');
   console.log('dbPath', dbPath);
   const db: Database = await open({
-	filename: dbPath,
-	driver: sqlite3.Database
+    filename: dbPath,
+    driver: sqlite3.Database
   });
 
   fastify.decorate('sqlite', db);
+  fastify.sqlite.run('PRAGMA foreign_keys = ON');
 
   fastify.addHook('onReady', async function () {
     db.migrate({
-      migrationsPath: '../app/services/database/migrations'
+      migrationsPath: path.resolve(__dirname, '../../services/database/migrations'),
     });
   });
 })

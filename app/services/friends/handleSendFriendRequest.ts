@@ -1,34 +1,39 @@
-import fastify from 'fastify';
-import { FastifyRequest, FastifyResponse} from 'fastify';
+import { FastifyRequest, FastifyReply} from 'fastify';
 import { doesUserExist } from './doesUserExist';
-import { saveFriendRequest } from './sendFriendRequest';
+import { saveFriendRequest } from './saveFriendRequest';
 import { isFriend } from './isFriend';
+import { FriendRequestBody } from '../../types/friends/friendRequestBody';
+import { FriendRequestContent } from '../../types/friends/friendRequestContent';
 
-export async function handleSendFriendRequest(request: FastifyRequest, response: FastifyResponse): Promise<void> {
+export async function handleSendFriendRequest(request: FastifyRequest<{ Body: FriendRequestBody }>, reply: FastifyReply): Promise<void> {
 	const friendId = request.body['X-friendId'];
+	const friendRequestContent: FriendRequestContent = {friendId, userId: request.userId, request, reply };
 
-	if (await validUserInfo(friendId, response) === false)
+	if (await validUserInfo(friendRequestContent) === false)
 		return;
 
 	try {
-		await saveFriendRequest(friendId, 0);
+		await saveFriendRequest(friendId, request.userId, 0, request.server);
 	}
 	catch (error) {
-		response.status(500).send({ message: 'Failed to save friend request' });
+		reply.status(500).send({ message: 'Failed to save friend request' });
 		return;
 	}
 
-	response.status(200).send({ message: 'Request sent' });
+	reply.status(200).send({ message: 'Request sent' });
 }
 
-async function validUserInfo(friendId: string, response: FastifyResponse): Promise<boolean> {
+async function validUserInfo(content: FriendRequestContent): Promise<boolean> {
 
-	if (await doesUserExist(friendId) === false) {
-		response.status(404).send({ message: 'User not found' });
+	if (await doesUserExist(content.friendId, content.request.server) === false) {
+		content.reply.status(404).send({ message: 'User not found' });
 		return false;
 	}
-	else if (await isFriend(friendId) === true) {
-		response.status(400).send({ message: 'User is already a friend' });
+	else if (await isFriend(content.friendId, content.userId, content.request.server) === true) {
+		content.reply.status(400).send({ message: 'User is already a friend' });
 		return false;
 	}
+	return true;
 }
+
+export default handleSendFriendRequest;
