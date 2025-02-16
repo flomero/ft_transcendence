@@ -21,8 +21,8 @@ class MultiplayerPong(GameBase):
 
         # Game objects -> w/ collisions
         self.balls = []
-        self.walls = None
-        self.player_paddles = None
+        self.walls = []
+        self.player_paddles = []
 
     def update(self):
         """Calulcate the next game state"""
@@ -123,7 +123,6 @@ class MultiplayerPong(GameBase):
                         else:
                             self.trigger_modifiers("on_wall_bounce")
                 else:
-                    # print(f"player {self.last_player_hit} took a power_up")
                     self.trigger_modifiers("on_power_up_pickup", power_up=self.power_up_manager.spawned_power_ups[collision["object_id"]], player_id=self.last_player_hit)
                     self.power_up_manager.spawned_power_ups.remove(self.power_up_manager.spawned_power_ups[collision["object_id"]])
 

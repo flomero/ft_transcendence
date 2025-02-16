@@ -47,3 +47,7 @@ class PongModifierBase:
     def on_power_up_spawn(self, game, power_up):
         """Called when a power up is spawned"""
         pass
+
+    def on_player_elimination(self, game, player_id):
+        """Called when a player is eliminated"""
+        pass

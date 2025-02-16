@@ -8,7 +8,7 @@ class DefaultSurvivalGameModifier(PongModifierBase):
     def __init__(self):
         super().__init__()
 
-    def on_goal(self, game: MultiplayerPong, player_id=-1):
+    def on_player_elimination(self, game: MultiplayerPong, player_id=-1):
         """Check if there's only 1 remaining player, if so he won -> stop the game"""
         survivors = [id for id in game.results if id == 0]
         if len(survivors) == 1:

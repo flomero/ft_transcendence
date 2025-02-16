@@ -48,14 +48,15 @@
           "size": 0.75
         },
         "default_power_up_settings": {
-          "size": 0.8
+          "size": 1.2
         }
       }
     },
 
     "game_modifiers": {
       "default_goal_modifier": {
-        "class_name": "DefaultGoalModifier"
+        "class_name": "DefaultGoalModifier",
+        "lives_count": 1
       },
       "default_last_hit_tracker_game_modifier": {
         "class_name": "DefaultLastHitTrackerGameModifier"
@@ -79,6 +80,13 @@
       },
       "power_ups_tester": {
         "class_name": "PowerUpsTester"
+      },
+      "player_elimination_arena_effect_modifier": {
+        "class_name": "PlayerEliminationArenaEffectModifier"
+      },
+      "default_wall_bounce_speedboost_game_modifier": {
+        "class_name": "DefaultWallBounceSpeedboostGameModifier",
+        "ramp_up_strength": 0.012
       }
     },
 
@@ -92,16 +100,16 @@
       "speed_boost_modifier": {
         "class_name": "SpeedBoostModifier",
         "spawn_weight": 1.0,
-        "duration": 60,
-        "ramp_up_strength": 0.1,
-        "ramp_up_frequency": 15
+        "duration": 96,
+        "ramp_up_strength": 0.11,
+        "ramp_up_frequency": 16
       },
       "multiball_modifier": {
         "class_name": "MultiballModifier",
         "spawn_weight": 1.0,
         "duration": 166,
-        "split_angle_to_pi": 7.0,
-        "spawn_count_per_side": 5
+        "split_angle_to_pi": 2.0,
+        "spawn_count_per_side": 6
       }
     }
   }

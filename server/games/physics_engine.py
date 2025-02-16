@@ -28,7 +28,6 @@ class PhysicsEngine:
         """Checks if the ball collides with a rotated object, including corner collisions."""
         rx, ry = obj["x"], obj["y"]
         rdx, rdy = obj["dx"], obj["dy"]
-        rnx, rny = obj["nx"], obj["ny"]
         rw, rh = obj["width"], obj["height"]
         # alpha is the angle of the wall’s (or paddle’s) direction
         alpha = math.atan2(rdy, rdx) if rdx != 0 else (rdy * math.pi / 2.0)

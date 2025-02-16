@@ -1,6 +1,7 @@
 import math
 from ..pong_modifier_base import PongModifierBase
 from ..multiplayer_pong import MultiplayerPong
+from ...game_registry import GAME_REGISTRY
 from games.modifiers_utils import compute_reset_angle
 
 
@@ -9,6 +10,8 @@ class DefaultGoalModifier(PongModifierBase):
 
     def __init__(self):
         super().__init__()
+
+        self.lives_count = GAME_REGISTRY["pong"]["game_modifiers"][self.name]["lives_count"]
 
 
     def on_goal(self, game: MultiplayerPong, player_id=-1):
@@ -20,14 +23,14 @@ class DefaultGoalModifier(PongModifierBase):
 
         game.player_goals[player_id] += 1
 
-        if game.player_goals[player_id] >= 3:
-            game.player_paddles[player_id]["visible"] = False
+        if game.player_goals[player_id] >= self.lives_count:
             game.results[player_id] = len(
                 [
-                    id
-                    for id, paddle in enumerate(game.player_paddles)
-                    if paddle["visible"]
+                    goals
+                    for goals in game.player_goals
+                    if goals < self.lives_count
                 ]
             )
+            game.trigger_modifiers('on_player_elimination', player_id=player_id)
 
         game.reset_ball(ball_id=0)
