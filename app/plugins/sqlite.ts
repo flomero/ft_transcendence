@@ -9,18 +9,24 @@ import path from 'path'
  * @see https://www.npmjs.com/package/sqlite
 **/
 
+declare module 'fastify' {
+  interface FastifyInstance {
+    sqlite: Database;
+  }
+}
+
 export default fp(async (fastify) => {
   const dbPath = path.resolve(__dirname, '../../database/db.sqlite');
   console.log('dbPath', dbPath);
   const db: Database = await open({
-	filename: dbPath,
-	driver: sqlite3.Database
+    filename: dbPath,
+    driver: sqlite3.Database
   });
 
   fastify.decorate('sqlite', db);
 
   fastify.addHook('onReady', async function () {
-    db.migrate({
+    await db.migrate({
       migrationsPath: '../app/services/database/migrations'
     });
   });

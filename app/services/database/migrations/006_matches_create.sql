@@ -2,8 +2,8 @@ CREATE TABLE IF NOT EXISTS matches (
 	id TEXT PRIMARY KEY,
 	game TEXT NOT NULL,
 	gameMode TEXT NOT NULL,
-	modifires TEXT,
+	modifiers TEXT,
 	result TEXT NOT NULL,
-	turnamentId TEXT NOT NULL,
-	FOREIGN KEY (turnamentId) REFERENCES turnaments(id)
+	tournamentId TEXT NOT NULL,
+	FOREIGN KEY (tournamentId) REFERENCES turnaments(id)
 );
