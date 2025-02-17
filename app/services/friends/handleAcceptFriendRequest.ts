@@ -1,9 +1,9 @@
 import { FastifyRequest, FastifyReply} from 'fastify';
 import { isFriend } from './isFriend';
 import { isOpenFriendRequest } from './isOpenFriendRequest';
-import { saveFriendRequest } from './saveFriendRequest';
 import { FriendRequestBody } from '../../types/friends/friendRequestBody';
 import { FriendRequestContent } from '../../types/friends/friendRequestContent';
+import { acceptFriendRequest } from './acceptFriendRequest';
 
 
 async function handleAcceptFriendRequest(request: FastifyRequest<{Body: FriendRequestBody }>, reply: FastifyReply): Promise<void> {
@@ -13,10 +13,10 @@ async function handleAcceptFriendRequest(request: FastifyRequest<{Body: FriendRe
 	if (await validUserInfo(friendRequestContent) === false)
 		return;
 	try {
-		await saveFriendRequest(friendId, request.userId, 1, request.server);
+		await acceptFriendRequest(friendId, request.userId, request.server);
 	}
 	catch (error) {
-		reply.status(500).send({ message: 'Failed to accept friend request' });
+		reply.status(500).send("ERROR MESSAGE: " + error );
 		return;
 	}
 

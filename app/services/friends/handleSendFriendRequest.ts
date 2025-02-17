@@ -13,7 +13,7 @@ export async function handleSendFriendRequest(request: FastifyRequest<{ Body: Fr
 		return;
 
 	try {
-		await saveFriendRequest(friendId, request.userId, 0, request.server);
+		await saveFriendRequest(friendId, request.userId, request.server);
 	}
 	catch (error) {
 		reply.status(500).send({ message: 'Failed to save friend request' });

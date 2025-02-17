@@ -5,9 +5,9 @@ export async function isOpenFriendRequest(friendId: string, userId: string, fast
 	const userIsSender = await fastify.sqlite.get(sql, [userId, friendId]);
 	const userIsReceiver = await fastify.sqlite.get(sql, [friendId, userId]);
 
-	if (userIsSender === undefined || userIsSender.accepted === 1)
-		return false;
-	else if (userIsReceiver === undefined || userIsReceiver.accepted === 1)
-		return false;
-	return true;
+	if (userIsSender !== undefined && userIsSender.accepted === 0)
+		return true;
+	else if (userIsReceiver !== undefined && userIsReceiver.accepted === 0)
+		return true;
+	return false;
 }
