@@ -39,8 +39,8 @@ class ExtraWallsMovementGameModifier(PongModifierBase):
         ]
 
         for i, pos in enumerate(self.positions):
-            rnd_step = random.randint(-self.amplitude + 1, self.amplitude - 1)
-            rnd_direction = 1.0 if random.random() < 0.5 else -1.0
+            rnd_step = game.rng.randint(-self.amplitude + 1, self.amplitude - 1)
+            rnd_direction = 1.0 if game.rng.random() < 0.5 else -1.0
 
             pos["direction"] = rnd_direction
             pos["steps"] = rnd_step

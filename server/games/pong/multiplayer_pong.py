@@ -1,5 +1,7 @@
 import math
 import random
+import time
+from collections import deque
 from games.game_base import GameBase
 from games.physics_engine import PhysicsEngine
 from ..game_registry import GAME_REGISTRY
@@ -14,14 +16,21 @@ class MultiplayerPong(GameBase):
     def __init__(self, game_mode, player_count=4, modifiers=[], power_ups=[]):
         super().__init__("pong", game_mode, modifiers, power_ups)
 
-        self.paddle_speed_width_percent = GAME_REGISTRY["pong"]["paddle_speed_width_percent"]
-        self.paddle_movement_speed = 0.0
+        # Server related
+        self.server_tickrate_ms = GAME_REGISTRY["pong"]["server_tickrate_ms"]
+        self.server_max_delay_ticks = GAME_REGISTRY["pong"]["server_max_delay_ticks"]
+
+        # Network playability related
+        self.tick_data = deque(maxlen=self.server_max_delay_ticks)
+        self.rng = random.Random(self.start_time_ms)
 
         # Players & related
         self.player_count = player_count
         self.player_goals = [0] * player_count
         self.results = [0] * player_count
         self.last_player_hit = None
+        self.paddle_speed_width_percent = GAME_REGISTRY["pong"]["paddle_speed_width_percent"]
+        self.paddle_movement_speed = 0.0
 
         # Game objects -> w/ collisions
         self.balls = []
@@ -36,6 +45,9 @@ class MultiplayerPong(GameBase):
                     self.do_collision_checks(ball)
             self.trigger_modifiers('on_update')
 
+            self.last_update_time = int(time.time() * 1000)
+            self.tick_data.append(self.get_state_snapshot())
+
     def handle_action(self, action):
         """Handle client action"""
         # print(f"Received action: {action}")
@@ -44,6 +56,26 @@ class MultiplayerPong(GameBase):
         # Handle use_modifier action
         #    -> handle ping compensation
 
+        delay_ms = self.last_update_time - action['timestamp']
+        delay_ticks = round(delay_ms // self.server_tickrate_ms)
+
+        print(f"Timestamps:")
+        print(f"  |- last update: {self.last_update_time}")
+        print(f"  |- user input : {action['timestamp']}")
+        print(f"  |--> delay ms    : {delay_ms}")
+        print(f"  |--> delay ticks : {delay_ticks}")
+        print()
+
+        if delay_ticks > self.server_max_delay_ticks:
+            print(f"Player {action['player_id']} has really high ping -> disconnecting")
+            # TODO: Disconnection in case of high ping
+            pass
+
+        # Rewind game state delay_ticks
+        if delay_ticks > 0:
+            self.rewind(delay_ticks)
+
+        # Apply user_input
         match(action["action"]):
             case 'UP':
                 self.move_paddle(action['player_id'], 1)
@@ -51,7 +83,9 @@ class MultiplayerPong(GameBase):
             case 'DOWN':
                 self.move_paddle(action['player_id'], -1)
 
-        pass
+        # Fast-forward to go bak to the current tick
+        if delay_ticks > 0:
+            self.fast_forward(delay_ticks)
 
     def get_state_snapshot(self):
         """Returns the current game state"""
@@ -60,11 +94,30 @@ class MultiplayerPong(GameBase):
         game_state["balls"] = self.balls
         game_state["player_paddles"] = self.player_paddles
         game_state["walls"] = self.walls
+        game_state["rng"] = self.rng.getstate()
         return game_state
 
     def load_state_snapshot(self, snapshot):
-        self.ball = snapshot["ball"]
-        self.player_paddles = snapshot["player_paddles"]
+        """Load game objects from a snapshot"""
+
+        self.balls = snapshot['balls']
+        self.walls = snapshot['walls']
+        self.player_paddles = snapshot['player_paddles']
+
+        self.rng.setstate(snapshot['rng'])
+
+    def rewind(self, to_tick):
+        """Rewinds the game state to a specific tick"""
+
+        if to_tick > len(self.tick_data):
+            print(f"Can't rewind that far -> rewinding as much as possible")
+            to_tick = len(self.tick_data)
+
+        self.load_state_snapshot(self.tick_data[-to_tick])
+
+    def fast_forward(self, tick_count):
+        """Plays tick_count updates in a row"""
+        pass
 
     def move_paddle(self, player_id, direction):
         """Moves player_id's paddle in direction"""

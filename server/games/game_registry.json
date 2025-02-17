@@ -1,5 +1,7 @@
 {
   "pong": {
+    "server_tickrate_ms": 30,
+    "server_max_delay_ticks": 100,
     "paddle_speed_width_percent": 5,
 
     "game_modes": {
@@ -71,8 +73,8 @@
       },
       "default_power_up_spawner_game_modifier": {
         "class_name": "DefaultPowerUpSpawnerGameModifier",
-        "spawn_interval_center": 15,
-        "spawn_interval_deviation": 0.25
+        "spawn_interval_center": 300,
+        "spawn_interval_deviation": 25
       },
       "extra_walls_movement_game_modifier": {
         "class_name": "ExtraWallsMovementGameModifier",

@@ -1,17 +1,16 @@
 import time
-from collections import deque
+import random
 from .power_up_manager import PowerUpManager
 
 
 class GameBase():
-    MAX_TICKS = 100     # If a client is more than MAX_TICKS ticks behind the server -> disconnect
 
     def __init__(self, game_name, game_mode, modifiers=[], power_ups=[]):
-        self.last_update_time = time.time()
-        self.current_time = time.time()
+        self.last_update_time = int(time.time() * 1000)
+        self.start_time_ms = int(time.time() * 1000)
         self.modifiers = modifiers
         self.running = False
-        self.tick_data = deque(maxlen=self.MAX_TICKS)
+        self.tick_data = None
         self.power_up_manager = PowerUpManager(power_ups, game_name, game_mode)
 
     def update(self):
@@ -26,21 +25,16 @@ class GameBase():
 
     def rewind(self, to_tick):
         """Rewind the game state to a specific time"""
-        if len(self.tick_data) < to_tick:
-            print(f"Trying to rewind too much: {to_tick} / {self.MAX_TICKS}")
-            return
-
-        self.load_state_snapshot(self.tick_data[-to_tick])
+        pass
 
     def fast_forward(self, tick_count):
         """Replays the game until current state"""
-        for _ in range(tick_count):
-            self.update()
+        pass
 
     def get_state_snapshot(self):
         """Returns a snapshot of the current game state."""
         return {
-            "timestamp": time.time()
+            "timestamp": self.last_update_time
         }
 
     def load_state_snapshot(self, snapshot):
@@ -51,9 +45,9 @@ class GameBase():
         """Handle client action"""
         pass
 
-    def spawn_power_up(self, position: tuple):
+    def spawn_power_up(self, position: tuple, rng: random.Random):
         """Spawns a power_up at the designated position"""
-        self.power_up_manager.spawn_power_up(position)
+        self.power_up_manager.spawn_power_up(rng, position)
         self.trigger_modifiers("on_power_up_spawn", power_up=self.power_up_manager.spawned_power_ups[-1])
 
     def trigger_modifiers(self, method, *args, **kwargs):

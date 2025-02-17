@@ -59,7 +59,7 @@
         let action = {
           "type": "user_input",
           "action": null,
-          "timestamp": Date.now(),
+          "timestamp": Date.now() - 100,
           "player_id": player_id
         };
         if (event.key === "ArrowUp") action["action"] = "UP";
@@ -146,32 +146,34 @@
         });
 
         // Draw the power_ups
-        gameState.power_ups?.forEach((power_up) => {
-          if (power_up.visible) {
-            switch (power_up.type) {
-              case "speed_boost_modifier":
-                ctx.fillStyle = "red";
-                break;
+        if (gameState.power_up_manager) {
+          gameState.power_up_manager.spawned_power_ups?.forEach((power_up) => {
+            if (power_up.visible) {
+              switch (power_up.type) {
+                case "speed_boost_modifier":
+                  ctx.fillStyle = "red";
+                  break;
 
-              case "invisible_ball_modifier":
-                ctx.fillStyle = "blue";
-                break;
+                case "invisible_ball_modifier":
+                  ctx.fillStyle = "blue";
+                  break;
 
-              case "multiball_modifier":
-                ctx.fillStyle = "green";
-                break;
+                case "multiball_modifier":
+                  ctx.fillStyle = "green";
+                  break;
+              }
+              ctx.beginPath();
+              ctx.arc(
+                power_up.x * width_percent,
+                power_up.y * height_percent,
+                power_up.size * width_percent,
+                0,
+                Math.PI * 2
+              );
+              ctx.fill();
             }
-            ctx.beginPath();
-            ctx.arc(
-              power_up.x * width_percent,
-              power_up.y * height_percent,
-              power_up.size * width_percent,
-              0,
-              Math.PI * 2
-            );
-            ctx.fill();
-          }
-        });
+          });
+        }
       }
 
       function gameLoop() {

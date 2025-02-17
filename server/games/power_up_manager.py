@@ -40,19 +40,27 @@ class PowerUpManager():
             cumul += d
             self.cdf.append(cumul)
 
-    def random_power_up(self):
+    def get_state_snapshot(self):
+        return {
+            'spawned_power_ups': self.spawned_power_ups,
+        }
+
+    def load_state_snapshot(self, snapshot):
+        self.spawned_power_ups = snapshot['spawned_power_ups']
+
+    def random_power_up(self, rng: random.Random):
         """Sample a random power_up using the CDF"""
-        rnd = random.random()
+        rnd = rng.random()
         for i, cumul in enumerate(self.cdf):
             if rnd < cumul:
                 return self.power_up_names[i]
 
         # fallback
-        return self.power_up_names[random.randint(0, len(self.power_up_names))]
+        return self.power_up_names[rng.randint(0, len(self.power_up_names))]
 
-    def spawn_power_up(self, position: tuple):
+    def spawn_power_up(self, rng: random.Random, position: tuple):
         """Sample then spawn a random power_up at the given position"""
-        power_up = self.random_power_up()
+        power_up = self.random_power_up(rng)
         self.spawned_power_ups.append(
             {
                 "x": position[0],

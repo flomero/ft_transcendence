@@ -18,8 +18,6 @@ class GameConsumer(AsyncWebsocketConsumer):
         """Handle incoming WebSocket messages (game selection, modifiers, actions)."""
         data = json.loads(text_data)
 
-        # print(f"Received: {data}")
-
         match(data.get('type')):
             case 'user_input':
                 if self.running:
@@ -49,10 +47,6 @@ class GameConsumer(AsyncWebsocketConsumer):
                 self.game_modifiers = [available_game_modifiers[mod]["class"]() for mod in modifier_names if mod in available_game_modifiers]
 
                 self.power_ups = data.get("power_ups", [])
-                # power_ups_names = data.get("power_ups", [])
-                # available_power_ups = GAME_REGISTRY[game_name]["power_ups"]
-                # print(f"available power_ups:\n{available_power_ups}")
-                # self.power_ups = [available_power_ups[mod]["class"]() for mod in power_ups_names if mod in available_power_ups]
 
                 self.player_count = data.get("player_count")
 
@@ -73,17 +67,15 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     async def run_game_loop(self):
         """Game loop: Update game state and send it to clients."""
-        update_count = 0
         while self.running:
             self.game.update()
-            update_count += 1
             await self.send(json.dumps(self.game.get_state_snapshot()))
-            await asyncio.sleep(0.03)
+            await asyncio.sleep(self.game.server_tickrate_ms / 1000.0)
 
-            # if update_count > 160:
-            #     break
-
-            if  self.game.balls[0]["x"] < 0 or self.game.balls[0]["x"] > 100 or \
-                self.game.balls[0]["y"] < 0 or self.game.balls[0]["y"] > 100:
+            # if  self.game.balls[0]["x"] < 0 or self.game.balls[0]["x"] > 100 or \
+            #     self.game.balls[0]["y"] < 0 or self.game.balls[0]["y"] > 100:
+            if  ((self.game.balls[0]["x"] - self.game.wall_distance)**2 \
+                + (self.game.balls[0]["y"] - self.game.wall_distance)**2) > self.game.wall_distance**2:
+                print(f"Ball went out of bounds, resetting it")
                 self.game.reset_ball(ball_id=0)
         print("end of game_loop")

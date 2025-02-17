@@ -8,7 +8,7 @@ def compute_offset(player_count, scoring_player_id):
     return (base_offset) if base_offset <= math.pi else (base_offset - 2.0 * math.pi)
 
 
-def compute_reset_angle(player_count: int, scoring_player_id: int, resolution=360):
+def compute_reset_angle(rng: random.Random, player_count: int, scoring_player_id: int, resolution=360):
     """Computes the reset angle of the ball after a goal
 
     Args:
@@ -52,16 +52,16 @@ def compute_reset_angle(player_count: int, scoring_player_id: int, resolution=36
         cdf.append(cumulative)
 
     # Sample an angle from the CDF.
-    r = random.random()
+    r = rng.random()
     for i, cumul_val in enumerate(cdf):
         if r < cumul_val:
             return thetas[i]
 
     return thetas[-1]
 
-def spawn_powerup_bell(center, radius, margin: tuple, pos_cdf, obstacles=None, max_attempts=1000):
-    def sample_pos(pos_cdf):
-        rnd = random.random()
+def spawn_powerup_bell(center, radius, margin: tuple, pos_cdf, rng: random.Random, obstacles=None, max_attempts=1000):
+    def sample_pos():
+        rnd = rng.random()
         for c in pos_cdf:
             if rnd < c:
                 return c
@@ -76,13 +76,13 @@ def spawn_powerup_bell(center, radius, margin: tuple, pos_cdf, obstacles=None, m
 
     for _ in range(max_attempts):
         # Generate a random magnitude in [0; 1] following a gaussian distribution
-        u_r = sample_pos(pos_cdf)
+        u_r = sample_pos()
 
         # Map the generated magnitude to [in_margin; radius - (in_margin + out_margin)]
         r = margin[0] + (radius - margin[0] - margin[1]) * u_r
 
         # Generates a ranomd angle to form a point in polar coordinates
-        theta = random.random() * math.pi * 2.0
+        theta = rng.random() * math.pi * 2.0
 
         x = r * math.cos(theta) + center[0]
         y = r * math.sin(theta) + center[1]

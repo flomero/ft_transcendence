@@ -113,11 +113,16 @@ class ModedMultiplayerPong(MultiplayerPong):
     def get_state_snapshot(self):
         snapshot = super().get_state_snapshot()
 
-        snapshot["power_ups"] = self.power_up_manager.spawned_power_ups
+        snapshot["power_up_manager"] = self.power_up_manager.get_state_snapshot()
         return snapshot
 
+    def load_state_snapshot(self, snapshot):
+        super().load_state_snapshot(snapshot)
+
+        self.power_up_manager.load_state_snapshot(snapshot['power_up_manager'])
+
     def reset_ball(self, ball_id=-1):
-        random_angle = random.random() * math.pi * 2.0
+        random_angle = self.rng.random() * math.pi * 2.0
         ca, sa = math.cos(random_angle), math.sin(random_angle)
 
         if not ball_id in range(len(self.balls)):
