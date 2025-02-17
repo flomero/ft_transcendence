@@ -18,45 +18,47 @@ class GameConsumer(AsyncWebsocketConsumer):
         """Handle incoming WebSocket messages (game selection, modifiers, actions)."""
         data = json.loads(text_data)
 
-        print(f"Received: {data}")
+        # print(f"Received: {data}")
 
-        # Game Selection (fallback = pong)
-        game_name = data.get("game", "pong")
-        if game_name not in GAME_REGISTRY:
-            print(f"Unknown game: {game_name}, defaulting to Pong")
-            game_name = "pong"
+        match(data.get('type')):
+            case 'user_input':
+                if self.running:
+                    self.game.handle_action(data)
 
-        # Game Mode Selection (fallback multiplayer_<game>)
-        mode_name = data.get("game_mode", f"multiplayer_{game_name}")
-        game_modes = GAME_REGISTRY[game_name]["game_modes"]
-        if mode_name in game_modes:
-            self.game_class = game_modes[mode_name]["class"]
-        else:
-            print(f"Unknown mode: {mode_name}, defaulting to {list(game_modes.keys())[0]}")
-            self.game_class = list(game_modes.values())[0]["class"]  # Default to first variant
+            case 'game_creation':
 
-        # Modifier Selection (with fallback to [])
-        modifier_names = data.get("modifiers", [])
-        available_game_modifiers = GAME_REGISTRY[game_name]["game_modifiers"]
-        print(f"available modifiers:\n{available_game_modifiers}")
-        self.game_modifiers = [available_game_modifiers[mod]["class"]() for mod in modifier_names if mod in available_game_modifiers]
+                # Game Selection (fallback = pong)
+                game_name = data.get("game", "pong")
+                if game_name not in GAME_REGISTRY:
+                    print(f"Unknown game: {game_name}, defaulting to Pong")
+                    game_name = "pong"
 
-        self.power_ups = data.get("power_ups", [])
-        # power_ups_names = data.get("power_ups", [])
-        # available_power_ups = GAME_REGISTRY[game_name]["power_ups"]
-        # print(f"available power_ups:\n{available_power_ups}")
-        # self.power_ups = [available_power_ups[mod]["class"]() for mod in power_ups_names if mod in available_power_ups]
+                # Game Mode Selection (fallback multiplayer_<game>)
+                mode_name = data.get("game_mode", f"multiplayer_{game_name}")
+                game_modes = GAME_REGISTRY[game_name]["game_modes"]
+                if mode_name in game_modes:
+                    self.game_class = game_modes[mode_name]["class"]
+                else:
+                    print(f"Unknown mode: {mode_name}, defaulting to {list(game_modes.keys())[0]}")
+                    self.game_class = list(game_modes.values())[0]["class"]  # Default to first variant
 
-        self.player_count = data.get("player_count")
+                # Modifier Selection (with fallback to [])
+                modifier_names = data.get("modifiers", [])
+                available_game_modifiers = GAME_REGISTRY[game_name]["game_modifiers"]
+                print(f"available modifiers:\n{available_game_modifiers}")
+                self.game_modifiers = [available_game_modifiers[mod]["class"]() for mod in modifier_names if mod in available_game_modifiers]
 
-        # Start Game if Requested
-        if data.get("start_game"):
-            await self.start_game()
+                self.power_ups = data.get("power_ups", [])
+                # power_ups_names = data.get("power_ups", [])
+                # available_power_ups = GAME_REGISTRY[game_name]["power_ups"]
+                # print(f"available power_ups:\n{available_power_ups}")
+                # self.power_ups = [available_power_ups[mod]["class"]() for mod in power_ups_names if mod in available_power_ups]
 
-        # Handle Player Actions
-        if data.get("action") and self.running:
-            print(f"Received: {data.get('action')}")
-            self.game.handle_action(data["action"])
+                self.player_count = data.get("player_count")
+
+                # Start Game if Requested
+                if data.get("start_game"):
+                    await self.start_game()
 
     async def start_game(self):
         """Start a new game instance with the selected settings."""

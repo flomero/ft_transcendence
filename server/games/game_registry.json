@@ -1,5 +1,7 @@
 {
   "pong": {
+    "paddle_speed_width_percent": 5,
+
     "game_modes": {
       "vanilla_duel_pong": {
         "class_name": "VanillaDuelPong",
@@ -89,7 +91,7 @@
       },
       "goal_count_based_elimination_game_modifier": {
         "class_name": "GoalCountBasedEliminationGameModifier",
-        "life_count": 1
+        "life_count": 10
       }
     },
 

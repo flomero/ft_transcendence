@@ -18,7 +18,6 @@ class SpeedBoostModifier(PongTimeLimitedModifierBase):
         """Ramps us the speed"""
         super().on_update(game)
         if (self.ticks % self.ramp_up_frequency) == 0:
-            print(f"  |- {game.balls[0]['speed']}  -->  ")
             game.balls[0]["speed"] *= (1 + self.ramp_up_strength)
 
     def on_deactivation(self, game: MultiplayerPong):

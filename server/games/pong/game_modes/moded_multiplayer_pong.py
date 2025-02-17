@@ -51,15 +51,19 @@ class ModedMultiplayerPong(MultiplayerPong):
 
 
         # Create paddles centered on every other wall
-        paddle_width = (self.wall_distance - self.paddle_offset) * math.sin(math.pi / self.player_count) * (self.paddle_coverage / 100.0)
+        paddle_amplitude = (self.wall_distance - self.paddle_offset) * math.sin(math.pi / self.player_count)
         self.player_paddles = [
             {
                 "x": round((self.wall_distance - (self.paddle_offset)) * math.cos(math.pi * i / self.player_count + math.pi), ndigits=3),
                 "y": round((self.wall_distance - (self.paddle_offset)) * math.sin(math.pi * i / self.player_count + math.pi), ndigits=3),
                 "alpha": round(math.pi + math.pi * i / self.player_count, ndigits=3),
-                "width": paddle_width,
+                "coverage": self.paddle_coverage,
+                "width":  paddle_amplitude * (self.paddle_coverage / 100.0),
                 "height": self.paddle_height,
-                "visible": True
+                "speed":  paddle_amplitude * (self.paddle_speed_width_percent / 100.0),
+                "displacement": 0.0,
+                "visible": True,
+                "do_move": True
             }
             for i in range(0, 2 * self.player_count, 2)
         ]
@@ -102,6 +106,9 @@ class ModedMultiplayerPong(MultiplayerPong):
                 "dy": -math.sin(math.pi / 4.0),
             }
         )
+
+        # Computes the paddle_movement_speed to be paddle_speed_width_percent % of the paddle_width per input
+        # self.paddle_movement_speed = paddle_width * self.paddle_speed_width_percent / 100.0
 
     def get_state_snapshot(self):
         snapshot = super().get_state_snapshot()
