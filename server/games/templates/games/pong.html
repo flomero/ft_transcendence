@@ -49,7 +49,8 @@
               "grasping_vines_debuff_modifier",
               "invisible_ball_modifier",
               "multiball_modifier",
-              "speed_boost_modifier"
+              "speed_boost_modifier",
+              "black_hole_debuff_modifier"
               ],
             player_count: player_count,
             start_game: true,
@@ -169,6 +170,10 @@
 
                 case "grasping_vines_debuff_modifier":
                   ctx.fillStyle = "yellow";
+                  break;
+
+                case "black_hole_debuff_modifier":
+                  ctx.fillStyle = "purple";
                   break;
               }
               ctx.beginPath();

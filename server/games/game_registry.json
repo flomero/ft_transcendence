@@ -52,7 +52,7 @@
           "size": 0.75
         },
         "default_power_up_settings": {
-          "size": 1.2
+          "size": 1.5
         }
       }
     },
@@ -93,27 +93,27 @@
       },
       "goal_count_based_elimination_game_modifier": {
         "class_name": "GoalCountBasedEliminationGameModifier",
-        "life_count": 10
+        "life_count": 5
       }
     },
 
     "power_ups": {
       "invisible_ball_modifier": {
         "class_name": "InvisibleBallModifier",
-        "spawn_weight": 2.0,
+        "spawn_weight": 3.0,
         "duration": 33,
         "speed_boost_coef": 0.2
       },
       "speed_boost_modifier": {
         "class_name": "SpeedBoostModifier",
-        "spawn_weight": 2.0,
+        "spawn_weight": 3.0,
         "duration": 96,
         "ramp_up_strength": 0.11,
         "ramp_up_frequency": 16
       },
       "multiball_modifier": {
         "class_name": "MultiballModifier",
-        "spawn_weight": 2.0,
+        "spawn_weight": 3.0,
         "duration": 166,
         "split_angle_to_pi": 2.0,
         "spawn_count_per_side": 6
@@ -125,6 +125,14 @@
         "max_vines": 10,
         "vine_frequency": 11,
         "vine_strength": 10
+      },
+      "black_hole_debuff_modifier": {
+        "class_name": "BlackHoleDebuffModifier",
+        "spawn_weight": 1.0,
+        "duration": 167,
+        "debuff_count": 1,
+        "pull_strength": 3.5,
+        "pull_range": 75
       }
     }
   }
