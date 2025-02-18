@@ -34,8 +34,7 @@ class InvisibleBallModifier(PongTimeLimitedModifierBase):
         game.balls[0]["dx"] = math.cos(random_angle)
         game.balls[0]["dy"] = math.sin(random_angle)
 
-        if self in game.power_up_manager.active_power_ups:
-            game.power_up_manager.active_power_ups.remove(self)
+        game.power_up_manager.deactivate_power_up(self)
 
-    def on_goal(self, game, player_id=-1):
+    def on_goal(self, game: MultiplayerPong, player_id=-1):
         self.deactivate(game)

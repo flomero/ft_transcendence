@@ -2,6 +2,7 @@ import math
 import random
 from ..pong_time_limited_modifier_base import PongTimeLimitedModifierBase
 from ...game_registry import GAME_REGISTRY
+from ..multiplayer_pong import MultiplayerPong
 
 
 class MultiballModifier(PongTimeLimitedModifierBase):
@@ -16,9 +17,6 @@ class MultiballModifier(PongTimeLimitedModifierBase):
         self.spawn_count_per_side = GAME_REGISTRY["pong"]["power_ups"][self.name]["spawn_count_per_side"]
 
         self.new_balls = []
-
-    # def on_update(self, game):
-    #     super().on_update(game)
 
     def on_activation(self, game):
         """Splits the ball into several balls with different angles.
@@ -65,12 +63,11 @@ class MultiballModifier(PongTimeLimitedModifierBase):
         ]
         game.balls += self.new_balls
 
-    def on_deactivation(self, game):
+    def on_deactivation(self, game: MultiplayerPong):
         """Removes the spawned extra balls."""
         super().on_deactivation(game)
         for ball in self.new_balls:
             if ball in game.balls:
                 game.balls.remove(ball)
-        if self in game.power_up_manager.active_power_ups:
-            game.power_up_manager.active_power_ups.remove(self)
+        game.power_up_manager.deactivate_power_up(self)
 

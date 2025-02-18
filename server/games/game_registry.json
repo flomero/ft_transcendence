@@ -52,7 +52,12 @@
           "size": 0.75
         },
         "default_power_up_settings": {
-          "size": 1.5
+          "size": 1.75,
+          "exclusive_power_ups": [
+            "black_hole_debuff_modifier",
+            "carousel_debuff_modifier",
+            "grasping_vines_debuff_modifier"
+          ]
         }
       }
     },
@@ -133,6 +138,12 @@
         "debuff_count": 1,
         "pull_strength": 3.5,
         "pull_range": 75
+      },
+      "carousel_debuff_modifier": {
+        "class_name": "CarouselDebuffModifier",
+        "spawn_weight": 1.5,
+        "steps_per_degree": 1,
+        "ticks_per_steps": 5
       }
     }
   }

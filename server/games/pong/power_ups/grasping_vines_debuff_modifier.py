@@ -63,3 +63,8 @@ class GraspingVinesDebuffModifier(PongTimeLimitedModifierBase):
 
         game.player_paddles[player_id]["speed"] = self.player_speeds[player_id] * (1.0 - self.vine_count[player_id] * self.vine_strength / 100.0)
 
+    def on_deactivation(self, game: MultiplayerPong):
+        super().on_deactivation(game)
+
+        game.power_up_manager.deactivate_power_up(self)
+

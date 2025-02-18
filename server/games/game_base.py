@@ -47,8 +47,8 @@ class GameBase():
 
     def spawn_power_up(self, position: tuple, rng: random.Random):
         """Spawns a power_up at the designated position"""
-        self.power_up_manager.spawn_power_up(rng, position)
-        self.trigger_modifiers("on_power_up_spawn", power_up=self.power_up_manager.spawned_power_ups[-1])
+        if  self.power_up_manager.spawn_power_up(rng, position):
+            self.trigger_modifiers("on_power_up_spawn", power_up=(self.power_up_manager.spawned_power_ups[-1]))
 
     def trigger_modifiers(self, method, *args, **kwargs):
         """Triggers method on modifiers if applicable, forwarding extra arguments."""

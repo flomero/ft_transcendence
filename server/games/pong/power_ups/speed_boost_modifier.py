@@ -22,8 +22,7 @@ class SpeedBoostModifier(PongTimeLimitedModifierBase):
 
     def on_deactivation(self, game: MultiplayerPong):
         super().on_deactivation(game)
-        if self in game.power_up_manager.active_power_ups:
-            game.power_up_manager.active_power_ups.remove(self)
+        game.power_up_manager.deactivate_power_up(self)
 
     def on_goal(self, game, player_id=-1):
         """On goal, deactivates itself"""

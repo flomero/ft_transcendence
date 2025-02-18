@@ -111,3 +111,8 @@ class BlackHoleDebuffModifier(PongTimeLimitedModifierBase):
             self.affected_players.remove(player_id)
             if len(self.affected_players) <= 0:
                 self.deactivate(game)
+
+    def on_deactivation(self, game: MultiplayerPong):
+        super().on_deactivation(game)
+
+        game.power_up_manager.deactivate_power_up(self)
