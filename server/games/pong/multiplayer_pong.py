@@ -164,6 +164,8 @@ class MultiplayerPong(GameBase):
         self.player_paddles[player_id]["y"] += direction * self.player_paddles[player_id]["speed"] * self.player_paddles[player_id]["dy"]
         self.player_paddles[player_id]["displacement"] += direction * self.paddle_speed_width_percent
 
+        self.trigger_modifiers('on_player_movement', player_id=player_id)
+
     def reset_ball(self, ball_id=-1):
         """Reset ball position and speed."""
         random_angle = random.random() * math.pi * 2.0

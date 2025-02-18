@@ -45,7 +45,12 @@
               "player_elimination_arena_effect_modifier",
               "default_wall_bounce_speedboost_game_modifier"
             ],
-            power_ups: ["invisible_ball_modifier", "multiball_modifier", "speed_boost_modifier"],
+            power_ups: [
+              "grasping_vines_debuff_modifier",
+              "invisible_ball_modifier",
+              "multiball_modifier",
+              "speed_boost_modifier"
+              ],
             player_count: player_count,
             start_game: true,
           })
@@ -160,6 +165,10 @@
 
                 case "multiball_modifier":
                   ctx.fillStyle = "green";
+                  break;
+
+                case "grasping_vines_debuff_modifier":
+                  ctx.fillStyle = "yellow";
                   break;
               }
               ctx.beginPath();

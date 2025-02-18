@@ -51,3 +51,7 @@ class PongModifierBase:
     def on_player_elimination(self, game, player_id):
         """Called when a player is eliminated"""
         pass
+
+    def on_player_movement(self, game, player_id):
+        """Called when a player moves"""
+        pass

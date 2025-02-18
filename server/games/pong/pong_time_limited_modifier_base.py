@@ -12,6 +12,7 @@ class PongTimeLimitedModifierBase(PongModifierBase):
     def activate(self, game, player_id=-1):
         self.active = True
         self.ticks = self.duration
+        self.player_id = player_id
         self.on_activation(game)
 
     def on_update(self, game):
