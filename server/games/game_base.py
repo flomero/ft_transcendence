@@ -13,7 +13,7 @@ class GameBase():
         self.tick_data = None
         self.power_up_manager = PowerUpManager(power_ups, game_name, game_mode)
 
-    def update(self):
+    async def update(self):
         """Advances the game by 1 tick"""
         pass
 
@@ -23,11 +23,11 @@ class GameBase():
         print(f"Game started")
         self.trigger_modifiers('on_game_start')
 
-    def rewind(self, to_tick):
+    async def rewind(self, to_tick):
         """Rewind the game state to a specific time"""
         pass
 
-    def fast_forward(self, tick_count):
+    async def fast_forward(self, tick_count):
         """Replays the game until current state"""
         pass
 
@@ -41,7 +41,7 @@ class GameBase():
         """Restores a game state snapshot."""
         pass
 
-    def handle_action(self, action):
+    async def handle_action(self, action):
         """Handle client action"""
         pass
 

@@ -1,6 +1,7 @@
 import math
 import random
 import time
+import asyncio
 from collections import deque
 from games.game_base import GameBase
 from games.physics_engine import PhysicsEngine
@@ -21,6 +22,7 @@ class MultiplayerPong(GameBase):
         self.server_max_delay_ticks = GAME_REGISTRY["pong"]["server_max_delay_ticks"]
 
         # Network playability related
+        self.tick_data_lock = asyncio.Lock()  # Protect shared tick_data
         self.tick_data = deque(maxlen=self.server_max_delay_ticks)
         self.rng = random.Random(self.start_time_ms)
 
@@ -37,7 +39,7 @@ class MultiplayerPong(GameBase):
         self.walls = []
         self.player_paddles = []
 
-    def update(self):
+    async def update(self):
         """Calulcate the next game state"""
         if self.start_game:
             for ball in self.balls:
@@ -45,10 +47,20 @@ class MultiplayerPong(GameBase):
                     self.do_collision_checks(ball)
             self.trigger_modifiers('on_update')
 
-            self.last_update_time = int(time.time() * 1000)
-            self.tick_data.append(self.get_state_snapshot())
+            snapshot = self.get_state_snapshot()
+            async with self.tick_data_lock:
+                self.last_update_time = int(time.time() * 1000)
+                self.tick_data.append(snapshot)
 
-    def handle_action(self, action):
+    def simulate_tick(self):
+        """Simulate 1 server tick"""
+        if self.start_game:
+            for ball in self.balls:
+                if ball["do_collision"]:
+                    self.do_collision_checks(ball)
+            self.trigger_modifiers('on_update')
+
+    async def handle_action(self, action):
         """Handle client action"""
         # print(f"Received action: {action}")
 
@@ -57,14 +69,14 @@ class MultiplayerPong(GameBase):
         #    -> handle ping compensation
 
         delay_ms = self.last_update_time - action['timestamp']
-        delay_ticks = round(delay_ms // self.server_tickrate_ms)
+        delay_ticks = round(delay_ms / self.server_tickrate_ms)
 
-        print(f"Timestamps:")
-        print(f"  |- last update: {self.last_update_time}")
-        print(f"  |- user input : {action['timestamp']}")
-        print(f"  |--> delay ms    : {delay_ms}")
-        print(f"  |--> delay ticks : {delay_ticks}")
-        print()
+        # print(f"Timestamps:")
+        # print(f"  |- last update: {self.last_update_time}")
+        # print(f"  |- user input : {action['timestamp']}")
+        # print(f"  |--> delay ms    : {delay_ms}")
+        # print(f"  |--> delay ticks : {delay_ticks}")
+        # print()
 
         if delay_ticks > self.server_max_delay_ticks:
             print(f"Player {action['player_id']} has really high ping -> disconnecting")
@@ -73,6 +85,7 @@ class MultiplayerPong(GameBase):
 
         # Rewind game state delay_ticks
         if delay_ticks > 0:
+            print(f"Rewinding {delay_ticks} ticks")
             self.rewind(delay_ticks)
 
         # Apply user_input
@@ -85,7 +98,8 @@ class MultiplayerPong(GameBase):
 
         # Fast-forward to go bak to the current tick
         if delay_ticks > 0:
-            self.fast_forward(delay_ticks)
+            print(f"Fast-forwarding {delay_ticks} ticks")
+            await self.fast_forward(delay_ticks)
 
     def get_state_snapshot(self):
         """Returns the current game state"""
@@ -115,9 +129,20 @@ class MultiplayerPong(GameBase):
 
         self.load_state_snapshot(self.tick_data[-to_tick])
 
-    def fast_forward(self, tick_count):
+    async def fast_forward(self, tick_count):
         """Plays tick_count updates in a row"""
-        pass
+        # Remove the outdated ticks from the end.
+        async with self.tick_data_lock:
+            for _ in range(tick_count):
+                if self.tick_data:  # safety check in case deque is empty
+                    self.tick_data.pop()
+
+        # Now, re-simulate the ticks one by one.
+        for _ in range(tick_count):
+            self.simulate_tick()
+            snapshot = self.get_state_snapshot()
+            async with self.tick_data_lock:
+                self.tick_data.append(snapshot)
 
     def move_paddle(self, player_id, direction):
         """Moves player_id's paddle in direction"""

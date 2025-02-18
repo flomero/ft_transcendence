@@ -21,7 +21,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         match(data.get('type')):
             case 'user_input':
                 if self.running:
-                    self.game.handle_action(data)
+                    await self.game.handle_action(data)
 
             case 'game_creation':
 
@@ -68,7 +68,7 @@ class GameConsumer(AsyncWebsocketConsumer):
     async def run_game_loop(self):
         """Game loop: Update game state and send it to clients."""
         while self.running:
-            self.game.update()
+            await self.game.update()
             await self.send(json.dumps(self.game.get_state_snapshot()))
             await asyncio.sleep(self.game.server_tickrate_ms / 1000.0)
 
