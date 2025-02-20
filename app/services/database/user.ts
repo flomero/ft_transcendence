@@ -6,5 +6,9 @@ export interface User {
 }
 
 export async function insertUserIfNotExists(fastify: FastifyInstance, user: User) {
-    await fastify.sqlite.run('INSERT INTO users (id, username) VALUES (?, ?) ON CONFLICT DO NOTHING', [user.id, user.username]);
+    const sql = `
+    INSERT INTO users (id, username)
+    VALUES (?, ?) ON CONFLICT DO NOTHING
+    `;
+    await fastify.sqlite.run(sql, [user.id, user.username]);
 }
