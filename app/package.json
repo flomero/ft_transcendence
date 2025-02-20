@@ -24,7 +24,8 @@
     "fastify-cli": "^7.3.0",
     "fastify-plugin": "^5.0.1",
     "sqlite": "^5.1.1",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@types/node": "^22.13.1",
