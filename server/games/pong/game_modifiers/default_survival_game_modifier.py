@@ -1,8 +1,8 @@
-from ..pong_modifier_base import PongModifierBase
+from ...modifier_base import ModifierBase
 from ..multiplayer_pong import MultiplayerPong
 
 
-class DefaultSurvivalGameModifier(PongModifierBase):
+class DefaultSurvivalGameModifier(ModifierBase):
     name = "default_survival_game_modifier"
 
     def __init__(self):

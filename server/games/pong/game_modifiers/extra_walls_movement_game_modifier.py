@@ -1,9 +1,9 @@
 import random
-from ..pong_modifier_base import PongModifierBase
+from ...modifier_base import ModifierBase
 from ...game_registry import GAME_REGISTRY
 
 
-class ExtraWallsMovementGameModifier(PongModifierBase):
+class ExtraWallsMovementGameModifier(ModifierBase):
     name = "extra_walls_movement_game_modifier"
 
     def __init__(self):

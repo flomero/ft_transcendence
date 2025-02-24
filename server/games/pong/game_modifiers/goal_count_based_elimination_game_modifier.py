@@ -1,9 +1,9 @@
-from ..pong_modifier_base import PongModifierBase
+from ...modifier_base import ModifierBase
 from ...game_registry import GAME_REGISTRY
 from ..multiplayer_pong import MultiplayerPong
 
 
-class GoalCountBasedEliminationGameModifier(PongModifierBase):
+class GoalCountBasedEliminationGameModifier(ModifierBase):
     name = "goal_count_based_elimination_game_modifier"
 
     def __init__(self):

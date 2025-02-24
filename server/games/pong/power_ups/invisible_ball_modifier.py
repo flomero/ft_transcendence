@@ -1,10 +1,10 @@
 import random
 import math
-from games.pong.pong_time_limited_modifier_base import PongTimeLimitedModifierBase
+from games.time_limited_modifier_base import TimeLimitedModifierBase
 from games.game_registry import GAME_REGISTRY
 from games.pong.multiplayer_pong import MultiplayerPong
 
-class InvisibleBallModifier(PongTimeLimitedModifierBase):
+class InvisibleBallModifier(TimeLimitedModifierBase):
     """Makes the ball disappear & randomly change direction."""
     name = "invisible_ball_modifier"
 

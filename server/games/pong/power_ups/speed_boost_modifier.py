@@ -1,8 +1,8 @@
-from games.pong.pong_time_limited_modifier_base import PongTimeLimitedModifierBase
+from games.time_limited_modifier_base import TimeLimitedModifierBase
 from games.game_registry import GAME_REGISTRY
 from games.pong.multiplayer_pong import MultiplayerPong
 
-class SpeedBoostModifier(PongTimeLimitedModifierBase):
+class SpeedBoostModifier(TimeLimitedModifierBase):
     """Increases ball speed every updates for a duration."""
     name = "speed_boost_modifier"
 

@@ -1,9 +1,9 @@
-from ..pong_time_limited_modifier_base import PongTimeLimitedModifierBase
+from ...time_limited_modifier_base import TimeLimitedModifierBase
 from ..multiplayer_pong import MultiplayerPong
 from ...game_registry import GAME_REGISTRY
 
 
-class DefaultTimeLimitedGameModifier(PongTimeLimitedModifierBase):
+class DefaultTimeLimitedGameModifier(TimeLimitedModifierBase):
     name = "default_time_limited_game_modifier"
 
     def __init__(self):

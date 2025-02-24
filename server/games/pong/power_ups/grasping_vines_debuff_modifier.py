@@ -1,9 +1,9 @@
-from ..pong_time_limited_modifier_base import PongTimeLimitedModifierBase
+from ...time_limited_modifier_base import TimeLimitedModifierBase
 from ...game_registry import GAME_REGISTRY
 from ..multiplayer_pong import MultiplayerPong
 
 
-class GraspingVinesDebuffModifier(PongTimeLimitedModifierBase):
+class GraspingVinesDebuffModifier(TimeLimitedModifierBase):
     name = "grasping_vines_debuff_modifier"
 
     def __init__(self):

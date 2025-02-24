@@ -1,18 +1,26 @@
 
 
-class PongModifierBase:
+class ModifierBase:
     name = ""
+
     def __init__(self):
         self.spawn_weight = 0       # used for spwan chance calculations
         self.player_id = -1         # -1 Until added to a player inventory
+        self.active = False
         pass                        #   for general game modifiers, keep -1
 
     def activate(self, game, player_id=-1):
         """Activates the modifier"""
+        self.active = True
         self.player_id = player_id
         self.on_activation(game)
 
-    def on_update(self, game, player_id=-1):
+    def deactivate(self, game):
+        """Deactivate the modifier"""
+        self.active = False
+        self.on_deactivation(game)
+
+    def on_update(self, game):
         """Called every game tick."""
         pass
 
@@ -37,6 +45,10 @@ class PongModifierBase:
         pass
 
     def on_activation(self, game, player_id=-1):
+        """Called when the modifier is activated"""
+        pass
+
+    def on_deactivation(self, game, player_id=-1):
         """Called when the modifier is activated"""
         pass
 

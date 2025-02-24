@@ -1,9 +1,9 @@
-from ..pong_modifier_base import PongModifierBase
+from ...modifier_base import ModifierBase
 from ..multiplayer_pong import MultiplayerPong
 from ...game_registry import GAME_REGISTRY
 
 
-class PowerUpsTester(PongModifierBase):
+class PowerUpsTester(ModifierBase):
     name = "power_ups_tester"
 
     def __init__(self):
