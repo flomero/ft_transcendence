@@ -29,13 +29,17 @@ class PlayerEliminationArenaEffectModifier(PongModifierBase):
         ]
 
         leftmost = {
-            "x": self.walls[0]["x"],
-            "y": self.walls[0]["y"],
+            "x": self.walls[0]["abs_x"] + game.wall_distance,
+            "y": self.walls[0]["abs_y"] + game.wall_distance,
+            "abs_x": self.walls[0]["abs_x"],
+            "abs_y": self.walls[0]["abs_y"],
         }
 
         rightmost = {
-            "x": self.walls[2]["x"],
-            "y": self.walls[2]["y"],
+            "x": self.walls[2]["abs_x"] + game.wall_distance,
+            "y": self.walls[2]["abs_y"] + game.wall_distance,
+            "abs_x": self.walls[2]["abs_x"],
+            "abs_y": self.walls[2]["abs_y"],
         }
 
         self.walls.append({
@@ -47,6 +51,8 @@ class PlayerEliminationArenaEffectModifier(PongModifierBase):
             "visible": True,
             "dx": self.walls[1]["dx"],
             "dy": self.walls[1]["dy"],
+            "abs_x": (leftmost["abs_x"] + rightmost["abs_x"]) / 2.0,
+            "abs_y": (leftmost["abs_y"] + rightmost["abs_y"]) / 2.0,
         })
 
         game.walls[wall_ids[0]]["width"] /= 1.05

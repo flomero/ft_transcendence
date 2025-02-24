@@ -93,6 +93,8 @@ class ModedMultiplayerPong(MultiplayerPong):
                 wall["nx"] = - wall["x"] / tmp
                 wall["ny"] = - wall["y"] / tmp
 
+            wall["abs_x"] = wall["x"]
+            wall["abs_y"] = wall["y"]
             wall["x"] += self.wall_distance
             wall["y"] += self.wall_distance
 
@@ -111,6 +113,8 @@ class ModedMultiplayerPong(MultiplayerPong):
                 "ny": math.cos(math.pi / 4.0),
                 "dx": math.cos(math.pi / 4.0),
                 "dy": -math.sin(math.pi / 4.0),
+                "abs_x": self.wall_distance,
+                "abs_y": self.wall_distance
             }
         )
 
@@ -157,74 +161,110 @@ class ModedMultiplayerPong(MultiplayerPong):
 
     def rotate_walls(self, alpha=0.0):
         """Rotates the walls"""
-        # Compute the main wall width (same as in init_walls)
-        wall_width = 2.0 * math.sin(math.pi / (2.0 * self.player_count)) * (
-            self.wall_distance * (1 + 1 / (self.player_count + 0.5))
-        )
+        center_x, center_y = self.wall_distance, self.wall_distance
+        cos_a = math.cos(alpha)
+        sin_a = math.sin(alpha)
 
-        # --- Update the main walls (first 2*player_count walls) ---
-        for i in range(2 * self.player_count):
-            wall = self.walls[i]
+        for id, wall in enumerate(self.walls):
+            if id >= 2 * self.player_count:
+                continue
 
-            base_angle = math.pi + math.pi * i / self.player_count
-            new_angle = base_angle + alpha
+            # Retrieve the stored absolute base position (relative to center)
+            base_x = wall["abs_x"]
+            base_y = wall["abs_y"]
 
-            factor = self.wall_distance - (self.wall_height * (i % 2))
-            base_x = factor * math.cos(new_angle)
-            base_y = factor * math.sin(new_angle)
+            # Rotate the base position by alpha using the standard 2D rotation:
+            #   new_x = base_x*cos(alpha) - base_y*sin(alpha)
+            #   new_y = base_x*sin(alpha) + base_y*cos(alpha)
+            rotated_x = base_x * cos_a - base_y * sin_a
+            rotated_y = base_x * sin_a + base_y * cos_a
 
-            # Compute the normal vector (points inward)
-            norm = math.hypot(base_x, base_y)
+            # Update the wall's absolute position by adding the center offset.
+            wall["x"] = round(rotated_x + center_x, 3)
+            wall["y"] = round(rotated_y + center_y, 3)
+
+            # Update the wall's orientation based on the rotated position.
+            new_angle = math.atan2(rotated_y, rotated_x)
+            wall["alpha"] = round(new_angle, 3)
+
+            # Recalculate the inward-pointing normal vector.
+            norm = math.hypot(rotated_x, rotated_y)
             if norm != 0:
-                wall["nx"] = -base_x / norm
-                wall["ny"] = -base_y / norm
+                wall["nx"] = -rotated_x / norm
+                wall["ny"] = -rotated_y / norm
 
-            # Lateral direction (perpendicular to normal)
+            # Update the lateral (movement) vector as perpendicular to the normal.
             wall["dx"] = wall["ny"]
             wall["dy"] = -wall["nx"]
 
-            # Adjust the position with the arena's coordinate offset.
-            wall["x"] = round(base_x + self.wall_distance, 3)
-            wall["y"] = round(base_y + self.wall_distance, 3)
-            wall["alpha"] = round(new_angle, 3)
+        # # Compute the main wall width (same as in init_walls)
+        # wall_width = 2.0 * math.sin(math.pi / (2.0 * self.player_count)) * (
+        #     self.wall_distance * (1 + 1 / (self.player_count + 0.5))
+        # )
 
-            # Update dimensions (main walls)
-            wall["width"] = round(wall_width, 3)
-            wall["height"] = self.wall_height
+        # # --- Update the main walls (first 2*player_count walls) ---
+        # for i in range(2 * self.player_count):
+        #     wall = self.walls[i]
+
+        #     base_angle = math.pi + math.pi * i / self.player_count
+        #     new_angle = base_angle + alpha
+
+        #     factor = self.wall_distance - (self.wall_height * (i % 2))
+        #     base_x = factor * math.cos(new_angle)
+        #     base_y = factor * math.sin(new_angle)
+
+        #     # Compute the normal vector (points inward)
+        #     norm = math.hypot(base_x, base_y)
+        #     if norm != 0:
+        #         wall["nx"] = -base_x / norm
+        #         wall["ny"] = -base_y / norm
+
+        #     # Lateral direction (perpendicular to normal)
+        #     wall["dx"] = wall["ny"]
+        #     wall["dy"] = -wall["nx"]
+
+        #     # Adjust the position with the arena's coordinate offset.
+        #     wall["x"] = round(base_x + self.wall_distance, 3)
+        #     wall["y"] = round(base_y + self.wall_distance, 3)
+        #     wall["alpha"] = round(new_angle, 3)
+
+        #     # Update dimensions (main walls)
+        #     wall["width"] = round(wall_width, 3)
+        #     wall["height"] = self.wall_height
 
         # --- Update the extra walls (if any) ---
         # These walls are added when player_count > 2.
-        extra_walls_start = 2 * self.player_count
-        extra_count = len(self.walls) - extra_walls_start
-        if extra_count > 0:
-            for j in range(extra_count):
-                wall = self.walls[extra_walls_start + j]
-                # In the extra walls, the original comprehension used:
-                #   base_angle = math.pi * (i + 1.0) / self.player_count + math.pi,
-                # where i in range(0, 2*player_count, 2). Recover that:
-                i_val = j * 2  # i originally went 0, 2, 4, …
-                base_angle = math.pi + math.pi * (i_val + 1.0) / self.player_count
-                new_angle = base_angle + alpha
+        # extra_walls_start = 2 * self.player_count
+        # extra_count = len(self.walls) - extra_walls_start
+        # if extra_count > 0:
+        #     for j in range(extra_count):
+        #         wall = self.walls[extra_walls_start + j]
+        #         # In the extra walls, the original comprehension used:
+        #         #   base_angle = math.pi * (i + 1.0) / self.player_count + math.pi,
+        #         # where i in range(0, 2*player_count, 2). Recover that:
+        #         i_val = j * 2  # i originally went 0, 2, 4, …
+        #         base_angle = math.pi + math.pi * (i_val + 1.0) / self.player_count
+        #         new_angle = base_angle + alpha
 
-                # For extra walls, the radial distance is fixed at 3/5 of wall_distance.
-                base_x = (self.wall_distance * 3.0 / 5.0) * math.cos(new_angle)
-                base_y = (self.wall_distance * 3.0 / 5.0) * math.sin(new_angle)
+        #         # For extra walls, the radial distance is fixed at 3/5 of wall_distance.
+        #         base_x = (self.wall_distance * 3.0 / 5.0) * math.cos(new_angle)
+        #         base_y = (self.wall_distance * 3.0 / 5.0) * math.sin(new_angle)
 
-                norm = math.hypot(base_x, base_y)
-                if norm != 0:
-                    wall["nx"] = -base_x / norm
-                    wall["ny"] = -base_y / norm
+        #         norm = math.hypot(base_x, base_y)
+        #         if norm != 0:
+        #             wall["nx"] = -base_x / norm
+        #             wall["ny"] = -base_y / norm
 
-                wall["dx"] = wall["ny"]
-                wall["dy"] = -wall["nx"]
+        #         wall["dx"] = wall["ny"]
+        #         wall["dy"] = -wall["nx"]
 
-                wall["x"] = round(base_x + self.wall_distance, 3)
-                wall["y"] = round(base_y + self.wall_distance, 3)
-                wall["alpha"] = round(new_angle, 3)
+        #         wall["x"] = round(base_x + self.wall_distance, 3)
+        #         wall["y"] = round(base_y + self.wall_distance, 3)
+        #         wall["alpha"] = round(new_angle, 3)
 
-                # Update dimensions for extra walls
-                wall["width"] = round(self.wall_height / 2.5, 3)
-                wall["height"] = round(wall_width / 6.5, 3)
+        #         # Update dimensions for extra walls
+        #         wall["width"] = round(self.wall_height / 2.5, 3)
+        #         wall["height"] = round(wall_width / 6.5, 3)
 
     def get_state_snapshot(self):
         snapshot = super().get_state_snapshot()

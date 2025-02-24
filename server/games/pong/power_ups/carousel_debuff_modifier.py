@@ -33,8 +33,8 @@ class CarouselDebuffModifier(PongTimeLimitedModifierBase):
     def on_deactivation(self, game: MultiplayerPong):
         super().on_deactivation(game)
 
-        game.init_paddles()
-        game.init_walls()
+        game.rotate_paddles()
+        game.rotate_walls()
 
         game.power_up_manager.deactivate_power_up(self)
 

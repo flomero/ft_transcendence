@@ -98,7 +98,7 @@
       },
       "goal_count_based_elimination_game_modifier": {
         "class_name": "GoalCountBasedEliminationGameModifier",
-        "life_count": 5
+        "life_count": 3
       }
     },
 
@@ -141,9 +141,9 @@
       },
       "carousel_debuff_modifier": {
         "class_name": "CarouselDebuffModifier",
-        "spawn_weight": 1.5,
-        "steps_per_degree": 1,
-        "ticks_per_steps": 5
+        "spawn_weight": 1.0,
+        "steps_per_degree": 3,
+        "ticks_per_steps": 1
       }
     }
   }
