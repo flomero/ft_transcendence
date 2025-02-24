@@ -35,6 +35,7 @@ class MultiplayerPong(GameBase):
         self.paddle_movement_speed = 0.0
 
         # Game objects -> w/ collisions
+        self.player_paddles_lock = asyncio.Lock()
         self.balls = []
         self.walls = []
         self.player_paddles = []
@@ -42,6 +43,12 @@ class MultiplayerPong(GameBase):
     async def update(self):
         """Calulcate the next game state"""
         if self.start_game:
+
+            async with self.player_paddles_lock:
+                for paddle in self.player_paddles:
+                    if paddle["velocity"] != 0.0:
+                        self.update_paddle(paddle)
+
             for ball in self.balls:
                 if ball["do_collision"]:
                     self.do_collision_checks(ball)
@@ -62,21 +69,13 @@ class MultiplayerPong(GameBase):
 
     async def handle_action(self, action):
         """Handle client action"""
-        # print(f"Received action: {action}")
 
-        # Handle paddle movement action
-        # Handle use_modifier action
-        #    -> handle ping compensation
+        if not action["player_id"] in range(self.player_count):
+            print(f"Can't handle player {action['player_id']}'s action: game has {self.player_count} players")
+            return
 
         delay_ms = self.last_update_time - action['timestamp']
         delay_ticks = round(delay_ms / self.server_tickrate_ms)
-
-        # print(f"Timestamps:")
-        # print(f"  |- last update: {self.last_update_time}")
-        # print(f"  |- user input : {action['timestamp']}")
-        # print(f"  |--> delay ms    : {delay_ms}")
-        # print(f"  |--> delay ticks : {delay_ticks}")
-        # print()
 
         if delay_ticks > self.server_max_delay_ticks:
             print(f"Player {action['player_id']} has really high ping -> disconnecting")
@@ -91,10 +90,16 @@ class MultiplayerPong(GameBase):
         # Apply user_input
         match(action["action"]):
             case 'UP':
-                self.move_paddle(action['player_id'], 1)
+                async with self.player_paddles_lock:
+                    self.player_paddles[action["player_id"]]["velocity"] = self.player_paddles[action["player_id"]]["speed"]
 
             case 'DOWN':
-                self.move_paddle(action['player_id'], -1)
+                async with self.player_paddles_lock:
+                    self.player_paddles[action["player_id"]]["velocity"] = -self.player_paddles[action["player_id"]]["speed"]
+
+            case 'STOP':
+                async with self.player_paddles_lock:
+                    self.player_paddles[action["player_id"]]["velocity"] = 0.0
 
         # Fast-forward to go bak to the current tick
         if delay_ticks > 0:
@@ -144,27 +149,25 @@ class MultiplayerPong(GameBase):
             async with self.tick_data_lock:
                 self.tick_data.append(snapshot)
 
-    def move_paddle(self, player_id, direction):
-        """Moves player_id's paddle in direction"""
+    def update_paddle(self, paddle):
+        """Update the paddle using it's velocity"""
 
-        if not player_id in range(self.player_count):
-            print(f"Trying to move {player_id}'s paddle when there's {self.player_count} players")
+        if not paddle["do_move"]:
+            print(f"Player {self.player_paddles.index(paddle)}'s paddle can't be moved")
             return
 
-        if not self.player_paddles[player_id]["do_move"]:
-            print(f"Player {player_id}'s paddle can't be moved")
-            return
+        direction = 1 if paddle["velocity"] > 0 else -1
 
-        if  (direction > 0 and self.player_paddles[player_id]["displacement"]) > (50 - self.player_paddles[player_id]["coverage"] / 2.0) or \
-            (direction < 0 and self.player_paddles[player_id]["displacement"]) < -(50 - self.player_paddles[player_id]["coverage"] / 2.0):
+        if  (direction > 0 and paddle["displacement"]) > (50 - paddle["coverage"] / 2.0) or \
+            (direction < 0 and paddle["displacement"]) < -(50 - paddle["coverage"] / 2.0):
             print(f"Can't move in this direction anymore")
             return
 
-        self.player_paddles[player_id]["x"] += direction * self.player_paddles[player_id]["speed"] * self.player_paddles[player_id]["dx"]
-        self.player_paddles[player_id]["y"] += direction * self.player_paddles[player_id]["speed"] * self.player_paddles[player_id]["dy"]
-        self.player_paddles[player_id]["displacement"] += direction * self.paddle_speed_width_percent
+        paddle["x"] += paddle["velocity"] * paddle["dx"]
+        paddle["y"] += paddle["velocity"] * paddle["dy"]
+        paddle["displacement"] += direction * self.paddle_speed_width_percent
 
-        self.trigger_modifiers('on_player_movement', player_id=player_id)
+        self.trigger_modifiers('on_player_movement', player_id=self.player_paddles.index(paddle))
 
     def reset_ball(self, ball_id=-1):
         """Reset ball position and speed."""

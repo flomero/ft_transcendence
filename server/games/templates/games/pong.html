@@ -83,6 +83,20 @@
         }
       });
 
+      document.addEventListener("keyup", (event) => {
+        let action = {
+          "type": "user_input",
+          "action": null,
+          "timestamp": Date.now(),
+          "player_id": player_id
+        };
+        if  (event.key === "ArrowUp" || event.key === "ArrowDown") action["action"] = "STOP";
+
+        if (action["action"]) {
+          socket.send(JSON.stringify(action));
+        }
+      })
+
       let gameState = {};
       let lastUpdateTime = performance.now();
 

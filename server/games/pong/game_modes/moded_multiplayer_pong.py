@@ -38,6 +38,7 @@ class ModedMultiplayerPong(MultiplayerPong):
                 "coverage": self.paddle_coverage,
                 "width":  paddle_amplitude * (self.paddle_coverage / 100.0),
                 "height": self.paddle_height,
+                "velocity": 0.0,
                 "speed":  paddle_amplitude * (self.paddle_speed_width_percent / 100.0),
                 "displacement": 0.0,
                 "visible": True,
@@ -196,75 +197,6 @@ class ModedMultiplayerPong(MultiplayerPong):
             # Update the lateral (movement) vector as perpendicular to the normal.
             wall["dx"] = wall["ny"]
             wall["dy"] = -wall["nx"]
-
-        # # Compute the main wall width (same as in init_walls)
-        # wall_width = 2.0 * math.sin(math.pi / (2.0 * self.player_count)) * (
-        #     self.wall_distance * (1 + 1 / (self.player_count + 0.5))
-        # )
-
-        # # --- Update the main walls (first 2*player_count walls) ---
-        # for i in range(2 * self.player_count):
-        #     wall = self.walls[i]
-
-        #     base_angle = math.pi + math.pi * i / self.player_count
-        #     new_angle = base_angle + alpha
-
-        #     factor = self.wall_distance - (self.wall_height * (i % 2))
-        #     base_x = factor * math.cos(new_angle)
-        #     base_y = factor * math.sin(new_angle)
-
-        #     # Compute the normal vector (points inward)
-        #     norm = math.hypot(base_x, base_y)
-        #     if norm != 0:
-        #         wall["nx"] = -base_x / norm
-        #         wall["ny"] = -base_y / norm
-
-        #     # Lateral direction (perpendicular to normal)
-        #     wall["dx"] = wall["ny"]
-        #     wall["dy"] = -wall["nx"]
-
-        #     # Adjust the position with the arena's coordinate offset.
-        #     wall["x"] = round(base_x + self.wall_distance, 3)
-        #     wall["y"] = round(base_y + self.wall_distance, 3)
-        #     wall["alpha"] = round(new_angle, 3)
-
-        #     # Update dimensions (main walls)
-        #     wall["width"] = round(wall_width, 3)
-        #     wall["height"] = self.wall_height
-
-        # --- Update the extra walls (if any) ---
-        # These walls are added when player_count > 2.
-        # extra_walls_start = 2 * self.player_count
-        # extra_count = len(self.walls) - extra_walls_start
-        # if extra_count > 0:
-        #     for j in range(extra_count):
-        #         wall = self.walls[extra_walls_start + j]
-        #         # In the extra walls, the original comprehension used:
-        #         #   base_angle = math.pi * (i + 1.0) / self.player_count + math.pi,
-        #         # where i in range(0, 2*player_count, 2). Recover that:
-        #         i_val = j * 2  # i originally went 0, 2, 4, …
-        #         base_angle = math.pi + math.pi * (i_val + 1.0) / self.player_count
-        #         new_angle = base_angle + alpha
-
-        #         # For extra walls, the radial distance is fixed at 3/5 of wall_distance.
-        #         base_x = (self.wall_distance * 3.0 / 5.0) * math.cos(new_angle)
-        #         base_y = (self.wall_distance * 3.0 / 5.0) * math.sin(new_angle)
-
-        #         norm = math.hypot(base_x, base_y)
-        #         if norm != 0:
-        #             wall["nx"] = -base_x / norm
-        #             wall["ny"] = -base_y / norm
-
-        #         wall["dx"] = wall["ny"]
-        #         wall["dy"] = -wall["nx"]
-
-        #         wall["x"] = round(base_x + self.wall_distance, 3)
-        #         wall["y"] = round(base_y + self.wall_distance, 3)
-        #         wall["alpha"] = round(new_angle, 3)
-
-        #         # Update dimensions for extra walls
-        #         wall["width"] = round(self.wall_height / 2.5, 3)
-        #         wall["height"] = round(wall_width / 6.5, 3)
 
     def get_state_snapshot(self):
         snapshot = super().get_state_snapshot()

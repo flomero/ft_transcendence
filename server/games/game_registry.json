@@ -2,7 +2,7 @@
   "pong": {
     "server_tickrate_ms": 30,
     "server_max_delay_ticks": 100,
-    "paddle_speed_width_percent": 5,
+    "paddle_speed_width_percent": 3,
 
     "game_modes": {
       "vanilla_duel_pong": {
