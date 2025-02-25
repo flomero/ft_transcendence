@@ -30,4 +30,8 @@ export default fp(async (fastify) => {
       migrationsPath: '../app/database/migrations'
     });
   });
-})
+
+  fastify.addHook('onClose', async (instance) => {
+    await db.close();
+  })
+});
