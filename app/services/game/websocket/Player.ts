@@ -1,31 +1,19 @@
-// ************************************************************************** //
-//                                                                            //
-//                                                        :::      ::::::::   //
-//   Player.ts                                          :+:      :+:    :+:   //
-//                                                    +:+ +:+         +:+     //
-//   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        //
-//                                                +#+#+#+#+#+   +#+           //
-//   Created: 2025/02/24 14:04:45 by fgabler           #+#    #+#             //
-//   Updated: 2025/02/24 16:16:33 by fgabler          ###   ########.fr       //
-//                                                                            //
-// ************************************************************************** //
-
 import WebSocket from "ws";
 
-//type States = "WaitingForMessage" | "InGameLobby" | "PlayingGame";
+export type States = "WaitingForMessage" | "InGameLobby" | "PlayingGame";
 
 class Player {
   private _playerId: string;
   private _socketConnection: WebSocket;
   private _userName:string = "unknown";
- // private _currentState: States;
+  private _currentState: States;
 
 
   constructor(playerId: string, socketConnection: WebSocket, userName: string) {
     this._playerId = playerId;
     this._socketConnection = socketConnection;
     this._userName = userName;
-//    this._currentState = "WaitingForMessage";
+    this._currentState = "WaitingForMessage";
   }
 
   sendMessage(message: string) {
@@ -40,9 +28,13 @@ class Player {
     return this._playerId;
   }
 
-  //set currentState(newState: States) {
-   // this._currentState = newState;
- // }
+  set currentState(newState: States) {
+    this._currentState = newState;
+  }
+
+  get currentState() {
+    return this._currentState;
+  }
 }
 
 export default Player;
