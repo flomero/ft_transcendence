@@ -52,6 +52,12 @@ export const userHook = async (req: FastifyRequest< UserRequestHeaders >, reply:
     reply.status(400).send({ error: 'Missing required headers' });
     return;
   }
+  const user = await req.server.sqlite.get("SELECT id FROM users WHERE id = ?", [userid]);
+
+  if (user === undefined) {
+    reply.status(401).send({ error: 'User not found' });
+    return;
+  }
   req.server.userId = userid;
   req.server.userName = userName;
 };
