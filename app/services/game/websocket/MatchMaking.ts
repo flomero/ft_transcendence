@@ -4,13 +4,14 @@ import Player from './Player';
 import { Database } from 'sqlite';
 
 class MatchMaking {
-  private matches!: Map <string, Match>;
+  matches!: Map <string, Match>;
 
   constructor() {
+    this.matches = new Map<string, Match>();
   }
 
   createaMatch(player: Player, gameOptions: GameOptions, db : Database) {
-    const match = new Match(player, gameOptions, db);
+    const match = new Match(gameOptions, db);
     match.addPlayerToGame(player);
     this.matches.set(match.matchId, match);
   }
@@ -28,6 +29,7 @@ class MatchMaking {
     if (this.matches.size === 0) {
       return undefined;
     }
+
     for (const match of this.matches.values()) {
       if (match.gameOptions.gameType === gameOptions.gameType
           && match.isGameFull() === false) {
@@ -35,6 +37,10 @@ class MatchMaking {
       }
     }
     return undefined;
+  }
+
+  get matchSize() {
+    return this.matches.size;
   }
 
   joinMatch(matchId: string, player: Player) {
@@ -47,6 +53,10 @@ class MatchMaking {
     }
   }
 
+  public printMatchStats(matchId: string) {
+    if (this.matches.get(matchId) !== undefined)
+      this.matches.get(matchId)?.printGameStats();
+  }
 }
 
 export default MatchMaking;
