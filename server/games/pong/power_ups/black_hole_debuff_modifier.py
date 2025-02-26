@@ -54,6 +54,7 @@ class BlackHoleDebuffModifier(TimeLimitedModifierBase):
 
     def on_update(self, game: MultiplayerPong):
         """If in range, pulls the main ball towards the player(s) acting as a black hole."""
+        super().on_update(game)
         ball = game.balls[0]
 
         # Get the current full velocity vector (velocity components scaled by speed)

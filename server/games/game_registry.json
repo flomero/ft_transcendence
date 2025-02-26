@@ -51,7 +51,7 @@
           "size": 0.75
         },
         "default_power_up_settings": {
-          "size": 1.75,
+          "size": 2.25,
           "exclusive_power_ups": [
             "black_hole_debuff_modifier",
             "carousel_debuff_modifier",
@@ -77,7 +77,7 @@
       },
       "default_power_up_spawner_game_modifier": {
         "class_name": "DefaultPowerUpSpawnerGameModifier",
-        "spawn_interval_center": 300,
+        "spawn_interval_center": 50,
         "spawn_interval_deviation": 25
       },
       "extra_walls_movement_game_modifier": {
@@ -97,7 +97,7 @@
       },
       "goal_count_based_elimination_game_modifier": {
         "class_name": "GoalCountBasedEliminationGameModifier",
-        "life_count": 3
+        "life_count": 5
       }
     },
 
@@ -133,9 +133,9 @@
       "black_hole_debuff_modifier": {
         "class_name": "BlackHoleDebuffModifier",
         "spawn_weight": 1.0,
-        "duration": 167,
+        "duration": 100,
         "debuff_count": 1,
-        "pull_strength": 3.5,
+        "pull_strength": 12.5,
         "pull_range": 75
       },
       "carousel_debuff_modifier": {
