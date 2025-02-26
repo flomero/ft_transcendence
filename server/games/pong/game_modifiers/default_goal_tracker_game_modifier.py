@@ -1,9 +1,8 @@
-from ...modifier_base import ModifierBase
+from ..pong_modifier_base import PongModifierBase
 from ..multiplayer_pong import MultiplayerPong
-from ...game_registry import GAME_REGISTRY
 
 
-class DefaultGoalTrackerGameModifier(ModifierBase):
+class DefaultGoalTrackerGameModifier(PongModifierBase):
     name = "default_goal_tracker_game_modifier"
 
     def __init__(self):

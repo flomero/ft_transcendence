@@ -1,4 +1,5 @@
 from ..game_base import GameBase
+from ..game_registry import GAME_REGISTRY
 from .tic_tac_toe_board import TicTacToeBoard
 
 
@@ -10,6 +11,7 @@ class EnhancedTicTacToe(GameBase):
 
         # Server related
         self.updated = True
+        self.server_tickrate_ms = GAME_REGISTRY[self.name]["server_tickrate_ms"]
 
         # Boards
         self.inner_boards = [[TicTacToeBoard() for _ in range(3)] for _ in range(3)]

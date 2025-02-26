@@ -1,14 +1,16 @@
 import math
-from ...time_limited_modifier_base import TimeLimitedModifierBase
+from ..pong_modifier_base import PongModifierBase
 from ...game_registry import GAME_REGISTRY
 from ..multiplayer_pong import MultiplayerPong
 
 
-class BlackHoleDebuffModifier(TimeLimitedModifierBase):
+class BlackHoleDebuffModifier(PongModifierBase):
     name = "black_hole_debuff_modifier"
 
-    def __init__(self):
+    def __init__(self, player_id):
         super().__init__()
+
+        self.player_id = player_id
 
         self.spawn_weight = GAME_REGISTRY["pong"]["power_ups"][self.name]["spawn_weight"]
         self.duration = GAME_REGISTRY["pong"]["power_ups"][self.name]["duration"]

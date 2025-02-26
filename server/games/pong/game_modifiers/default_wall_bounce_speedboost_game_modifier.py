@@ -1,9 +1,9 @@
-from ...modifier_base import ModifierBase
+from ..pong_modifier_base import PongModifierBase
 from ...game_registry import GAME_REGISTRY
 from ..multiplayer_pong import MultiplayerPong
 
 
-class DefaultWallBounceSpeedboostGameModifier(ModifierBase):
+class DefaultWallBounceSpeedboostGameModifier(PongModifierBase):
     name = "default_wall_bounce_speedboost_game_modifier"
 
     def __init__(self):

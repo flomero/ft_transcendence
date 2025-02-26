@@ -51,6 +51,6 @@ class PongPowerUpManager(PowerUpManager):
         """Deactivate given power up if active"""
         if power_up in self.active_power_ups:
             self.active_power_ups.remove(power_up)
-            if power_up.name in self.unavailable_power_ups:
-                self.unavailable_power_ups.remove(power_up.name)
-                self.compute_cdf()
+        if power_up.name in self.unavailable_power_ups:
+            self.unavailable_power_ups.remove(power_up.name)
+            self.compute_cdf()

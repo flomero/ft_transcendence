@@ -3,7 +3,6 @@ import asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .game_registry import GAME_REGISTRY
 
-SERVER_TICKRATE_MS = 30
 
 class GameConsumer(AsyncWebsocketConsumer):
     game = None
@@ -72,10 +71,6 @@ class GameConsumer(AsyncWebsocketConsumer):
         while self.running:
             await self.game.update()
             await self.send(json.dumps(self.game.get_state_snapshot()))
-            await asyncio.sleep(SERVER_TICKRATE_MS / 1000.0)
+            await asyncio.sleep(self.game.server_tickrate_ms / 1000.0)
 
-            # if  ((self.game.balls[0]["x"] - self.game.wall_distance)**2 \
-            #     + (self.game.balls[0]["y"] - self.game.wall_distance)**2) > self.game.wall_distance**2:
-            #     print(f"Ball went out of bounds, resetting it")
-            #     self.game.reset_ball(ball_id=0)
         print("end of game_loop")

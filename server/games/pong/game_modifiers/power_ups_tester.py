@@ -1,9 +1,9 @@
-from ...modifier_base import ModifierBase
+from ..pong_modifier_base import PongModifierBase
 from ..multiplayer_pong import MultiplayerPong
 from ...game_registry import GAME_REGISTRY
 
 
-class PowerUpsTester(ModifierBase):
+class PowerUpsTester(PongModifierBase):
     name = "power_ups_tester"
 
     def __init__(self):
@@ -13,5 +13,9 @@ class PowerUpsTester(ModifierBase):
         """Automatically trigger a power_up when picked up to test it's effect"""
 
         print(f"Picked up a power_up: {power_up}")
-        game.power_up_manager.active_power_ups.append(GAME_REGISTRY['pong']['power_ups'][power_up["type"]]["class"]())
-        game.power_up_manager.active_power_ups[-1].activate(game, player_id)
+        try:
+            power_up = GAME_REGISTRY['pong']['power_ups'][power_up["type"]]["class"](player_id)
+            game.power_up_manager.active_power_ups.append(power_up)
+        except ValueError:
+            return
+        # game.power_up_manager.active_power_ups[-1].activate(game, player_id)

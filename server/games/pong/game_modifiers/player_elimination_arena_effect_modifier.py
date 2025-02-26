@@ -1,9 +1,9 @@
 import math
-from ...modifier_base import ModifierBase
+from ..pong_modifier_base import PongModifierBase
 from ..multiplayer_pong import MultiplayerPong
 
 
-class PlayerEliminationArenaEffectModifier(ModifierBase):
+class PlayerEliminationArenaEffectModifier(PongModifierBase):
     name = "player_elimination_arena_effect_modifier"
 
     def __init__(self):

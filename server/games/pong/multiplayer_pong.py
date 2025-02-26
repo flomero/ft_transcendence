@@ -21,6 +21,7 @@ class MultiplayerPong(GameBase):
         self.power_up_manager = PongPowerUpManager(power_ups, game_mode)
 
         # Server related
+        self.server_tickrate_ms = GAME_REGISTRY["pong"]["server_tickrate_ms"]
         self.server_max_delay_ticks = GAME_REGISTRY["pong"]["server_max_delay_ticks"]
 
         # Network playability related
@@ -37,7 +38,7 @@ class MultiplayerPong(GameBase):
         self.paddle_movement_speed = 0.0
 
         # Game objects -> w/ collisions
-        self.player_paddles_lock = asyncio.Lock()
+        self.game_objects_lock = asyncio.Lock()
         self.balls = []
         self.walls = []
         self.player_paddles = []
@@ -46,7 +47,7 @@ class MultiplayerPong(GameBase):
         """Calulcate the next game state"""
         if self.start_game:
 
-            async with self.player_paddles_lock:
+            async with self.game_objects_lock:
                 for paddle in self.player_paddles:
                     if paddle["velocity"] != 0.0:
                         self.update_paddle(paddle)
@@ -54,6 +55,10 @@ class MultiplayerPong(GameBase):
             for ball in self.balls:
                 if ball["do_collision"]:
                     self.do_collision_checks(ball)
+                if  ((ball["x"] - self.wall_distance)**2 \
+                    + (ball["y"] - self.wall_distance)**2) > self.wall_distance**2:
+                    print(f"Ball went out of bounds, resetting it")
+                    self.reset_ball(ball_id=0)
             self.trigger_modifiers('on_update')
 
             snapshot = self.get_state_snapshot()
@@ -92,16 +97,19 @@ class MultiplayerPong(GameBase):
         # Apply user_input
         match(action["action"]):
             case 'UP':
-                async with self.player_paddles_lock:
+                async with self.game_objects_lock:
                     self.player_paddles[action["player_id"]]["velocity"] = self.player_paddles[action["player_id"]]["speed"]
 
             case 'DOWN':
-                async with self.player_paddles_lock:
+                async with self.game_objects_lock:
                     self.player_paddles[action["player_id"]]["velocity"] = -self.player_paddles[action["player_id"]]["speed"]
 
             case 'STOP':
-                async with self.player_paddles_lock:
+                async with self.game_objects_lock:
                     self.player_paddles[action["player_id"]]["velocity"] = 0.0
+
+        async with self.game_objects_lock:
+            self.trigger_modifiers('on_user_input', input=action)
 
         # Fast-forward to go bak to the current tick
         if delay_ticks > 0:
@@ -239,6 +247,7 @@ class MultiplayerPong(GameBase):
                         else:
                             self.trigger_modifiers("on_wall_bounce")
                 else:
+                    print(f"Player {self.last_player_hit} picked up a power_up")
                     self.trigger_modifiers("on_power_up_pickup", power_up=self.power_up_manager.spawned_power_ups[collision["object_id"]], player_id=self.last_player_hit)
                     self.power_up_manager.spawned_power_ups.remove(self.power_up_manager.spawned_power_ups[collision["object_id"]])
 

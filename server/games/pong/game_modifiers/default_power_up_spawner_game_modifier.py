@@ -1,11 +1,11 @@
 import math
-from ...time_limited_modifier_base import TimeLimitedModifierBase
+from ..pong_modifier_base import PongModifierBase
 from ..multiplayer_pong import MultiplayerPong
 from ...game_registry import GAME_REGISTRY
 from ...modifiers_utils import spawn_powerup_bell
 
 
-class DefaultPowerUpSpawnerGameModifier(TimeLimitedModifierBase):
+class DefaultPowerUpSpawnerGameModifier(PongModifierBase):
     name = "default_power_up_spawner_game_modifier"
 
     def __init__(self):
