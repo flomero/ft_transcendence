@@ -1,0 +1,14 @@
+<h2>Welcome to ft_transcendence!</h2>
+
+<p>This is a simple test page rendered with Handlebars.</p>
+
+<p>User Info:</p>
+<ul>
+    {{#if isAuthenticated}}
+        <li>User ID: {{userId}}</li>
+        <li>Username: {{userName}}</li>
+        <li>Status: Authenticated</li>
+    {{else}}
+        <li>Status: Not authenticated</li>
+    {{/if}}
+</ul> 
