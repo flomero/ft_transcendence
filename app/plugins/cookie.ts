@@ -8,7 +8,7 @@ export default fp(async function (fastify, opts) {
         parseOptions: {
             secure: 'auto',
             sameSite: 'strict',
-            httpOnly: true
+            httpOnly: false
         }
     } as FastifyCookieOptions)
 })
