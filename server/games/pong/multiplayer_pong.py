@@ -15,10 +15,7 @@ class MultiplayerPong(GameBase):
 
     name = "multiplayer_pong"
 
-    def __init__(self, game_mode, modifiers=[], power_ups=[], **kwargs):
-        if not "player_count" in kwargs.keys:
-            print(f"A player_count needs to be provided")
-            return
+    def __init__(self, game_mode, modifiers=[], power_ups=[], player_count=7):
 
         super().__init__("pong", game_mode, modifiers, power_ups)
         self.power_up_manager = PongPowerUpManager(power_ups, game_mode)
@@ -32,7 +29,7 @@ class MultiplayerPong(GameBase):
         self.rng = random.Random(self.start_time_ms)
 
         # Players & related
-        self.player_count = kwargs['player_count']
+        self.player_count = player_count
         self.player_goals = [0] * self.player_count
         self.results = [0] * self.player_count
         self.last_player_hit = None

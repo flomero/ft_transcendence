@@ -8,8 +8,12 @@ class ModedMultiplayerPong(MultiplayerPong):
 
     name = "moded_multiplayer_pong"
 
-    def __init__(self, player_count=4, modifiers=[], power_ups=[]):
-        super().__init__(self.name, player_count, modifiers, power_ups)
+    def __init__(self, modifiers=[], power_ups=[], **kwargs):
+        if not "player_count" in kwargs.keys():
+            print(f"A player_count needs to be provided")
+            return
+
+        super().__init__(self.name, modifiers, power_ups, kwargs["player_count"])
 
         self.wall_distance = GAME_REGISTRY["pong"]["game_modes"][self.name]["arena_settings"]["wall_distance"]
         self.wall_height = GAME_REGISTRY["pong"]["game_modes"][self.name]["arena_settings"]["wall_height"]
