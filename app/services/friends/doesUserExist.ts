@@ -7,5 +7,9 @@ export async function doesUserExist(userId: string, fastify: FastifyInstance): P
   `;
 	console.log("ID TO CHECK [" + userId + "]");
 
-	return await fastify.sqlite.get(sql, [userId]);
+	const dbUserId = await fastify.sqlite.get(sql, [userId]);
+
+  if (dbUserId !== undefined)
+    return true;
+  return false;
 }
