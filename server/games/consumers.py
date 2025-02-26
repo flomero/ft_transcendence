@@ -3,6 +3,8 @@ import asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .game_registry import GAME_REGISTRY
 
+SERVER_TICKRATE_MS = 30
+
 class GameConsumer(AsyncWebsocketConsumer):
     game = None
     game_class = "MultiplayerPong"
@@ -32,7 +34,7 @@ class GameConsumer(AsyncWebsocketConsumer):
                     game_name = "pong"
 
                 # Game Mode Selection (fallback multiplayer_<game>)
-                mode_name = data.get("game_mode", f"multiplayer_{game_name}")
+                mode_name = data.get("game_mode", f"moded_multiplayer_{game_name}")
                 game_modes = GAME_REGISTRY[game_name]["game_modes"]
                 if mode_name in game_modes:
                     self.game_class = game_modes[mode_name]["class"]
@@ -60,7 +62,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         print(f" |- game_modifiers: {self.game_modifiers}")
         print(f" |- power_ups: {self.power_ups}")
         print(f"\n")
-        self.game = self.game_class(player_count=self.player_count, modifiers=self.game_modifiers, power_ups=self.power_ups)
+        self.game = self.game_class(modifiers=self.game_modifiers, power_ups=self.power_ups, player_count=self.player_count)
         self.game.start_game()
         self.running = True
         asyncio.create_task(self.run_game_loop())
@@ -70,12 +72,10 @@ class GameConsumer(AsyncWebsocketConsumer):
         while self.running:
             await self.game.update()
             await self.send(json.dumps(self.game.get_state_snapshot()))
-            await asyncio.sleep(self.game.server_tickrate_ms / 1000.0)
+            await asyncio.sleep(SERVER_TICKRATE_MS / 1000.0)
 
-            # if  self.game.balls[0]["x"] < 0 or self.game.balls[0]["x"] > 100 or \
-            #     self.game.balls[0]["y"] < 0 or self.game.balls[0]["y"] > 100:
-            if  ((self.game.balls[0]["x"] - self.game.wall_distance)**2 \
-                + (self.game.balls[0]["y"] - self.game.wall_distance)**2) > self.game.wall_distance**2:
-                print(f"Ball went out of bounds, resetting it")
-                self.game.reset_ball(ball_id=0)
+            # if  ((self.game.balls[0]["x"] - self.game.wall_distance)**2 \
+            #     + (self.game.balls[0]["y"] - self.game.wall_distance)**2) > self.game.wall_distance**2:
+            #     print(f"Ball went out of bounds, resetting it")
+            #     self.game.reset_ball(ball_id=0)
         print("end of game_loop")

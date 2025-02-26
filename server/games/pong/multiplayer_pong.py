@@ -6,6 +6,7 @@ from collections import deque
 from games.game_base import GameBase
 from games.physics_engine import PhysicsEngine
 from ..game_registry import GAME_REGISTRY
+from .pong_power_up_manager import PongPowerUpManager
 
 EPSILON = 1e-2
 
@@ -14,11 +15,15 @@ class MultiplayerPong(GameBase):
 
     name = "multiplayer_pong"
 
-    def __init__(self, game_mode, player_count=4, modifiers=[], power_ups=[]):
+    def __init__(self, game_mode, modifiers=[], power_ups=[], **kwargs):
+        if not "player_count" in kwargs.keys:
+            print(f"A player_count needs to be provided")
+            return
+
         super().__init__("pong", game_mode, modifiers, power_ups)
+        self.power_up_manager = PongPowerUpManager(power_ups, game_mode)
 
         # Server related
-        self.server_tickrate_ms = GAME_REGISTRY["pong"]["server_tickrate_ms"]
         self.server_max_delay_ticks = GAME_REGISTRY["pong"]["server_max_delay_ticks"]
 
         # Network playability related
@@ -27,9 +32,9 @@ class MultiplayerPong(GameBase):
         self.rng = random.Random(self.start_time_ms)
 
         # Players & related
-        self.player_count = player_count
-        self.player_goals = [0] * player_count
-        self.results = [0] * player_count
+        self.player_count = kwargs['player_count']
+        self.player_goals = [0] * self.player_count
+        self.results = [0] * self.player_count
         self.last_player_hit = None
         self.paddle_speed_width_percent = GAME_REGISTRY["pong"]["paddle_speed_width_percent"]
         self.paddle_movement_speed = 0.0

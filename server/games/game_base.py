@@ -1,6 +1,5 @@
 import time
 import random
-from .power_up_manager import PowerUpManager
 
 
 class GameBase():
@@ -11,7 +10,7 @@ class GameBase():
         self.modifiers = modifiers
         self.running = False
         self.tick_data = None
-        self.power_up_manager = PowerUpManager(power_ups, game_name, game_mode)
+        self.power_up_manager = None
 
     async def update(self):
         """Advances the game by 1 tick"""
@@ -34,6 +33,7 @@ class GameBase():
     def get_state_snapshot(self):
         """Returns a snapshot of the current game state."""
         return {
+            "type": "game_state",
             "timestamp": self.last_update_time
         }
 
@@ -59,10 +59,11 @@ class GameBase():
             except AttributeError:
                 print(f"Unknown method: {method}, for modifier: {modifier}")
                 print(f"Available methods:\n  |- {dir(modifier)}")
-        for power_up in self.power_up_manager.active_power_ups:
-            try:
-                getattr(power_up, method)(self, *args, **kwargs)
-            except AttributeError:
-                print(f"Unknown method: {method}, for power_up: {power_up}")
-                print(f"Available methods:\n  |- {dir(power_up)}")
+        if self.power_up_manager:
+            for power_up in self.power_up_manager.active_power_ups:
+                try:
+                    getattr(power_up, method)(self, *args, **kwargs)
+                except AttributeError:
+                    print(f"Unknown method: {method}, for power_up: {power_up}")
+                    print(f"Available methods:\n  |- {dir(power_up)}")
 

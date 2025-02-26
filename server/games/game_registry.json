@@ -1,6 +1,5 @@
 {
   "pong": {
-    "server_tickrate_ms": 30,
     "server_max_delay_ticks": 100,
     "paddle_speed_width_percent": 3,
 
@@ -146,5 +145,16 @@
         "ticks_per_steps": 1
       }
     }
+  },
+
+  "enhanced_tic_tac_toe": {
+    "game_modes": {
+      "enhanced_tic_tac_toe_classic": {
+        "class_name": "EnhancedTicTacToe"
+      }
+    },
+
+    "game_modifiers": {},
+    "power_ups": {}
   }
 }

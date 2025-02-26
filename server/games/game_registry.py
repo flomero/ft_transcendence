@@ -18,6 +18,7 @@ def load_game_registry():
     # Import all games, game_modes, and modifiers dynamically
     for game, data in GAME_REGISTRY.items():
         # Load game modes
+
         GAME_REGISTRY[game]["game_modes"] = {
             game_mode: {
                 "class": import_class(f"games.{game}.game_modes.{game_mode}", mod_data["class_name"]),
