@@ -8,18 +8,18 @@ class Match {
   private _players: Player[] = [];
   private _numberOfPlayers: number = 0;
   private _connectionToDB: Database;
-  private _gameStatus: "waiting" | "playing" | "finished" = "waiting";
+  private _matchStatus: "waiting" | "playing" | "finished" = "waiting";
 
 
   constructor(gameOptions: GameOptions, dbConneection: Database) {
     this._gameOptions = gameOptions;
     this._numberOfPlayers = this.setNumberOfPlayers(gameOptions);
     this._connectionToDB = dbConneection;
-    this._gameStatus = "waiting";
+    this._matchStatus = "waiting";
   }
 
   private setNumberOfPlayers(gameOptions: GameOptions): number {
-    if (gameOptions.gameType.includes("Modded") === false)
+    if (gameOptions.matchMode.includes("Modded") === false)
       return (2);
     else
       return (8);
@@ -40,7 +40,7 @@ class Match {
   }
 
   private canPlayerBeAdded(player: Player): boolean {
-    if (this._gameStatus !== "waiting")
+    if (this._matchStatus !== "waiting")
       return (false);
     else if (this.isAddedAlready(player) === true)
       return (false);
@@ -78,7 +78,7 @@ class Match {
   async startGame(): Promise<void> {
     //await this.addMatchToDB();
     //await this.addPlayersToMatchInDB();
-    this._gameStatus = "playing";
+    this._matchStatus = "playing";
     // start louens game
   }
 
@@ -90,7 +90,7 @@ class Match {
     VALUES (?, ?, ?)
     `;
     await this._connectionToDB.run(sql, [
-      this._matchId, "Pong", this._gameOptions.gameType]);
+      this._matchId, "Pong", this._gameOptions.matchMode]);
   }
 
   async addPlayersToMatchInDB(): Promise<void> { // make private
@@ -135,17 +135,17 @@ class Match {
     + " GameOptions: " + JSON.stringify(this._gameOptions) + "\n"
     + " Players:\n" + this.getPlayerNameAndId() + "\n"
     + " NumberOfPlayers: " + this._numberOfPlayers + "\n"
-    + " GameStatus: " + this._gameStatus + "\n";
+    + " GameStatus: " + this._matchStatus + "\n";
   console.log(message);
   }
 
 }
 
 type GameOptions =
-  { gameMode: 'pong'; gameType: 'VanillaDouble'; }
-  | { gameMode: 'pong'; gameType: 'ModdedDouble'; modifiers: Modifiers[] }
-  | { gameMode: 'pong'; gameType: 'VanillaMulti'; }
-  | { gameMode: 'pong'; gameType: 'ModdedMulti'; modifiers: Modifiers[] };
+  { match: 'pong'; matchMode: 'VanillaDouble'; }
+  | { match: 'pong'; matchMode: 'ModdedDouble'; modifiers: Modifiers[] }
+  | { match: 'pong'; matchMode: 'VanillaMulti'; }
+  | { match: 'pong'; matchMode: 'ModdedMulti'; modifiers: Modifiers[] };
 
         type Modifiers = "blackwhole" | "speedUpBall";
 
