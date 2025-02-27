@@ -14,6 +14,26 @@ function convertMessageToGameOptions(message: gameMessageInterface): GameOptions
 			gameOptions = {
 				match: message.match,
 				matchMode: message.matchMode,
-				modifiers: message.modifiers
+				modifiers: message.modifiers!
+			};
+			break;
+		case "VanillaMulti":
+			gameOptions = {
+				match: message.match,
+				matchMode: message.matchMode,
+			};
+			break;
+		case "ModdedMulti":
+			gameOptions = {
+				match: message.match,
+				matchMode: message.matchMode,
+				modifiers: message.modifiers!
+			};
+			break;
+		default:
+			throw new Error("Invalid matchMode");
+    }
   return gameOptions;
 }
+
+export default convertMessageToGameOptions;

@@ -18,10 +18,10 @@ const matchMessageSchema: matchMessagSchemaInterface = {
   type: 'object',
   properties: {
     messageType: { type: 'string', enum: ['createMatch'] },
-    match: { type: 'string', enum: ['pong'] },
+    match: { enum: ['pong'] },
     matchMode: {
       type: 'string',
-      enum: ['VanillaModded', 'MultiplayerModded', 'VanillaDouble', 'VanillaMultiplayer']
+      enum: ['VanillaModded', 'ModdedMulti', 'VanillaDouble', 'VanillaMulti']
     }
   },
   required: ['messageType', 'match', 'matchMode'],
@@ -30,7 +30,7 @@ const matchMessageSchema: matchMessagSchemaInterface = {
       if: {
         properties: {
           matchMode: {
-            enum: ['VanillaModded', 'MultiplayerModded']
+            enum: ['VanillaModded', 'ModdedMulti']
           }
         }
       },
@@ -57,7 +57,7 @@ const matchMessageSchema: matchMessagSchemaInterface = {
     match: { type: 'string', enum: ['pong'] },
     matchMode: {
       type: 'string',
-      enum: ['VanillaModded', 'MultiplayerModded', 'VanillaDouble', 'VanillaMultiplayer']
+      enum: ['VanillaModded', 'ModdedMulti', 'VanillaDouble', 'VanillaMultiplayer']
     }
   },
   required: ['messageType', 'match', 'matchMode'],
@@ -66,7 +66,7 @@ const matchMessageSchema: matchMessagSchemaInterface = {
       if: {
         properties: {
           matchMode: {
-            enum: ['VanillaModded', 'MultiplayerModded']
+            enum: ['VanillaModded', 'ModdedMulti']
           }
         }
       },

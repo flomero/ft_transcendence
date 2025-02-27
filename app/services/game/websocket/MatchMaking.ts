@@ -21,7 +21,7 @@ class MatchMaking {
     if (match !== undefined) {
       await match.addPlayerToGame(player);
     } else {
-      this.createaMatch(player, gameOptions, db);
+      this.createMatch(player, gameOptions, db);
     }
   }
 

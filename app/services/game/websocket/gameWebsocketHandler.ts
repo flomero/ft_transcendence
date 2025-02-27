@@ -4,6 +4,7 @@ import Player from "./Player";
 import MatchMaking from "./MatchMaking";
 import { gameMessageInterface } from "../../../interfaces/game/gameMessageInterface";
 import { getCompiledSchemaValidator, messageCheck } from "./gameMessageParsing";
+import convertMessageToGameOptions from "./convetMessageToGameOptions";
 
 const matchMaking = new MatchMaking();
 const compiledSchemaValidator = getCompiledSchemaValidator();
@@ -22,7 +23,7 @@ const gameWebsocketHandler = async (connection: WebSocket, request: FastifyReque
       const messageType = jsonMessage.messageType;
 
       if (messageType === 'createMatch' && player.currentState === 'WaitingForMessage') {
-        matchMaking.createMatch(player, db);
+        matchMaking.createMatch(player, convertMessageToGameOptions(jsonMessage), db);
       }
 
 

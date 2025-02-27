@@ -147,7 +147,7 @@ type GameOptions =
   | { match: 'pong'; matchMode: 'VanillaMulti'; }
   | { match: 'pong'; matchMode: 'ModdedMulti'; modifiers: Modifiers[] };
 
-        type Modifiers = "blackwhole" | "speedUpBall";
+type Modifiers = "blackwhole" | "speedUpBall";
 
 
 export type { GameOptions, Modifiers };
