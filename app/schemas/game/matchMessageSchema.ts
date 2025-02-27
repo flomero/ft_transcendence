@@ -1,26 +1,29 @@
-interface Schema {
+interface propertiesInterface {
+  messageType: { type: 'string'; enum: string[] };
+  [key: string]: unknown;
+}
+
+interface matchMessagSchemaInterface {
   [key: string]: {
     type: string;
-
-    properties: Record<string, unknown>;
-
+    properties: propertiesInterface;
     required: string[];
-
     allOf?: Array<Record<string, unknown>>;
   };
 }
 
-const gameWebsocketMessageSchema = {
+
+const matchMessageSchema: matchMessagSchemaInterface = {
   createMatch: {
   type: 'object',
   properties: {
-    type: { type: 'string', enum: ['createMatch'] },
+    messageType: { type: 'string', enum: ['createMatch'] },
     gameType: {
       type: 'string',
       enum: ['VanillaModded', 'MultiplayerModded', 'VanillaDouble', 'VanillaMultiplayer']
     }
   },
-  required: ['type','gameType'],
+  required: ['messageType','gameType'],
   allOf: [
     {
       if: {
@@ -49,14 +52,13 @@ const gameWebsocketMessageSchema = {
   joinRandomMatch: {
   type: 'object',
   properties: {
-    type: { type: 'string', enum: ['joinRandomMatch'] },
+    messageType: { type: 'string', enum: ['joinRandomMatch'] },
     gameType: {
       type: 'string',
       enum: ['VanillaModded', 'MultiplayerModded', 'VanillaDouble', 'VanillaMultiplayer']
     }
   },
-  required: ['type','gameType'],
-  },
+  required: ['messageType','gameType'],
   allOf: [
     {
       if: {
@@ -80,6 +82,28 @@ const gameWebsocketMessageSchema = {
       }
     }
   ]
+  },
+
+  joinMatchWithId: {
+  type: 'object',
+  properties: {
+    messageType: { type: 'string', enum: ['joinMatchWithId'] },
+    matchId: { type: 'string' }
+    },
+    required: ['messageType','matchId']
+  },
+
+  matchInput: {
+  type: 'object',
+  properties: {
+    messageType: { type: 'string', enum: ['gameInput'] },
+    matchId: { type: 'string' },
+    input: { type: 'string' },
+    timeStamp: { type: 'number' }
+  },
+  required: ['messageType','matchId','input','timeStamp']
+  },
 };
 
-export default gameWebsocketMessageSchema;
+
+export default matchMessageSchema;
