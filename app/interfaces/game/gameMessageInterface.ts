@@ -1,6 +1,7 @@
 export interface gameMessageInterface {
 	messageType: string;
-	gameType?: string;
+	match: string;
+	matchMode?: string;
 	modifiers?: string[];
 	matchId?: string;
 	imput?: string;
