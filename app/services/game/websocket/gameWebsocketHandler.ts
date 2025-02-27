@@ -1,39 +1,53 @@
 import { FastifyRequest } from "fastify";
 import { WebSocket } from 'ws';
-import Player from "./Player";
-import MatchMaking from "./MatchMaking";
-import { GameOptions } from "./Match";
+//import Player from "./Player";
+//import MatchMaking from "./MatchMaking";
+import matchMessageSchema from "../../../schemas/game/matchMessageSchema";
+import { gameMessageInterface } from "../../../interfaces/game/gameMessageInterface";
+import ajv from "../../../plugins/ajv";
 
-interface Message {
-  type: string;
-}
-
-const matchMaking = new MatchMaking();
+//const matchMaking = new MatchMaking();
+const compiledSchemaValidator = getCompiledSchemaValidator();
 
 const gameWebsocketHandler = async (connection: WebSocket, request: FastifyRequest): Promise<void> => {
 
-  const player = new Player(request.server.userId, connection, request.server.userName);
-  const db = request.server.sqlite;
+ // const player = new Player(request.server.userId, connection, request.server.userName);
+ //// const db = request.server.sqlite;
 
   connection.on('message', async (message) => {
 
     try {
-      const parsedMessage: Message = getParsedMessag(message.toString());
+      const jsonMessage: gameMessageInterface = JSON.parse(message.toString());
+      messageCheck(jsonMessage);
 
-      if (parsedMessage.type === 'VanillaDouble') {
-        const gameOptions: GameOptions = { gameType: "VanillaDouble" };
-        connection.send("You have been added to a match");
-      }
+      connection.send("correct message");
+
     }
     catch (error) {
-      connection.send("Invalid message: " + error);
+      if (error instanceof Error)
+        connection.send(error.message);
     }
   });
 }
 
-function getParsedMessag(message: string): Message {
-  const messageObject: Message = JSON.parse(message);
-  return messageObject;
+function getCompiledSchemaValidator(): Record<string, (data: unknown) => boolean> {
+  const compiledSchemaValidator: Record<string, (data: unknown) => boolean> = {};
+
+  for (const schemaKey in matchMessageSchema) {
+    const schemaObject = matchMessageSchema[schemaKey];
+    const schemaMessageType = schemaObject.properties.messageType.enum[0];
+    compiledSchemaValidator[schemaMessageType] = ajv.compile(matchMessageSchema[schemaKey]);
+  }
+  return compiledSchemaValidator;
+}
+
+function messageCheck(message: gameMessageInterface): void {
+  if (message.messageType === undefined)
+    throw new Error("Type messageType is missing");
+  else if(compiledSchemaValidator[message.messageType] === undefined)
+    throw new Error("Type messageType is missing");
+  else if (compiledSchemaValidator[message.messageType](message) === false)
+    throw new Error("Invalid format: " + compiledSchemaValidator.errors);
 }
 
 export default gameWebsocketHandler;
