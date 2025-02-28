@@ -4,21 +4,21 @@ import { randomUUID } from 'crypto';
 
 class Match {
   private _matchId: string = randomUUID();
-  private _gameOptions: GameOptions;
+  private _gameOptions: MatchOptions;
   private _players: Player[] = [];
   private _numberOfPlayers: number = 0;
   private _connectionToDB: Database;
   private _matchStatus: "waiting" | "playing" | "finished" = "waiting";
 
 
-  constructor(gameOptions: GameOptions, dbConneection: Database) {
+  constructor(gameOptions: MatchOptions, dbConneection: Database) {
     this._gameOptions = gameOptions;
     this._numberOfPlayers = this.setNumberOfPlayers(gameOptions);
     this._connectionToDB = dbConneection;
     this._matchStatus = "waiting";
   }
 
-  private setNumberOfPlayers(gameOptions: GameOptions): number {
+  private setNumberOfPlayers(gameOptions: MatchOptions): number {
     if (gameOptions.matchMode.includes("Modded") === false)
       return (2);
     else
@@ -106,6 +106,10 @@ class Match {
     });
   }
 
+  //matchInput(input: string, timeStamp: number) {
+  //  //send message to Louens game
+ // }
+
   sendMessageToAllPlayers(message: string) {
     this._players.forEach(player => {
       player.sendMessage(message);
@@ -132,16 +136,15 @@ class Match {
 
   public printGameStats() {
   const message = "MatchId: " + this._matchId + "\n"
-    + " GameOptions: " + JSON.stringify(this._gameOptions) + "\n"
+    + " MatchOptions: " + JSON.stringify(this._gameOptions) + "\n"
     + " Players:\n" + this.getPlayerNameAndId() + "\n"
     + " NumberOfPlayers: " + this._numberOfPlayers + "\n"
     + " GameStatus: " + this._matchStatus + "\n";
   console.log(message);
   }
-
 }
 
-type GameOptions =
+type MatchOptions =
   { match: 'pong'; matchMode: 'VanillaDouble'; }
   | { match: 'pong'; matchMode: 'ModdedDouble'; modifiers: Modifiers[] }
   | { match: 'pong'; matchMode: 'VanillaMulti'; }
@@ -150,5 +153,5 @@ type GameOptions =
 type Modifiers = "blackwhole" | "speedUpBall";
 
 
-export type { GameOptions, Modifiers };
+export type { MatchOptions, Modifiers };
 export default Match;

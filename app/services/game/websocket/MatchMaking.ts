@@ -1,5 +1,5 @@
 import Match from './Match';
-import type { GameOptions } from './Match';
+import type { MatchOptions } from './Match';
 import Player from './Player';
 import { Database } from 'sqlite';
 
@@ -10,13 +10,13 @@ class MatchMaking {
     this.matches = new Map<string, Match>();
   }
 
-  createMatch(player: Player, gameOptions: GameOptions, db : Database) {
+  createMatch(player: Player, gameOptions: MatchOptions, db : Database) {
     const match = new Match(gameOptions, db);
     match.addPlayerToGame(player);
     this.matches.set(match.matchId, match);
   }
 
-  async asignUserToRandomMatch(player: Player, gameOptions: GameOptions, db : Database) {
+  async asignUserToRandomMatch(player: Player, gameOptions: MatchOptions, db : Database) {
     const match = this.findOpenMatchWithSameMode(gameOptions);
     if (match !== undefined) {
       await match.addPlayerToGame(player);
@@ -25,7 +25,7 @@ class MatchMaking {
     }
   }
 
-  private findOpenMatchWithSameMode(gameOptions: GameOptions): Match | undefined {
+  private findOpenMatchWithSameMode(gameOptions: MatchOptions): Match | undefined {
     if (this.matches.size === 0) {
       return undefined;
     }
@@ -52,6 +52,11 @@ class MatchMaking {
       player.sendMessage('Invalid match id');
     }
   }
+
+//  matchInput(matchId: string, input: string, timeStamp: number) {
+//    if (this.matches.get(matchId) !== undefined)
+//      this.matches.get(matchId)?.matchInput( input, timeStamp);
+//  }
 
   public printMatchStats(matchId: string) {
     if (this.matches.get(matchId) !== undefined)

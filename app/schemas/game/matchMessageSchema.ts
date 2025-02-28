@@ -98,7 +98,7 @@ const matchMessageSchema: matchMessagSchemaInterface = {
   matchInput: {
   type: 'object',
   properties: {
-    messageType: { type: 'string', enum: ['gameInput'] },
+    messageType: { type: 'string', enum: ['matchInput'] },
     matchId: { type: 'string' },
     input: { type: 'string' },
     timeStamp: { type: 'number' }

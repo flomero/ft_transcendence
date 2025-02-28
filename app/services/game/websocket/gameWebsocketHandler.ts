@@ -4,7 +4,7 @@ import Player from "./Player";
 import MatchMaking from "./MatchMaking";
 import { gameMessageInterface } from "../../../interfaces/game/gameMessageInterface";
 import { getCompiledSchemaValidator, messageCheck } from "./gameMessageParsing";
-import convertMessageToGameOptions from "./convetMessageToGameOptions";
+import convertMessageToMatchOptions from "./convetMessageToGameOptions";
 
 const matchMaking = new MatchMaking();
 const compiledSchemaValidator = getCompiledSchemaValidator();
@@ -22,11 +22,14 @@ const gameWebsocketHandler = async (connection: WebSocket, request: FastifyReque
       messageCheck(jsonMessage, compiledSchemaValidator);
       const messageType = jsonMessage.messageType;
 
-      if (messageType === 'createMatch' && player.currentState === 'WaitingForMessage') {
-        matchMaking.createMatch(player, convertMessageToGameOptions(jsonMessage), db);
-      }
-
-
+      if (messageType === 'createMatch' && player.currentState === 'WaitingForMessage')
+        matchMaking.createMatch(player, convertMessageToMatchOptions(jsonMessage), db);
+      else if (messageType === 'joinRandomMatch' && player.currentState === 'WaitingForMessage')
+        matchMaking.asignUserToRandomMatch(player, convertMessageToMatchOptions(jsonMessage), db);
+      else if (messageType === 'joinMatchWithId' && player.currentState === 'WaitingForMessage')
+        matchMaking.joinMatch(jsonMessage.matchId!, player);
+//      else if (messageType === 'matchId' && player.currentState === 'PlayingGame')
+      //      matchMaking.matchInput(jsonMessage.matchId jsonMessage.input!, jsonMessage.timeStamp!);
     }
     catch (error) {
       if (error instanceof Error)

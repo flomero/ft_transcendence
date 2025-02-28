@@ -1,8 +1,8 @@
 import { gameMessageInterface } from "../../../interfaces/game/gameMessageInterface";
-import { GameOptions } from "./Match";
+import { MatchOptions } from "./Match";
 
-function convertMessageToGameOptions(message: gameMessageInterface): GameOptions {
-	let gameOptions: GameOptions;
+function convertMessageToGameOptions(message: gameMessageInterface): MatchOptions {
+	let gameOptions: MatchOptions;
 	switch (message.matchMode) {
 		case "VanillaDouble":
 			gameOptions = {
