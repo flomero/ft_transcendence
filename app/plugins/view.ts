@@ -14,7 +14,7 @@ export default fp(async (fastify) => {
             handlebars: handlebars
         },
         root: join(__dirname, "..", "..", "views"),
-        layout: 'layouts/main.hbs',
+        // layout: 'layouts/main.hbs',
         viewExt: 'hbs',
         options: {
             partials: {

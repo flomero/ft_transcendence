@@ -11,3 +11,20 @@
         <button id="send-button">Send</button>
     </div>
 </div>
+
+<script>
+    const socket = new WebSocket('ws://localhost:3000/chat/ws');
+
+    socket.onmessage = function (event) {
+        const data = JSON.parse(event.data);
+        const messageContainer = document.getElementById('chat-messages');
+        messageContainer.innerHTML += data.html;
+    }
+
+    document.getElementById('send-button').onclick = function () {
+        const messageInput = document.getElementById('message-input');
+        const message = messageInput.value;
+        socket.send(message);
+        messageInput.value = '';
+    }
+</script>
