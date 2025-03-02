@@ -19,11 +19,13 @@
     "@fastify/jwt": "^9.0.4",
     "@fastify/oauth2": "^8.1.2",
     "@fastify/sensible": "^6.0.3",
+    "@fastify/view": "^10.0.2",
     "@fastify/websocket": "^11.0.2",
     "fastify": "^5.2.1",
     "fastify-cli": "^7.3.0",
     "fastify-plugin": "^5.0.1",
     "fluent-json-schema": "^5.0.0",
+    "handlebars": "^4.7.8",
     "sqlite": "^5.1.1",
     "sqlite3": "^5.1.7"
   },
