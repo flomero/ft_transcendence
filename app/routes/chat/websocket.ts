@@ -1,5 +1,5 @@
 import { FastifyPluginAsync } from "fastify";
-import {createChatRoom} from "../../services/chat/chat";
+import {postMessage} from "../../services/chat/message";
 
 interface ChatMessageResponse {
     html: string;
@@ -7,12 +7,12 @@ interface ChatMessageResponse {
 
 const chatWebSocket: FastifyPluginAsync = async (fastify): Promise<void> => {
     fastify.get('/ws', { websocket: true }, async function (socket, request) {
-        fastify.log.debug('Chat client connected');
+        fastify.log.trace('Chat client connected');
 
         socket.on('message', async function (message) {
-            fastify.log.debug('Received message: ' + message);
+            fastify.log.trace('Received message: ' + message);
 
-            await createChatRoom(fastify);
+            await postMessage(fastify, 1, "110899881598177411832", message.toString());
 
             const html = await fastify.view('partials/chat/message', {
                 message: {
