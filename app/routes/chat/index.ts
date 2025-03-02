@@ -1,24 +1,34 @@
 import {FastifyPluginAsync} from 'fastify'
 import chatWebSocket from './websocket'
+import {getMessagesWithUserInfo} from "../../services/chat/message";
+
+interface ChatMessage {
+    userName: string;
+    message: string;
+    timestamp: string;
+    isOwnMessage: boolean;
+}
 
 const chat: FastifyPluginAsync = async (fastify): Promise<void> => {
     fastify.get('/', async function (request, reply) {
+        const db_messages = await getMessagesWithUserInfo(fastify, 1);
+
+        fastify.log.debug(db_messages);
+
+        const messages: ChatMessage[] = [];
+
+        db_messages.forEach((message) => {
+            messages.push({
+                userName: message["username"],
+                message: message["message"],
+                timestamp: message["timestamp"],
+                isOwnMessage: request.userId === message["sender_id"]
+            })
+        })
+
         return reply.view('chat', {
-            messages: [
-                {
-                    userName: "John Doe",
-                    message: "This is a test message",
-                    timestamp: new Date().toLocaleString(),
-                    isOwnMessage: false
-                },
-                {
-                    userName: "Jane Peter",
-                    message: "I received your message",
-                    timestamp: new Date().toLocaleString(),
-                    isOwnMessage: true
-                }
-            ]
-        }, { layout: "layouts/main" });
+            messages: messages
+        }, {layout: "layouts/main"});
     })
 
     // Register the websocket route
