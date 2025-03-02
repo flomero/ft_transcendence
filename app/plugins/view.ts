@@ -19,7 +19,8 @@ export default fp(async (fastify) => {
         options: {
             partials: {
                 header: 'partials/header.hbs',
-                footer: 'partials/footer.hbs'
+                footer: 'partials/footer.hbs',
+                head: 'partials/head.hbs',
             }
         }
     })
