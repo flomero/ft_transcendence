@@ -7,7 +7,7 @@ const root: FastifyPluginAsync = async (fastify): Promise<void> => {
             isAuthenticated: request.isAuthenticated,
             userId: request.userId,
             userName: request.userName
-        });
+        }, { layout: "layouts/main" });
     })
 
     fastify.get('/health', async function () {

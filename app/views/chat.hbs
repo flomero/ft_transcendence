@@ -13,7 +13,10 @@
 </div>
 
 <script>
-    const socket = new WebSocket('ws://localhost:3000/chat/ws');
+    const currentUrl = window.location.origin;
+    const wsProtocol = currentUrl.startsWith('https') ? 'wss' : 'ws';
+    const wsUrl = currentUrl.replace(/^http/, 'ws');
+    const socket = new WebSocket(`${wsUrl}/chat/ws`);
 
     socket.onmessage = function (event) {
         const data = JSON.parse(event.data);
