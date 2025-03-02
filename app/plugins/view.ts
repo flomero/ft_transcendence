@@ -20,7 +20,8 @@ export default fp(async (fastify) => {
             partials: {
                 header: 'partials/header.hbs',
                 footer: 'partials/footer.hbs',
-                'chat/message': 'partials/chat/message.hbs'
+                'chat/message': 'partials/chat/message.hbs',
+                head: 'partials/head.hbs',
             }
         }
     })

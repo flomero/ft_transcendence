@@ -1,27 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{title}}</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 0;
-            color: #333;
-        }
         .container {
             width: 80%;
             margin: 0 auto;
             padding: 1rem;
         }
+
         header {
             background: #3498db;
             color: white;
             padding: 1rem 0;
         }
+
         footer {
             background: #34495e;
             color: white;
@@ -32,14 +28,17 @@
             width: 100%;
         }
     </style>
+    {{> head}}
 </head>
+
 <body>
     {{> header}}
-    
+
     <div class="container">
         {{{body}}}
     </div>
-    
+
     {{> footer}}
 </body>
-</html> 
+
+</html>
