@@ -1,4 +1,5 @@
 import { FastifyPluginAsync } from "fastify";
+import {createChatRoom} from "../../services/chat/chat";
 
 interface ChatMessageResponse {
     html: string;
@@ -10,6 +11,8 @@ const chatWebSocket: FastifyPluginAsync = async (fastify): Promise<void> => {
 
         socket.on('message', async function (message) {
             fastify.log.debug('Received message: ' + message);
+
+            await createChatRoom(fastify);
 
             const html = await fastify.view('partials/chat/message', {
                 message: {

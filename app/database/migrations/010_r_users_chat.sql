@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS users_chat (
+CREATE TABLE IF NOT EXISTS r_users_chat (
     user_id TEXT NOT NULL,
     room_id TEXT NOT NULL,
     PRIMARY KEY (user_id, room_id),
