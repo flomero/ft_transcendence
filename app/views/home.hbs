@@ -1,15 +1,18 @@
-<h2 class="font-xl font-bold">Welcome to ft_transcendence!</h2>
+<div class="layout py-4">
+  <h2 class="font-xl font-bold">Welcome to ft_transcendence!</h2>
 
-<p class="italic">This is a simple test page rendered with Handlebars.</p>
+  <p class="italic">This is a simple test page rendered with Handlebars.</p>
 
-<p>User Info:</p>
-<ul>
-  {{#if isAuthenticated}}
-    <li>User ID: {{userId}}</li>
-    <li>Username: {{userName}}</li>
-    <li>Status: Authenticated</li>
-  {{else}}
-    <li>Status: Not authenticated</li>
-  {{/if}}
-  <button class="py-2 px-4 fancy-border text-white rounded-lg">Login</button>
-</ul>
+  <p>User Info:</p>
+  <ul>
+    {{#if isAuthenticated}}
+      <li>User ID: {{userId}}</li>
+      <li>Username: {{userName}}</li>
+      <li>Status: Authenticated</li>
+    {{else}}
+      <li>Status: Not authenticated</li>
+    {{/if}}
+    <button class="fancy-border rounded-lg px-4 py-2 text-white">Login</button>
+  </ul>
+
+</div>
