@@ -1,3 +1,3 @@
 export interface FriendRequestBody {
-	'X-friendId': string;
+  "X-friendId": string;
 }

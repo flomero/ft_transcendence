@@ -1,1 +1,55 @@
 @import "tailwindcss";
+
+@theme {
+  --color-bg: var(--color-zinc-950);
+  --color-fg: var(--color-zinc-50);
+  --color-bg-muted: var(--color-zinc-900);
+  --color-fg-muted: var(--color-zinc-100);
+  --color-border: var(--color-zinc-100);
+}
+
+@layer base {
+  :root {
+    @apply font-sans text-base text-fg;
+  }
+}
+
+@layer components {
+  /* WIP Button Stuff */
+  body {
+    @apply bg-bg text-fg;
+  }
+
+  button {
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  button:hover {
+    @apply bg-bg-muted text-fg-muted scale-90;
+  }
+
+  .fancy-border {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 12px;
+    border: 1px solid transparent;
+    background:
+      linear-gradient(var(--color-bg), var(--color-bg)) padding-box,
+      linear-gradient(var(--angle), var(--color-border) 80%, #687aff 90%)
+        border-box;
+    animation: 5s fancy-border linear infinite;
+  }
+
+  @keyframes fancy-border {
+    to {
+      --angle: 360deg;
+    }
+  }
+
+  @property --angle {
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
+  }
+}
