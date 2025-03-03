@@ -13,7 +13,7 @@
     "watch:tailwind": "npx @tailwindcss/cli -i ./assets/app.css -o ./public/app.css --watch",
     "lint": "npx prettier . --write --no-error-on-unmatched-pattern",
     "lint:check": "npx prettier . --check",
-    "prepare": "husky install"
+    "prepare": "cd .. && husky app/.husky"
   },
   "keywords": [],
   "author": "",
@@ -49,7 +49,12 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3"
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
   "lint-staged": {
-    "*.{js,css,md}": "prettier --write"
+    "**/*": "prettier --write --ignore-unknown"
   }
 }
