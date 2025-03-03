@@ -4,13 +4,12 @@
 
 <p>User Info:</p>
 <ul>
-    {{#if isAuthenticated}}
+  {{#if isAuthenticated}}
     <li>User ID: {{userId}}</li>
     <li>Username: {{userName}}</li>
     <li>Status: Authenticated</li>
-    {{else}}
+  {{else}}
     <li>Status: Not authenticated</li>
-    {{/if}}
-    <button class="py-2 px-4 fancy-border text-white rounded-lg">Login</button>
-
+  {{/if}}
+  <button class="py-2 px-4 fancy-border text-white rounded-lg">Login</button>
 </ul>
