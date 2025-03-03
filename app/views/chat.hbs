@@ -1,0 +1,33 @@
+<h2>Chat!</h2>
+
+<div id="chat-container">
+    <div id="chat-messages">
+        {{#each messages}}
+            {{> chat/message message=this}}
+        {{/each}}
+    </div>
+    <div id="chat-input">
+        <input type="text" id="message-input" placeholder="Message...">
+        <button id="send-button">Send</button>
+    </div>
+</div>
+
+<script>
+    const currentUrl = window.location.origin;
+    const wsProtocol = currentUrl.startsWith('https') ? 'wss' : 'ws';
+    const wsUrl = currentUrl.replace(/^http/, 'ws');
+    const socket = new WebSocket(`${wsUrl}/chat/ws`);
+
+    socket.onmessage = function (event) {
+        const data = JSON.parse(event.data);
+        const messageContainer = document.getElementById('chat-messages');
+        messageContainer.innerHTML += data.html;
+    }
+
+    document.getElementById('send-button').onclick = function () {
+        const messageInput = document.getElementById('message-input');
+        const message = messageInput.value;
+        socket.send(message);
+        messageInput.value = '';
+    }
+</script>

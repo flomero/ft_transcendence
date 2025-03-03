@@ -14,12 +14,12 @@ export default fp(async (fastify) => {
       handlebars: handlebars,
     },
     root: join(__dirname, "..", "..", "views"),
-    layout: "layouts/main.hbs",
     viewExt: "hbs",
     options: {
       partials: {
         header: "partials/header.hbs",
         footer: "partials/footer.hbs",
+        "chat/message": "partials/chat/message.hbs",
         head: "partials/head.hbs",
       },
     },
