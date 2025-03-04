@@ -2,8 +2,8 @@ import { FastifyRequest, FastifyReply } from "fastify";
 import { doesUserExist } from "./doesUserExist";
 import { saveFriendRequest } from "./saveFriendRequest";
 import { isFriend } from "./isFriend";
-import { FriendRequestBody } from "../../types/friends/friendRequestBody";
-import { FriendRequestContent } from "../../types/friends/friendRequestContent";
+import { FriendRequestBody } from "../../interfaces/friends/friendRequestBody";
+import { FriendRequestContent } from "../../interfaces/friends/friendRequestContent";
 
 export async function handleSendFriendRequest(
   request: FastifyRequest<{ Body: FriendRequestBody }>,

@@ -1,8 +1,8 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { isFriend } from "./isFriend";
 import { isOpenFriendRequest } from "./isOpenFriendRequest";
-import { FriendRequestBody } from "../../types/friends/friendRequestBody";
-import { FriendRequestContent } from "../../types/friends/friendRequestContent";
+import { FriendRequestBody } from "../../interfaces/friends/friendRequestBody";
+import { FriendRequestContent } from "../../interfaces/friends/friendRequestContent";
 import { acceptFriendRequest } from "./acceptFriendRequest";
 
 async function handleAcceptFriendRequest(
