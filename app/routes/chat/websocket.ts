@@ -24,7 +24,7 @@ const chatWebSocket: FastifyPluginAsync = async (fastify): Promise<void> => {
 
       for (const client of clients) {
         if (client.roomId == 1) {
-          const html = await fastify.view("partials/chat/message", {
+          const html = await fastify.view("components/chat/message", {
             message: {
               userName: "John Doe",
               message: message,
