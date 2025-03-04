@@ -3,9 +3,9 @@
 @theme {
   --color-bg: var(--color-zinc-950);
   --color-fg: var(--color-zinc-50);
-  --color-bg-muted: var(--color-zinc-900);
-  --color-fg-muted: var(--color-zinc-100);
-  --color-border: var(--color-zinc-400);
+  --color-bg-muted: var(--color-zinc-700);
+  --color-fg-muted: var(--color-zinc-300);
+  --color-border: var(--color-zinc-600);
 }
 
 @layer base {
@@ -43,14 +43,6 @@
 }
 
 @layer components {
-  button {
-    @apply transition-all duration-200 ease-in-out;
-  }
-
-  button:hover {
-    @apply bg-bg-muted text-fg-muted scale-90;
-  }
-
   .fancy-border {
     display: flex;
     justify-content: center;
@@ -61,6 +53,13 @@
       linear-gradient(var(--angle), var(--color-border) 80%, #fff 90%)
         border-box;
     animation: 5s fancy-border linear infinite;
+  }
+
+  .fancy-border:hover {
+    background:
+      linear-gradient(var(--color-bg-muted), var(--color-bg-muted)) padding-box,
+      linear-gradient(var(--angle), var(--color-border) 80%, #fff 90%)
+        border-box;
   }
 
   @keyframes fancy-border {
