@@ -1,6 +1,7 @@
-import Player from './Player';
-import { Database } from 'sqlite';
-import { randomUUID } from 'crypto';
+import Player from "./Player";
+import { Database } from "sqlite";
+import { randomUUID } from "crypto";
+import { MatchOptions } from "../../../types/game/MatchOptions";
 
 class Match {
   private _matchId: string = randomUUID();
@@ -10,7 +11,6 @@ class Match {
   private _connectionToDB: Database;
   private _matchStatus: "waiting" | "playing" | "finished" = "waiting";
 
-
   constructor(gameOptions: MatchOptions, dbConneection: Database) {
     this._gameOptions = gameOptions;
     this._numberOfPlayers = this.setNumberOfPlayers(gameOptions);
@@ -19,42 +19,33 @@ class Match {
   }
 
   private setNumberOfPlayers(gameOptions: MatchOptions): number {
-    if (gameOptions.matchMode.includes("Modded") === false)
-      return (2);
-    else
-      return (8);
+    if (gameOptions.matchMode.includes("Modded") === false) return 2;
+    else return 8;
   }
 
   async addPlayerToGame(player: Player) {
     if (this.canPlayerBeAdded(player) === false)
       throw new Error("Player can't be added to game");
-    else if (this.isBeforFinalPlayer() === true)
-      this.registerPlayer(player);
+    else if (this.isBeforFinalPlayer() === true) this.registerPlayer(player);
     else if (this.isFinalPlayer() === true) {
       this.registerPlayer(player);
       await this.startGame();
-    }
-    else {
+    } else {
       player.sendMessage("Match is full");
     }
   }
 
   private canPlayerBeAdded(player: Player): boolean {
-    if (this._matchStatus !== "waiting")
-      return (false);
-    else if (this.isAddedAlready(player) === true)
-      return (false);
-    else if (this.isGameFull() == true)
-      return (false);
-    else if (player.currentState !== "WaitingForMessage" )
-      return (false);
-    return (true);
+    if (this._matchStatus !== "waiting") return false;
+    else if (this.isAddedAlready(player) === true) return false;
+    else if (this.isGameFull() == true) return false;
+    else if (player.currentState !== "WaitingForMessage") return false;
+    return true;
   }
 
   private isAddedAlready(player: Player): boolean {
-    if (this._players.includes(player) === true)
-      return (true);
-    return (false);
+    if (this._players.includes(player) === true) return true;
+    return false;
   }
 
   private sendMatchIdToPlayer(player: Player) {
@@ -62,17 +53,17 @@ class Match {
   }
 
   private registerPlayer(player: Player) {
-    player.currentState= "InGameLobby";
+    player.currentState = "InGameLobby";
     this._players.push(player);
     this.sendMatchIdToPlayer(player);
   }
 
   private isBeforFinalPlayer(): boolean {
-    return (this._players.length < this._numberOfPlayers - 1);
+    return this._players.length < this._numberOfPlayers - 1;
   }
 
   private isFinalPlayer(): boolean {
-    return (this._players.length === this._numberOfPlayers - 1);
+    return this._players.length === this._numberOfPlayers - 1;
   }
 
   async startGame(): Promise<void> {
@@ -82,36 +73,42 @@ class Match {
     // start louens game
   }
 
-  async addMatchToDB(): Promise<void> { // make private
-    if (!this._connectionToDB)
-      return;
+  async addMatchToDB(): Promise<void> {
+    // make private
+    if (!this._connectionToDB) return;
     const sql = `
     INSERT INTO matches (id, game, gameMode)
     VALUES (?, ?, ?)
     `;
     await this._connectionToDB.run(sql, [
-      this._matchId, "Pong", this._gameOptions.matchMode]);
+      this._matchId,
+      "Pong",
+      this._gameOptions.matchMode,
+    ]);
   }
 
-  async addPlayersToMatchInDB(): Promise<void> { // make private
-    if (!this._connectionToDB)
-      return;
+  async addPlayersToMatchInDB(): Promise<void> {
+    // make private
+    if (!this._connectionToDB) return;
     const sql = `
     INSERT INTO r_users_matches (id, userId, match)
     VALUES (?, ?, ?)
     `;
-    this._players.forEach(async player => {
-      await this._connectionToDB.run(sql,
-                      [randomUUID, player.playerId, this._matchId]);
+    this._players.forEach(async (player) => {
+      await this._connectionToDB.run(sql, [
+        randomUUID,
+        player.playerId,
+        this._matchId,
+      ]);
     });
   }
 
   //matchInput(input: string, timeStamp: number) {
   //  //send message to Louens game
- // }
+  // }
 
   sendMessageToAllPlayers(message: string) {
-    this._players.forEach(player => {
+    this._players.forEach((player) => {
       player.sendMessage(message);
     });
   }
@@ -125,33 +122,37 @@ class Match {
   }
 
   isGameFull(): boolean {
-    return (this._players.length === this._numberOfPlayers);
+    return this._players.length === this._numberOfPlayers;
   }
 
   private getPlayerNameAndId(): string {
-  return this._players
-    .map(player => `PlayerId: ${player.playerId}, PlayerName: ${player.userName}`)
-    .join("\n");
+    return this._players
+      .map(
+        (player) =>
+          `PlayerId: ${player.playerId}, PlayerName: ${player.userName}`,
+      )
+      .join("\n");
   }
 
   public printGameStats() {
-  const message = "MatchId: " + this._matchId + "\n"
-    + " MatchOptions: " + JSON.stringify(this._gameOptions) + "\n"
-    + " Players:\n" + this.getPlayerNameAndId() + "\n"
-    + " NumberOfPlayers: " + this._numberOfPlayers + "\n"
-    + " GameStatus: " + this._matchStatus + "\n";
-  console.log(message);
+    const message =
+      "MatchId: " +
+      this._matchId +
+      "\n" +
+      " MatchOptions: " +
+      JSON.stringify(this._gameOptions) +
+      "\n" +
+      " Players:\n" +
+      this.getPlayerNameAndId() +
+      "\n" +
+      " NumberOfPlayers: " +
+      this._numberOfPlayers +
+      "\n" +
+      " GameStatus: " +
+      this._matchStatus +
+      "\n";
+    console.log(message);
   }
 }
 
-type MatchOptions =
-  { match: 'pong'; matchMode: 'VanillaDouble'; }
-  | { match: 'pong'; matchMode: 'ModdedDouble'; modifiers: Modifiers[] }
-  | { match: 'pong'; matchMode: 'VanillaMulti'; }
-  | { match: 'pong'; matchMode: 'ModdedMulti'; modifiers: Modifiers[] };
-
-type Modifiers = "blackwhole" | "speedUpBall";
-
-
-export type { MatchOptions, Modifiers };
 export default Match;
