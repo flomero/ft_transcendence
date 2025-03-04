@@ -5,5 +5,5 @@ CREATE TABLE IF NOT EXISTS matches (
 	modifiers TEXT,
 	result TEXT,
 	tournamentId TEXT,
-	FOREIGN KEY (tournamentId) REFERENCES turnaments(id)
+	FOREIGN KEY (tournamentId) REFERENCES tournaments(id)
 );
