@@ -1,5 +1,5 @@
-import websocketPlugin from '@fastify/websocket';
-import fp from 'fastify-plugin'
+import websocketPlugin from "@fastify/websocket";
+import fp from "fastify-plugin";
 
 /**
  * This plugins adds websocket support
@@ -7,5 +7,5 @@ import fp from 'fastify-plugin'
  */
 
 export default fp(async (fastify) => {
-  fastify.register(websocketPlugin)
-})
+  fastify.register(websocketPlugin);
+});

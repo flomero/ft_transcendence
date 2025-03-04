@@ -1,8 +1,37 @@
 {
-    "name": "ft_transcendence",
-    "image": "node:22",
-    "mounts": [
-        "source=${localEnv:HOME}/.gitconfig,target=/root/.gitconfig,type=bind,consistency=cached",
-        "source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind,consistency=cached"
-    ]
+  "name": "ft_transcendence",
+  "image": "node:22",
+  "mounts": [
+    "source=${localEnv:HOME}/.gitconfig,target=/root/.gitconfig,type=bind,consistency=cached",
+    "source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind,consistency=cached"
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": ["bradlc.vscode-tailwindcss", "esbenp.prettier-vscode"],
+      "settings": {
+        "files.associations": {
+          "*.css": "tailwindcss"
+        },
+        "editor.quickSuggestions": {
+          "strings": true
+        },
+        "tailwindCSS.includeLanguages": {
+          "plaintext": "html",
+          "handlebars": "html",
+          "css": "css"
+        },
+        "tailwindCSS.emmetCompletions": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "[javascript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[json]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[tailwindcss]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        }
+      }
+    }
+  }
 }
