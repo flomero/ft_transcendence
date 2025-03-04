@@ -3,18 +3,38 @@ import view from "@fastify/view";
 import { join } from "path";
 import handlebars from "handlebars";
 import { registerHelpers } from "../templates/helpers";
-import { readdirSync } from "fs";
+import { readdirSync, statSync } from "fs";
+import { relative } from "path";
 
 const componentsDir = join(__dirname, "..", "..", "templates", "components");
-const componentFiles = readdirSync(componentsDir);
 const components: Record<string, string> = {};
 
-componentFiles.forEach((file) => {
-  if (file.endsWith(".hbs")) {
-    const componentName = file.replace(".hbs", "");
-    components[`components/${componentName}`] = `/components/${file}`;
-  }
-});
+// Helper function to recursively scan directories
+function scanComponentsDir(directory: string) {
+  const files = readdirSync(directory);
+  files.forEach((file) => {
+    const fullPath = join(directory, file);
+    const isDirectory = statSync(fullPath).isDirectory();
+
+    if (isDirectory) {
+      scanComponentsDir(fullPath); // Recursively scan subdirectories
+    } else if (file.endsWith(".hbs")) {
+      // Get path relative to components directory
+      const relativePath = relative(componentsDir, fullPath);
+      // Create component name without extension and with forward slashes
+      const componentName = relativePath
+        .replace(/\.hbs$/, "")
+        .replace(/\\/g, "/");
+      // Create component path relative to templates directory
+      const componentPath = `/components/${relativePath.replace(/\\/g, "/")}`;
+
+      components[`components/${componentName}`] = componentPath;
+    }
+  });
+}
+
+// Start the recursive scan
+scanComponentsDir(componentsDir);
 
 /**
  * This plugin adds template rendering support using Handlebars
@@ -34,7 +54,6 @@ export default fp(async (fastify) => {
         header: "/partials/header.hbs",
         footer: "/partials/footer.hbs",
         head: "/partials/head.hbs",
-        "chat/message": "/partials/chat/message.hbs",
         ...components,
       },
     },
