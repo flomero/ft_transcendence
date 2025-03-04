@@ -2,7 +2,7 @@ import { FastifyPluginAsync } from "fastify";
 
 const root: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.get("/", async function (request, reply) {
-    return reply.view("home", {
+    return reply.view("views/home", {
       title: "ft_transcendence",
       isAuthenticated: request.isAuthenticated,
       userId: request.userId,

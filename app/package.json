@@ -35,6 +35,7 @@
     "handlebars": "^4.7.8",
     "sqlite": "^5.1.1",
     "sqlite3": "^5.1.7",
+    "tailwind-merge": "^3.0.2",
     "tailwindcss": "^4.0.9"
   },
   "devDependencies": {
@@ -45,7 +46,8 @@
     "fastify-tsconfig": "^3.0.0",
     "husky": "^9.1.7",
     "lint-staged": "^15.4.3",
-    "prettier": "3.5.2",
+    "prettier": "^3.5.2",
+    "prettier-plugin-tailwindcss": "^0.6.11",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3"
   },

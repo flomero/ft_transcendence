@@ -27,7 +27,7 @@ const chat: FastifyPluginAsync = async (fastify): Promise<void> => {
     });
 
     return reply.view(
-      "chat",
+      "views/chat",
       {
         messages: messages,
       },
