@@ -34,6 +34,7 @@ export default fp(async (fastify) => {
         header: "/partials/header.hbs",
         footer: "/partials/footer.hbs",
         head: "/partials/head.hbs",
+        "chat/message": "/partials/chat/message.hbs",
         ...components,
       },
     },

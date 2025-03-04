@@ -1,2 +1,6 @@
 # generated CSS
 public/app.css
+
+# database
+database/db.sqlite
+database/db.sqlite-journal
