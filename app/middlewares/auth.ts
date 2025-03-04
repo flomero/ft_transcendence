@@ -2,14 +2,6 @@ import fp from "fastify-plugin";
 import { decodeJWT, verifyJWT } from "../services/auth/jwt";
 import { refreshJWT } from "../services/auth/google-oauth";
 
-declare module "fastify" {
-  interface FastifyRequest {
-    userId: string;
-    userName: string;
-    isAuthenticated: boolean;
-  }
-}
-
 export default fp(async (fastify) => {
   fastify.decorateRequest("userId", "");
   fastify.decorateRequest("userName", "");
