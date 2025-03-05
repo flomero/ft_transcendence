@@ -1,4 +1,4 @@
-import { Modifiers } from "../../types/game/MatchOptions";
+import { Modifiers } from "../../services/game/websocket/Match";
 
 export interface gameMessageInterface {
   messageType: string;

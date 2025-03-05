@@ -1,5 +1,6 @@
 import Match from "./Match";
-import { MatchOptions } from "../../../types/game/MatchOptions";
+import type { MatchOptions } from "./Match";
+
 import Player from "./Player";
 import { Database } from "sqlite";
 

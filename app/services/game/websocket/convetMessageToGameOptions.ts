@@ -1,5 +1,5 @@
 import { gameMessageInterface } from "../../../interfaces/game/gameMessageInterface";
-import { MatchOptions } from "../../../types/game/MatchOptions";
+import type { MatchOptions } from "./Match";
 
 function convertMessageToGameOptions(
   message: gameMessageInterface,

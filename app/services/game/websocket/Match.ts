@@ -1,7 +1,6 @@
 import Player from "./Player";
 import { Database } from "sqlite";
 import { randomUUID } from "crypto";
-import { MatchOptions } from "../../../types/game/MatchOptions";
 
 class Match {
   private _matchId: string = randomUUID();
@@ -154,5 +153,15 @@ class Match {
     console.log(message);
   }
 }
+
+type MatchOptions =
+  | { match: "pong"; matchMode: "VanillaDouble" }
+  | { match: "pong"; matchMode: "ModdedDouble"; modifiers: Modifiers[] }
+  | { match: "pong"; matchMode: "VanillaMulti" }
+  | { match: "pong"; matchMode: "ModdedMulti"; modifiers: Modifiers[] };
+
+type Modifiers = "blackwhole" | "speedUpBall";
+
+export type { MatchOptions, Modifiers };
 
 export default Match;
