@@ -1,0 +1,169 @@
+{
+  "pong": {
+    "serverTickrateMs": 30,
+    "serverMaxDelayTicks": 100,
+    "paddleSpeedWidthPercent": 3,
+    "gameModes": {
+      "vanillaDuelPong": {
+        "className": "VanillaDuelPong",
+        "arenaSettings": {},
+        "defaultBallSettings": {
+          "speed": 2.0,
+          "size": 0.75
+        }
+      },
+      "modedDuelPong": {
+        "className": "ModedDuelPong",
+        "arenaSettings": {},
+        "defaultBallSettings": {
+          "speed": 2.0,
+          "size": 0.75
+        },
+        "defaultPowerUpSettings": {
+          "size": 0.8
+        }
+      },
+      "vanillaMultiplayerPong": {
+        "className": "VanillaMultiplayerPong",
+        "arenaSettings": {
+          "wallDistance": 50,
+          "wallHeight": 2,
+          "paddleOffset": 2.5,
+          "paddleCoverage": 25,
+          "paddleHeight": 1
+        },
+        "defaultBallSettings": {
+          "speed": 2.0,
+          "size": 0.75
+        }
+      },
+      "modedMultiplayerPong": {
+        "className": "ModedMultiplayerPong",
+        "arenaSettings": {
+          "wallDistance": 50,
+          "wallHeight": 2,
+          "paddleOffset": 2.5,
+          "paddleCoverage": 25,
+          "paddleHeight": 1
+        },
+        "defaultBallSettings": {
+          "speed": 2.15,
+          "size": 0.75
+        },
+        "defaultPowerUpSettings": {
+          "size": 2.25,
+          "powerUpsCapacities": {
+            "invisibleBallModifier": 1,
+            "speedBoostModifier": 1,
+            "multiballModifier": 1,
+            "graspingVinesDebuffModifier": 1,
+            "blackHoleDebuffModifier": 1,
+            "carouselDebuffModifier": 1,
+            "shootingModifier": 1
+          }
+        }
+      }
+    },
+    "gameModifiers": {
+      "defaultGoalTrackerGameModifier": {
+        "className": "DefaultGoalTrackerGameModifier"
+      },
+      "defaultLastHitTrackerGameModifier": {
+        "className": "DefaultLastHitTrackerGameModifier"
+      },
+      "defaultSurvivalGameModifier": {
+        "className": "DefaultSurvivalGameModifier"
+      },
+      "defaultTimeLimitedGameModifier": {
+        "className": "DefaultTimeLimitedGameModifier",
+        "duration": 60
+      },
+      "defaultPowerUpSpawnerGameModifier": {
+        "className": "DefaultPowerUpSpawnerGameModifier",
+        "spawnIntervalCenter": 350,
+        "spawnIntervalDeviation": 25
+      },
+      "extraWallsMovementGameModifier": {
+        "className": "ExtraWallsMovementGameModifier",
+        "amplitude": 12,
+        "speed": 0.25
+      },
+      "powerUpsTester": {
+        "className": "PowerUpsTester"
+      },
+      "playerEliminationArenaEffectModifier": {
+        "className": "PlayerEliminationArenaEffectModifier"
+      },
+      "defaultWallBounceSpeedboostGameModifier": {
+        "className": "DefaultWallBounceSpeedboostGameModifier",
+        "rampUpStrength": 0.012
+      },
+      "goalCountBasedEliminationGameModifier": {
+        "className": "GoalCountBasedEliminationGameModifier",
+        "lifeCount": 5
+      }
+    },
+    "powerUps": {
+      "invisibleBallModifier": {
+        "className": "InvisibleBallModifier",
+        "spawnWeight": 3.0,
+        "duration": 33,
+        "speedBoostCoef": 0.2
+      },
+      "speedBoostModifier": {
+        "className": "SpeedBoostModifier",
+        "spawnWeight": 3.0,
+        "duration": 96,
+        "rampUpStrength": 0.11,
+        "rampUpFrequency": 16
+      },
+      "multiballModifier": {
+        "className": "MultiballModifier",
+        "spawnWeight": 3.0,
+        "duration": 166,
+        "splitAngleToPi": 2.0,
+        "spawnCountPerSide": 6
+      },
+      "graspingVinesDebuffModifier": {
+        "className": "GraspingVinesDebuffModifier",
+        "spawnWeight": 1.0,
+        "duration": 167,
+        "maxVines": 10,
+        "vineFrequency": 11,
+        "vineStrength": 10
+      },
+      "blackHoleDebuffModifier": {
+        "className": "BlackHoleDebuffModifier",
+        "spawnWeight": 1.0,
+        "duration": 100,
+        "debuffCount": 1,
+        "pullStrength": 12.5,
+        "pullRange": 75
+      },
+      "carouselDebuffModifier": {
+        "className": "CarouselDebuffModifier",
+        "spawnWeight": 1.0,
+        "stepsPerDegree": 3,
+        "ticksPerSteps": 1
+      },
+      "shootingModifier": {
+        "className": "ShootingModifier",
+        "spawnWeight": 1.0,
+        "duration": 66,
+        "rampUpStrength": 0.5,
+        "angularSpeedDegTick": 0.5,
+        "halfOpeningDeg": 33
+      }
+    }
+  },
+  "enhancedTicTacToe": {
+    "serverTickrateMs": 10,
+    "gameModes": {
+      "enhancedTicTacToeClassic": {
+        "className": "EnhancedTicTacToe"
+      }
+    },
+    "gameModifiers": {},
+    "powerUps": {}
+  }
+}
