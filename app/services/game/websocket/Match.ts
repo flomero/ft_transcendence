@@ -66,14 +66,13 @@ class Match {
   }
 
   async startGame(): Promise<void> {
-    //await this.addMatchToDB();
-    //await this.addPlayersToMatchInDB();
+    await this.addMatchToDB();
+    await this.addPlayersToMatchInDB();
     this._matchStatus = "playing";
     // start louens game
   }
 
-  async addMatchToDB(): Promise<void> {
-    // make private
+  private async addMatchToDB(): Promise<void> {
     if (!this._connectionToDB) return;
     const sql = `
     INSERT INTO matches (id, game, gameMode)
@@ -86,16 +85,15 @@ class Match {
     ]);
   }
 
-  async addPlayersToMatchInDB(): Promise<void> {
-    // make private
+  private async addPlayersToMatchInDB(): Promise<void> {
     if (!this._connectionToDB) return;
     const sql = `
-    INSERT INTO r_users_matches (id, userId, match)
+    INSERT INTO r_users_matches (id, userId, matchId)
     VALUES (?, ?, ?)
     `;
     this._players.forEach(async (player) => {
       await this._connectionToDB.run(sql, [
-        randomUUID,
+        randomUUID(),
         player.playerId,
         this._matchId,
       ]);
