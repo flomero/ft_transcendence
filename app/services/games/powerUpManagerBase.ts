@@ -17,9 +17,11 @@ export class PowerUpManagerBase {
   protected spawnedPowerUps: Record<string, any>[] = [];
   protected activePowerUps: ModifierBase[] = [];
 
-  constructor(gameName: string, gameMode: string, allowedPowerUps: string[]) {
+  constructor(gameData: Record<string, any>) {
     // Save allowed power-up names in order.
-    this.powerUpNames = allowedPowerUps;
+    const gameName: string = gameData["gameName"];
+    const gameModeName: string = gameData["gameModeName"];
+    this.powerUpNames = gameData["powerUpNames"];
 
     // Get the power ups object from the registry.
     const registryPowerUps = GAME_REGISTRY[gameName]["power_ups"];
@@ -38,7 +40,9 @@ export class PowerUpManagerBase {
 
     // Read properties from the registry.
     this.powerUpDefaultProperties =
-      GAME_REGISTRY[gameName]["game_modes"][gameMode]["defaultPowerUpSettings"];
+      GAME_REGISTRY[gameName]["game_modes"][gameModeName][
+        "defaultPowerUpSettings"
+      ];
 
     // Extract capacities
     this.powerUpCapacities =
