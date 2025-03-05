@@ -2,34 +2,38 @@ import { PowerUpManagerBase } from "./powerUpManagerBase";
 import { ModifierBase } from "./modifierBase";
 import { GAME_REGISTRY } from "./gameRegistry";
 
-export abstract class GameBase {
-  lastUpdateTime: number;
-  startTimeMs: number;
-  modifiers: ModifierBase[];
-  running: boolean;
-  tickData: Record<string, any>[];
-  powerUpManager: PowerUpManagerBase;
+export enum GameState {
+  CREATED,
+  RUNNING,
+  FINISHED,
+}
 
-  constructor(
-    public gameName: string,
-    public gameMode: string,
-    modifierNames: string[] = [],
-    powerUpNames: string[] = [],
-  ) {
+export abstract class GameBase {
+  protected matchId: string;
+
+  protected lastUpdateTime: number;
+  protected startTimeMs: number;
+
+  protected state: GameState = GameState.CREATED;
+  protected tickData: Record<string, any>[];
+
+  protected modifiers: ModifierBase[];
+  protected powerUpManager: PowerUpManagerBase;
+
+  constructor(public gameData: Record<string, any>) {
+    this.matchId = gameData["matchId"];
     this.lastUpdateTime = Date.now();
     this.startTimeMs = Date.now();
 
-    this.modifiers = modifierNames.map((modifierName) =>
-      GAME_REGISTRY[gameName]["game_modifiers"][modifierName]["class"](),
+    this.modifiers = (gameData["modifierNames"] as string[]).map(
+      (modifierName) =>
+        GAME_REGISTRY[gameData["gameName"]]["game_modifiers"][modifierName][
+          "class"
+        ](),
     );
 
-    this.running = false;
     this.tickData = [];
-    this.powerUpManager = new PowerUpManagerBase(
-      gameName,
-      gameMode,
-      powerUpNames,
-    );
+    this.powerUpManager = new PowerUpManagerBase(gameData);
   }
 
   /**
@@ -41,7 +45,7 @@ export abstract class GameBase {
    * Starts the game.
    */
   startGame(): void {
-    this.running = true;
+    this.state = GameState.RUNNING;
     console.log("Game started");
     this.triggerModifiers("on_game_start");
   }
@@ -63,7 +67,7 @@ export abstract class GameBase {
   /**
    * Returns a snapshot of the current game state.
    */
-  getStateSnapshot(): object {
+  getStateSnapshot(): Record<string, any> {
     return {
       type: "game_state",
       timestamp: this.lastUpdateTime,
@@ -73,12 +77,12 @@ export abstract class GameBase {
   /**
    * Restores a game state snapshot.
    */
-  abstract loadStateSnapshot(snapshot: any): void;
+  abstract loadStateSnapshot(snapshot: Record<string, any>): void;
 
   /**
    * Handles a client action.
    */
-  async handleAction(action: any): Promise<void> {
+  async handleAction(action: Record<string, any>): Promise<void> {
     // Implementation here...
   }
 
@@ -138,5 +142,10 @@ export abstract class GameBase {
     for (const powerUp of this.powerUpManager.getActivePowerUps()) {
       safeInvoke(powerUp, method);
     }
+  }
+
+  // Getters & Setters
+  getState(): GameState {
+    return this.state;
   }
 }
