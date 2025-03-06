@@ -2,7 +2,7 @@ import { PowerUpManagerBase } from "./powerUpManagerBase";
 import { ModifierBase } from "./modifierBase";
 import { GAME_REGISTRY } from "./gameRegistry";
 
-export enum GameState {
+export enum GameStatus {
   CREATED,
   RUNNING,
   FINISHED,
@@ -14,8 +14,7 @@ export abstract class GameBase {
   protected lastUpdateTime: number;
   protected startTimeMs: number;
 
-  protected state: GameState = GameState.CREATED;
-  protected tickData: Record<string, any>[];
+  protected status: GameStatus = GameStatus.CREATED;
 
   protected modifiers: ModifierBase[];
   protected powerUpManager: PowerUpManagerBase;
@@ -32,7 +31,6 @@ export abstract class GameBase {
         ](),
     );
 
-    this.tickData = [];
     this.powerUpManager = new PowerUpManagerBase(gameData);
   }
 
@@ -45,23 +43,9 @@ export abstract class GameBase {
    * Starts the game.
    */
   startGame(): void {
-    this.state = GameState.RUNNING;
+    this.status = GameStatus.RUNNING;
     console.log("Game started");
     this.triggerModifiers("on_game_start");
-  }
-
-  /**
-   * Rewinds the game state to a specific tick.
-   */
-  async rewind(toTick: number): Promise<void> {
-    // Implementation here...
-  }
-
-  /**
-   * Fast-forwards the game state by replaying tickCount ticks.
-   */
-  async fastForward(tickCount: number): Promise<void> {
-    // Implementation here...
   }
 
   /**
@@ -69,7 +53,7 @@ export abstract class GameBase {
    */
   getStateSnapshot(): Record<string, any> {
     return {
-      type: "game_state",
+      type: "game_status",
       timestamp: this.lastUpdateTime,
     };
   }
@@ -145,7 +129,7 @@ export abstract class GameBase {
   }
 
   // Getters & Setters
-  getState(): GameState {
-    return this.state;
+  getStatus(): GameStatus {
+    return this.status;
   }
 }

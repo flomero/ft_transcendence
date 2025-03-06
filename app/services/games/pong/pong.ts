@@ -1,14 +1,410 @@
-import { GameObject } from "../../../types/games/gameObject";
-import { GameBase } from "../gameBase";
+import { GameBase, GameStatus } from "../gameBase";
+import { PhysicsEngine, Collision } from "../physicsEngine";
+import { GAME_REGISTRY } from "../gameRegistry";
+import { Paddle } from "../../../types/games/pong/paddle";
+import { Ball } from "../../../types/games/pong/ball";
+import { Rectangle } from "../../../types/games/pong/rectangle";
+import { RNG } from "../rng";
 
-export class Pong extends GameBase {
-  protected gameObjects: GameObject[] = [];
+const EPSILON = 1e-2;
+
+// Temporary:
+interface Player {
+  id: number;
+}
+
+interface PongExtraGameData {
+  playerCount: number;
+  lastHit: number;
+  players?: Player[];
+  scores: number[];
+}
+
+interface PongGameObjects {
+  balls: Ball[];
+  paddles: Paddle[];
+  walls: Rectangle[];
+}
+
+export abstract class Pong extends GameBase {
+  static readonly name = "multiplayer_pong";
+
+  protected serverTickrateMs: number;
+  protected serverMaxDelayTicks: number;
+
+  protected tickData: Record<string, any>[];
+  protected tickDataLock: Promise<void> | null = null;
+  protected rng: RNG;
+
+  protected extraGameData: PongExtraGameData;
+
+  protected gameObjects: PongGameObjects;
+  protected gameObjectsLock: Promise<void> | null = null;
+
+  protected arenaSettings: Record<string, any>;
 
   constructor(gameData: Record<string, any>) {
     super(gameData);
+
+    // Registry settings
+    this.serverTickrateMs = GAME_REGISTRY.pong.serverTickrateMs;
+    this.serverMaxDelayTicks = GAME_REGISTRY.pong.serverMaxDelayTicks;
+    this.arenaSettings =
+      GAME_REGISTRY.pong[gameData["gameModeName"]].arenaSettings;
+
+    // Network playability related
+    this.tickData = new Array(this.serverMaxDelayTicks);
+    this.rng = new RNG();
+
+    // Players & related
+    this.extraGameData = {
+      playerCount: gameData["playerCount"],
+      lastHit: -1,
+      scores: Array(gameData["playerCount"]).fill(0),
+    };
+
+    // Game objects -> w/ collisions
+    this.gameObjects = {
+      balls: [],
+      paddles: [],
+      walls: [],
+    };
   }
 
-  async update(): Promise<void> {}
+  async update(): Promise<void> {
+    if (this.status === GameStatus.RUNNING) {
+      // Use a lock for game objects
+      if (this.gameObjectsLock === null)
+        this.gameObjectsLock = Promise.resolve();
 
-  loadStateSnapshot(snapshot: Record<string, any>): void {}
+      await this.gameObjectsLock.then(async () => {
+        this.gameObjectsLock = new Promise<void>((resolve) => {
+          for (const paddle of this.gameObjects.paddles)
+            if (paddle.velocity !== 0.0) this.updatePaddle(paddle);
+          resolve();
+        });
+      });
+
+      for (const ball of this.gameObjects.balls) {
+        if (ball.doCollision) this.doCollisionChecks(ball);
+
+        if (!this.isOutOfBounds(ball)) {
+          console.log("Ball went out of bounds, resetting it");
+          this.resetBall(0);
+        }
+      }
+      this.triggerModifiers("on_update");
+
+      const snapshot = this.getStateSnapshot();
+
+      // Use a lock for tick data
+      if (this.tickDataLock === null) this.tickDataLock = Promise.resolve();
+
+      await this.tickDataLock.then(async () => {
+        this.tickDataLock = new Promise<void>((resolve) => {
+          this.lastUpdateTime = Date.now();
+          this.tickData.push(snapshot);
+          if (this.tickData.length > this.serverMaxDelayTicks)
+            this.tickData.shift();
+          resolve();
+        });
+      });
+    }
+  }
+
+  simulateTick(): void {
+    if (this.status === GameStatus.RUNNING) {
+      for (const ball of this.gameObjects.balls)
+        if (ball.doCollision) this.doCollisionChecks(ball);
+      this.triggerModifiers("on_update");
+    }
+  }
+
+  // TODO: Use userInput schema for received action
+  async handleAction(action: Record<string, any>): Promise<void> {
+    if (
+      !(
+        action.player_id >= 0 &&
+        action.player_id < this.extraGameData.playerCount
+      )
+    ) {
+      console.log(
+        `Can't handle player ${action.player_id}'s action: game has ${this.extraGameData.playerCount} players`,
+      );
+      return;
+    }
+
+    const delayMs = this.lastUpdateTime - action.timestamp;
+    const delayTicks = Math.round(delayMs / this.serverTickrateMs);
+
+    if (delayTicks > this.serverMaxDelayTicks) {
+      console.log(
+        `Player ${action.player_id} has really high ping -> disconnecting`,
+      );
+      // TODO: Disconnection in case of high ping
+      return;
+    }
+
+    // Rewind game state delay_ticks
+    if (delayTicks > 0) {
+      console.log(`Rewinding ${delayTicks} ticks`);
+      await this.rewind(delayTicks);
+    }
+
+    // Apply user_input
+    if (this.gameObjectsLock === null) this.gameObjectsLock = Promise.resolve();
+
+    await this.gameObjectsLock.then(async () => {
+      this.gameObjectsLock = new Promise<void>((resolve) => {
+        switch (action.action) {
+          case "UP":
+            this.gameObjects.paddles[action.player_id].velocity =
+              this.gameObjects.paddles[action.player_id].speed;
+            break;
+
+          case "DOWN":
+            this.gameObjects.paddles[action.player_id].velocity =
+              -this.gameObjects.paddles[action.player_id].speed;
+            break;
+
+          case "STOP":
+            this.gameObjects.paddles[action.player_id].velocity = 0.0;
+            break;
+        }
+        resolve();
+      });
+    });
+
+    this.triggerModifiers("on_user_input", { input: action });
+
+    // Fast-forward to go back to the current tick
+    if (delayTicks > 0) {
+      console.log(`Fast-forwarding ${delayTicks} ticks`);
+      await this.fastForward(delayTicks);
+    }
+  }
+
+  // TODO: Use gameState schema
+  getStateSnapshot(): Record<string, any> {
+    const gameState = super.getStateSnapshot();
+
+    gameState.balls = this.gameObjects.balls;
+    gameState.player_paddles = this.gameObjects.paddles;
+    gameState.walls = this.gameObjects.walls;
+    gameState.rng = this.rng.getState();
+
+    return gameState;
+  }
+
+  // TODO: Use gameState schema
+  loadStateSnapshot(snapshot: Record<string, any>): void {
+    this.gameObjects.balls = snapshot.balls;
+    this.gameObjects.walls = snapshot.walls;
+    this.gameObjects.paddles = snapshot.player_paddles;
+
+    this.rng.setState(snapshot.rng);
+  }
+
+  async rewind(toTick: number): Promise<void> {
+    if (toTick > this.tickData.length) {
+      console.log(`Can't rewind that far -> rewinding as much as possible`);
+      toTick = this.tickData.length;
+    }
+
+    this.loadStateSnapshot(this.tickData[this.tickData.length - toTick]);
+  }
+
+  async fastForward(tickCount: number): Promise<void> {
+    // Remove the outdated ticks from the end
+    if (this.tickDataLock === null) {
+      this.tickDataLock = Promise.resolve();
+    }
+
+    await this.tickDataLock.then(async () => {
+      this.tickDataLock = new Promise<void>((resolve) => {
+        for (let i = 0; i < tickCount; i++)
+          if (this.tickData.length > 0) this.tickData.pop();
+        resolve();
+      });
+    });
+
+    // Now, re-simulate the ticks one by one
+    for (let i = 0; i < tickCount; i++) {
+      this.simulateTick();
+      const snapshot = this.getStateSnapshot();
+
+      await this.tickDataLock.then(async () => {
+        this.tickDataLock = new Promise<void>((resolve) => {
+          this.tickData.push(snapshot);
+          resolve();
+        });
+      });
+    }
+  }
+
+  updatePaddle(paddle: Paddle): void {
+    if (!paddle.doMove) {
+      console.log(
+        `Player ${this.gameObjects.paddles.indexOf(paddle)}'s paddle can't be moved`,
+      );
+      return;
+    }
+
+    const direction = paddle.velocity > 0 ? 1 : -1;
+
+    if (
+      (direction > 0 && paddle.displacement > 50 - paddle.coverage / 2.0) ||
+      (direction < 0 && paddle.displacement < -(50 - paddle.coverage / 2.0))
+    ) {
+      console.log(`Can't move in this direction anymore`);
+      return;
+    }
+
+    paddle.x += paddle.velocity * paddle.dx;
+    paddle.y += paddle.velocity * paddle.dy;
+    paddle.displacement += direction * paddle.speedWidthPercent;
+
+    this.triggerModifiers("on_player_movement", {
+      player_id: this.gameObjects.paddles.indexOf(paddle),
+    });
+  }
+
+  resetBall(ballId: number = -1): void {
+    const randomAngle = this.rng.random() * Math.PI * 2.0;
+    const ca = Math.cos(randomAngle);
+    const sa = Math.sin(randomAngle);
+
+    // Reset all balls
+    this.gameObjects.balls[0] = {
+      x: 50 + 2.0 * ca,
+      y: 50 + 2.0 * sa,
+      dx: ca,
+      dy: sa,
+      speed: 2,
+      radius: 0.75,
+      isVisible: true,
+      doCollision: true,
+      doGoal: true,
+    };
+  }
+
+  abstract isOutOfBounds(ball: Ball): boolean;
+
+  doCollisionChecks(ball: Ball): void {
+    const getClosestCollision = (
+      collisions: Array<Collision | null>,
+    ): Collision | null => {
+      let minIndex = -1;
+      let minValue = Infinity;
+
+      for (let k = 0; k < collisions.length; k++) {
+        if (!collisions[k]) continue;
+
+        if (collisions[k]!.distance < minValue) {
+          minValue = collisions[k]!.distance;
+          minIndex = k;
+        }
+      }
+
+      return minIndex >= 0 ? collisions[minIndex] : null;
+    };
+
+    let remainingDistance = ball.speed;
+    let loopCounter = 0;
+
+    while (remainingDistance > EPSILON) {
+      const paddleCollision: Collision | null = PhysicsEngine.detectCollision(
+        ball,
+        remainingDistance,
+        this.gameObjects.paddles,
+        "paddle",
+      );
+      const wallCollision: Collision | null = PhysicsEngine.detectCollision(
+        ball,
+        remainingDistance,
+        this.gameObjects.walls,
+        "wall",
+      );
+
+      let powerUpCollision: Collision | null = null;
+      if (this.powerUpManager.getSpawnedPowerUps().length > 0) {
+        powerUpCollision = PhysicsEngine.detectCollision(
+          ball,
+          remainingDistance,
+          this.powerUpManager.getSpawnedPowerUps(),
+          "power_up",
+        );
+      }
+
+      // Balls that can't score a goal can't pickup powerUps
+      if (!ball.doGoal) powerUpCollision = null;
+
+      // Determine the closest collision
+      const tmpCollision: Collision | null = getClosestCollision([
+        paddleCollision,
+        wallCollision,
+        powerUpCollision,
+      ]);
+
+      if (!tmpCollision) {
+        // Move ball normally if no collision
+        ball.x += Math.round(ball.dx * remainingDistance * 100) / 100;
+        ball.y += Math.round(ball.dy * remainingDistance * 100) / 100;
+        break;
+      }
+
+      let collision: Collision = tmpCollision as Collision;
+      collision.object_id = collision.object_id || -1;
+
+      const travelDistance = collision.distance;
+      ball.x += Math.round(ball.dx * travelDistance * 100) / 100;
+      ball.y += Math.round(ball.dy * travelDistance * 100) / 100;
+
+      if (collision.type !== "power_up") {
+        PhysicsEngine.resolveCollision(ball, collision);
+
+        // Handle modifiers
+        if (collision.type === "paddle") {
+          this.triggerModifiers("on_paddle_bounce", {
+            player_id: collision.object_id,
+          });
+        } else if (collision.type === "wall") {
+          if (this.isGoalWall(collision.object_id) && ball.doGoal)
+            this.triggerModifiers("on_goal", {
+              player_id: Math.floor(collision.object_id / 2),
+            });
+          else this.triggerModifiers("on_wall_bounce");
+        }
+      } else {
+        console.log(
+          `Player ${this.extraGameData.lastHit} picked up a power_up`,
+        );
+        this.triggerModifiers("on_power_up_pickup", {
+          power_up:
+            this.powerUpManager.getSpawnedPowerUps()[collision.object_id],
+          player_id: this.extraGameData.lastHit,
+        });
+        this.powerUpManager.getSpawnedPowerUps().splice(collision.object_id, 1);
+      }
+
+      remainingDistance -= travelDistance;
+
+      loopCounter += 1;
+      if (loopCounter > ball.speed * 3.0 + 1) {
+        break;
+      }
+    }
+  }
+
+  isGoalWall(wallId: number): boolean {
+    if (wallId < 0) return false;
+
+    return (
+      wallId % 2 === 0 &&
+      wallId >= 0 &&
+      wallId < 2 * this.extraGameData.playerCount &&
+      wallId % 2 === 0 &&
+      this.gameObjects.paddles[Math.floor(wallId / 2)].isVisible
+    );
+  }
 }

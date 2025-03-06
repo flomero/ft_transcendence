@@ -5,4 +5,5 @@ export interface Ball extends GameObject {
   speed: number;
   doCollision: boolean;
   isVisible: boolean;
+  doGoal: boolean;
 }

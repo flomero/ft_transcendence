@@ -3,6 +3,4 @@ export interface GameObject {
   y: number;
   dx: number;
   dy: number;
-  nx: number;
-  ny: number;
 }

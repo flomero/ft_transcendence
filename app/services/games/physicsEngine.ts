@@ -1,20 +1,20 @@
-import { Rectangle } from "../../types/games/rectangle";
-import { Ball } from "../../types/games/ball";
+import { Rectangle } from "../../types/games/pong/rectangle";
+import { Ball } from "../../types/games/pong/ball";
 
 const EPSILON = 1e-2;
 
-interface Collision {
+export interface Collision {
   distance: number;
   normal?: [number, number];
   object_id?: number;
   type?: string;
 }
 
-class PhysicsEngine {
+export class PhysicsEngine {
   static detectCollision(
     ball: Ball,
     distance: number,
-    objects: Array<Rectangle | Ball>,
+    objects: Array<Rectangle | Ball | Record<string, any>>,
     objectType: string,
   ): Collision | null {
     let closestCollision: Collision | null = null;
