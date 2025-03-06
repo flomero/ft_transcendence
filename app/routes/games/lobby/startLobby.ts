@@ -1,13 +1,13 @@
 import { FastifyPluginAsync } from "fastify";
-import newLobbySchema from "../../../schemas/games/lobby/newLobbySchema";
-import startLobbyHandeler from "../../../services/games/lobby/startLobbyHandler";
+import startLobbySchema from "../../../schemas/games/lobby/startLobbySchema";
+import startLobbyHandler from "../../../services/games/lobby/startLobbyHandler";
 
 const startLobby: FastifyPluginAsync = async (
   fastify
   ): Promise<void> => {
   fastify.post("/start", {
-    schema: newLobbySchema,
-    handler: startLobbyHandeler,
+    schema: startLobbySchema,
+    handler: startLobbyHandler,
   });
 };
 

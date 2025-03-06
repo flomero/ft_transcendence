@@ -1,9 +1,7 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 
-async function joinLobbyHandler(request: FastifyRequest, reply: FastifyReply) {
-  reply.send({ message: "joined Lobby "});
+async function startLobbyHandler(request: FastifyRequest, reply: FastifyReply) {
+  reply.send({ message: "Lobby started" });
 }
 
-export default joinLobbyHandler;
-
-
+export default startLobbyHandler;

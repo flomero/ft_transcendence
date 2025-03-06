@@ -1,7 +1,11 @@
-import { FastifyRequest, FastifyReply } from "fastify";
+import S from 'fluent-json-schema';
 
-async function newLobbyHandler(request: FastifyRequest, reply: FastifyReply) {
-  reply.send({ message: "new lobby" });
-}
+const bodySchema = S.object()
+  .prop("matchId", S.string().required())
 
-export default newLobbyHandler;
+
+const startLobbySchema = {
+  body: bodySchema,
+};
+
+export default startLobbySchema;
