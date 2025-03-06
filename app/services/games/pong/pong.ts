@@ -50,7 +50,7 @@ export abstract class Pong extends GameBase {
     this.serverTickrateMs = GAME_REGISTRY.pong.serverTickrateMs;
     this.serverMaxDelayTicks = GAME_REGISTRY.pong.serverMaxDelayTicks;
     this.arenaSettings =
-      GAME_REGISTRY.pong[gameData["gameModeName"]].arenaSettings;
+      GAME_REGISTRY.pong.gameModes[gameData["gameModeName"]].arenaSettings;
 
     // Network playability related
     this.tickData = new Array(this.serverMaxDelayTicks);
@@ -262,7 +262,7 @@ export abstract class Pong extends GameBase {
 
     paddle.x += paddle.velocity * paddle.dx;
     paddle.y += paddle.velocity * paddle.dy;
-    paddle.displacement += direction * paddle.speedWidthPercent;
+    paddle.displacement += direction * this.arenaSettings.speedWidthPercent;
 
     this.triggerModifiers("on_player_movement", {
       player_id: this.gameObjects.paddles.indexOf(paddle),
