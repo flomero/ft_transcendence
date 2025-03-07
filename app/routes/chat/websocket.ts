@@ -8,6 +8,7 @@ interface ChatMessageResponse {
 interface SocketClient {
   socket: any;
   roomId: number;
+  userId: string;
 }
 
 const clients: SocketClient[] = [];
@@ -17,7 +18,7 @@ const chatWebSocket: FastifyPluginAsync = async (fastify): Promise<void> => {
     fastify.log.trace("Chat client connected");
 
     const roomId = 1;
-    clients.push({ socket: socket, roomId: roomId });
+    clients.push({ socket: socket, roomId: roomId, userId: request.userId });
 
     socket.on("message", async function (message) {
       fastify.log.trace("Received message: " + message);
@@ -26,10 +27,10 @@ const chatWebSocket: FastifyPluginAsync = async (fastify): Promise<void> => {
         if (client.roomId == 1) {
           const html = await fastify.view("components/chat/message", {
             message: {
-              userName: "John Doe",
+              userName: request.userName,
               message: message,
               timestamp: new Date().toLocaleString(),
-              isOwnMessage: true,
+              isOwnMessage: client.userId === request.userId, // This is not working
             },
           });
 
@@ -41,12 +42,7 @@ const chatWebSocket: FastifyPluginAsync = async (fastify): Promise<void> => {
         }
       }
 
-      await postMessage(
-        fastify,
-        1,
-        "110899881598177411832",
-        message.toString(),
-      );
+      await postMessage(fastify, 1, request.userId, message.toString());
     });
 
     socket.on("close", async function () {
