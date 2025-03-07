@@ -1,11 +1,11 @@
 import { FastifyPluginAsync } from "fastify";
-import leaveLobbySchema from "../../../schemas/games/lobby/leaveLobbySchema";
-import leaveLobbyHandler from "../../../services/games/lobby/leaveLobbyHandler";
+import leaveLobbySchema from "../../../../schemas/games/lobby/leaveLobbySchema";
+import leaveLobbyHandler from "../../../../services/games/lobby/leave/leaveLobbyHandler";
 
 const leaveLobby: FastifyPluginAsync = async (
   fastify
   ): Promise<void> => {
-  fastify.post("/leave", {
+  fastify.post("/", {
     schema: leaveLobbySchema,
     handler: leaveLobbyHandler,
   });
