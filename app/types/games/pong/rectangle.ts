@@ -9,4 +9,5 @@ export interface Rectangle extends GameObject {
   height: number;
   alpha: number;
   isVisible: boolean;
+  isGoal: boolean;
 }

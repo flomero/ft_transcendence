@@ -1,9 +1,0 @@
-{
-  "pong": {
-    "gameModes": {
-      "classicPong": {
-        "className": "ClassicPong"
-      }
-    }
-  }
-}

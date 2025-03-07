@@ -3,7 +3,7 @@
     "serverTickrateMs": 30,
     "serverMaxDelayTicks": 100,
     "gameModes": {
-      "vanillaDuelPong": {
+      "classicPong": {
         "className": "ClassicPong",
         "arenaSettings": {
           "width": 200,
@@ -164,7 +164,7 @@
     }
   },
   "enhancedTicTacToe": {
-    "serverTickrateMs": 10,
+    "serverTickrateMs": 30,
     "gameModes": {
       "enhancedTicTacToeClassic": {
         "className": "EnhancedTicTacToe"

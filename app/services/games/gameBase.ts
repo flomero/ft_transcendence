@@ -1,6 +1,7 @@
-import { PowerUpManagerBase } from "./powerUpManagerBase";
 import { ModifierBase } from "./modifierBase";
 import { GAME_REGISTRY } from "./gameRegistry";
+// import { RNG } from "./rng";
+import { PowerUpManagerBase } from "./powerUpManagerBase";
 
 export enum GameStatus {
   CREATED,
@@ -13,25 +14,29 @@ export abstract class GameBase {
 
   protected lastUpdateTime: number;
   protected startTimeMs: number;
+  protected serverTickrateS: number = 20;
 
   protected status: GameStatus = GameStatus.CREATED;
 
-  protected modifiers: ModifierBase[];
-  protected powerUpManager: PowerUpManagerBase;
+  protected modifiers: ModifierBase[] = [];
+  protected powerUpManager: PowerUpManagerBase | null = null;
 
   constructor(public gameData: Record<string, any>) {
-    this.matchId = gameData["matchId"];
+    this.matchId = gameData["matchId"] || -1;
     this.lastUpdateTime = Date.now();
     this.startTimeMs = Date.now();
 
+    console.log(gameData);
+
     this.modifiers = (gameData["modifierNames"] as string[]).map(
       (modifierName) =>
-        GAME_REGISTRY[gameData["gameName"]]["game_modifiers"][modifierName][
+        GAME_REGISTRY[gameData["gameName"]].gameModifiers[modifierName][
           "class"
         ](),
     );
 
-    this.powerUpManager = new PowerUpManagerBase(gameData);
+    if (gameData["powerUpNames"].length > 0)
+      this.powerUpManager = new PowerUpManagerBase(gameData["powerUpNames"]);
   }
 
   /**
@@ -53,7 +58,6 @@ export abstract class GameBase {
    */
   getStateSnapshot(): Record<string, any> {
     return {
-      type: "game_status",
       timestamp: this.lastUpdateTime,
     };
   }
@@ -75,19 +79,20 @@ export abstract class GameBase {
    * @param position A tuple with the x and y coordinates.
    * @param rng A random number generator instance.
    */
-  spawnPowerUp(
-    position: [number, number],
-    rng: { random: () => number },
-  ): void {
-    if (
-      this.powerUpManager &&
-      this.powerUpManager.spawnRandomPowerUp(rng, position)
-    ) {
-      const spawned = this.powerUpManager.getSpawnedPowerUps();
-      const lastPowerUp = spawned[spawned.length - 1];
-      this.triggerModifiers("onPowerUpSpawn", { powerUp: lastPowerUp });
-    }
-  }
+  // abstract spawnPowerUp(position: [number, number], rng: RNG): void;
+  // spawnPowerUp(
+  //   position: [number, number],
+  //   rng: { random: () => number },
+  // ): void {
+  //   if (
+  //     this.powerUpManager &&
+  //     this.powerUpManager.spawnRandomPowerUp(rng, position)
+  //   ) {
+  //     const spawned = this.powerUpManager.getSpawnedPowerUps();
+  //     const lastPowerUp = spawned[spawned.length - 1];
+  //     this.triggerModifiers("onPowerUpSpawn", { powerUp: lastPowerUp });
+  //   }
+  // }
 
   /**
    * Triggers a method on both game modifiers and active power-ups.
@@ -123,13 +128,17 @@ export abstract class GameBase {
     }
 
     // Trigger method on all active power-ups
-    for (const powerUp of this.powerUpManager.getActivePowerUps()) {
-      safeInvoke(powerUp, method);
-    }
+    // for (const powerUp of this.powerUpManager.getActivePowerUps()) {
+    //   safeInvoke(powerUp, method);
+    // }
   }
 
   // Getters & Setters
   getStatus(): GameStatus {
     return this.status;
+  }
+
+  getServerTickrateS(): number {
+    return this.serverTickrateS;
   }
 }

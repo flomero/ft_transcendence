@@ -6,4 +6,5 @@ export interface Paddle extends Rectangle {
   displacement: number;
   coverage: number;
   doMove: boolean;
+  isGoal: false;
 }

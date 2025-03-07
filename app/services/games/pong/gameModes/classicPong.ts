@@ -4,7 +4,7 @@ import { Ball } from "../../../../types/games/pong/ball";
 import { Paddle } from "../../../../types/games/pong/paddle";
 import { GAME_REGISTRY } from "../../gameRegistry";
 
-export class DuelPong extends Pong {
+export class ClassicPong extends Pong {
   protected defaultBallSettings: Record<string, any>;
 
   constructor(gameData: Record<string, any>) {
@@ -26,191 +26,319 @@ export class DuelPong extends Pong {
       (this.arenaSettings.height - this.arenaSettings.paddleOffset) *
       Math.sin(Math.PI / this.extraGameData.playerCount);
 
-    this.gameObjects.paddles = [];
-    for (let i = 0; i < this.extraGameData.playerCount * 2; i += 2) {
-      const paddle: Record<string, any> = {
-        x: parseFloat(
-          (
-            (this.arenaSettings.width - this.arenaSettings.paddleOffset) *
-            Math.cos((Math.PI * i) / this.extraGameData.playerCount + Math.PI)
-          ).toFixed(3),
-        ),
-        y: parseFloat(
-          (
-            (this.arenaSettings.width - this.arenaSettings.paddleOffset) *
-            Math.cos((Math.PI * i) / this.extraGameData.playerCount + Math.PI)
-          ).toFixed(3),
-        ),
-        alpha: parseFloat(
-          (Math.PI + (Math.PI * i) / this.extraGameData.playerCount).toFixed(3),
-        ),
+    this.gameObjects.paddles = [
+      // LEFT PADDLE
+      {
+        x:
+          this.arenaSettings.paddleHeight / 2.0 +
+          this.arenaSettings.paddleOffset,
+        y: this.arenaSettings.height / 2.0,
+        alpha: Math.PI,
+        dx: 0.0,
+        dy: -1.0,
+        nx: 1.0,
+        ny: 0.0,
+        absX:
+          this.arenaSettings.paddleHeight / 2.0 +
+          this.arenaSettings.paddleOffset,
+        absY: this.arenaSettings.height / 2.0,
         coverage: this.arenaSettings.paddleCoverage,
         width: paddleAmplitude * (this.arenaSettings.paddleCoverage / 100.0),
         height: this.arenaSettings.paddleHeight,
-        speed: paddleAmplitude * (this.arenaSettings.speedWidthPercent / 100.0),
-        doMove: true,
-        isVisible: true,
+        speed:
+          paddleAmplitude *
+          (this.arenaSettings.paddleSpeedWidthPercent / 100.0),
         velocity: 0.0,
         displacement: 0.0,
-      };
+        doMove: true,
+        isVisible: true,
+      } as Paddle,
 
-      const tmp: number = Math.sqrt(paddle.x ** 2 + paddle.y ** 2);
-      if (tmp !== 0) {
-        paddle.nx = -paddle.x / tmp;
-        paddle.ny = -paddle.y / tmp;
-      }
+      // RIGHT PADDLE
+      {
+        x:
+          this.arenaSettings.width -
+          this.arenaSettings.paddleHeight / 2.0 -
+          this.arenaSettings.paddleOffset,
+        y: this.arenaSettings.height / 2.0,
+        alpha: 0.0,
+        dx: 0.0,
+        dy: 1.0,
+        nx: -1.0,
+        ny: 0.0,
+        absX:
+          this.arenaSettings.width -
+          this.arenaSettings.paddleHeight / 2.0 -
+          this.arenaSettings.paddleOffset,
+        absY: this.arenaSettings.height / 2.0,
+        coverage: this.arenaSettings.paddleCoverage,
+        width: paddleAmplitude * (this.arenaSettings.paddleCoverage / 100.0),
+        height: this.arenaSettings.paddleHeight,
+        speed:
+          paddleAmplitude *
+          (this.arenaSettings.paddleSpeedWidthPercent / 100.0),
+        velocity: 0.0,
+        displacement: 0.0,
+        doMove: true,
+        isVisible: true,
+      } as Paddle,
+    ];
 
-      paddle.x += this.arenaSettings.wallDistance;
-      paddle.y += this.arenaSettings.wallDistance;
+    // this.gameObjects.paddles.forEach((paddle) => {console.log(paddle)})
 
-      paddle.dx = paddle.ny;
-      paddle.dy = -paddle.nx;
+    // this.gameObjects.paddles = [];
+    // for (let i = 0; i < this.extraGameData.playerCount; ++i) {
+    //   const paddle: Record<string, any> = {
+    //     x: parseFloat(
+    //         ((this.arenaSettings.width / 2.0 - this.arenaSettings.paddleOffset) *
+    //         Math.cos((Math.PI * i) / this.extraGameData.playerCount + Math.PI)).toFixed(3)
+    //     ),
+    //     y: parseFloat(
+    //         ((this.arenaSettings.height / 2.0 - this.arenaSettings.paddleOffset) *
+    //         Math.cos((Math.PI * i) / this.extraGameData.playerCount + Math.PI)).toFixed(3)
+    //     ),
+    //     alpha: parseFloat(
+    //       (Math.PI + (Math.PI * i) / this.extraGameData.playerCount).toFixed(3),
+    //     ),
+    //     coverage: this.arenaSettings.paddleCoverage,
+    //     width: paddleAmplitude * (this.arenaSettings.paddleCoverage / 100.0),
+    //     height: this.arenaSettings.paddleHeight,
+    //     speed: paddleAmplitude * (this.arenaSettings.paddleSpeedWidthPercent / 100.0),
+    //     doMove: true,
+    //     isVisible: true,
+    //     velocity: 0.0,
+    //     displacement: 0.0,
+    //   };
 
-      paddle.absX = paddle.x;
-      paddle.absY = paddle.y;
+    //   const tmp: number = Math.sqrt(paddle.x ** 2 + paddle.y ** 2);
+    //   if (tmp !== 0) {
+    //     paddle.nx = -paddle.x / tmp;
+    //     paddle.ny = -paddle.y / tmp;
+    //   }
 
-      this.gameObjects.paddles.push(paddle as Paddle);
-    }
+    //   paddle.x += this.arenaSettings.width;
+    //   paddle.y += this.arenaSettings.height;
+
+    //   paddle.dx = paddle.ny;
+    //   paddle.dy = -paddle.nx;
+
+    //   paddle.absX = paddle.x;
+    //   paddle.absY = paddle.y;
+
+    // console.log(paddle as Paddle);
+
+    // this.gameObjects.paddles.push(paddle as Paddle);
+    // }
   }
 
   initWalls(): void {
     // Initialize walls, rotate by alpha
-    const wallWidth =
-      2.0 *
-      Math.sin(Math.PI / (2.0 * this.extraGameData.playerCount)) *
-      (this.arenaSettings.wallDistance *
-        (1 + 1 / (this.extraGameData.playerCount + 0.5)));
-    this.gameObjects.walls = [];
-
-    // Create walls forming a regular polygon
-    for (let i = 0; i < 2 * this.extraGameData.playerCount; i++) {
-      const wall: Record<string, any> = {
-        x: parseFloat(
-          (
-            (this.arenaSettings.wallDistance -
-              this.arenaSettings.wallHeight * (i % 2) * 1.0) *
-            Math.cos((Math.PI * i) / this.extraGameData.playerCount + Math.PI)
-          ).toFixed(3),
-        ),
-        y: parseFloat(
-          (
-            (this.arenaSettings.wallDistance -
-              this.arenaSettings.wallHeight * (i % 2) * 1.0) *
-            Math.sin((Math.PI * i) / this.extraGameData.playerCount + Math.PI)
-          ).toFixed(3),
-        ),
-        alpha: parseFloat(
-          (Math.PI + (Math.PI * i) / this.extraGameData.playerCount).toFixed(3),
-        ),
-        width: wallWidth,
+    // const wallWidth =
+    //   2.0 *
+    //   Math.sin(Math.PI / (2.0 * this.extraGameData.playerCount)) *
+    //   (this.arenaSettings.width *
+    //     (1 + 1 / (this.extraGameData.playerCount + 0.5)));
+    this.gameObjects.walls = [
+      // LEFT WALL
+      {
+        x: 0.0,
+        y: this.arenaSettings.height / 2.0,
+        alpha: Math.PI,
+        dx: 0.0,
+        dy: -1.0,
+        nx: 1.0,
+        ny: 0.0,
+        absX: 0.0,
+        absY: this.arenaSettings.height / 2.0,
+        width: this.arenaSettings.height,
         height: this.arenaSettings.wallHeight,
         isVisible: true,
-      };
+        isGoal: true,
+      } as Rectangle,
 
-      const tmp = Math.sqrt(wall.x ** 2 + wall.y ** 2);
+      // RIGHT WALL
+      {
+        x: this.arenaSettings.width,
+        y: this.arenaSettings.height / 2.0,
+        alpha: 0.0,
+        dx: 0.0,
+        dy: 1.0,
+        nx: -1.0,
+        ny: 0.0,
+        absX: this.arenaSettings.width,
+        absY: this.arenaSettings.height / 2.0,
+        width: this.arenaSettings.height,
+        height: this.arenaSettings.wallHeight,
+        isVisible: true,
+        isGoal: true,
+      } as Rectangle,
 
-      if (tmp !== 0) {
-        wall.nx = -wall.x / tmp;
-        wall.ny = -wall.y / tmp;
-      }
+      // UP WALL
+      {
+        x: this.arenaSettings.width / 2.0,
+        y: 0.0,
+        alpha: Math.PI / 4.0,
+        dx: 1.0,
+        dy: 0.0,
+        nx: 0.0,
+        ny: 1.0,
+        absX: this.arenaSettings.width / 2.0,
+        absY: 0.0,
+        width: this.arenaSettings.width,
+        height: this.arenaSettings.wallHeight,
+        isVisible: true,
+        isGoal: false,
+      } as Rectangle,
 
-      wall.absX = wall.x;
-      wall.absY = wall.y;
-      wall.x += this.arenaSettings.wallDistance;
-      wall.y += this.arenaSettings.wallDistance;
+      // DOWN WALL
+      {
+        x: this.arenaSettings.width / 2.0,
+        y: this.arenaSettings.height,
+        alpha: -Math.PI / 4.0,
+        dx: -1.0,
+        dy: 0.0,
+        nx: 0.0,
+        ny: -1.0,
+        absX: this.arenaSettings.width / 2.0,
+        absY: this.arenaSettings.height,
+        width: this.arenaSettings.width,
+        height: this.arenaSettings.wallHeight,
+        isVisible: true,
+        isGoal: false,
+      } as Rectangle,
+    ];
 
-      wall.dx = wall.ny;
-      wall.dy = -wall.nx;
+    // this.gameObjects.walls.forEach((wall) => {console.log(wall)})
 
-      this.gameObjects.walls.push(wall as Rectangle);
-    }
+    // Create walls forming a regular polygon
+    // for (let i = 0; i < 2 * this.extraGameData.playerCount; i++) {
+    //   const wall: Record<string, any> = {
+    //     x: parseFloat(
+    //       (
+    //         (this.arenaSettings.width -
+    //           this.arenaSettings.wallHeight * (i % 2) * 1.0) *
+    //         Math.cos((Math.PI * i) / this.extraGameData.playerCount + Math.PI)
+    //       ).toFixed(3),
+    //     ),
+    //     y: parseFloat(
+    //       (
+    //         (this.arenaSettings.height -
+    //           this.arenaSettings.wallHeight * (i % 2) * 1.0) *
+    //         Math.sin((Math.PI * i) / this.extraGameData.playerCount + Math.PI)
+    //       ).toFixed(3),
+    //     ),
+    //     alpha: parseFloat(
+    //       (Math.PI + (Math.PI * i) / this.extraGameData.playerCount).toFixed(3),
+    //     ),
+    //     width: this.arenaSettings.width,
+    //     height: this.arenaSettings.wallHeight,
+    //     isVisible: true,
+    //   };
+
+    //   const tmp = Math.sqrt(wall.x ** 2 + wall.y ** 2);
+
+    //   if (tmp !== 0) {
+    //     wall.nx = -wall.x / tmp;
+    //     wall.ny = -wall.y / tmp;
+    //   }
+
+    //   wall.absX = wall.x;
+    //   wall.absY = wall.y;
+    //   wall.x += this.arenaSettings.width;
+    //   wall.y += this.arenaSettings.height;
+
+    //   wall.dx = wall.ny;
+    //   wall.dy = -wall.nx;
+
+    //   this.gameObjects.walls.push(wall as Rectangle);
+    // }
 
     // Add small walls between players for more bounces if player count > 2
-    if (this.extraGameData.playerCount > 2) {
-      for (let i = 0; i < 2 * this.extraGameData.playerCount; i += 2) {
-        const wall: Record<string, any> = {
-          x: parseFloat(
-            (
-              ((this.arenaSettings.wallDistance * 3.0) / 5.0) *
-              Math.cos(
-                (Math.PI * (i + 1.0)) / this.extraGameData.playerCount +
-                  Math.PI,
-              )
-            ).toFixed(3),
-          ),
-          y: parseFloat(
-            (
-              ((this.arenaSettings.wallDistance * 3.0) / 5.0) *
-              Math.sin(
-                (Math.PI * (i + 1.0)) / this.extraGameData.playerCount +
-                  Math.PI,
-              )
-            ).toFixed(3),
-          ),
-          alpha: parseFloat(
-            (
-              Math.PI +
-              (Math.PI * (i + 1.0)) / this.extraGameData.playerCount
-            ).toFixed(3),
-          ),
-          width: this.arenaSettings.wallHeight / 2.5,
-          height: wallWidth / 6.5,
-          isVisible: true,
-        };
+    // if (this.extraGameData.playerCount > 2) {
+    //   for (let i = 0; i < 2 * this.extraGameData.playerCount; i += 2) {
+    //     const wall: Record<string, any> = {
+    //       x: parseFloat(
+    //         (
+    //           ((this.arenaSettings.wallDistance * 3.0) / 5.0) *
+    //           Math.cos(
+    //             (Math.PI * (i + 1.0)) / this.extraGameData.playerCount +
+    //               Math.PI,
+    //           )
+    //         ).toFixed(3),
+    //       ),
+    //       y: parseFloat(
+    //         (
+    //           ((this.arenaSettings.wallDistance * 3.0) / 5.0) *
+    //           Math.sin(
+    //             (Math.PI * (i + 1.0)) / this.extraGameData.playerCount +
+    //               Math.PI,
+    //           )
+    //         ).toFixed(3),
+    //       ),
+    //       alpha: parseFloat(
+    //         (
+    //           Math.PI +
+    //           (Math.PI * (i + 1.0)) / this.extraGameData.playerCount
+    //         ).toFixed(3),
+    //       ),
+    //       width: this.arenaSettings.wallHeight / 2.5,
+    //       height: wallWidth / 6.5,
+    //       isVisible: true,
+    //     };
 
-        const tmp = Math.sqrt(wall.x ** 2 + wall.y ** 2);
+    //     const tmp = Math.sqrt(wall.x ** 2 + wall.y ** 2);
 
-        if (tmp !== 0) {
-          wall.nx = -wall.x / tmp;
-          wall.ny = -wall.y / tmp;
-        }
+    //     if (tmp !== 0) {
+    //       wall.nx = -wall.x / tmp;
+    //       wall.ny = -wall.y / tmp;
+    //     }
 
-        wall.absX = wall.x;
-        wall.absY = wall.y;
-        wall.x += this.arenaSettings.wallDistance;
-        wall.y += this.arenaSettings.wallDistance;
+    //     wall.absX = wall.x;
+    //     wall.absY = wall.y;
+    //     wall.x += this.arenaSettings.wallDistance;
+    //     wall.y += this.arenaSettings.wallDistance;
 
-        wall.dx = wall.ny;
-        wall.dy = -wall.nx;
+    //     wall.dx = wall.ny;
+    //     wall.dy = -wall.nx;
 
-        this.gameObjects.walls.push(wall as Rectangle);
-      }
-    }
+    //     this.gameObjects.walls.push(wall as Rectangle);
+    //   }
+    // }
 
     // Process all walls
-    for (let i = 0; i < this.gameObjects.walls.length; i++) {
-      const wall = this.gameObjects.walls[i];
-      const tmp = Math.sqrt(wall.x ** 2 + wall.y ** 2);
+    // for (let i = 0; i < this.gameObjects.walls.length; i++) {
+    //   const wall = this.gameObjects.walls[i];
+    //   const tmp = Math.sqrt(wall.x ** 2 + wall.y ** 2);
 
-      if (tmp !== 0) {
-        wall.nx = -wall.x / tmp;
-        wall.ny = -wall.y / tmp;
-      }
+    //   if (tmp !== 0) {
+    //     wall.nx = -wall.x / tmp;
+    //     wall.ny = -wall.y / tmp;
+    //   }
 
-      wall.absX = wall.x;
-      wall.absY = wall.y;
-      wall.x += this.arenaSettings.wallDistance;
-      wall.y += this.arenaSettings.wallDistance;
+    //   wall.absX = wall.x;
+    //   wall.absY = wall.y;
+    //   wall.x += this.arenaSettings.wallDistance;
+    //   wall.y += this.arenaSettings.wallDistance;
 
-      wall.dx = wall.ny;
-      wall.dy = -wall.nx;
-    }
+    //   wall.dx = wall.ny;
+    //   wall.dy = -wall.nx;
+    // }
 
-    // Add central wall
-    this.gameObjects.walls.push({
-      x: this.arenaSettings.wallDistance,
-      y: this.arenaSettings.wallDistance,
-      alpha: Math.PI / 4.0,
-      width: 1.0,
-      height: 1.0,
-      isVisible: true,
-      nx: Math.sin(Math.PI / 4.0),
-      ny: Math.cos(Math.PI / 4.0),
-      dx: Math.cos(Math.PI / 4.0),
-      dy: -Math.sin(Math.PI / 4.0),
-      absX: this.arenaSettings.wallDistance,
-      absY: this.arenaSettings.wallDistance,
-    });
+    // // Add central wall
+    // this.gameObjects.walls.push({
+    //   x: this.arenaSettings.width,
+    //   y: this.arenaSettings.height,
+    //   alpha: Math.PI / 4.0,
+    //   width: 1.0,
+    //   height: 1.0,
+    //   isVisible: true,
+    //   nx: Math.sin(Math.PI / 4.0),
+    //   ny: Math.cos(Math.PI / 4.0),
+    //   dx: Math.cos(Math.PI / 4.0),
+    //   dy: -Math.sin(Math.PI / 4.0),
+    //   absX: this.arenaSettings.width,
+    //   absY: this.arenaSettings.height,
+    // });
   }
 
   resetBall(ballId: number = -1): void {
@@ -219,8 +347,8 @@ export class DuelPong extends Pong {
     const sa = Math.sin(randomAngle);
 
     const newBall: Ball = {
-      x: this.arenaSettings.wallDistance + this.arenaSettings.paddleOffset * ca,
-      y: this.arenaSettings.wallDistance + this.arenaSettings.paddleOffset * sa,
+      x: this.arenaSettings.width / 2.0 + this.arenaSettings.paddleOffset * ca,
+      y: this.arenaSettings.height / 2.0 + this.arenaSettings.paddleOffset * sa,
       dx: ca,
       dy: sa,
       speed: this.defaultBallSettings.speed,
@@ -347,26 +475,15 @@ export class DuelPong extends Pong {
     }
   }
 
-  getStateSnapshot(): any {
-    const snapshot = super.getStateSnapshot();
-    snapshot.powerUpManager = this.powerUpManager.getStateSnapshot();
-    return snapshot;
-  }
-
-  loadStateSnapshot(snapshot: any): void {
-    super.loadStateSnapshot(snapshot);
-    this.powerUpManager.loadStateSnapshot(snapshot.powerUpManager);
-  }
-
   // Implementation of isOutOfBounds method
   isOutOfBounds(ball: Ball): boolean {
     const tolerance: number =
-      this.arenaSettings.wallHeight + this.arenaSettings.paddleOffset;
+      2.0 * (this.arenaSettings.wallHeight + this.arenaSettings.paddleOffset);
 
     return (
-      ball.x <= tolerance ||
+      ball.x <= -tolerance ||
       ball.x >= this.arenaSettings.width + tolerance ||
-      ball.y <= tolerance ||
+      ball.y <= -tolerance ||
       ball.y >= this.arenaSettings.height + tolerance
     );
   }

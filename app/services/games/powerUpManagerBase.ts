@@ -25,8 +25,8 @@ export class PowerUpManagerBase {
 
     // Get the power ups object from the registry.
     const registryPowerUps = GAME_REGISTRY[gameName]["power_ups"];
-    if (!registryPowerUps)
-      throw new Error(`No power ups defined for game "${gameName}"`);
+    // if (!registryPowerUps)
+    //   throw new Error(`No power ups defined for game "${gameName}"`);
 
     // Create availablePowerUps in the same order as allowed names.
     this.availablePowerUps = this.powerUpNames.map(

@@ -1,0 +1,24 @@
+{
+  "pong": {
+    "serverTickrateS": 100,
+    "serverMaxDelayTicks": 100,
+    "gameModes": {
+      "classicPong": {
+        "className": "ClassicPong",
+        "arenaSettings": {
+          "width": 200,
+          "height": 100,
+          "wallHeight": 2,
+          "paddleOffset": 2.5,
+          "paddleCoverage": 25,
+          "paddleHeight": 1,
+          "paddleSpeedWidthPercent": 1.5
+        },
+        "defaultBallSettings": {
+          "speed": 1.5,
+          "radius": 0.75
+        }
+      }
+    }
+  }
+}

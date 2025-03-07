@@ -6,7 +6,7 @@ const EPSILON = 1e-2;
 export interface Collision {
   distance: number;
   normal?: [number, number];
-  object_id?: number;
+  objectId?: number;
   type?: string;
 }
 
@@ -43,7 +43,7 @@ export class PhysicsEngine {
         collision &&
         (!closestCollision || collision.distance < closestCollision.distance)
       ) {
-        collision.object_id = i;
+        collision.objectId = i;
         collision.type = objectType;
         closestCollision = collision;
       }
