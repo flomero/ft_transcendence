@@ -55,7 +55,8 @@
     animation: 5s fancy-border linear infinite;
   }
 
-  .fancy-border:hover {
+  button.fancy-border:hover,
+  a.fancy-border:hover {
     background:
       linear-gradient(var(--color-bg-muted), var(--color-bg-muted)) padding-box,
       linear-gradient(var(--angle), var(--color-border) 80%, #fff 90%)

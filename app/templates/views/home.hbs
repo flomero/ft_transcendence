@@ -15,6 +15,13 @@
     {{!-- <button class="fancy-border rounded-lg px-4 py-2 text-white">Login</button> --}}
 
     <div class="flex flex-col gap-2 my-8">
+       {{#> components/button variant="fancy" url="/login"}}
+        To Login Page
+      {{/components/button}}
+    </div>
+
+
+    <div class="flex flex-col gap-2 my-8">
         {{! Regular button }}
       {{#> components/button}}
         Click Me
