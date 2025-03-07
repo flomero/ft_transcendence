@@ -1,8 +1,13 @@
 import { GameBase } from "./gameBase";
 
+export enum ModifierStatus {
+  INACTIVE,
+  ACTIVE,
+}
+
 export abstract class ModifierBase {
   protected spawnWeight: number = 0;
-  protected active: boolean = false;
+  protected status: ModifierStatus = ModifierStatus.INACTIVE;
 
   protected name: string = "";
   protected playerId: number = -1;
@@ -11,12 +16,12 @@ export abstract class ModifierBase {
 
   activate(game: GameBase, playerId: number): void {
     this.playerId = playerId;
-    this.active = true;
+    this.status = ModifierStatus.ACTIVE;
     this.onActivation(game);
   }
 
   deactivate(game: GameBase): void {
-    this.active = false;
+    this.status = ModifierStatus.INACTIVE;
     this.onDeactivation(game);
   }
 
@@ -36,5 +41,9 @@ export abstract class ModifierBase {
   // Getters & Setters
   getName(): string {
     return this.name;
+  }
+
+  getStatus(): ModifierStatus {
+    return this.status;
   }
 }

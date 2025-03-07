@@ -5,7 +5,6 @@ import { Paddle } from "../../../types/games/pong/paddle";
 import { Ball } from "../../../types/games/pong/ball";
 import { Rectangle } from "../../../types/games/pong/rectangle";
 import { RNG } from "../rng";
-import { PowerUpManagerBase } from "../powerUpManagerBase";
 
 const EPSILON = 1e-2;
 
@@ -93,7 +92,7 @@ export abstract class Pong extends GameBase {
           this.resetBall(0);
         }
       }
-      this.triggerModifiers("onUpdate");
+      this.modifierManager.trigger("onUpdate");
 
       const snapshot = this.getStateSnapshot();
 
@@ -116,7 +115,7 @@ export abstract class Pong extends GameBase {
     if (this.status === GameStatus.RUNNING) {
       for (const ball of this.gameObjects.balls)
         if (ball.doCollision) this.doCollisionChecks(ball);
-      this.triggerModifiers("onUpdate");
+      this.modifierManager.trigger("onUpdate");
     }
   }
   // TODO: Use userInput schema for received action
@@ -174,7 +173,7 @@ export abstract class Pong extends GameBase {
       });
     });
 
-    this.triggerModifiers("onUserInput", { input: action });
+    this.modifierManager.trigger("onUserInput", { input: action });
 
     // Fast-forward to go back to the current tick
     if (delayTicks > 0) {
@@ -268,7 +267,7 @@ export abstract class Pong extends GameBase {
     paddle.displacement +=
       direction * this.arenaSettings.paddleSpeedWidthPercent;
 
-    this.triggerModifiers("onPlayerMovement", {
+    this.modifierManager.trigger("onPlayerMovement", {
       playerId: this.gameObjects.paddles.indexOf(paddle),
     });
   }
@@ -331,15 +330,11 @@ export abstract class Pong extends GameBase {
       );
 
       let powerUpCollision: Collision | null = null;
-      if (
-        this.powerUpManager &&
-        (this.powerUpManager as PowerUpManagerBase).getSpawnedPowerUps()
-          .length > 0
-      ) {
+      if (this.modifierManager.getSpawnedPowerUps().length > 0) {
         powerUpCollision = PhysicsEngine.detectCollision(
           ball,
           remainingDistance,
-          this.powerUpManager.getSpawnedPowerUps(),
+          this.modifierManager.getSpawnedPowerUps(),
           "powerUp",
         );
       }
@@ -362,32 +357,36 @@ export abstract class Pong extends GameBase {
       }
 
       let collision: Collision = tmpCollision as Collision;
-      collision.objectId = collision.objectId || -1;
 
       const travelDistance = collision.distance;
       ball.x += Math.round(ball.dx * travelDistance * 100) / 100;
       ball.y += Math.round(ball.dy * travelDistance * 100) / 100;
 
       switch (collision.type) {
-        // @ts-ignore
-        case "powerUp":
-        case "paddle":
-        case "wall":
-          PhysicsEngine.resolveCollision(ball, collision);
-
         case "powerUp":
           // TODO: trigger onPowerUpPickup
+          PhysicsEngine.resolveCollision(ball, collision);
+          console.log(
+            `Player ${this.extraGameData.lastHit} picked up a powerUp`,
+          );
           break;
 
         case "paddle":
-          // TODO: trigger onPaddleBounce
+          PhysicsEngine.resolveCollision(ball, collision);
+          this.modifierManager.trigger("onPaddleBounce", {
+            playerId: collision.objectId,
+          });
           break;
 
         case "wall":
+          PhysicsEngine.resolveCollision(ball, collision);
           // TODO: Bounce or Goal ?
-          console.log(`wall collision: ${collision}`);
-          if (collision.objectId === -1)
-            console.log(this.gameObjects.walls[collision.objectId]);
+          const wall: Rectangle = this.gameObjects.walls[collision.objectId];
+          if (wall.isGoal)
+            this.modifierManager.trigger("onGoal", {
+              playerId: Math.floor(collision.objectId / 2),
+            });
+          else this.modifierManager.trigger("onWallBounce");
           break;
 
         default:
@@ -398,23 +397,23 @@ export abstract class Pong extends GameBase {
 
       //   // Handle modifiers
       //   if (collision.type === "paddle") {
-      //     this.triggerModifiers("onPaddleBounce", {
+      //     this.modifierManager.trigger("onPaddleBounce", {
       //       playerId: collision.objectId,
       //     });
       //   } else if (collision.type === "wall") {
       //     console.log(this.gameObjects.walls[collision.objectId]);
       //     if (ball.doGoal
       //       && this.gameObjects.walls[collision.objectId].isGoal)
-      //       this.triggerModifiers("onGoal", {
+      //       this.modifierManager.trigger("onGoal", {
       //         playerId: Math.floor(collision.objectId / 2),
       //       });
-      //     else this.triggerModifiers("onWallBounce");
+      //     else this.modifierManager.trigger("onWallBounce");
       //   }
       // } else {
       //   console.log(
       //     `Player ${this.extraGameData.lastHit} picked up a powerUp`,
       //   );
-      //   this.triggerModifiers("onPowerUpPickup", {
+      //   this.modifierManager.trigger("onPowerUpPickup", {
       //     powerUp:
       //       (this.powerUpManager as PowerUpManagerBase).getSpawnedPowerUps()[collision.objectId],
       //     playerId: this.extraGameData.lastHit,

@@ -1,7 +1,5 @@
-import { ModifierBase } from "./modifierBase";
-import { GAME_REGISTRY } from "./gameRegistry";
 // import { RNG } from "./rng";
-import { PowerUpManagerBase } from "./powerUpManagerBase";
+import { ModifierManager } from "./modifierManagerBase";
 
 export enum GameStatus {
   CREATED,
@@ -18,8 +16,7 @@ export abstract class GameBase {
 
   protected status: GameStatus = GameStatus.CREATED;
 
-  protected modifiers: ModifierBase[] = [];
-  protected powerUpManager: PowerUpManagerBase | null = null;
+  protected modifierManager: ModifierManager;
 
   constructor(public gameData: Record<string, any>) {
     this.matchId = gameData["matchId"] || -1;
@@ -28,15 +25,7 @@ export abstract class GameBase {
 
     console.log(gameData);
 
-    this.modifiers = (gameData["modifierNames"] as string[]).map(
-      (modifierName) =>
-        GAME_REGISTRY[gameData["gameName"]].gameModifiers[modifierName][
-          "class"
-        ](),
-    );
-
-    if (gameData["powerUpNames"].length > 0)
-      this.powerUpManager = new PowerUpManagerBase(gameData["powerUpNames"]);
+    this.modifierManager = new ModifierManager(gameData);
   }
 
   /**
@@ -50,7 +39,7 @@ export abstract class GameBase {
   startGame(): void {
     this.status = GameStatus.RUNNING;
     console.log("Game started");
-    this.triggerModifiers("on_game_start");
+    this.modifierManager.trigger("onGameStart");
   }
 
   /**
@@ -93,45 +82,6 @@ export abstract class GameBase {
   //     this.triggerModifiers("onPowerUpSpawn", { powerUp: lastPowerUp });
   //   }
   // }
-
-  /**
-   * Triggers a method on both game modifiers and active power-ups.
-   * @param method The method name to trigger.
-   * @param args Extra arguments to pass along.
-   */
-  triggerModifiers(method: string, ...args: any[]): void {
-    // Helper function to safely invoke a method on an object
-    const safeInvoke = (obj: any, methodName: string) => {
-      try {
-        // Check if the method exists and is a function
-        if (typeof obj[methodName] === "function") {
-          // Invoke the method with the current game instance and any additional arguments
-          obj[methodName](this, ...args);
-        }
-      } catch (error) {
-        console.error(
-          `Error triggering method ${methodName} on object:`,
-          error,
-        );
-        console.log(`Object details:`, {
-          objectType: obj.constructor.name,
-          availableMethods: Object.getOwnPropertyNames(
-            Object.getPrototypeOf(obj),
-          ).filter((prop) => typeof obj[prop] === "function"),
-        });
-      }
-    };
-
-    // Trigger method on all modifiers
-    for (const modifier of this.modifiers) {
-      safeInvoke(modifier, method);
-    }
-
-    // Trigger method on all active power-ups
-    // for (const powerUp of this.powerUpManager.getActivePowerUps()) {
-    //   safeInvoke(powerUp, method);
-    // }
-  }
 
   // Getters & Setters
   getStatus(): GameStatus {

@@ -5,8 +5,8 @@ const EPSILON = 1e-2;
 
 export interface Collision {
   distance: number;
+  objectId: number;
   normal?: [number, number];
-  objectId?: number;
   type?: string;
 }
 
@@ -30,12 +30,14 @@ export class PhysicsEngine {
           ball,
           distance,
           objects[i] as Rectangle,
+          i,
         );
       } else {
         collision = PhysicsEngine.ballCircleCollision(
           ball,
           distance,
           objects[i] as Ball,
+          i,
         );
       }
 
@@ -56,6 +58,7 @@ export class PhysicsEngine {
     ball: Ball,
     distance: number,
     obj: Rectangle,
+    objId: number,
   ): Collision | null {
     const rx = obj.x;
     const ry = obj.y;
@@ -209,7 +212,7 @@ export class PhysicsEngine {
       return null;
     }
 
-    return { distance: minT, normal: normalGlobal };
+    return { distance: minT, normal: normalGlobal, objectId: objId };
   }
 
   static computeCollision(
@@ -220,6 +223,7 @@ export class PhysicsEngine {
     r_bdy: number,
     rw: number,
     rh: number,
+    objId: number,
   ): Collision {
     const intersectionX = r_bx + t * r_bdx;
     const intersectionY = r_by + t * r_bdy;
@@ -239,7 +243,7 @@ export class PhysicsEngine {
       normal = [normalX / normLength, normalY / normLength];
     }
 
-    return { distance: t, normal };
+    return { distance: t, normal, objectId: objId };
   }
 
   static resolveCollision(ball: Ball, collision: Collision): void {
@@ -264,6 +268,7 @@ export class PhysicsEngine {
     ball: Ball,
     distance: number,
     obj: Ball,
+    objId: number,
   ): Collision | null {
     const a = ball.dx ** 2 + ball.dy ** 2;
     const b = 2.0 * (ball.dx * (ball.x - obj.x) + ball.dy * (ball.y - obj.y));
@@ -283,7 +288,7 @@ export class PhysicsEngine {
     const t = (-b - sqrtDelta) / (2.0 * a);
 
     if (EPSILON < t && t <= distance) {
-      return { distance: t };
+      return { distance: t, objectId: objId };
     }
 
     return null;
