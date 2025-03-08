@@ -6,10 +6,10 @@
             {{> components/chat/message message=this}}
         {{/each}}
     </div>
-    <div id="chat-input">
-        <input type="text" id="message-input" placeholder="Message...">
-        {{#> components/button onClick="sendMessage()"}}Send{{/components/button}}
-    </div>
+    <form id="chat-input" onsubmit="sendMessage(event)" method="POST">
+        <input type="text" required name="message" placeholder="Message...">
+        {{#> components/button}}Send{{/components/button}}
+    </form>
 </div>
 
 <script>
@@ -24,10 +24,13 @@
         messageContainer.innerHTML += data.html;
     }
 
-    function sendMessage() {
-        const messageInput = document.getElementById('message-input');
-        const message = messageInput.value;
+    function sendMessage(event) {
+        event.preventDefault();
+        const message = event.target.message.value;
+        if (message.trim() === '') {
+            return;
+        }
         socket.send(message);
-        messageInput.value = '';
+        event.target.reset();
     }
 </script>
