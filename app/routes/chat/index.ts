@@ -2,7 +2,7 @@ import { FastifyPluginAsync } from "fastify";
 import chatWebSocket from "./websocket";
 import { getChatMessagesForRoom } from "../../services/chat/message";
 import { getChatRoomsForUserView } from "../../services/chat/room";
-import { sendMessage } from "../../services/chat/live";
+import { addRoom } from "../../services/chat/live";
 
 const chat: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.get("/", async function (request, reply) {
@@ -45,7 +45,8 @@ const chat: FastifyPluginAsync = async (fastify): Promise<void> => {
       return reply.status(400).send({ error: "Message is required" });
     }
 
-    await sendMessage(fastify, request, message, roomId);
+    // await sendMessage(fastify, request, message, roomId);
+    await addRoom(fastify, "Room " + roomId, [request.userId]);
 
     return reply.status(200).send({ message: "Message sent" });
   });

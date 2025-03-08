@@ -2,11 +2,21 @@ import { FastifyInstance } from "fastify";
 
 export async function createChatRoom(
   fastify: FastifyInstance,
+  name: string,
 ): Promise<number> {
-  const sql = "INSERT INTO chat_rooms DEFAULT VALUES RETURNING id";
-  const result = await fastify.sqlite.get(sql);
+  const sql = "INSERT INTO chat_rooms (name) VALUES (?) RETURNING id";
+  const result = await fastify.sqlite.get(sql, [name]);
   fastify.log.trace(`Created chat_room with id: ${result.id}`);
   return result.id;
+}
+
+export async function addUserToChatRoom(
+  fastify: FastifyInstance,
+  roomId: number,
+  userId: string,
+) {
+  const sql = "INSERT INTO r_users_chat (room_id, user_id) VALUES (?, ?)";
+  await fastify.sqlite.run(sql, [roomId, userId]);
 }
 
 export interface ChatRoom {

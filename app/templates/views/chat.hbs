@@ -60,8 +60,23 @@
 
     socket.onmessage = function (event) {
         const data = JSON.parse(event.data);
-        const messageContainer = document.getElementById('chat-messages');
-        messageContainer.innerHTML += data.html;
+        switch (data.type) {
+            case 'message':
+                if (data.id !== currentRoomId) {
+                    return;
+                }
+                document.getElementById('chat-messages').innerHTML += data.html;
+                break;
+            case 'room':
+                const existingRoom = document.querySelector(`[data-room-id="${data.id}"]`);
+                
+                if (existingRoom) {
+                    existingRoom.outerHTML = data.html;
+                } else {
+                    document.getElementById('chat-rooms').innerHTML += data.html;
+                }
+                break;
+        }
     }
 
     function sendMessage(event) {
