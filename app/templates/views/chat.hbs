@@ -7,10 +7,6 @@
         {{/each}}
     </div>
     {{> components/chat/messages messages=messages}}
-    <form id="chat-input" class="col-span-4" onsubmit="sendMessage(event)" method="POST">
-        <input type="text" required name="message" placeholder="Message...">
-        {{#> components/button}}Send{{/components/button}}
-    </form>
 </div>
 
 <style>
@@ -60,6 +56,8 @@
     const wsUrl = currentUrl.replace(/^http/, 'ws');
     const socket = new WebSocket(`${wsUrl}/chat/ws`);
 
+    let currentRoomId = null;
+
     socket.onmessage = function (event) {
         const data = JSON.parse(event.data);
         const messageContainer = document.getElementById('chat-messages');
@@ -79,11 +77,41 @@
     function selectRoom(event) {
         const clickedRoom = event.target;
         
-        if (!roomElement) {
+        if (!clickedRoom) {
+            console.error('No room element found');
             return;
         }
 
-        const roomId = clickedRoom.getAttribute('data-room-id');
+        const roomElement = clickedRoom.closest('[data-room-id]');
+        if (!roomElement) {
+            console.error('No room element found with data-room-id');
+            return;
+        }
+        
+        const roomId = roomElement.getAttribute('data-room-id');
+        if (!roomId) {
+            console.error('No room ID found');
+            return;
+        }
 
+        if (currentRoomId === roomId) {
+            return;
+        }
+
+        fetch(`/chat/${roomId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.text();
+            })
+            .then(html => {
+                const messageContainer = document.getElementById('chat-messages-container');
+                messageContainer.outerHTML = html;
+                currentRoomId = roomId;
+            })
+            .catch(error => {
+                console.error('Error fetching room messages:', error);
+            });
     }
 </script>
