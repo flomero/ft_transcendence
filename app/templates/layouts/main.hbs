@@ -11,11 +11,12 @@
 <body class="min-h-lvh flex flex-col">
     {{> header}}
 
-    <div class="flex-1">
+    <div id="app-content" class="flex-1">
         {{{body}}}
     </div>
 
     {{> footer}}
+    <script type="module" src="/js/router.js"></script>
 </body>
 
 </html>

@@ -26,13 +26,11 @@ const chat: FastifyPluginAsync = async (fastify): Promise<void> => {
       });
     });
 
-    return reply.view(
-      "views/chat",
-      {
-        messages: messages,
-      },
-      { layout: "layouts/main" },
-    );
+    const data = {
+      messages: messages,
+    };
+    const viewOptions = request.isAjax() ? {} : { layout: "layouts/main" };
+    return reply.view("views/chat", data, viewOptions);
   });
 
   // Register the websocket route
