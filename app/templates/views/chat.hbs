@@ -8,7 +8,7 @@
     </div>
     <div id="chat-input">
         <input type="text" id="message-input" placeholder="Message...">
-        <button id="send-button">Send</button>
+        {{#> components/button onClick="sendMessage()"}}Send{{/components/button}}
     </div>
 </div>
 
@@ -24,7 +24,7 @@
         messageContainer.innerHTML += data.html;
     }
 
-    document.getElementById('send-button').onclick = function () {
+    function sendMessage() {
         const messageInput = document.getElementById('message-input');
         const message = messageInput.value;
         socket.send(message);
