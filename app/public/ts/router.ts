@@ -1,3 +1,5 @@
+import { TransitionManager } from "./transitions.js";
+
 // Type declarations for window extensions
 declare global {
   interface Window {
@@ -9,6 +11,7 @@ declare global {
 class Router {
   private routes: Record<string, () => Promise<string | null>>;
   private contentContainer: HTMLElement;
+  private transitionManager: TransitionManager;
 
   constructor() {
     this.routes = {};
@@ -19,6 +22,9 @@ class Router {
     }
 
     this.contentContainer = container;
+    this.contentContainer.classList.add("fade-transition");
+    this.contentContainer.classList.add("fade-in");
+    this.transitionManager = new TransitionManager("app-content");
 
     // Handle back/forward browser navigation
     window.addEventListener("popstate", (e) => this.handlePopState(e));
@@ -66,7 +72,7 @@ class Router {
   showLoader(): void {
     const loader = document.createElement("div");
     loader.id = "page-loader";
-    loader.className = "fixed top-0 left-0 w-full h-1 bg-blue-500";
+    loader.className = "fixed top-0 left-0 w-full h-[1px] bg-fg";
     loader.style.transition = "width 0.3s ease-in-out";
     document.body.appendChild(loader);
 
@@ -87,23 +93,25 @@ class Router {
 
   async loadRoute(path: string): Promise<void> {
     this.showLoader();
-    let html: string | null = null;
 
     try {
-      const customHandler = this.routes[path];
+      await this.transitionManager.transition(async () => {
+        const customHandler = this.routes[path];
+        let html: string | null = null;
 
-      if (customHandler) {
-        html = await customHandler();
-      } else {
-        html = await this.fetchContent(path);
-      }
+        if (customHandler) {
+          html = await customHandler();
+        } else {
+          html = await this.fetchContent(path);
+        }
 
-      if (html) {
-        this.contentContainer.innerHTML = html;
-        this.executeScripts();
-        this.updateActiveLinks(path);
-        window.scrollTo(0, 0);
-      }
+        if (html) {
+          this.contentContainer.innerHTML = html;
+          this.executeScripts();
+          this.updateActiveLinks(path);
+          window.scrollTo(0, 0);
+        }
+      });
     } catch (error) {
       console.error("Error loading route:", error);
     } finally {
