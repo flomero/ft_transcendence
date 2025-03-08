@@ -13,8 +13,6 @@ const chat: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.get("/", async function (request, reply) {
     const db_messages = await getMessagesWithUserInfo(fastify, 1);
 
-    fastify.log.debug(db_messages);
-
     const messages: ChatMessage[] = [];
 
     db_messages.forEach((message) => {
@@ -33,7 +31,6 @@ const chat: FastifyPluginAsync = async (fastify): Promise<void> => {
     return reply.view("views/chat", data, viewOptions);
   });
 
-  // Register the websocket route
   fastify.register(chatWebSocket);
 };
 

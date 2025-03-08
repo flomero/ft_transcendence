@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 
-export async function postMessage(
+export async function saveMessage(
   fastify: FastifyInstance,
   roomId: number,
   userId: string,
