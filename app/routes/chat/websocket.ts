@@ -30,7 +30,7 @@ const chatWebSocket: FastifyPluginAsync = async (fastify): Promise<void> => {
               userName: request.userName,
               message: message,
               timestamp: new Date().toLocaleString(),
-              isOwnMessage: client.userId === request.userId, // This is not working
+              isOwnMessage: client.userId === request.userId,
             },
           });
 
