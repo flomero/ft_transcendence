@@ -15,10 +15,14 @@ export class ModifierBase {
 
   constructor() {}
 
-  activate(game: GameBase, playerId: number): void {
-    this.playerId = playerId;
+  activate(game: GameBase): void {
     this.status = ModifierStatus.ACTIVE;
     this.onActivation(game);
+  }
+
+  playerActivate(game: GameBase, args: { playerId: number }): void {
+    this.playerId = args.playerId;
+    this.activate(game);
   }
 
   deactivate(game: GameBase): void {

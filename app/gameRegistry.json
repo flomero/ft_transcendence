@@ -28,6 +28,11 @@
 
       "lastHitTracker": {
         "className": "LastHitTracker"
+      },
+
+      "timedGame": {
+        "className": "TimedGame",
+        "durationS": 10
       }
     }
   }

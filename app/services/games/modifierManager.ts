@@ -24,7 +24,7 @@ export class ModifierManager {
   >();
   protected modifiers: ModifierBase[] = []; // Active modifiers
 
-  constructor(gameData: Record<string, any>) {
+  constructor(game: GameBase, gameData: Record<string, any>) {
     this.rawGameData = gameData;
 
     console.log(`\n\nInitializing modifierManager w/:`);
@@ -33,7 +33,7 @@ export class ModifierManager {
     console.log(`  |- modifierNames: ${gameData["modifierNames"]}`);
 
     // Initialize modifiers from registry
-    this.initializeModifiers();
+    this.initializeModifiers(game);
 
     // Initialize power-ups
     this.initializePowerUps();
@@ -41,7 +41,7 @@ export class ModifierManager {
     console.log("\n");
   }
 
-  protected initializeModifiers(): void {
+  protected initializeModifiers(game: GameBase): void {
     // Get the gameModifiers object from the registry
     const modifierRegistry =
       GAME_REGISTRY[this.rawGameData.gameName]?.gameModifiers;
@@ -60,7 +60,8 @@ export class ModifierManager {
     }
 
     this.modifiers.forEach((modifier) => {
-      modifier.setStatus(ModifierStatus.ACTIVE);
+      modifier.activate(game);
+      // modifier.setStatus(ModifierStatus.ACTIVE);
       console.log(modifier);
     });
   }

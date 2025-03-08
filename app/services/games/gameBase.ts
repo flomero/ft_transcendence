@@ -4,6 +4,7 @@ import { ModifierManager } from "./modifierManager";
 export enum GameStatus {
   CREATED,
   RUNNING,
+  PAUSED,
   FINISHED,
 }
 
@@ -24,7 +25,7 @@ export abstract class GameBase {
 
     console.log(gameData);
 
-    this.modifierManager = new ModifierManager(gameData);
+    this.modifierManager = new ModifierManager(this, gameData);
   }
 
   /**
@@ -87,7 +88,15 @@ export abstract class GameBase {
     return this.status;
   }
 
+  setStatus(status: GameStatus): void {
+    this.status = status;
+  }
+
   getServerTickrateS(): number {
     return this.serverTickrateS;
+  }
+
+  getModifierManager(): ModifierManager {
+    return this.modifierManager;
   }
 }
