@@ -12,6 +12,47 @@
     </form>
 </div>
 
+<style>
+    .chat-message {
+        margin-bottom: 15px;
+        padding: 10px;
+        border-radius: 8px;
+        max-width: 70%;
+    }
+    
+    .chat-message-own {
+        background-color: #DCF8C6;
+        margin-left: auto;
+        margin-right: 10px;
+    }
+    
+    .chat-message-other {
+        background-color: #F2F2F2;
+        margin-right: auto;
+        margin-left: 10px;
+    }
+    
+    .chat-message-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 5px;
+        font-size: 0.8rem;
+    }
+    
+    .chat-message-username {
+        font-weight: bold;
+        color: #555;
+    }
+    
+    .chat-message-time {
+        color: #999;
+    }
+    
+    .chat-message-content {
+        word-wrap: break-word;
+    }
+</style>
+
 <script>
     const currentUrl = window.location.origin;
     const wsProtocol = currentUrl.startsWith('https') ? 'wss' : 'ws';
