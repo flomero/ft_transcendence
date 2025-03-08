@@ -33,6 +33,12 @@
       "timedGame": {
         "className": "TimedGame",
         "durationS": 10
+      },
+
+      "powerUpSpawner": {
+        "className": "PowerUpSpawner",
+        "meanDelayS": 10,
+        "delaySpanS": 5
       }
     }
   }

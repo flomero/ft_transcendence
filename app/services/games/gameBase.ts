@@ -1,4 +1,4 @@
-// import { RNG } from "./rng";
+import { RNG } from "./rng";
 import { ModifierManager } from "./modifierManager";
 
 export enum GameStatus {
@@ -17,6 +17,7 @@ export abstract class GameBase {
 
   protected status: GameStatus = GameStatus.CREATED;
 
+  protected rng: RNG;
   protected modifierManager: ModifierManager;
 
   constructor(public gameData: Record<string, any>) {
@@ -25,6 +26,7 @@ export abstract class GameBase {
 
     console.log(gameData);
 
+    this.rng = new RNG();
     this.modifierManager = new ModifierManager(this, gameData);
   }
 
@@ -98,5 +100,9 @@ export abstract class GameBase {
 
   getModifierManager(): ModifierManager {
     return this.modifierManager;
+  }
+
+  getRNG(): RNG {
+    return this.rng;
   }
 }

@@ -21,4 +21,9 @@ export abstract class TimeLimitedModifierBase extends ModifierBase {
     this.ticks--;
     if (this.ticks <= 0) this.deactivate(game);
   }
+
+  // Getters & Setters
+  setDuration(duration: number): void {
+    this.duration = duration;
+  }
 }

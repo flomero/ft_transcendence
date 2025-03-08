@@ -50,11 +50,13 @@ export class ModifierManager {
     if (modifierRegistry) {
       // Iterate over each key in the gameModifiers object
       Object.keys(modifierRegistry).forEach((modifierName) => {
-        const modifier = modifierRegistry[modifierName];
-        if (modifier && modifier.class) {
-          // Create an instance of the modifier class
-          const ModifierClass = modifier.class;
-          this.modifiers.push(new ModifierClass());
+        if (this.rawGameData.modifierNames.includes(modifierName)) {
+          const modifier = modifierRegistry[modifierName];
+          if (modifier && modifier.class) {
+            // Create an instance of the modifier class
+            const ModifierClass = modifier.class;
+            this.modifiers.push(new ModifierClass());
+          }
         }
       });
     }

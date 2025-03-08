@@ -4,7 +4,6 @@ import { GAME_REGISTRY } from "../gameRegistry";
 import { Paddle } from "../../../types/games/pong/paddle";
 import { Ball } from "../../../types/games/pong/ball";
 import { Rectangle } from "../../../types/games/pong/rectangle";
-import { RNG } from "../rng";
 
 const EPSILON = 1e-2;
 
@@ -33,7 +32,6 @@ export abstract class Pong extends GameBase {
 
   protected tickData: Record<string, any>[];
   protected tickDataLock: Promise<void> | null = null;
-  protected rng: RNG;
 
   protected extraGameData: PongExtraGameData;
 
@@ -53,7 +51,6 @@ export abstract class Pong extends GameBase {
 
     // Network playability related
     this.tickData = new Array(this.serverMaxDelayTicks);
-    this.rng = new RNG();
 
     // Players & related
     this.extraGameData = {
