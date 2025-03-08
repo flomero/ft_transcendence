@@ -1,8 +1,8 @@
 import { Pong } from "../pong";
 import { PongModifierBase } from "../pongModifierBase";
 
-export class GoalTakeTracker extends PongModifierBase {
-  name = "goalTakeTracker";
+export class GoalTakenTracker extends PongModifierBase {
+  name = "goalTakenTracker";
 
   constructor() {
     super();

@@ -22,8 +22,12 @@
     },
 
     "gameModifiers": {
-      "goalTakeTracker": {
-        "className": "GoalTakeTracker"
+      "goalTakenTracker": {
+        "className": "GoalTakenTracker"
+      },
+
+      "lastHitTracker": {
+        "className": "LastHitTracker"
       }
     }
   }

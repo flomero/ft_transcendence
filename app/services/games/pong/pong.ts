@@ -438,9 +438,11 @@ export abstract class Pong extends GameBase {
 
   editScore(id: number, delta: number) {
     this.extraGameData.scores[id] += delta;
+  }
 
-    // console.log("Scores:");
-    // for (const score in this.extraGameData.scores)
-    // 		console.log(`  |- ${score}`);
+  setLastHit(id: number) {
+    this.extraGameData.lastHit = id;
+
+    console.log(`New lastHit: ${this.extraGameData.lastHit}`);
   }
 }
