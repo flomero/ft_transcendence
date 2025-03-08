@@ -92,7 +92,7 @@ export abstract class Pong extends GameBase {
           this.resetBall(0);
         }
       }
-      this.modifierManager.trigger("onUpdate");
+      this.modifierManager.trigger(this, "onUpdate");
 
       const snapshot = this.getStateSnapshot();
 
@@ -115,7 +115,7 @@ export abstract class Pong extends GameBase {
     if (this.status === GameStatus.RUNNING) {
       for (const ball of this.gameObjects.balls)
         if (ball.doCollision) this.doCollisionChecks(ball);
-      this.modifierManager.trigger("onUpdate");
+      this.modifierManager.trigger(this, "onUpdate");
     }
   }
   // TODO: Use userInput schema for received action
@@ -172,7 +172,7 @@ export abstract class Pong extends GameBase {
       });
     });
 
-    this.modifierManager.trigger("onUserInput", { input: action });
+    this.modifierManager.trigger(this, "onUserInput", { input: action });
 
     // Fast-forward to go back to the current tick
     if (delayTicks > 0) {
@@ -188,6 +188,7 @@ export abstract class Pong extends GameBase {
     gameState.balls = this.gameObjects.balls;
     gameState.paddles = this.gameObjects.paddles;
     gameState.walls = this.gameObjects.walls;
+    gameState.scores = this.extraGameData.scores;
     gameState.rng = this.rng.getState();
 
     return gameState;
@@ -198,6 +199,7 @@ export abstract class Pong extends GameBase {
     this.gameObjects.balls = snapshot.balls;
     this.gameObjects.walls = snapshot.walls;
     this.gameObjects.paddles = snapshot.player_paddles;
+    this.extraGameData.scores = snapshot.scores;
 
     this.rng.setState(snapshot.rng);
   }
@@ -266,7 +268,7 @@ export abstract class Pong extends GameBase {
     paddle.displacement +=
       direction * this.arenaSettings.paddleSpeedWidthPercent;
 
-    this.modifierManager.trigger("onPlayerMovement", {
+    this.modifierManager.trigger(this, "onPlayerMovement", {
       playerId: this.gameObjects.paddles.indexOf(paddle),
     });
   }
@@ -372,7 +374,7 @@ export abstract class Pong extends GameBase {
 
         case "paddle":
           PhysicsEngine.resolveCollision(ball, collision);
-          this.modifierManager.trigger("onPaddleBounce", {
+          this.modifierManager.trigger(this, "onPaddleBounce", {
             playerId: collision.objectId,
           });
           break;
@@ -382,10 +384,10 @@ export abstract class Pong extends GameBase {
           // TODO: Bounce or Goal ?
           const wall: Rectangle = this.gameObjects.walls[collision.objectId];
           if (wall.isGoal)
-            this.modifierManager.trigger("onGoal", {
+            this.modifierManager.trigger(this, "onGoal", {
               playerId: Math.floor(collision.objectId / 2),
             });
-          else this.modifierManager.trigger("onWallBounce");
+          else this.modifierManager.trigger(this, "onWallBounce");
           break;
 
         default:
@@ -396,23 +398,23 @@ export abstract class Pong extends GameBase {
 
       //   // Handle modifiers
       //   if (collision.type === "paddle") {
-      //     this.modifierManager.trigger("onPaddleBounce", {
+      //     this.modifierManager.trigger(this, "onPaddleBounce", {
       //       playerId: collision.objectId,
       //     });
       //   } else if (collision.type === "wall") {
       //     console.log(this.gameObjects.walls[collision.objectId]);
       //     if (ball.doGoal
       //       && this.gameObjects.walls[collision.objectId].isGoal)
-      //       this.modifierManager.trigger("onGoal", {
+      //       this.modifierManager.trigger(this, "onGoal", {
       //         playerId: Math.floor(collision.objectId / 2),
       //       });
-      //     else this.modifierManager.trigger("onWallBounce");
+      //     else this.modifierManager.trigger(this, "onWallBounce");
       //   }
       // } else {
       //   console.log(
       //     `Player ${this.extraGameData.lastHit} picked up a powerUp`,
       //   );
-      //   this.modifierManager.trigger("onPowerUpPickup", {
+      //   this.modifierManager.trigger(this, "onPowerUpPickup", {
       //     powerUp:
       //       (this.powerUpManager as PowerUpManagerBase).getSpawnedPowerUps()[collision.objectId],
       //     playerId: this.extraGameData.lastHit,
@@ -427,5 +429,18 @@ export abstract class Pong extends GameBase {
         break;
       }
     }
+  }
+
+  // Getters & Setters
+  getExtraGameData(): PongExtraGameData {
+    return this.extraGameData;
+  }
+
+  editScore(id: number, delta: number) {
+    this.extraGameData.scores[id] += delta;
+
+    // console.log("Scores:");
+    // for (const score in this.extraGameData.scores)
+    // 		console.log(`  |- ${score}`);
   }
 }

@@ -1,4 +1,5 @@
 import { Ball } from "../../types/games/pong/ball";
+import { GameBase } from "./gameBase";
 import { GAME_REGISTRY } from "./gameRegistry";
 import { ModifierBase, ModifierStatus } from "./modifierBase";
 
@@ -26,32 +27,42 @@ export class ModifierManager {
   constructor(gameData: Record<string, any>) {
     this.rawGameData = gameData;
 
+    console.log(`\n\nInitializing modifierManager w/:`);
+    console.log(`  |- gameName: ${gameData["gameName"]}`);
+    console.log(`  |- gameModeName: ${gameData["gameModeName"]}`);
+    console.log(`  |- modifierNames: ${gameData["modifierNames"]}`);
+
     // Initialize modifiers from registry
     this.initializeModifiers();
 
     // Initialize power-ups
     this.initializePowerUps();
+
+    console.log("\n");
   }
 
   protected initializeModifiers(): void {
-    // Get modifiers from the registry
-    const modifierRegistry: Record<string, any> =
-      GAME_REGISTRY[this.rawGameData.gameName]?.modifiers;
+    // Get the gameModifiers object from the registry
+    const modifierRegistry =
+      GAME_REGISTRY[this.rawGameData.gameName]?.gameModifiers;
 
-    // Check if modifierRegistry exists and has an array property
-    if (
-      modifierRegistry &&
-      modifierRegistry.array &&
-      Array.isArray(modifierRegistry.array)
-    ) {
-      modifierRegistry.array.forEach((modifier) => {
-        if (modifier.class) {
-          // Use the concrete class directly without casting to ModifierBase
+    // Check if modifierRegistry exists
+    if (modifierRegistry) {
+      // Iterate over each key in the gameModifiers object
+      Object.keys(modifierRegistry).forEach((modifierName) => {
+        const modifier = modifierRegistry[modifierName];
+        if (modifier && modifier.class) {
+          // Create an instance of the modifier class
           const ModifierClass = modifier.class;
           this.modifiers.push(new ModifierClass());
         }
       });
     }
+
+    this.modifiers.forEach((modifier) => {
+      modifier.setStatus(ModifierStatus.ACTIVE);
+      console.log(modifier);
+    });
   }
 
   protected initializePowerUps(): void {
@@ -115,14 +126,18 @@ export class ModifierManager {
     );
   }
 
-  trigger(method: string, ...args: any[]): void {
+  trigger(
+    game: GameBase,
+    method: string,
+    args: Record<string, any> = {},
+  ): void {
     // Helper function to safely invoke a method on an object
     const safeInvoke = (obj: any, methodName: string) => {
       try {
         // Check if the method exists and is a function
         if (typeof obj[methodName] === "function") {
           // Invoke the method with the current game instance and any additional arguments
-          obj[methodName](this, ...args);
+          obj[methodName](game, args);
         }
       } catch (error) {
         console.error(
@@ -139,10 +154,9 @@ export class ModifierManager {
     };
 
     // Trigger method on all modifiers
-    for (const modifier of this.modifiers) {
+    for (const modifier of this.modifiers)
       if (modifier.getStatus() === ModifierStatus.ACTIVE)
         safeInvoke(modifier, method);
-    }
   }
 
   getStateSnapshot(): Record<string, any> {

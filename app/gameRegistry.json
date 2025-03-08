@@ -19,6 +19,12 @@
           "radius": 0.75
         }
       }
+    },
+
+    "gameModifiers": {
+      "goalTakeTracker": {
+        "className": "GoalTakeTracker"
+      }
     }
   }
 }

@@ -156,23 +156,6 @@ export class ClassicPong extends Pong {
         isGoal: true,
       } as Rectangle,
 
-      // RIGHT WALL
-      {
-        x: this.arenaSettings.width,
-        y: this.arenaSettings.height / 2.0,
-        alpha: 0.0,
-        dx: 0.0,
-        dy: 1.0,
-        nx: -1.0,
-        ny: 0.0,
-        absX: this.arenaSettings.width,
-        absY: this.arenaSettings.height / 2.0,
-        width: this.arenaSettings.height,
-        height: this.arenaSettings.wallHeight,
-        isVisible: true,
-        isGoal: true,
-      } as Rectangle,
-
       // UP WALL
       {
         x: this.arenaSettings.width / 2.0,
@@ -188,6 +171,23 @@ export class ClassicPong extends Pong {
         height: this.arenaSettings.wallHeight,
         isVisible: true,
         isGoal: false,
+      } as Rectangle,
+
+      // RIGHT WALL
+      {
+        x: this.arenaSettings.width,
+        y: this.arenaSettings.height / 2.0,
+        alpha: 0.0,
+        dx: 0.0,
+        dy: 1.0,
+        nx: -1.0,
+        ny: 0.0,
+        absX: this.arenaSettings.width,
+        absY: this.arenaSettings.height / 2.0,
+        width: this.arenaSettings.height,
+        height: this.arenaSettings.wallHeight,
+        isVisible: true,
+        isGoal: true,
       } as Rectangle,
 
       // DOWN WALL

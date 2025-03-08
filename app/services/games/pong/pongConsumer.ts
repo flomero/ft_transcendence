@@ -40,7 +40,7 @@ export const pongConsumer = async (
       await sleep(sleepIntervalMs);
       loopCounter++;
 
-      // if (loopCounter >= 1000)
+      // if (loopCounter >= 1)
       //     break;
     }
   };

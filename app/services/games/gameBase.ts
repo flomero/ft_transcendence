@@ -1,5 +1,5 @@
 // import { RNG } from "./rng";
-import { ModifierManager } from "./modifierManagerBase";
+import { ModifierManager } from "./modifierManager";
 
 export enum GameStatus {
   CREATED,
@@ -8,7 +8,7 @@ export enum GameStatus {
 }
 
 export abstract class GameBase {
-  protected matchId: string;
+  protected matchId: string = "undefined";
 
   protected lastUpdateTime: number;
   protected startTimeMs: number;
@@ -19,7 +19,6 @@ export abstract class GameBase {
   protected modifierManager: ModifierManager;
 
   constructor(public gameData: Record<string, any>) {
-    this.matchId = gameData["matchId"] || -1;
     this.lastUpdateTime = Date.now();
     this.startTimeMs = Date.now();
 
@@ -39,7 +38,7 @@ export abstract class GameBase {
   startGame(): void {
     this.status = GameStatus.RUNNING;
     console.log("Game started");
-    this.modifierManager.trigger("onGameStart");
+    this.modifierManager.trigger(this, "onGameStart");
   }
 
   /**

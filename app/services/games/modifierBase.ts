@@ -5,11 +5,12 @@ export enum ModifierStatus {
   ACTIVE,
 }
 
-export abstract class ModifierBase {
+export class ModifierBase {
+  name: string = "";
+
   protected spawnWeight: number = 0;
   protected status: ModifierStatus = ModifierStatus.INACTIVE;
 
-  protected name: string = "";
   protected playerId: number = -1;
 
   constructor() {}
@@ -26,17 +27,17 @@ export abstract class ModifierBase {
   }
 
   // Triggered events
-  abstract onUpdate(game: GameBase): void;
+  onUpdate(game: GameBase): void {}
 
-  abstract onActivation(game: GameBase): void;
-  abstract onDeactivation(game: GameBase): void;
+  onActivation(game: GameBase): void {}
+  onDeactivation(game: GameBase): void {}
 
-  abstract onGameStart(game: GameBase): void;
+  onGameStart(game: GameBase): void {}
 
-  abstract onUserInput(game: GameBase): void;
+  onUserInput(game: GameBase): void {}
 
-  abstract onPowerUpSpawn(game: GameBase): void;
-  abstract onPowerUpPickup(game: GameBase): void;
+  onPowerUpSpawn(game: GameBase): void {}
+  onPowerUpPickup(game: GameBase): void {}
 
   // Getters & Setters
   getName(): string {
@@ -45,5 +46,9 @@ export abstract class ModifierBase {
 
   getStatus(): ModifierStatus {
     return this.status;
+  }
+
+  setStatus(status: ModifierStatus): void {
+    this.status = status;
   }
 }
