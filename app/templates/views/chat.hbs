@@ -1,16 +1,12 @@
 <h2>Chat!</h2>
 
 <div id="chat-container" class="grid grid-cols-4 gap-4 w-full">
-    <div id="chat-users" class="col-span-1">
-        {{#each users}}
-            {{> components/chat/user user=this}}
+    <div id="chat-rooms" class="col-span-1">
+        {{#each rooms}}
+            {{> components/chat/room room=this}}
         {{/each}}
     </div>
-    <div id="chat-messages" class="col-span-3">
-        {{#each messages}}
-            {{> components/chat/message message=this}}
-        {{/each}}
-    </div>
+    {{> components/chat/messages messages=messages}}
     <form id="chat-input" class="col-span-4" onsubmit="sendMessage(event)" method="POST">
         <input type="text" required name="message" placeholder="Message...">
         {{#> components/button}}Send{{/components/button}}
@@ -78,5 +74,16 @@
         }
         socket.send(message);
         event.target.reset();
+    }
+
+    function selectRoom(event) {
+        const clickedRoom = event.target;
+        
+        if (!roomElement) {
+            return;
+        }
+
+        const roomId = clickedRoom.getAttribute('data-room-id');
+
     }
 </script>

@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyRequest } from "fastify";
-import { saveMessage } from "./message";
+import { saveMessage } from "../database/chat/message";
 
 interface ChatClient {
   socket: any;
