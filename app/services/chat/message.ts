@@ -12,19 +12,13 @@ export async function getChatMessagesForRoom(
   fastify: FastifyInstance,
   roomId: number,
   userId: string,
-) {
+): Promise<ChatMessage[]> {
   const db_messages = await getMessagesWithUserInfo(fastify, roomId);
 
-  const messages: ChatMessage[] = [];
-
-  db_messages.forEach((message) => {
-    messages.push({
-      userName: message["username"],
-      message: message["message"],
-      timestamp: message["timestamp"],
-      isOwnMessage: userId === message["sender_id"],
-    });
-  });
-
-  return messages;
+  return db_messages.map((message) => ({
+    userName: message["username"],
+    message: message["message"],
+    timestamp: message["timestamp"],
+    isOwnMessage: userId === message["sender_id"],
+  }));
 }

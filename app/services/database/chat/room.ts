@@ -9,10 +9,16 @@ export async function createChatRoom(
   return result.id;
 }
 
+export interface ChatRoom {
+  id: number;
+  name: string;
+}
+
 export async function getChatRoomsForUser(
   fastify: FastifyInstance,
   userId: string,
-): Promise<any[]> {
-  const sql = "SELECT * FROM chat_rooms WHERE user_id = ?";
+): Promise<ChatRoom[]> {
+  const sql =
+    "SELECT chat_rooms.id, chat_rooms.name FROM chat_rooms JOIN r_users_chat ON chat_rooms.id = r_users_chat.room_id WHERE r_users_chat.user_id = ?";
   return await fastify.sqlite.all(sql, [userId]);
 }

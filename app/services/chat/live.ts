@@ -33,7 +33,14 @@ export async function sendMessage(
   roomId: number,
 ) {
   for (const client of chatClients) {
-    if (!client.roomIds.includes(roomId)) {
+    let includes = false;
+    for (const id of client.roomIds) {
+      if (id == roomId) {
+        includes = true;
+        break;
+      }
+    }
+    if (!includes) {
       continue;
     }
 

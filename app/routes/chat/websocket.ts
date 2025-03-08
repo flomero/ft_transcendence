@@ -1,25 +1,21 @@
 import { FastifyPluginAsync } from "fastify";
-import {
-  addChatClient,
-  removeChatClient,
-  sendMessage,
-} from "../../services/chat/live";
+import { addChatClient, removeChatClient } from "../../services/chat/live";
+import { getChatRoomsForUser } from "../../services/database/chat/room";
 
 const chatWebSocket: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.get("/ws", { websocket: true }, async function (socket, request) {
     fastify.log.trace("Chat client connected");
 
-    const roomId = 1;
+    const rooms = await getChatRoomsForUser(fastify, request.userId);
+
     addChatClient({
       socket: socket,
-      roomIds: [roomId],
+      roomIds: rooms.map((room) => room.id),
       userId: request.userId,
     });
 
     socket.on("message", async function (message) {
       fastify.log.trace("Received message: " + message);
-
-      await sendMessage(fastify, request, message.toString(), roomId);
     });
 
     socket.on("close", async function () {
