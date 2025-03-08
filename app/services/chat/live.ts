@@ -4,6 +4,7 @@ import {
   addUserToChatRoom,
   createChatRoom,
   getChatRoomRead,
+  setRoomRead,
   setRoomReadForAllUsersBlacklist,
 } from "../database/chat/room";
 
@@ -39,6 +40,7 @@ export async function setCurrentRoomId(
 
   client.currentRoomId = roomId;
 
+  await setRoomRead(fastify, true, roomId, userId);
   const dbRoom = await getChatRoomRead(fastify, roomId, userId);
 
   const html = await fastify.view("components/chat/room", {
@@ -67,8 +69,9 @@ export async function sendMessage(
   roomId: number,
 ) {
   const userIdsBlacklist = chatClients
-    .filter((client) => client.currentRoomId !== roomId)
+    .filter((client) => client.currentRoomId === roomId)
     .map((client) => client.userId);
+
   await setRoomReadForAllUsersBlacklist(
     fastify,
     false,

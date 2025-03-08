@@ -12,6 +12,7 @@ const chatWebSocket: FastifyPluginAsync = async (fastify): Promise<void> => {
       socket: socket,
       roomIds: rooms.map((room) => room.id),
       userId: request.userId,
+      currentRoomId: -1,
     });
 
     socket.on("message", async function (message) {

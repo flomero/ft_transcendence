@@ -65,7 +65,13 @@ export async function setRoomReadForAllUsersBlacklist(
   roomId: number,
   userIdsBlacklist: string[],
 ) {
-  const sql =
-    "UPDATE r_users_chat SET read = ? WHERE room_id = ? AND user_id NOT IN (?)";
-  await fastify.sqlite.run(sql, [read, roomId, userIdsBlacklist]);
+  if (userIdsBlacklist.length === 0) {
+    const sql = "UPDATE r_users_chat SET read = ? WHERE room_id = ?";
+    await fastify.sqlite.run(sql, [read, roomId]);
+    return;
+  }
+
+  const placeholders = userIdsBlacklist.map(() => "?").join(",");
+  const sql = `UPDATE r_users_chat SET read = ? WHERE room_id = ? AND user_id NOT IN (${placeholders})`;
+  await fastify.sqlite.run(sql, [read, roomId, ...userIdsBlacklist]);
 }
