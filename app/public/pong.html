@@ -40,7 +40,7 @@
       const socket = new WebSocket("ws://localhost:3000/game");
 
       let playerId = 0;
-      const player_count = 2;
+      const playerCount = 2;
       const playerIdDisplay = document.querySelector(".player-id");
 
       socket.onopen = function () {
@@ -54,7 +54,7 @@
               gameModeName: "classicPong",
               modifierNames: [],
               powerUpNames: [],
-              playerCount: player_count,
+              playerCount: playerCount,
             },
           }),
         );
@@ -62,11 +62,11 @@
 
       document.addEventListener("keydown", (event) => {
         if (event.key === "ArrowLeft") {
-          playerId = (playerId + 6) % player_count;
+          playerId = (playerId + (playerCount - 1)) % playerCount;
           playerIdDisplay.textContent = playerId;
         }
         if (event.key === "ArrowRight") {
-          playerId = (playerId + 1) % player_count;
+          playerId = (playerId + 1) % playerCount;
           playerIdDisplay.textContent = playerId;
         }
 

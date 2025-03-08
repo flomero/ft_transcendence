@@ -120,7 +120,6 @@ export abstract class Pong extends GameBase {
   }
   // TODO: Use userInput schema for received action
   async handleAction(action: Record<string, any>): Promise<void> {
-    console.log(`Received: ${action}`);
     if (
       !(
         action.playerId >= 0 && action.playerId < this.extraGameData.playerCount

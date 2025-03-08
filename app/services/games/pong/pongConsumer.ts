@@ -93,7 +93,6 @@ export const pongConsumer = async (
         }
 
         case "userInput": {
-          console.log(`Consumer received: ${data}`);
           if (!currentGame) {
             ws.send(
               JSON.stringify({
