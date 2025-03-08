@@ -1,8 +1,10 @@
 {
   "extends": "fastify-tsconfig",
   "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "ESNext"],
     "outDir": "dist",
     "sourceMap": true
   },
-  "include": ["**/*.ts"]
+  "include": ["**/*.ts"],
+  "exclude": ["public"]
 }

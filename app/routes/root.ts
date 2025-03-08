@@ -2,6 +2,7 @@ import { FastifyPluginAsync } from "fastify";
 
 const root: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.get("/", async function (request, reply) {
+    const viewOptions = request.isAjax() ? {} : { layout: "layouts/main" };
     return reply.view(
       "views/home",
       {
@@ -10,7 +11,7 @@ const root: FastifyPluginAsync = async (fastify): Promise<void> => {
         userId: request.userId,
         userName: request.userName,
       },
-      { layout: "layouts/main" },
+      viewOptions,
     );
   });
 
