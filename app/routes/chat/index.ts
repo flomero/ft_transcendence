@@ -26,6 +26,18 @@ const chat: FastifyPluginAsync = async (fastify): Promise<void> => {
 
     const data = {
       messages: messages,
+      users: [
+        {
+          name: "John Doe",
+          avatar:
+            "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.researchgate.net%2Fpublication%2F332729812%2Ffigure%2Ffig3%2FAS%3A753019561984003%401556545262420%2FWebsocket-work-flow-chart.png&f=1&nofb=1&ipt=aa8b70922327ebb2548dae4ec4db93e56cc45ff0c5ec8d555293d3857670aaae&ipo=images",
+        },
+        {
+          name: "Jane Doe",
+          avatar:
+            "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.researchgate.net%2Fpublication%2F332729812%2Ffigure%2Ffig3%2FAS%3A753019561984003%401556545262420%2FWebsocket-work-flow-chart.png&f=1&nofb=1&ipt=aa8b70922327ebb2548dae4ec4db93e56cc45ff0c5ec8d555293d3857670aaae&ipo=images",
+        },
+      ],
     };
     const viewOptions = request.isAjax() ? {} : { layout: "layouts/main" };
     return reply.view("views/chat", data, viewOptions);

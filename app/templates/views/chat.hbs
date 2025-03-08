@@ -1,12 +1,17 @@
 <h2>Chat!</h2>
 
-<div id="chat-container" class="layout">
-    <div id="chat-messages">
+<div id="chat-container" class="grid grid-cols-4 gap-4 w-full">
+    <div id="chat-users" class="col-span-1">
+        {{#each users}}
+            {{> components/chat/user user=this}}
+        {{/each}}
+    </div>
+    <div id="chat-messages" class="col-span-3">
         {{#each messages}}
             {{> components/chat/message message=this}}
         {{/each}}
     </div>
-    <form id="chat-input" onsubmit="sendMessage(event)" method="POST">
+    <form id="chat-input" class="col-span-4" onsubmit="sendMessage(event)" method="POST">
         <input type="text" required name="message" placeholder="Message...">
         {{#> components/button}}Send{{/components/button}}
     </form>
