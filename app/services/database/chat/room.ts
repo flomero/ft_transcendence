@@ -1,5 +1,25 @@
 import { FastifyInstance } from "fastify";
 
+export interface ChatRoom {
+  id: number;
+  name: string;
+  read: boolean;
+}
+
+export async function getChatRoomRead(
+  fastify: FastifyInstance,
+  roomId: number,
+  userId: string,
+): Promise<ChatRoom> {
+  const sql =
+    "SELECT chat_rooms.id, chat_rooms.name, r_users_chat.read FROM chat_rooms JOIN r_users_chat ON chat_rooms.id = r_users_chat.room_id WHERE r_users_chat.user_id = ? AND chat_rooms.id = ?";
+  const result = await fastify.sqlite.get(sql, [userId, roomId]);
+  if (!result) {
+    throw new Error("Chat room not found");
+  }
+  return result;
+}
+
 export async function createChatRoom(
   fastify: FastifyInstance,
   name: string,
@@ -19,16 +39,33 @@ export async function addUserToChatRoom(
   await fastify.sqlite.run(sql, [roomId, userId]);
 }
 
-export interface ChatRoom {
-  id: number;
-  name: string;
-}
-
 export async function getChatRoomsForUser(
   fastify: FastifyInstance,
   userId: string,
 ): Promise<ChatRoom[]> {
   const sql =
-    "SELECT chat_rooms.id, chat_rooms.name FROM chat_rooms JOIN r_users_chat ON chat_rooms.id = r_users_chat.room_id WHERE r_users_chat.user_id = ?";
+    "SELECT chat_rooms.id, chat_rooms.name, r_users_chat.read FROM chat_rooms JOIN r_users_chat ON chat_rooms.id = r_users_chat.room_id WHERE r_users_chat.user_id = ?";
   return await fastify.sqlite.all(sql, [userId]);
+}
+
+export async function setRoomRead(
+  fastify: FastifyInstance,
+  read: boolean,
+  roomId: number,
+  userId: string,
+) {
+  const sql =
+    "UPDATE r_users_chat SET read = ? WHERE room_id = ? AND user_id = ?";
+  await fastify.sqlite.run(sql, [read, roomId, userId]);
+}
+
+export async function setRoomReadForAllUsersBlacklist(
+  fastify: FastifyInstance,
+  read: boolean,
+  roomId: number,
+  userIdsBlacklist: string[],
+) {
+  const sql =
+    "UPDATE r_users_chat SET read = ? WHERE room_id = ? AND user_id NOT IN (?)";
+  await fastify.sqlite.run(sql, [read, roomId, userIdsBlacklist]);
 }

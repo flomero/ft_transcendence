@@ -1,11 +1,17 @@
 import { FastifyInstance, FastifyRequest } from "fastify";
 import { saveMessage } from "../database/chat/message";
-import { addUserToChatRoom, createChatRoom } from "../database/chat/room";
+import {
+  addUserToChatRoom,
+  createChatRoom,
+  getChatRoomRead,
+  setRoomReadForAllUsersBlacklist,
+} from "../database/chat/room";
 
 interface ChatClient {
   socket: any;
-  roomIds: number[];
   userId: string;
+  currentRoomId: number;
+  roomIds: number[];
 }
 
 const chatClients: ChatClient[] = [];
@@ -21,6 +27,33 @@ export function removeChatClient(userId: string) {
   );
 }
 
+export async function setCurrentRoomId(
+  fastify: FastifyInstance,
+  userId: string,
+  roomId: number,
+) {
+  const client = chatClients.find((client) => client.userId === userId);
+  if (!client) {
+    return;
+  }
+
+  client.currentRoomId = roomId;
+
+  const dbRoom = await getChatRoomRead(fastify, roomId, userId);
+
+  const html = await fastify.view("components/chat/room", {
+    room: dbRoom,
+  });
+
+  const response: ChatWebSocketResponse = {
+    type: "room",
+    id: roomId,
+    html: html,
+  };
+
+  client.socket.send(JSON.stringify(response));
+}
+
 interface ChatWebSocketResponse {
   type: "message" | "room";
   id: number;
@@ -33,15 +66,37 @@ export async function sendMessage(
   message: string,
   roomId: number,
 ) {
+  const userIdsBlacklist = chatClients
+    .filter((client) => client.currentRoomId !== roomId)
+    .map((client) => client.userId);
+  await setRoomReadForAllUsersBlacklist(
+    fastify,
+    false,
+    roomId,
+    userIdsBlacklist,
+  );
+
   for (const client of chatClients) {
-    let includes = false;
-    for (const id of client.roomIds) {
-      if (id == roomId) {
-        includes = true;
-        break;
+    if (client.currentRoomId !== roomId) {
+      let room = client.roomIds.find((id) => id == roomId);
+      if (!room) {
+        continue;
       }
-    }
-    if (!includes) {
+
+      const dbRoom = await getChatRoomRead(fastify, roomId, client.userId);
+
+      const html = await fastify.view("components/chat/room", {
+        room: dbRoom,
+      });
+
+      const response: ChatWebSocketResponse = {
+        type: "room",
+        id: roomId,
+        html: html,
+      };
+
+      client.socket.send(JSON.stringify(response));
+
       continue;
     }
 
@@ -90,6 +145,7 @@ export async function addRoom(
       room: {
         id: roomId,
         name: roomName,
+        read: false,
       },
     });
 

@@ -2,7 +2,8 @@ import { FastifyPluginAsync } from "fastify";
 import chatWebSocket from "./websocket";
 import { getChatMessagesForRoom } from "../../services/chat/message";
 import { getChatRoomsForUserView } from "../../services/chat/room";
-import { addRoom } from "../../services/chat/live";
+import { sendMessage, setCurrentRoomId } from "../../services/chat/live";
+import { setRoomRead } from "../../services/database/chat/room";
 
 const chat: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.get("/", async function (request, reply) {
@@ -20,6 +21,9 @@ const chat: FastifyPluginAsync = async (fastify): Promise<void> => {
     if (!roomId) {
       return reply.status(400).send({ error: "Room ID is required" });
     }
+
+    await setRoomRead(fastify, true, roomId, request.userId);
+    await setCurrentRoomId(fastify, request.userId, roomId);
 
     const messages = await getChatMessagesForRoom(
       fastify,
@@ -45,8 +49,8 @@ const chat: FastifyPluginAsync = async (fastify): Promise<void> => {
       return reply.status(400).send({ error: "Message is required" });
     }
 
-    // await sendMessage(fastify, request, message, roomId);
-    await addRoom(fastify, "Room " + roomId, [request.userId]);
+    await sendMessage(fastify, request, message, roomId);
+    // await addRoom(fastify, "Room " + roomId, [request.userId]);
 
     return reply.status(200).send({ message: "Message sent" });
   });
