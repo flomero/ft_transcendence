@@ -1,9 +1,11 @@
 import { FastifyPluginAsync } from "fastify";
 import { updateUsername } from "../../services/database/user";
+import { signJWT, verifyJWT } from "../../services/auth/jwt";
 
 const updateProfile: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.post("/update/username", async (request, reply) => {
-    if (!request.isAuthenticated) {
+    const token = request.cookies.token;
+    if (!request.isAuthenticated || !token) {
       return reply
         .code(401)
         .send({ error: "You are not authorized to authenticate" });
@@ -20,6 +22,19 @@ const updateProfile: FastifyPluginAsync = async (fastify): Promise<void> => {
     if (!(await updateUsername(fastify, request.userId, newUsername))) {
       return reply.code(500).send({ error: "Failed to update username" });
     }
+
+    const decoded = await verifyJWT(fastify, token);
+
+    const jwtToken = await signJWT(fastify, {
+      id: decoded.id,
+      name: newUsername,
+      token: decoded.token,
+    });
+
+    reply.cookie("token", jwtToken, {
+      path: "/",
+    });
+
     return reply.code(200).send({});
   });
 };
