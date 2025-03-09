@@ -1,7 +1,7 @@
 <h2>Chat!</h2>
 
-<div id="chat-container" class="grid grid-cols-4 gap-4 w-full">
-    <div id="chat-rooms" class="col-span-1">
+<div id="chat-container" class="grid grid-cols-4 gap-4 w-full h-screen overflow-y-auto">
+    <div id="chat-rooms" class="col-span-1 border-2 border-gray-50 rounded-lg p-4">
         {{#each rooms}}
             {{> components/chat/room room=this}}
         {{/each}}
