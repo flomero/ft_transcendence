@@ -11,7 +11,12 @@ class Lobby {
   lobbyOwner: string;//make private later
 
   constructor(game: "pong", gameMode: GameModes, memberId: string) {
-    this.lobbyMembers.set(memberId, { id: memberId, isReady: false });
+    const newMember: LobbyMember = {
+    id: memberId,
+    userState: "inLobby",
+    isReady: false };
+
+    this.lobbyMembers.set(memberId, newMember);
     this.game = game;
     this.gameMode = gameMode;
     this.lobbyOwner = memberId;
@@ -25,6 +30,32 @@ class Lobby {
 
   public get getLobbyId(): string {
     return this.lobbyId;
+  }
+
+  public isUserInLobby(memberId: string): boolean {
+    return this.lobbyMembers.has(memberId);
+  }
+
+  public removeMember(memberId: string): void {
+    if (this.lobbyMembers.has(memberId) === false) {
+      throw new Error("Member is not in the lobby");
+    }
+    this.lobbyMembers.delete(memberId);
+  }
+
+  public memberStatus(memberId: string): "notInLobby" | "inLobby" | "inMatch" {
+    if (this.lobbyMembers.has(memberId) === false) {
+      throw new Error("Member is not in the lobby");
+    }
+    return this.lobbyMembers.get(memberId)!.userState;
+  }
+
+  public disconnectMember(memberId: string): void {
+    if (this.lobbyMembers.has(memberId) === false
+       || this.lobbyMembers.get(memberId)!.userState === "inMatch") {
+      throw new Error("Member is not in the lobby");
+    }
+    this.lobbyMembers.get(memberId)!.socket!.close();
   }
 };
 
