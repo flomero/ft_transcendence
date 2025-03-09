@@ -46,12 +46,15 @@ export default fp(async (fastify) => {
           req.isAuthenticated = true;
         } catch (err) {
           fastify.log.error("Error refreshing token: ", err);
+          fastify.countJwtVerify("failure");
           reply.clearCookie("token");
         }
       } else {
         fastify.log.error("Error verifying token: ", err);
+        fastify.countJwtVerify("failure");
         reply.clearCookie("token");
       }
     }
+    fastify.countJwtVerify("success");
   });
 });
