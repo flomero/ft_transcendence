@@ -14,6 +14,7 @@
           "paddleHeight": 1,
           "paddleSpeedWidthPercent": 1.5
         },
+
         "defaultBallSettings": {
           "speed": 1.5,
           "radius": 0.75
@@ -22,12 +23,10 @@
     },
 
     "gameModifiers": {
-      "goalTakenTracker": {
-        "className": "GoalTakenTracker"
-      },
-
-      "lastHitTracker": {
-        "className": "LastHitTracker"
+      "powerUpSpawner": {
+        "className": "PowerUpSpawner",
+        "meanDelayS": 10,
+        "delaySpanS": 5
       },
 
       "timedGame": {
@@ -35,10 +34,9 @@
         "durationS": 10
       },
 
-      "powerUpSpawner": {
-        "className": "PowerUpSpawner",
-        "meanDelayS": 10,
-        "delaySpanS": 5
+      "scoredGame": {
+        "className": "ScoredGame",
+        "goalObjective": 10
       }
     }
   }

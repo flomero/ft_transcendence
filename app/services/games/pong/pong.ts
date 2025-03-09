@@ -371,6 +371,13 @@ export abstract class Pong extends GameBase {
 
         case "paddle":
           PhysicsEngine.resolveCollision(ball, collision);
+          const playerId = collision.objectId;
+
+          // Update lastHit
+          this.extraGameData.lastHit = playerId;
+          console.log(`Last hit: ${this.extraGameData.lastHit}`);
+
+          // Then trigger on paddle bounce effects
           this.modifierManager.trigger(this, "onPaddleBounce", {
             playerId: collision.objectId,
           });
@@ -380,11 +387,17 @@ export abstract class Pong extends GameBase {
           PhysicsEngine.resolveCollision(ball, collision);
           // TODO: Bounce or Goal ?
           const wall: Rectangle = this.gameObjects.walls[collision.objectId];
-          if (wall.isGoal)
+          if (wall.isGoal) {
+            const playerId = Math.floor(collision.objectId / 2);
+
+            // Update the scores
+            this.extraGameData.scores[playerId]++;
+
+            // Then trigger on goal effects
             this.modifierManager.trigger(this, "onGoal", {
-              playerId: Math.floor(collision.objectId / 2),
+              playerId: playerId,
             });
-          else this.modifierManager.trigger(this, "onWallBounce");
+          } else this.modifierManager.trigger(this, "onWallBounce");
           break;
 
         default:
