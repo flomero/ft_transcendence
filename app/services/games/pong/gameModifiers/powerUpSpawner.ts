@@ -39,11 +39,28 @@ export class PowerUpSpawner extends TimeLimitedModifierBase {
     const arenaHeight =
       GAME_REGISTRY.pong.gameModes[game.gameData.gameModeName].arenaSettings
         .height;
+    const defaultRadius =
+      GAME_REGISTRY.pong.gameModes[game.gameData.gameModeName]
+        .defaultPowerUpSettings.radius;
+    const offset =
+      GAME_REGISTRY.pong.gameModes[game.gameData.gameModeName].arenaSettings
+        .wallHeight;
 
-    const x = game.getRNG().randomGaussian(arenaWidth / 2.0, arenaWidth / 4.0);
-    const y = game
-      .getRNG()
-      .randomGaussian(arenaHeight / 2.0, arenaHeight / 2.2);
+    const x = Math.min(
+      Math.max(
+        game.getRNG().randomGaussian(arenaWidth / 2.0, arenaWidth / 4.0),
+        defaultRadius + offset,
+      ),
+      arenaWidth - (defaultRadius + offset),
+    );
+
+    const y = Math.min(
+      Math.max(
+        game.getRNG().randomGaussian(arenaHeight / 2.0, arenaHeight / 2.2),
+        defaultRadius + offset,
+      ),
+      arenaHeight - (defaultRadius + offset),
+    );
 
     const spawned = game
       .getModifierManager()

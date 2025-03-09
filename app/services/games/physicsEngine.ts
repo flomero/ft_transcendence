@@ -25,7 +25,7 @@ export class PhysicsEngine {
       }
 
       let collision: Collision | null;
-      if (objectType !== "power_up") {
+      if (objectType !== "powerUp") {
         collision = PhysicsEngine.ballRectCollision(
           ball,
           distance,
@@ -33,6 +33,9 @@ export class PhysicsEngine {
           i,
         );
       } else {
+        // Balls that can't score a goal can't pickup powerUps
+        if (!ball.doGoal) continue;
+
         collision = PhysicsEngine.ballCircleCollision(
           ball,
           distance,

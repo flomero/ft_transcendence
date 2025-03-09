@@ -333,6 +333,7 @@ export abstract class Pong extends GameBase {
         this.gameObjects.paddles,
         "paddle",
       );
+
       const wallCollision: Collision | null = PhysicsEngine.detectCollision(
         ball,
         remainingDistance,
@@ -340,18 +341,12 @@ export abstract class Pong extends GameBase {
         "wall",
       );
 
-      let powerUpCollision: Collision | null = null;
-      if (this.modifierManager.getSpawnedPowerUps().length > 0) {
-        powerUpCollision = PhysicsEngine.detectCollision(
-          ball,
-          remainingDistance,
-          this.modifierManager.getSpawnedPowerUps(),
-          "powerUp",
-        );
-      }
-
-      // Balls that can't score a goal can't pickup powerUps
-      if (!ball.doGoal) powerUpCollision = null;
+      const powerUpCollision: Collision | null = PhysicsEngine.detectCollision(
+        ball,
+        remainingDistance,
+        this.modifierManager.getSpawnedPowerUsObjects(),
+        "powerUp",
+      );
 
       // Determine the closest collision
       const tmpCollision: Collision | null = getClosestCollision([
@@ -377,8 +372,10 @@ export abstract class Pong extends GameBase {
         case "powerUp":
           // TODO: trigger          PhysicsEngine.resolveCollision(ball, collision);
           console.log(
-            `Player ${this.extraGameData.lastHit} picked up a powerUp`,
+            `\nPlayer ${this.extraGameData.lastHit} picked up a powerUp\n`,
           );
+
+          this.modifierManager.pickupPowerUp(collision.objectId);
           break;
 
         case "paddle":

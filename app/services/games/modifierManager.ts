@@ -1,7 +1,11 @@
 import { Ball } from "../../types/games/pong/ball";
 import { GameBase } from "./gameBase";
 import { GAME_REGISTRY } from "../../types/games/gameRegistry";
-import { ModifierBase, ModifierStatus } from "./modifierBase";
+import {
+  ModifierActivationMode,
+  ModifierBase,
+  ModifierStatus,
+} from "./modifierBase";
 
 interface PowerUpProperties {
   radius: number;
@@ -62,8 +66,6 @@ export class ModifierManager {
 
     this.modifiers.forEach((modifier) => {
       modifier.activate(this.game);
-      // modifier.setStatus(ModifierStatus.ACTIVE);
-      console.log(modifier);
     });
   }
 
@@ -89,14 +91,6 @@ export class ModifierManager {
         `No default power up settings found for ${this.game.gameData.gameModeName}`,
       );
     }
-
-    // Changed to properly iterate over the capacities object
-    Object.entries(this.powerUpDefaultProperties.capacities).forEach(
-      ([name, capacity]) => {
-        console.log(`  |- ${name}: ${capacity}`);
-      },
-    );
-    console.log("\n");
 
     // Extract available powerUpNames from the capacities object
     // (fixed from using Object.keys on the entire powerUpDefaultProperties)
@@ -213,7 +207,6 @@ export class ModifierManager {
     position: [number, number],
   ): boolean {
     const powerUpName: string | null = this.sampleRandomPowerUp(rng);
-    console.log(`  |- sampled powerUp: ${powerUpName}`);
     if (!powerUpName) {
       console.log("Can't spawn any power up");
       this.trigger("onFailedPowerUpSpawn", {
@@ -242,7 +235,7 @@ export class ModifierManager {
       } as Ball,
     ]);
 
-    console.log(`Successfully spawned @ [${position[0]}, ${position[1]}]`);
+    this.trigger("onPowerUpSpawn");
 
     return true;
   }
@@ -257,22 +250,13 @@ export class ModifierManager {
     this.updateAvailability(powerUpName);
   }
 
-  pickupPowerUp(powerUp: Ball): void {
-    let obj: string | null = null;
-    for (const [type, ball] of this.spawnedPowerUps) {
-      if (ball === powerUp) {
-        obj = type;
-        this.spawnedPowerUps.splice(this.spawnedPowerUps.indexOf([type, ball]));
-        break;
-      }
-    }
+  pickupPowerUp(objectId: number): void {
+    const powerUp: [string, Ball] = this.spawnedPowerUps[objectId];
 
-    if (!obj) {
-      console.log(`Unknown powerUp picked up: ${powerUp}`);
-      return;
-    }
+    this.spawnedPowerUps.splice(objectId, 1);
+    this.createPowerUpInstance(powerUp[0]);
 
-    this.createPowerUpInstance(obj as string);
+    this.trigger("onPowerUpPickup");
   }
 
   protected createPowerUpInstance(powerUpName: string): void {
@@ -284,7 +268,10 @@ export class ModifierManager {
       return;
     }
 
-    this.modifiers.push(new powerUpClass());
+    const powerUp: ModifierBase = new powerUpClass() as ModifierBase;
+    if (powerUp.getActivationMode() === ModifierActivationMode.AUTO)
+      powerUp.activate(this.game);
+    this.modifiers.push(powerUp);
   }
 
   updateAvailability(powerUpName: string): void {
@@ -324,8 +311,12 @@ export class ModifierManager {
   }
 
   // Getters & Setters
-  getSpawnedPowerUps(): Record<string, any>[] {
+  getSpawnedPowerUps(): Array<[string, Ball]> {
     return this.spawnedPowerUps;
+  }
+
+  getSpawnedPowerUsObjects(): Ball[] {
+    return this.spawnedPowerUps.map((value) => value[1]);
   }
 
   getmodifiers(): ModifierBase[] {

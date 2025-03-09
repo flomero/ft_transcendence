@@ -16,12 +16,12 @@
         },
 
         "defaultBallSettings": {
-          "speed": 1.5,
+          "speed": 1.25,
           "radius": 0.75
         },
 
         "defaultPowerUpSettings": {
-          "radius": 3.5,
+          "radius": 12.5,
           "capacities": {
             "speedBoost": 1
           }
@@ -33,7 +33,7 @@
       "powerUpSpawner": {
         "className": "PowerUpSpawner",
         "meanDelayS": 5,
-        "delaySpanS": 1.5
+        "delaySpanS": 2
       },
 
       "timedGame": {
@@ -51,8 +51,9 @@
       "speedBoost": {
         "className": "SpeedBoost",
         "spawnWeight": 1.0,
+        "selfActivation": false,
         "durationS": 2,
-        "totalRampUpStrength": 0.5,
+        "totalRampUpStrength": 0.75,
         "rampUpFrequencyS": 0.25
       }
     }

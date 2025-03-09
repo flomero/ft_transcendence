@@ -6,11 +6,18 @@ export enum ModifierStatus {
   ACTIVE,
 }
 
+export enum ModifierActivationMode {
+  AUTO,
+  SELF,
+}
+
 export class ModifierBase {
   name: string = "";
 
   protected spawnWeight: number = 0;
   protected status: ModifierStatus = ModifierStatus.INACTIVE;
+  protected activationMode: ModifierActivationMode =
+    ModifierActivationMode.AUTO;
 
   protected playerId: number = -1;
 
@@ -71,5 +78,9 @@ export class ModifierBase {
 
   setStatus(status: ModifierStatus): void {
     this.status = status;
+  }
+
+  getActivationMode(): ModifierActivationMode {
+    return this.activationMode;
   }
 }
