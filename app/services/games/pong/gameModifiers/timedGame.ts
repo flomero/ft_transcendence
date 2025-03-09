@@ -1,5 +1,5 @@
 import { GameBase, GameStatus } from "../../gameBase";
-import { GAME_REGISTRY } from "../../gameRegistry";
+import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
 import { TimeLimitedModifierBase } from "../../timeLimitedModifierBase";
 
 export class TimedGame extends TimeLimitedModifierBase {

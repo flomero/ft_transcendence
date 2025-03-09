@@ -1,6 +1,7 @@
 import { GameBase } from "../../gameBase";
-import { GAME_REGISTRY } from "../../gameRegistry";
+import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
 import { TimeLimitedModifierBase } from "../../timeLimitedModifierBase";
+import { ModifierStatus } from "../../modifierBase";
 
 export class PowerUpSpawner extends TimeLimitedModifierBase {
   name = "powerUpSpawner";
@@ -32,9 +33,36 @@ export class PowerUpSpawner extends TimeLimitedModifierBase {
   }
 
   onDeactivation(game: GameBase): void {
-    // placeholder
-    // game.spawnRandomPowerUp()
+    const arenaWidth =
+      GAME_REGISTRY.pong.gameModes[game.gameData.gameModeName].arenaSettings
+        .width;
+    const arenaHeight =
+      GAME_REGISTRY.pong.gameModes[game.gameData.gameModeName].arenaSettings
+        .height;
+
+    const x = game.getRNG().randomGaussian(arenaWidth / 2.0, arenaWidth / 4.0);
+    const y = game
+      .getRNG()
+      .randomGaussian(arenaHeight / 2.0, arenaHeight / 2.2);
+
+    const spawned = game
+      .getModifierManager()
+      .spawnRandomPowerUp(game.getRNG(), [x, y]);
 
     this.activate(game);
+    if (!spawned) this.pause(game);
+  }
+
+  onCDFComputation(game: GameBase): void {
+    if (game.getModifierManager().getCDF().length > 0) this.resume(game);
+  }
+
+  onPausing(game: GameBase): void {
+    console.log(`PowerUpSpawner PAUSED`);
+  }
+
+  onResuming(game: GameBase): void {
+    this.status = ModifierStatus.ACTIVE;
+    console.log(`PowerUpSpawner RESUMED`);
   }
 }

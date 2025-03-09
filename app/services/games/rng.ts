@@ -11,10 +11,10 @@ export class RNG {
     return this.state / 233280;
   }
 
-  randomGaussian(center: number, span: number): number {
+  randomGaussian(center: number, halfSpan: number): number {
     // For 95% confidence interval, span = 2 * halfSpan = 2 * 1.96 * stdDev
-    // So stdDev = span / (2 * 1.96) = span / 3.92
-    const stdDev = span / 3.92;
+    // So stdDev = span / (2 * 1.96) = halfSpan / 1.96
+    const stdDev = halfSpan / 1.96;
 
     // Box-Muller transform
     const u1 = 1.0 - this.random(); // Subtract from 1 to avoid logarithm of zero

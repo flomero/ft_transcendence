@@ -1,10 +1,8 @@
 import { promises as fs } from "fs";
 import * as path from "path";
+import { GameRegistry, GAME_REGISTRY } from "../../types/games/gameRegistry";
 
-// Exported registry variable that will be populated on module load.
-export let GAME_REGISTRY: Record<string, any> = {};
-
-export async function loadGameRegistry() {
+export async function loadGameRegistry(): Promise<void> {
   const jsonPath = path.join(
     "/workspaces/ft_transcendence/app/gameRegistry.json",
   );
@@ -16,8 +14,8 @@ export async function loadGameRegistry() {
     throw new Error(`Game registry JSON not found at ${jsonPath}`);
   }
 
-  // Parse the JSON file (assumed to follow a strict format)
-  const registry = JSON.parse(jsonData);
+  // Parse the JSON file
+  const registry = JSON.parse(jsonData) as GameRegistry;
 
   // Loop through each game in the registry.
   for (const game in registry) {
@@ -55,7 +53,6 @@ export async function loadGameRegistry() {
         if (!gameData.gameModifiers.hasOwnProperty(modifier)) continue;
         const modData = gameData.gameModifiers[modifier];
         if (modData.className) {
-          // Example: "./pong/gameModifiers/black_hole_debuff_modifier"
           const modulePath = `./${game}/gameModifiers/${modifier}.js`;
           try {
             const modModule = await import(modulePath);
@@ -81,7 +78,6 @@ export async function loadGameRegistry() {
         if (!gameData.powerUps.hasOwnProperty(pu)) continue;
         const puData = gameData.powerUps[pu];
         if (puData.className) {
-          // Example: "./pong/powerUps/black_hole_debuff_modifier"
           const modulePath = `./${game}/powerUps/${pu}.js`;
           try {
             const puModule = await import(modulePath);
@@ -90,7 +86,8 @@ export async function loadGameRegistry() {
                 `Module ${modulePath} does not export ${puData.className}`,
               );
             }
-            puData.class = puModule[puData.class_name];
+            // Fixed the bug in your original code: was using puData.class_name but should be puData.className
+            puData.class = puModule[puData.className];
           } catch (err) {
             console.error(
               `Error importing power up "${pu}" for game "${game}":`,
@@ -103,6 +100,6 @@ export async function loadGameRegistry() {
   }
 
   // Save the processed registry to the exported variable.
-  GAME_REGISTRY = registry;
+  Object.assign(GAME_REGISTRY, registry);
   console.log("Loaded GAME_REGISTRY:", GAME_REGISTRY);
 }

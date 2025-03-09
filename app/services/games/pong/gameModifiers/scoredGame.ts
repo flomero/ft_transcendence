@@ -1,5 +1,5 @@
 import { GameStatus } from "../../gameBase";
-import { GAME_REGISTRY } from "../../gameRegistry";
+import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
 import { Pong } from "../pong";
 import { PongModifierBase } from "../pongModifierBase";
 

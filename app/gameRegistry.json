@@ -18,6 +18,13 @@
         "defaultBallSettings": {
           "speed": 1.5,
           "radius": 0.75
+        },
+
+        "defaultPowerUpSettings": {
+          "radius": 3.5,
+          "capacities": {
+            "speedBoost": 1
+          }
         }
       }
     },
@@ -25,8 +32,8 @@
     "gameModifiers": {
       "powerUpSpawner": {
         "className": "PowerUpSpawner",
-        "meanDelayS": 10,
-        "delaySpanS": 5
+        "meanDelayS": 5,
+        "delaySpanS": 1.5
       },
 
       "timedGame": {
@@ -37,6 +44,16 @@
       "scoredGame": {
         "className": "ScoredGame",
         "goalObjective": 10
+      }
+    },
+
+    "powerUps": {
+      "speedBoost": {
+        "className": "SpeedBoost",
+        "spawnWeight": 1.0,
+        "durationS": 2,
+        "totalRampUpStrength": 0.5,
+        "rampUpFrequencyS": 0.25
       }
     }
   }

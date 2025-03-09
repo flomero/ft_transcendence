@@ -1,20 +1,26 @@
 import { Ball } from "../../types/games/pong/ball";
 import { GameBase } from "./gameBase";
-import { GAME_REGISTRY } from "./gameRegistry";
+import { GAME_REGISTRY } from "../../types/games/gameRegistry";
 import { ModifierBase, ModifierStatus } from "./modifierBase";
+
+interface PowerUpProperties {
+  radius: number;
+  capacities: Record<string, number>;
+}
 
 export class ModifierManager {
   // Arrays that maintain the allowed names and their definitions.
-  protected rawGameData: Record<string, any>;
+  protected game: GameBase;
 
   // PowerUp related properties
-  protected powerUpNames: string[] = []; // List of power-up names
-  protected availablePowerUps: any[] = []; // From the registry (in same order as powerUpNames)
+  protected availablePowerUps: string[] = [];
   protected unavailablePowerUps: string[] = []; // List of power-up names that are unavailable
 
   protected powerUpCounters: Record<string, number> = {};
-  protected powerUpDefaultProperties: Record<string, any> = {};
-  protected powerUpCapacities: Record<string, number> = {};
+  protected powerUpDefaultProperties: PowerUpProperties = {
+    radius: 10,
+    capacities: {},
+  };
 
   protected probabilityDensityFunction: number[] = [];
   protected cumulativeDensityFunction: number[] = [];
@@ -24,33 +30,26 @@ export class ModifierManager {
   >();
   protected modifiers: ModifierBase[] = []; // Active modifiers
 
-  constructor(game: GameBase, gameData: Record<string, any>) {
-    this.rawGameData = gameData;
-
-    console.log(`\n\nInitializing modifierManager w/:`);
-    console.log(`  |- gameName: ${gameData["gameName"]}`);
-    console.log(`  |- gameModeName: ${gameData["gameModeName"]}`);
-    console.log(`  |- modifierNames: ${gameData["modifierNames"]}`);
+  constructor(game: GameBase) {
+    this.game = game;
 
     // Initialize modifiers from registry
-    this.initializeModifiers(game);
+    this.initializeModifiers();
 
     // Initialize power-ups
     this.initializePowerUps();
-
-    console.log("\n");
   }
 
-  protected initializeModifiers(game: GameBase): void {
+  protected initializeModifiers(): void {
     // Get the gameModifiers object from the registry
     const modifierRegistry =
-      GAME_REGISTRY[this.rawGameData.gameName]?.gameModifiers;
+      GAME_REGISTRY[this.game.gameData.gameName]?.gameModifiers;
 
     // Check if modifierRegistry exists
     if (modifierRegistry) {
       // Iterate over each key in the gameModifiers object
       Object.keys(modifierRegistry).forEach((modifierName) => {
-        if (this.rawGameData.modifierNames.includes(modifierName)) {
+        if (this.game.gameData.modifierNames.includes(modifierName)) {
           const modifier = modifierRegistry[modifierName];
           if (modifier && modifier.class) {
             // Create an instance of the modifier class
@@ -62,59 +61,75 @@ export class ModifierManager {
     }
 
     this.modifiers.forEach((modifier) => {
-      modifier.activate(game);
+      modifier.activate(this.game);
       // modifier.setStatus(ModifierStatus.ACTIVE);
       console.log(modifier);
     });
   }
 
   protected initializePowerUps(): void {
-    // Get the power ups object from the registry
-    const registryPowerUps = GAME_REGISTRY[this.rawGameData.gameName]?.powerUps;
-    if (!registryPowerUps) {
-      console.warn(
-        `No power ups defined for game "${this.rawGameData.gameName}"`,
+    // Get the power ups object from the registry with proper type safety
+    const gameMode =
+      GAME_REGISTRY[this.game.gameData.gameName]?.gameModes[
+        this.game.gameData.gameModeName
+      ];
+
+    if (!gameMode) {
+      console.error(
+        `Game mode ${this.game.gameData.gameModeName} not found for game ${this.game.gameData.gameName}`,
       );
       return;
     }
 
-    // Create availablePowerUps in the same order as allowed names
-    this.availablePowerUps = this.powerUpNames.map(
-      (name) => registryPowerUps[name],
-    );
+    // Make sure the default settings exist
+    if (gameMode.defaultPowerUpSettings) {
+      this.powerUpDefaultProperties = gameMode.defaultPowerUpSettings;
+    } else {
+      console.warn(
+        `No default power up settings found for ${this.game.gameData.gameModeName}`,
+      );
+    }
 
-    // Initialize counters
-    this.powerUpNames.forEach((name) => {
+    // Changed to properly iterate over the capacities object
+    Object.entries(this.powerUpDefaultProperties.capacities).forEach(
+      ([name, capacity]) => {
+        console.log(`  |- ${name}: ${capacity}`);
+      },
+    );
+    console.log("\n");
+
+    // Extract available powerUpNames from the capacities object
+    // (fixed from using Object.keys on the entire powerUpDefaultProperties)
+    Object.keys(this.powerUpDefaultProperties.capacities).forEach((name) => {
+      if (this.game.gameData.powerUpNames.includes(name))
+        this.availablePowerUps.push(name);
       this.powerUpCounters[name] = 0;
     });
-
-    // Read properties from the registry
-    this.powerUpDefaultProperties =
-      GAME_REGISTRY[this.rawGameData.gameName]["game_modes"][
-        this.rawGameData.gameModeName
-      ]?.["defaultPowerUpSettings"] || {};
-
-    // Extract capacities
-    this.powerUpCapacities =
-      this.powerUpDefaultProperties["powerUpsCapacities"] || {};
 
     this.computeCDF();
   }
 
   protected computeCDF(): void {
     // Build PDF by iterating over allowed names (in order) and skipping any that are unavailable
-    const pdfArray = this.powerUpNames
+    const registryPowerUps =
+      GAME_REGISTRY[this.game.gameData.gameName]?.powerUps;
+
+    if (!registryPowerUps) {
+      console.error(`Game ${this.game.gameData.gameName}.powerUps not found`);
+      return;
+    }
+
+    const pdfArray: number[] = this.availablePowerUps
       .filter((name) => !this.unavailablePowerUps.includes(name))
-      .map((name) => {
-        // Find the index in the powerUpNames list
-        const index = this.powerUpNames.indexOf(name);
-        // Assume that the registry object has a property "spawnWeight"
-        return Number(this.availablePowerUps[index]?.spawnWeight) || 0;
-      });
+      .map((name) => registryPowerUps[name].spawnWeight);
 
     // Compute total density
     const totalDensity = pdfArray.reduce((acc, val) => acc + val, 0);
-    if (totalDensity === 0) return;
+    if (totalDensity === 0) {
+      this.cumulativeDensityFunction = [];
+      this.trigger("onCDFComputation");
+      return;
+    }
 
     // Normalize the PDF
     this.probabilityDensityFunction = pdfArray.map((val) => val / totalDensity);
@@ -127,20 +142,18 @@ export class ModifierManager {
         return cumul;
       },
     );
+
+    this.trigger("onCDFComputation");
   }
 
-  trigger(
-    game: GameBase,
-    method: string,
-    args: Record<string, any> = {},
-  ): void {
+  trigger(method: string, args: Record<string, any> = {}): void {
     // Helper function to safely invoke a method on an object
     const safeInvoke = (obj: any, methodName: string) => {
       try {
         // Check if the method exists and is a function
         if (typeof obj[methodName] === "function") {
           // Invoke the method with the current game instance and any additional arguments
-          obj[methodName](game, args);
+          obj[methodName](this.game, args);
         }
       } catch (error) {
         console.error(
@@ -158,7 +171,7 @@ export class ModifierManager {
 
     // Trigger method on all modifiers
     for (const modifier of this.modifiers)
-      if (modifier.getStatus() === ModifierStatus.ACTIVE)
+      if (modifier.getStatus() !== ModifierStatus.INACTIVE)
         safeInvoke(modifier, method);
   }
 
@@ -184,11 +197,15 @@ export class ModifierManager {
     const rnd = rng.random();
     // Loop over the CDF and return the first power-up whose cumulative value exceeds rnd
     for (let i = 0; i < this.cumulativeDensityFunction.length; i++)
-      if (rnd < this.cumulativeDensityFunction[i]) return this.powerUpNames[i];
+      if (rnd < this.cumulativeDensityFunction[i])
+        return Object.keys(this.powerUpDefaultProperties.capacities)[i];
 
     // Fallback: return a random allowed power-up
-    const index = Math.floor(rng.random() * this.powerUpNames.length);
-    return this.powerUpNames[index];
+    const index = Math.floor(
+      rng.random() *
+        Object.keys(this.powerUpDefaultProperties.capacities).length,
+    );
+    return Object.keys(this.powerUpDefaultProperties.capacities)[index];
   }
 
   spawnRandomPowerUp(
@@ -196,8 +213,12 @@ export class ModifierManager {
     position: [number, number],
   ): boolean {
     const powerUpName: string | null = this.sampleRandomPowerUp(rng);
+    console.log(`  |- sampled powerUp: ${powerUpName}`);
     if (!powerUpName) {
       console.log("Can't spawn any power up");
+      this.trigger("onFailedPowerUpSpawn", {
+        reason: "NONE_AVAILABLE",
+      });
       return false;
     }
 
@@ -214,12 +235,14 @@ export class ModifierManager {
         dx: 0.0,
         dy: 0.0,
         speed: 0.0,
-        radius: this.powerUpDefaultProperties["size"],
+        radius: this.powerUpDefaultProperties.radius,
         isVisible: true,
         doCollision: true,
         doGoal: false,
       } as Ball,
     ]);
+
+    console.log(`Successfully spawned @ [${position[0]}, ${position[1]}]`);
 
     return true;
   }
@@ -254,7 +277,7 @@ export class ModifierManager {
 
   protected createPowerUpInstance(powerUpName: string): void {
     const powerUpClass =
-      GAME_REGISTRY[this.rawGameData.gameName].powerUps[powerUpName].class;
+      GAME_REGISTRY[this.game.gameData.gameName].powerUps[powerUpName].class;
 
     if (!powerUpClass) {
       console.log(`Unknown powerUpClass: ${powerUpName}`);
@@ -268,7 +291,8 @@ export class ModifierManager {
     // becomes available
     if (
       this.unavailablePowerUps.includes(powerUpName) &&
-      this.powerUpCounters[powerUpName] < this.powerUpCapacities[powerUpName]
+      this.powerUpCounters[powerUpName] <
+        (this.powerUpDefaultProperties.capacities[powerUpName] || -1)
     ) {
       // Remove the name from unavailablePowerUps
       const i = this.unavailablePowerUps.indexOf(powerUpName);
@@ -280,7 +304,8 @@ export class ModifierManager {
     // becomes unavailable
     if (
       !this.unavailablePowerUps.includes(powerUpName) &&
-      this.powerUpCounters[powerUpName] >= this.powerUpCapacities[powerUpName]
+      this.powerUpCounters[powerUpName] >=
+        (this.powerUpDefaultProperties.capacities[powerUpName] || -1)
     ) {
       // Add the name to unavailablePowerUps
       this.unavailablePowerUps.push(powerUpName);
@@ -305,5 +330,9 @@ export class ModifierManager {
 
   getmodifiers(): ModifierBase[] {
     return this.modifiers;
+  }
+
+  getCDF(): number[] {
+    return this.cumulativeDensityFunction;
   }
 }

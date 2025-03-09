@@ -2,7 +2,7 @@ import { Pong } from "../pong";
 import { Rectangle } from "../../../../types/games/pong/rectangle";
 import { Ball } from "../../../../types/games/pong/ball";
 import { Paddle } from "../../../../types/games/pong/paddle";
-import { GAME_REGISTRY } from "../../gameRegistry";
+import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
 
 export class ClassicPong extends Pong {
   protected defaultBallSettings: Record<string, any>;

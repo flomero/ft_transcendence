@@ -27,7 +27,7 @@ export abstract class GameBase {
     console.log(gameData);
 
     this.rng = new RNG();
-    this.modifierManager = new ModifierManager(this, gameData);
+    this.modifierManager = new ModifierManager(this);
   }
 
   /**
@@ -41,7 +41,7 @@ export abstract class GameBase {
   startGame(): void {
     this.status = GameStatus.RUNNING;
     console.log("Game started");
-    this.modifierManager.trigger(this, "onGameStart");
+    this.modifierManager.trigger("onGameStart");
   }
 
   /**

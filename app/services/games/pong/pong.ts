@@ -1,6 +1,6 @@
 import { GameBase, GameStatus } from "../gameBase";
 import { PhysicsEngine, Collision } from "../physicsEngine";
-import { GAME_REGISTRY } from "../gameRegistry";
+import { GAME_REGISTRY } from "../../../types/games/gameRegistry";
 import { Paddle } from "../../../types/games/pong/paddle";
 import { Ball } from "../../../types/games/pong/ball";
 import { Rectangle } from "../../../types/games/pong/rectangle";
@@ -24,6 +24,15 @@ export interface PongGameObjects {
   paddles: Paddle[];
   walls: Rectangle[];
 }
+
+// Define a type for the edit function
+type PropertyEditor<T> = (value: T) => T;
+
+// Define a type for the edit parameter
+type GameObjectEdit<T> = {
+  property: keyof T;
+  editor: PropertyEditor<any>;
+};
 
 export abstract class Pong extends GameBase {
   static readonly name = "pong";
@@ -89,7 +98,7 @@ export abstract class Pong extends GameBase {
           this.resetBall(0);
         }
       }
-      this.modifierManager.trigger(this, "onUpdate");
+      this.modifierManager.trigger("onUpdate");
 
       const snapshot = this.getStateSnapshot();
 
@@ -112,7 +121,7 @@ export abstract class Pong extends GameBase {
     if (this.status === GameStatus.RUNNING) {
       for (const ball of this.gameObjects.balls)
         if (ball.doCollision) this.doCollisionChecks(ball);
-      this.modifierManager.trigger(this, "onUpdate");
+      this.modifierManager.trigger("onUpdate");
     }
   }
   // TODO: Use userInput schema for received action
@@ -169,7 +178,7 @@ export abstract class Pong extends GameBase {
       });
     });
 
-    this.modifierManager.trigger(this, "onUserInput", { input: action });
+    this.modifierManager.trigger("onUserInput", { input: action });
 
     // Fast-forward to go back to the current tick
     if (delayTicks > 0) {
@@ -188,6 +197,8 @@ export abstract class Pong extends GameBase {
     gameState.scores = this.extraGameData.scores;
     gameState.rng = this.rng.getState();
 
+    gameState.modifiersData = this.modifierManager.getStateSnapshot();
+
     return gameState;
   }
 
@@ -197,6 +208,8 @@ export abstract class Pong extends GameBase {
     this.gameObjects.walls = snapshot.walls;
     this.gameObjects.paddles = snapshot.player_paddles;
     this.extraGameData.scores = snapshot.scores;
+
+    this.modifierManager.loadStateSnapshot(snapshot.modifiersData);
 
     this.rng.setState(snapshot.rng);
   }
@@ -265,7 +278,7 @@ export abstract class Pong extends GameBase {
     paddle.displacement +=
       direction * this.arenaSettings.paddleSpeedWidthPercent;
 
-    this.modifierManager.trigger(this, "onPlayerMovement", {
+    this.modifierManager.trigger("onPlayerMovement", {
       playerId: this.gameObjects.paddles.indexOf(paddle),
     });
   }
@@ -362,8 +375,7 @@ export abstract class Pong extends GameBase {
 
       switch (collision.type) {
         case "powerUp":
-          // TODO: trigger onPowerUpPickup
-          PhysicsEngine.resolveCollision(ball, collision);
+          // TODO: trigger          PhysicsEngine.resolveCollision(ball, collision);
           console.log(
             `Player ${this.extraGameData.lastHit} picked up a powerUp`,
           );
@@ -377,8 +389,8 @@ export abstract class Pong extends GameBase {
           this.extraGameData.lastHit = playerId;
           console.log(`Last hit: ${this.extraGameData.lastHit}`);
 
-          // Then trigger on paddle bounce effects
-          this.modifierManager.trigger(this, "onPaddleBounce", {
+          // Then trigger addle bounce effects
+          this.modifierManager.trigger("onPaddleBounce", {
             playerId: collision.objectId,
           });
           break;
@@ -393,11 +405,11 @@ export abstract class Pong extends GameBase {
             // Update the scores
             this.extraGameData.scores[playerId]++;
 
-            // Then trigger on goal effects
-            this.modifierManager.trigger(this, "onGoal", {
+            // Then trigger oal effects
+            this.modifierManager.trigger("onGoal", {
               playerId: playerId,
             });
-          } else this.modifierManager.trigger(this, "onWallBounce");
+          } else this.modifierManager.trigger("onWallBounce");
           break;
 
         default:
@@ -408,23 +420,23 @@ export abstract class Pong extends GameBase {
 
       //   // Handle modifiers
       //   if (collision.type === "paddle") {
-      //     this.modifierManager.trigger(this, "onPaddleBounce", {
+      //     this.modifierManager.trigger("onPaddleBounce", {
       //       playerId: collision.objectId,
       //     });
       //   } else if (collision.type === "wall") {
       //     console.log(this.gameObjects.walls[collision.objectId]);
       //     if (ball.doGoal
       //       && this.gameObjects.walls[collision.objectId].isGoal)
-      //       this.modifierManager.trigger(this, "onGoal", {
+      //       this.modifierManager.trigger("onGoal", {
       //         playerId: Math.floor(collision.objectId / 2),
       //       });
-      //     else this.modifierManager.trigger(this, "onWallBounce");
+      //     else this.modifierManager.trigger("onWallBounce");
       //   }
       // } else {
       //   console.log(
       //     `Player ${this.extraGameData.lastHit} picked up a powerUp`,
       //   );
-      //   this.modifierManager.trigger(this, "onPowerUpPickup", {
+      //   this.modifierManager.trigger("onPowerUpPickup", {
       //     powerUp:
       //       (this.powerUpManager as PowerUpManagerBase).getSpawnedPowerUps()[collision.objectId],
       //     playerId: this.extraGameData.lastHit,
@@ -454,5 +466,15 @@ export abstract class Pong extends GameBase {
     this.extraGameData.lastHit = id;
 
     console.log(`New lastHit: ${this.extraGameData.lastHit}`);
+  }
+
+  getGameObjects(): PongGameObjects {
+    return this.gameObjects;
+  }
+
+  editGameObject<T>(obj: T, edit: GameObjectEdit<T>): void {
+    const property = edit.property;
+    const currentValue = obj[property];
+    obj[property] = edit.editor(currentValue);
   }
 }

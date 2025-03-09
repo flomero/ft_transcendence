@@ -53,7 +53,7 @@
               gameName: "pong",
               gameModeName: "classicPong",
               modifierNames: ["powerUpSpawner", "scoredGame"],
-              powerUpNames: [],
+              powerUpNames: ["speedBoost"],
               playerCount: playerCount,
             },
           }),
@@ -193,11 +193,13 @@
 
         // Draw the powerUps
 
-        if (gameState.powerUpManager) {
-          gameState.powerUpManager.spawned_powerUps?.forEach((powerUp) => {
+        if (gameState.modifiersData) {
+          gameState.modifiersData.spawnedPowerUps?.forEach((entry) => {
+            const type = entry[0];
+            const powerUp = entry[1];
             if (powerUp.isVisible) {
-              switch (powerUp.type) {
-                case "speed_boost_modifier":
+              switch (type) {
+                case "speedBoost":
                   ctx.fillStyle = "red";
                   break;
 

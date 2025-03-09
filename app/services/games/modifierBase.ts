@@ -2,6 +2,7 @@ import { GameBase } from "./gameBase";
 
 export enum ModifierStatus {
   INACTIVE,
+  PAUSED,
   ACTIVE,
 }
 
@@ -30,18 +31,34 @@ export class ModifierBase {
     this.onDeactivation(game);
   }
 
+  pause(game: GameBase): void {
+    if (this.status !== ModifierStatus.ACTIVE) return;
+    this.status = ModifierStatus.PAUSED;
+    this.onPausing(game);
+  }
+
+  resume(game: GameBase): void {
+    if (this.status !== ModifierStatus.PAUSED) return;
+    this.onResuming(game);
+  }
+
   // Triggered events
   onUpdate(game: GameBase): void {}
 
   onActivation(game: GameBase): void {}
   onDeactivation(game: GameBase): void {}
+  onPausing(game: GameBase): void {}
+  onResuming(game: GameBase): void {}
 
   onGameStart(game: GameBase): void {}
 
   onUserInput(game: GameBase): void {}
 
   onPowerUpSpawn(game: GameBase): void {}
+  onFailedPowerUpSpawn(game: GameBase, args: { reason: string }): void {}
   onPowerUpPickup(game: GameBase): void {}
+
+  onCDFComputation(game: GameBase): void {}
 
   // Getters & Setters
   getName(): string {
