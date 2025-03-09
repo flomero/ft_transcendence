@@ -75,3 +75,14 @@ export async function setRoomReadForAllUsersBlacklist(
   const sql = `UPDATE r_users_chat SET read = ? WHERE room_id = ? AND user_id NOT IN (${placeholders})`;
   await fastify.sqlite.run(sql, [read, roomId, ...userIdsBlacklist]);
 }
+
+export async function userIsInRoom(
+  fastify: FastifyInstance,
+  roomId: number,
+  userId: string,
+): Promise<boolean> {
+  const sql =
+    "SELECT 1 FROM r_users_chat WHERE room_id = ? AND user_id = ? LIMIT 1";
+  const result = await fastify.sqlite.get(sql, [roomId, userId]);
+  return result !== null && result !== undefined;
+}

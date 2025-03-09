@@ -3,6 +3,7 @@ import chatWebSocket from "./websocket";
 import { getChatMessagesForRoom } from "../../services/chat/message";
 import { getChatRoomsForUserView } from "../../services/chat/room";
 import { sendMessage, setCurrentRoomId } from "../../services/chat/live";
+import { userIsInRoom } from "../../services/database/chat/room";
 
 const chat: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.get("/", async function (request, reply) {
@@ -19,6 +20,10 @@ const chat: FastifyPluginAsync = async (fastify): Promise<void> => {
     const { roomId } = request.params as { roomId: number };
     if (!roomId) {
       return reply.status(400).send({ error: "Room ID is required" });
+    }
+
+    if (!(await userIsInRoom(fastify, roomId, request.userId))) {
+      return reply.status(403).send({ error: "You are not in this room" });
     }
 
     await setCurrentRoomId(fastify, request.userId, roomId);
@@ -45,6 +50,10 @@ const chat: FastifyPluginAsync = async (fastify): Promise<void> => {
     const message = request.body as string;
     if (!message) {
       return reply.status(400).send({ error: "Message is required" });
+    }
+
+    if (!(await userIsInRoom(fastify, roomId, request.userId))) {
+      return reply.status(403).send({ error: "You are not in this room" });
     }
 
     await sendMessage(fastify, request, message, roomId);
