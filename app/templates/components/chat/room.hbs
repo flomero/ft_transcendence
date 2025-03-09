@@ -1,0 +1,8 @@
+<div class="chat-room flex items-center p-3 rounded-lg cursor-pointer mb-2 {{#if room.selected}}border-2 border-blue-500{{/if}}" data-room-id="{{room.id}}" data-read="{{room.read}}" onclick="selectRoom(event)">
+    <div class="chat-room-name font-medium flex justify-between w-full">
+        <p>{{room.name}}</p>
+        {{#unless room.read}}
+            <span class="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">New</span>
+        {{/unless}}
+    </div>
+</div>
