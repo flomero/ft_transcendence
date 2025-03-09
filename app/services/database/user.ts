@@ -15,3 +15,14 @@ export async function insertUserIfNotExists(
     `;
   await fastify.sqlite.run(sql, [user.id, user.username]);
 }
+
+export async function updateUsername(
+  fastify: FastifyInstance,
+  userId: string,
+  newUsername: string,
+): Promise<boolean> {
+  const sql = `
+    UPDATE users SET username = ? WHERE id = ?`;
+  const result = await fastify.sqlite.run(sql, [newUsername, userId]);
+  return (result?.changes ?? 0) > 0;
+}
