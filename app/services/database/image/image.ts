@@ -28,3 +28,14 @@ export async function saveImage(
 
   return newUUID;
 }
+
+export async function updateImage(
+  fastify: FastifyInstance,
+  id: UUID,
+  base64: string,
+): Promise<void> {
+  const sql = `
+    UPDATE images SET data = ? WHERE id = ?
+  `;
+  await fastify.sqlite.run(sql, base64, id);
+}

@@ -1,6 +1,7 @@
 import { FastifyPluginAsync } from "fastify";
-import { updateUsername } from "../../services/database/user";
+import { getUserById, updateUsername } from "../../services/database/user";
 import { signJWT, verifyJWT } from "../../services/auth/jwt";
+import { updateImage } from "../../services/database/image/image";
 
 const updateProfile: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.post("/update/username", async (request, reply) => {
@@ -44,8 +45,26 @@ const updateProfile: FastifyPluginAsync = async (fastify): Promise<void> => {
         .code(401)
         .send({ error: "You are not authorized to authenticate" });
     }
+    const userData = await getUserById(fastify, request.userId);
+    if (!userData) {
+      return reply.code(500).send({ error: "Failed to get user data" });
+    }
 
-    fastify.log.info(request.query);
+    const file = await request.file();
+    if (!file) {
+      return reply.code(400).send({ error: "No file uploaded" });
+    }
+    if (
+      file.mimetype !== "image/png" &&
+      file.mimetype !== "image/jpeg" &&
+      file.mimetype !== "image/gif"
+    ) {
+      return reply.code(401).send({ error: "Invalid file upload" });
+    }
+
+    const base64 = (await file.toBuffer()).toString("base64");
+    const completeData = "data:" + file.mimetype + ";base64," + base64;
+    await updateImage(fastify, userData.image_id, completeData);
 
     return reply.code(200).send({});
   });
