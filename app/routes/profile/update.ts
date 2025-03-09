@@ -37,6 +37,18 @@ const updateProfile: FastifyPluginAsync = async (fastify): Promise<void> => {
 
     return reply.code(200).send({});
   });
+
+  fastify.post("/update/image", async (request, reply) => {
+    if (!request.isAuthenticated) {
+      return reply
+        .code(401)
+        .send({ error: "You are not authorized to authenticate" });
+    }
+
+    fastify.log.info(request.query);
+
+    return reply.code(200).send({});
+  });
 };
 
 export default updateProfile;

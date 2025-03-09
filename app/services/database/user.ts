@@ -7,6 +7,14 @@ export interface User {
   image_id: UUID;
 }
 
+export async function getUserById(
+  fastify: FastifyInstance,
+  userId: string,
+): Promise<User | undefined> {
+  const sql = "SELECT * FROM users WHERE id = ?";
+  return await fastify.sqlite.get(sql, userId);
+}
+
 export async function userExists(
   fastify: FastifyInstance,
   userId: string,
