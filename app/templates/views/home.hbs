@@ -1,0 +1,51 @@
+<div class="layout py-4">
+  <h2 class="font-xl font-bold">Welcome to ft_transcendence!</h2>
+
+  <p class="italic">This is a simple test page rendered with Handlebars.</p>
+
+  <p>User Info:</p>
+  <ul>
+    {{#if isAuthenticated}}
+      <li>User ID: {{userId}}</li>
+      <li>Username: {{userName}}</li>
+      <li>Status: Authenticated</li>
+    {{else}}
+       <li>Status: Not authenticated</li>
+    {{/if}}
+    {{!-- <button class="fancy-border rounded-lg px-4 py-2 text-white">Login</button> --}}
+
+    <div class="flex flex-col gap-2 my-8">
+       {{#> components/button variant="fancy" url="/login"}}
+        To Login Page
+      {{/components/button}}
+    </div>
+
+
+    <div class="flex flex-col gap-2 my-8">
+        {{! Regular button }}
+      {{#> components/button}}
+        Click Me
+      {{/components/button}}
+
+      {{#> components/button class="bg-blue-800"}}
+        Click Me
+      {{/components/button}}
+
+      {{! Link button }}
+      {{#> components/button variant="fancy" url="/dashboard"}}
+        Go to Dashboard
+      {{/components/button}}
+
+      {{! Button with variant and onClick }}
+      {{#> components/button variant="outline" onClick="alert('hallo')"}}
+        Alert
+      {{/components/button}}
+
+      {{! Disabled button }}
+      {{#> components/button disabled=true}}
+        Processing...
+      {{/components/button}}
+    </div>
+  </ul>
+
+</div>

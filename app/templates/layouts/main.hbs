@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    {{> head}}
+</head>
+
+<body class="min-h-lvh flex flex-col">
+    {{> header}}
+
+    <div id="app-content" class="flex-1">
+        {{{body}}}
+    </div>
+
+    {{> footer}}
+    <script type="module" src="/js/router.js"></script>
+</body>
+
+</html>

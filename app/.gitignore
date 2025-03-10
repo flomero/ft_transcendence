@@ -1,5 +1,6 @@
 # generated CSS
 public/app.css
+public/js
 
 # database
 database/db.sqlite
