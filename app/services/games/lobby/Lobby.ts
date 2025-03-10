@@ -13,7 +13,7 @@ class Lobby {
   constructor(game: "pong", gameMode: GameModes, memberId: string) {
     const newMember: LobbyMember = {
       id: memberId,
-      userState: "inLobby",
+      userState: "notInLobby",
       isReady: false,
     };
 
@@ -53,10 +53,12 @@ class Lobby {
 
   public disconnectMember(memberId: string): void {
     if (
-      this.lobbyMembers.has(memberId) === false ||
-      this.lobbyMembers.get(memberId)!.userState === "inMatch"
+      this.lobbyMembers.get(memberId)?.userState === "inMatch" ||
+      this.lobbyMembers.get(memberId)?.socket === undefined
     ) {
-      throw new Error("[disconnectMember] Member is not in the lobby");
+      throw new Error(
+        "[disconnectMember] Member is not in the lobby WebSocket",
+      );
     }
     this.lobbyMembers.get(memberId)!.userState = "notInLobby";
     this.lobbyMembers.get(memberId)!.socket!.close();

@@ -10,12 +10,12 @@ function closePossibleLobbySocketConnection(
 
   if (
     privateLobby !== undefined &&
-    isUserConnectedToLobbySocket(userId, privateLobby!) === true
+    isUserConnectedToLobbySocket(userId, privateLobby) === true
   ) {
     privateLobby.disconnectMember(userId);
   } else if (
     publicLobby !== undefined &&
-    isUserConnectedToLobbySocket(userId, publicLobby!) === true
+    isUserConnectedToLobbySocket(userId, publicLobby) === true
   ) {
     publicLobby.disconnectMember(userId);
   }
