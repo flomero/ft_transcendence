@@ -7,14 +7,15 @@ class Lobby {
   private lobbyId: string = randomUUID();
   private lobbyMembers: Map<string, LobbyMember> = new Map();
   game: "pong"; //make private later
-  gameMode: GameModes;//make private later
-  lobbyOwner: string;//make private later
+  gameMode: GameModes; //make private later
+  lobbyOwner: string; //make private later
 
   constructor(game: "pong", gameMode: GameModes, memberId: string) {
     const newMember: LobbyMember = {
-    id: memberId,
-    userState: "inLobby",
-    isReady: false };
+      id: memberId,
+      userState: "inLobby",
+      isReady: false,
+    };
 
     this.lobbyMembers.set(memberId, newMember);
     this.game = game;
@@ -38,7 +39,7 @@ class Lobby {
 
   public removeMember(memberId: string): void {
     if (this.lobbyMembers.has(memberId) === false) {
-      throw new Error("Member is not in the lobby");
+      throw new Error("[removeMember] Member is not in the lobby");
     }
     this.lobbyMembers.delete(memberId);
   }
@@ -51,12 +52,26 @@ class Lobby {
   }
 
   public disconnectMember(memberId: string): void {
-    if (this.lobbyMembers.has(memberId) === false
-       || this.lobbyMembers.get(memberId)!.userState === "inMatch") {
-      throw new Error("Member is not in the lobby");
+    if (
+      this.lobbyMembers.has(memberId) === false ||
+      this.lobbyMembers.get(memberId)!.userState === "inMatch"
+    ) {
+      throw new Error("[disconnectMember] Member is not in the lobby");
     }
+    this.lobbyMembers.get(memberId)!.userState = "notInLobby";
     this.lobbyMembers.get(memberId)!.socket!.close();
+    this.lobbyMembers.get(memberId)!.socket = undefined;
   }
-};
+
+  public addSocketToMember(memberId: string, socket: WebSocket): void {
+    if (this.lobbyMembers.has(memberId) === false) {
+      throw new Error("Member is not in the lobby");
+    } else if (this.lobbyMembers.get(memberId)!.socket !== undefined) {
+      throw new Error("Member already has a socket");
+    }
+    this.lobbyMembers.get(memberId)!.socket = socket;
+    this.lobbyMembers.get(memberId)!.userState = "inLobby";
+  }
+}
 
 export { Lobby };

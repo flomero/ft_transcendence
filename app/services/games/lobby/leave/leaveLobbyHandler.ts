@@ -1,23 +1,22 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { validConnectionCheck } from "../lobbyVaidation/validConnectionCheck";
-import { LobbyRequestWithLobbyId } from "../../../../interfaces/games/lobby/LobbyRequestWithMatchId";
 import { removeUserFromLobby } from "./removeUserFromLobby";
 import closePossibleLobbySocketConnection from "./closePossibleLobbySocketConnection";
 
 async function leaveLobbyHandler(
-  request: FastifyRequest <{ Body: LobbyRequestWithLobbyId }>,
-  reply: FastifyReply ): Promise<void> {
+  request: FastifyRequest<{ Params: { lobbyId: string } }>,
+  reply: FastifyReply,
+): Promise<void> {
   const userId = request.userId;
-  const lobbyId = request.body.lobbyId;
+  const lobbyId = request.params.lobbyId;
 
   try {
-    validConnectionCheck(userId, lobbyId)
+    validConnectionCheck(userId, lobbyId);
     closePossibleLobbySocketConnection(userId, lobbyId);
     removeUserFromLobby(userId, lobbyId);
-  }
-  catch (error) {
-    if (error instanceof Error)
-      reply.code(400).send({ error: error.message });
+    reply.send({ message: "You have left the lobby" });
+  } catch (error) {
+    if (error instanceof Error) reply.code(400).send({ error: error.message });
     return;
   }
 }

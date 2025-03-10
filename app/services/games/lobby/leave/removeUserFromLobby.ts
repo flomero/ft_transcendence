@@ -1,13 +1,16 @@
 import { PublicLobbies, PrivateLobbies } from "../new/newLobbyHandler";
 
 function removeUserFromLobby(userId: string, lobbyId: string): void {
-  if (PublicLobbies.has(lobbyId)
-      && PublicLobbies.get(lobbyId)!.isUserInLobby(userId) === true) {
+  if (
+    PublicLobbies.has(lobbyId) &&
+    PublicLobbies.get(lobbyId)!.isUserInLobby(userId) === true
+  ) {
     PublicLobbies.get(lobbyId)!.removeMember(userId);
     return;
-  }
-  else if (PrivateLobbies.has(lobbyId)
-      && PrivateLobbies.get(lobbyId)!.isUserInLobby(userId) === true) {
+  } else if (
+    PrivateLobbies.has(lobbyId) &&
+    PrivateLobbies.get(lobbyId)!.isUserInLobby(userId) === true
+  ) {
     PrivateLobbies.get(lobbyId)!.removeMember(userId);
     return;
   }

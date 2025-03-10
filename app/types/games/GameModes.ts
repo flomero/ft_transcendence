@@ -1,4 +1,5 @@
-export type GameModes = "VanillaDouble"
-                        | "ModdedDouble"
-                        | "VanillaMulti"
-                        | "ModdedMulti";
+export type GameModes =
+  | "VanillaDouble"
+  | "ModdedDouble"
+  | "VanillaMulti"
+  | "ModdedMulti";
