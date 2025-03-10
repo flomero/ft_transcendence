@@ -16,8 +16,8 @@
         },
 
         "defaultBallSettings": {
-          "speed": 1.25,
-          "radius": 0.75
+          "speed": 1.5,
+          "radius": 0.85
         },
 
         "defaultPowerUpSettings": {

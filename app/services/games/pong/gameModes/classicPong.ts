@@ -29,6 +29,7 @@ export class ClassicPong extends Pong {
     this.gameObjects.paddles = [
       // LEFT PADDLE
       {
+        id: 0,
         x:
           this.arenaSettings.paddleHeight / 2.0 +
           this.arenaSettings.paddleOffset,
@@ -56,6 +57,7 @@ export class ClassicPong extends Pong {
 
       // RIGHT PADDLE
       {
+        id: 1,
         x:
           this.arenaSettings.width -
           this.arenaSettings.paddleHeight / 2.0 -
@@ -141,6 +143,7 @@ export class ClassicPong extends Pong {
     this.gameObjects.walls = [
       // LEFT WALL
       {
+        id: 0,
         x: 0.0,
         y: this.arenaSettings.height / 2.0,
         alpha: Math.PI,
@@ -158,6 +161,7 @@ export class ClassicPong extends Pong {
 
       // UP WALL
       {
+        id: 1,
         x: this.arenaSettings.width / 2.0,
         y: 0.0,
         alpha: Math.PI / 4.0,
@@ -175,6 +179,7 @@ export class ClassicPong extends Pong {
 
       // RIGHT WALL
       {
+        id: 2,
         x: this.arenaSettings.width,
         y: this.arenaSettings.height / 2.0,
         alpha: 0.0,
@@ -192,6 +197,7 @@ export class ClassicPong extends Pong {
 
       // DOWN WALL
       {
+        id: 3,
         x: this.arenaSettings.width / 2.0,
         y: this.arenaSettings.height,
         alpha: -Math.PI / 4.0,
@@ -341,28 +347,69 @@ export class ClassicPong extends Pong {
     // });
   }
 
-  resetBall(ballId: number = -1): void {
+  // Updated to use edit queue
+  async resetBall(ballId: number = -1): Promise<void> {
     const randomAngle = this.rng.random() * Math.PI * 2.0;
     const ca = Math.cos(randomAngle);
     const sa = Math.sin(randomAngle);
 
-    const newBall: Ball = {
-      x: this.arenaSettings.width / 2.0 + this.arenaSettings.paddleOffset * ca,
-      y: this.arenaSettings.height / 2.0 + this.arenaSettings.paddleOffset * sa,
-      dx: ca,
-      dy: sa,
-      speed: this.defaultBallSettings.speed,
-      radius: this.defaultBallSettings.radius,
-      isVisible: true,
-      doCollision: true,
-      doGoal: true,
-    };
-
-    if (ballId < 0 || ballId >= this.gameObjects.balls.length) {
-      this.gameObjects.balls = [newBall];
-    } else {
-      this.gameObjects.balls[ballId] = newBall;
+    const release = await this.acquireLock();
+    try {
+      if (ballId < 0) {
+        // Reset all balls
+        this.pendingEdits.push({
+          targetId: -1, // Special identifier for array replacement
+          targetType: "",
+          property: "balls",
+          editor: (_) => [
+            {
+              id: 0,
+              x:
+                this.arenaSettings.width / 2.0 +
+                this.arenaSettings.paddleOffset * ca,
+              y:
+                this.arenaSettings.height / 2.0 +
+                this.arenaSettings.paddleOffset * sa,
+              dx: ca,
+              dy: sa,
+              speed: this.defaultBallSettings.speed,
+              radius: this.defaultBallSettings.radius,
+              isVisible: true,
+              doCollision: true,
+              doGoal: true,
+            },
+          ],
+        });
+      } else {
+        // Find the ball by ID and update it
+        this.pendingEdits.push({
+          targetId: ballId,
+          targetType: "balls",
+          property: "ballReset",
+          editor: (_) => ({
+            id: ballId,
+            x:
+              this.arenaSettings.width / 2.0 +
+              this.arenaSettings.paddleOffset * ca,
+            y:
+              this.arenaSettings.height / 2.0 +
+              this.arenaSettings.paddleOffset * sa,
+            dx: ca,
+            dy: sa,
+            speed: this.defaultBallSettings.speed,
+            radius: this.defaultBallSettings.radius,
+            isVisible: true,
+            doCollision: true,
+            doGoal: true,
+          }),
+        });
+      }
+    } finally {
+      release();
     }
+
+    // Process the edits
+    this.processQueuedEdits();
   }
 
   rotatePaddles(alpha: number = 0.0): void {

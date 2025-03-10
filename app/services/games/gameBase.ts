@@ -33,7 +33,7 @@ export abstract class GameBase {
   /**
    * Advances the game by 1 tick.
    */
-  abstract update(): Promise<void>;
+  abstract update(): void;
 
   /**
    * Starts the game.
@@ -61,29 +61,7 @@ export abstract class GameBase {
   /**
    * Handles a client action.
    */
-  async handleAction(action: Record<string, any>): Promise<void> {
-    // Implementation here...
-  }
-
-  /**
-   * Spawns a power-up at the designated position.
-   * @param position A tuple with the x and y coordinates.
-   * @param rng A random number generator instance.
-   */
-  // abstract spawnPowerUp(position: [number, number], rng: RNG): void;
-  // spawnPowerUp(
-  //   position: [number, number],
-  //   rng: { random: () => number },
-  // ): void {
-  //   if (
-  //     this.powerUpManager &&
-  //     this.powerUpManager.spawnRandomPowerUp(rng, position)
-  //   ) {
-  //     const spawned = this.powerUpManager.getSpawnedPowerUps();
-  //     const lastPowerUp = spawned[spawned.length - 1];
-  //     this.triggerModifiers("onPowerUpSpawn", { powerUp: lastPowerUp });
-  //   }
-  // }
+  async handleAction(action: Record<string, any>): Promise<void> {}
 
   // Getters & Setters
   getStatus(): GameStatus {

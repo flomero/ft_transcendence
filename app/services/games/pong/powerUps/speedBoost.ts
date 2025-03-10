@@ -44,31 +44,47 @@ export class SpeedBoost extends TimeLimitedModifierBase {
   onActivation(game: Pong): void {
     super.onActivation(game);
 
-    this.initialSpeed = game.getGameObjects()?.balls[0].speed;
+    const gameObjects = game.getGameObjectsReadOnly();
+    if (gameObjects.balls.length > 0) {
+      this.initialSpeed = gameObjects.balls[0].speed;
+    }
   }
 
-  onUpdate(game: Pong): void {
+  async onUpdate(game: Pong): Promise<void> {
     super.onUpdate(game);
 
     if (this.ticks % this.rampUpFrequency == 0) {
       this.strength += this.rampUpStrength;
 
-      if (!(game.getGameObjects().balls.length > 0)) {
-        console.log(
-          `Can't speed up if there's no balls: ${game.getGameObjects().balls}`,
-        );
+      const gameObjects = game.getGameObjectsReadOnly();
+      if (!(gameObjects.balls.length > 0)) {
+        console.log(`Can't speed up if there's no balls: ${gameObjects.balls}`);
         return;
       }
 
-      game.editGameObject(game.getGameObjects().balls[0], {
-        property: "speed",
-        editor: (speed) => this.initialSpeed * (1 + this.strength),
-      });
+      // Use the public editGameObject method which properly handles locking and editing
+      const ball = gameObjects.balls[0];
+      const newSpeed = this.initialSpeed * (1 + this.strength);
+
+      // This method handles all the locking and queue management internally
+      await game.editGameObject(ball, "speed", (_) => newSpeed);
     }
   }
 
   onDeactivation(game: Pong): void {
     super.onDeactivation(game);
+
+    // Reset ball speed back to initial when deactivating
+    const gameObjects = game.getGameObjectsReadOnly();
+    if (gameObjects.balls.length > 0) {
+      const ball = gameObjects.balls[0];
+
+      // Using the public API to reset the speed
+      game
+        .editGameObject(ball, "speed", (_) => this.initialSpeed)
+        .catch((err) => console.error("Error resetting ball speed:", err));
+    }
+
     game.getModifierManager().deletePowerUp(this);
   }
 }

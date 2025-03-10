@@ -25,14 +25,16 @@ export interface PongGameObjects {
   walls: Rectangle[];
 }
 
-// Define a type for the edit function
-type PropertyEditor<T> = (value: T) => T;
+// Define types for our edit operations
+export interface GameObjectEdit<T = any> {
+  targetId: number;
+  targetType: string;
+  property: string;
+  editor: (currentValue: any) => any;
+}
 
-// Define a type for the edit parameter
-type GameObjectEdit<T> = {
-  property: keyof T;
-  editor: PropertyEditor<any>;
-};
+// Define a type for the edit function
+type PropertyEditor<T, K extends keyof T> = (value: T[K]) => T[K];
 
 export abstract class Pong extends GameBase {
   static readonly name = "pong";
@@ -48,6 +50,9 @@ export abstract class Pong extends GameBase {
   protected gameObjectsLock: Promise<void> | null = null;
 
   protected arenaSettings: Record<string, any>;
+
+  protected pendingEdits: GameObjectEdit[] = [];
+  protected editsQueueLock: Promise<void> | null = null;
 
   constructor(gameData: Record<string, any>) {
     super(gameData);
@@ -76,55 +81,110 @@ export abstract class Pong extends GameBase {
     };
   }
 
-  async update(): Promise<void> {
+  // Modified update method that incorporates queued edits
+  update(): void {
+    this.processQueuedEdits();
+
+    // Update game state
     if (this.status === GameStatus.RUNNING) {
-      // Use a lock for game objects
-      if (this.gameObjectsLock === null)
-        this.gameObjectsLock = Promise.resolve();
-
-      await this.gameObjectsLock.then(async () => {
-        this.gameObjectsLock = new Promise<void>((resolve) => {
-          for (const paddle of this.gameObjects.paddles)
-            if (paddle.velocity !== 0.0) this.updatePaddle(paddle);
-          resolve();
-        });
-      });
-
-      for (const ball of this.gameObjects.balls) {
-        if (ball.doCollision) this.doCollisionChecks(ball);
-
-        if (this.isOutOfBounds(ball)) {
-          console.log("Ball went out of bounds, resetting it");
-          this.resetBall(0);
+      // Update paddle positions
+      for (const paddle of this.gameObjects.paddles) {
+        if (paddle.velocity !== 0) {
+          this.queuePaddleUpdate(paddle);
         }
       }
+
+      // Update ball positions
+      for (const ball of this.gameObjects.balls) {
+        if (ball.doCollision) {
+          this.doCollisionChecks(ball);
+        } else {
+          // Queue ball movement for balls without collision
+          this.pendingEdits.push({
+            targetId: ball.id,
+            targetType: "balls",
+            property: "x",
+            editor: (x) => x + Math.round(ball.dx * ball.speed * 100) / 100,
+          });
+          this.pendingEdits.push({
+            targetId: ball.id,
+            targetType: "balls",
+            property: "y",
+            editor: (y) => y + Math.round(ball.dy * ball.speed * 100) / 100,
+          });
+        }
+      }
+
+      // Apply all the queued edits from paddle and ball updates
+      this.processQueuedEdits();
+
+      // Trigger modifiers
       this.modifierManager.trigger("onUpdate");
-
-      const snapshot = this.getStateSnapshot();
-
-      // Use a lock for tick data
-      if (this.tickDataLock === null) this.tickDataLock = Promise.resolve();
-
-      await this.tickDataLock.then(async () => {
-        this.tickDataLock = new Promise<void>((resolve) => {
-          this.lastUpdateTime = Date.now();
-          this.tickData.push(snapshot);
-          if (this.tickData.length > this.serverMaxDelayTicks)
-            this.tickData.shift();
-          resolve();
-        });
-      });
     }
+
+    // Save the current state for potential rewinding
+    const snapshot = this.getStateSnapshot();
+    this.saveStateSnapshot(snapshot);
   }
 
-  simulateTick(): void {
-    if (this.status === GameStatus.RUNNING) {
-      for (const ball of this.gameObjects.balls)
-        if (ball.doCollision) this.doCollisionChecks(ball);
-      this.modifierManager.trigger("onUpdate");
+  // Queue a paddle update instead of directly modifying it
+  protected queuePaddleUpdate(paddle: Paddle): void {
+    if (!paddle.doMove) {
+      console.log(
+        `Player ${this.gameObjects.paddles.indexOf(paddle)}'s paddle can't be moved`,
+      );
+      return;
     }
+
+    const direction = paddle.velocity > 0 ? 1 : -1;
+    const newDisplacement =
+      paddle.displacement +
+      direction * this.arenaSettings.paddleSpeedWidthPercent;
+
+    // Check if movement would exceed boundaries
+    if (
+      (direction > 0 &&
+        newDisplacement >
+          this.arenaSettings.height / 2.0 - paddle.coverage / 2.0) ||
+      (direction < 0 &&
+        newDisplacement <
+          -(this.arenaSettings.height / 2.0 - paddle.coverage / 2.0))
+    ) {
+      console.log(`Can't move in this direction anymore`);
+      return;
+    }
+
+    // Queue position updates
+    this.pendingEdits.push({
+      targetId: paddle.id,
+      targetType: "paddles",
+      property: "x",
+      editor: (x) => x + paddle.velocity * paddle.dx,
+    });
+
+    this.pendingEdits.push({
+      targetId: paddle.id,
+      targetType: "paddles",
+      property: "y",
+      editor: (y) => y + paddle.velocity * paddle.dy,
+    });
+
+    this.pendingEdits.push({
+      targetId: paddle.id,
+      targetType: "paddles",
+      property: "displacement",
+      editor: (_) => newDisplacement,
+    });
+
+    // After updating, trigger the modifier
+    const paddleIndex = this.gameObjects.paddles.indexOf(paddle);
+    this.modifierManager.trigger("onPlayerMovement", {
+      playerId: paddleIndex,
+    });
   }
+
   // TODO: Use userInput schema for received action
+  // Handle player actions with lag compensation
   async handleAction(action: Record<string, any>): Promise<void> {
     if (
       !(
@@ -137,8 +197,8 @@ export abstract class Pong extends GameBase {
       return;
     }
 
-    const delayMs = this.lastUpdateTime - action.timestamp;
-    const delayTicks = Math.round(delayMs / this.serverTickrateS);
+    const delayS = (this.lastUpdateTime - action.timestamp) / 1000.0;
+    const delayTicks = Math.round(delayS / this.serverTickrateS);
 
     if (delayTicks > this.serverMaxDelayTicks) {
       console.log(
@@ -148,39 +208,54 @@ export abstract class Pong extends GameBase {
       return;
     }
 
-    // Rewind game state delay_ticks
+    // Rewind game state if needed
     if (delayTicks > 0) {
       console.log(`Rewinding ${delayTicks} ticks`);
       await this.rewind(delayTicks);
     }
 
-    // Apply user_input
-    if (this.gameObjectsLock === null) this.gameObjectsLock = Promise.resolve();
+    // Queue the player's action as an edit
+    const release = await this.acquireLock();
+    try {
+      switch (action.type) {
+        case "UP":
+          this.pendingEdits.push({
+            targetId: action.playerId,
+            targetType: "paddles",
+            property: "velocity",
+            editor: (_) => this.gameObjects.paddles[action.playerId].speed,
+          });
+          break;
 
-    await this.gameObjectsLock.then(async () => {
-      this.gameObjectsLock = new Promise<void>((resolve) => {
-        switch (action.type) {
-          case "UP":
-            this.gameObjects.paddles[action.playerId].velocity =
-              this.gameObjects.paddles[action.playerId].speed;
-            break;
+        case "DOWN":
+          this.pendingEdits.push({
+            targetId: action.playerId,
+            targetType: "paddles",
+            property: "velocity",
+            editor: (_) => -this.gameObjects.paddles[action.playerId].speed,
+          });
+          break;
 
-          case "DOWN":
-            this.gameObjects.paddles[action.playerId].velocity =
-              -this.gameObjects.paddles[action.playerId].speed;
-            break;
+        case "STOP":
+          this.pendingEdits.push({
+            targetId: action.playerId,
+            targetType: "paddles",
+            property: "velocity",
+            editor: (_) => 0.0,
+          });
+          break;
+      }
+    } finally {
+      release();
+    }
 
-          case "STOP":
-            this.gameObjects.paddles[action.playerId].velocity = 0.0;
-            break;
-        }
-        resolve();
-      });
-    });
+    // Apply edits immediately since we're in a rewound state
+    this.processQueuedEdits();
 
+    // Trigger modifiers for user input
     this.modifierManager.trigger("onUserInput", { input: action });
 
-    // Fast-forward to go back to the current tick
+    // Fast-forward back to current state
     if (delayTicks > 0) {
       console.log(`Fast-forwarding ${delayTicks} ticks`);
       await this.fastForward(delayTicks);
@@ -214,6 +289,27 @@ export abstract class Pong extends GameBase {
     this.rng.setState(snapshot.rng);
   }
 
+  // Save a state snapshot with properly acquired lock
+  protected async saveStateSnapshot(
+    snapshot: Record<string, any>,
+  ): Promise<void> {
+    if (this.tickDataLock === null) {
+      this.tickDataLock = Promise.resolve();
+    }
+
+    await this.tickDataLock.then(async () => {
+      this.tickDataLock = new Promise<void>((resolve) => {
+        this.tickData.push(snapshot);
+        // Limit the history length if needed
+        if (this.tickData.length > this.serverMaxDelayTicks) {
+          this.tickData.shift();
+        }
+        resolve();
+      });
+    });
+  }
+
+  // The rewind and fastForward methods can remain largely the same
   async rewind(toTick: number): Promise<void> {
     if (toTick > this.tickData.length) {
       console.log(`Can't rewind that far -> rewinding as much as possible`);
@@ -237,70 +333,22 @@ export abstract class Pong extends GameBase {
       });
     });
 
-    // Now, re-simulate the ticks one by one
+    // Re-simulate the ticks one by one
     for (let i = 0; i < tickCount; i++) {
-      this.simulateTick();
-      const snapshot = this.getStateSnapshot();
+      // Use update instead of simulateTick
+      this.update();
 
-      await this.tickDataLock.then(async () => {
-        this.tickDataLock = new Promise<void>((resolve) => {
-          this.tickData.push(snapshot);
-          resolve();
-        });
-      });
+      // State snapshots are now saved within the update method
     }
   }
 
+  // Replaced with queuePaddleUpdate method that uses the edit queue
   updatePaddle(paddle: Paddle): void {
-    if (!paddle.doMove) {
-      console.log(
-        `Player ${this.gameObjects.paddles.indexOf(paddle)}'s paddle can't be moved`,
-      );
-      return;
-    }
-
-    const direction = paddle.velocity > 0 ? 1 : -1;
-
-    if (
-      (direction > 0 &&
-        paddle.displacement >
-          this.arenaSettings.height / 2.0 - paddle.coverage / 2.0) ||
-      (direction < 0 &&
-        paddle.displacement <
-          -(this.arenaSettings.height / 2.0 - paddle.coverage / 2.0))
-    ) {
-      console.log(`Can't move in this direction anymore`);
-      return;
-    }
-
-    paddle.x += paddle.velocity * paddle.dx;
-    paddle.y += paddle.velocity * paddle.dy;
-    paddle.displacement +=
-      direction * this.arenaSettings.paddleSpeedWidthPercent;
-
-    this.modifierManager.trigger("onPlayerMovement", {
-      playerId: this.gameObjects.paddles.indexOf(paddle),
-    });
+    this.queuePaddleUpdate(paddle);
   }
 
-  resetBall(ballId: number = -1): void {
-    const randomAngle = this.rng.random() * Math.PI * 2.0;
-    const ca = Math.cos(randomAngle);
-    const sa = Math.sin(randomAngle);
-
-    // Reset all balls
-    this.gameObjects.balls[0] = {
-      x: 50 + 2.0 * ca,
-      y: 50 + 2.0 * sa,
-      dx: ca,
-      dy: sa,
-      speed: 2,
-      radius: 0.75,
-      isVisible: true,
-      doCollision: true,
-      doGoal: true,
-    };
-  }
+  // Updated to use edit queue
+  async resetBall(ballId: number = -1): Promise<void> {}
 
   abstract isOutOfBounds(ball: Ball): boolean;
 
@@ -356,21 +404,45 @@ export abstract class Pong extends GameBase {
       ]);
 
       if (!tmpCollision) {
-        // Move ball normally if no collision
-        ball.x += Math.round(ball.dx * remainingDistance * 100) / 100;
-        ball.y += Math.round(ball.dy * remainingDistance * 100) / 100;
+        // Queue normal movement if no collision
+        this.pendingEdits.push({
+          targetId: ball.id,
+          targetType: "balls",
+          property: "x",
+          editor: (x) =>
+            x + Math.round(ball.dx * remainingDistance * 100) / 100,
+        });
+
+        this.pendingEdits.push({
+          targetId: ball.id,
+          targetType: "balls",
+          property: "y",
+          editor: (y) =>
+            y + Math.round(ball.dy * remainingDistance * 100) / 100,
+        });
         break;
       }
 
       let collision: Collision = tmpCollision as Collision;
-
       const travelDistance = collision.distance;
-      ball.x += Math.round(ball.dx * travelDistance * 100) / 100;
-      ball.y += Math.round(ball.dy * travelDistance * 100) / 100;
+
+      // Queue movement up to collision point
+      this.pendingEdits.push({
+        targetId: ball.id,
+        targetType: "balls",
+        property: "x",
+        editor: (x) => x + Math.round(ball.dx * travelDistance * 100) / 100,
+      });
+
+      this.pendingEdits.push({
+        targetId: ball.id,
+        targetType: "balls",
+        property: "y",
+        editor: (y) => y + Math.round(ball.dy * travelDistance * 100) / 100,
+      });
 
       switch (collision.type) {
         case "powerUp":
-          // TODO: trigger          PhysicsEngine.resolveCollision(ball, collision);
           console.log(
             `\nPlayer ${this.extraGameData.lastHit} picked up a powerUp\n`,
           );
@@ -379,32 +451,129 @@ export abstract class Pong extends GameBase {
           break;
 
         case "paddle":
-          PhysicsEngine.resolveCollision(ball, collision);
+          // Compute reflection variables before queueing edits
+          const paddleNormal = collision.normal!;
+          const paddleDotProduct =
+            2 * (ball.dx * paddleNormal[0] + ball.dy * paddleNormal[1]);
+          const newPaddleDx = ball.dx - paddleDotProduct * paddleNormal[0];
+          const newPaddleDy = ball.dy - paddleDotProduct * paddleNormal[1];
+
+          // Normalize direction
+          const paddleSpeed = Math.sqrt(newPaddleDx ** 2 + newPaddleDy ** 2);
+          const normalizedPaddleDx = newPaddleDx / paddleSpeed;
+          const normalizedPaddleDy = newPaddleDy / paddleSpeed;
+
+          // Queue updates to direction vectors
+          this.pendingEdits.push({
+            targetId: ball.id,
+            targetType: "balls",
+            property: "dx",
+            editor: (_) => normalizedPaddleDx,
+          });
+
+          this.pendingEdits.push({
+            targetId: ball.id,
+            targetType: "balls",
+            property: "dy",
+            editor: (_) => normalizedPaddleDy,
+          });
+
+          // Move the ball slightly outside the collision surface to prevent sticking
+          this.pendingEdits.push({
+            targetId: ball.id,
+            targetType: "balls",
+            property: "x",
+            editor: (x) => x + paddleNormal[0] * EPSILON * 10,
+          });
+
+          this.pendingEdits.push({
+            targetId: ball.id,
+            targetType: "balls",
+            property: "y",
+            editor: (y) => y + paddleNormal[1] * EPSILON * 10,
+          });
+
           const playerId = collision.objectId;
 
-          // Update lastHit
-          this.extraGameData.lastHit = playerId;
-          console.log(`Last hit: ${this.extraGameData.lastHit}`);
+          // Update lastHit through edit queue
+          this.pendingEdits.push({
+            targetId: -2, // Special identifier for extraGameData
+            targetType: "",
+            property: "lastHit",
+            editor: (_) => playerId,
+          });
 
-          // Then trigger addle bounce effects
+          console.log(`Last hit: ${playerId}`);
+
+          // Then trigger paddle bounce effects
           this.modifierManager.trigger("onPaddleBounce", {
             playerId: collision.objectId,
           });
           break;
 
         case "wall":
-          PhysicsEngine.resolveCollision(ball, collision);
+          // Compute reflection variables before queueing edits
+          const wallNormal = collision.normal!;
+          const wallDotProduct =
+            2 * (ball.dx * wallNormal[0] + ball.dy * wallNormal[1]);
+          const newWallDx = ball.dx - wallDotProduct * wallNormal[0];
+          const newWallDy = ball.dy - wallDotProduct * wallNormal[1];
+
+          // Normalize direction
+          const wallSpeed = Math.sqrt(newWallDx ** 2 + newWallDy ** 2);
+          const normalizedWallDx = newWallDx / wallSpeed;
+          const normalizedWallDy = newWallDy / wallSpeed;
+
+          // Queue updates to direction vectors
+          this.pendingEdits.push({
+            targetId: ball.id,
+            targetType: "balls",
+            property: "dx",
+            editor: (_) => normalizedWallDx,
+          });
+
+          this.pendingEdits.push({
+            targetId: ball.id,
+            targetType: "balls",
+            property: "dy",
+            editor: (_) => normalizedWallDy,
+          });
+
+          // Move the ball slightly outside the collision surface to prevent sticking
+          this.pendingEdits.push({
+            targetId: ball.id,
+            targetType: "balls",
+            property: "x",
+            editor: (x) => x + wallNormal[0] * EPSILON * 10,
+          });
+
+          this.pendingEdits.push({
+            targetId: ball.id,
+            targetType: "balls",
+            property: "y",
+            editor: (y) => y + wallNormal[1] * EPSILON * 10,
+          });
+
           // TODO: Bounce or Goal ?
           const wall: Rectangle = this.gameObjects.walls[collision.objectId];
           if (wall.isGoal) {
-            const playerId = Math.floor(collision.objectId / 2);
+            const goalPlayerId = Math.floor(collision.objectId / 2);
 
-            // Update the scores
-            this.extraGameData.scores[playerId]++;
+            // Update the scores through edit queue
+            this.pendingEdits.push({
+              targetId: -2, // Special identifier for extraGameData
+              targetType: "",
+              property: "scores",
+              editor: (scores) => {
+                const newScores = [...scores];
+                newScores[goalPlayerId]++;
+                return newScores;
+              },
+            });
 
-            // Then trigger oal effects
+            // Then trigger goal effects
             this.modifierManager.trigger("onGoal", {
-              playerId: playerId,
+              playerId: goalPlayerId,
             });
           } else this.modifierManager.trigger("onWallBounce");
           break;
@@ -412,34 +581,6 @@ export abstract class Pong extends GameBase {
         default:
           console.log(`Unknown collision type: ${collision.type}`);
       }
-      // if (collision.type !== "powerUp") {
-      //   PhysicsEngine.resolveCollision(ball, collision);
-
-      //   // Handle modifiers
-      //   if (collision.type === "paddle") {
-      //     this.modifierManager.trigger("onPaddleBounce", {
-      //       playerId: collision.objectId,
-      //     });
-      //   } else if (collision.type === "wall") {
-      //     console.log(this.gameObjects.walls[collision.objectId]);
-      //     if (ball.doGoal
-      //       && this.gameObjects.walls[collision.objectId].isGoal)
-      //       this.modifierManager.trigger("onGoal", {
-      //         playerId: Math.floor(collision.objectId / 2),
-      //       });
-      //     else this.modifierManager.trigger("onWallBounce");
-      //   }
-      // } else {
-      //   console.log(
-      //     `Player ${this.extraGameData.lastHit} picked up a powerUp`,
-      //   );
-      //   this.modifierManager.trigger("onPowerUpPickup", {
-      //     powerUp:
-      //       (this.powerUpManager as PowerUpManagerBase).getSpawnedPowerUps()[collision.objectId],
-      //     playerId: this.extraGameData.lastHit,
-      //   });
-      //   (this.powerUpManager as PowerUpManagerBase).getSpawnedPowerUps().splice(collision.objectId, 1);
-      // }
 
       remainingDistance -= travelDistance;
 
@@ -448,6 +589,9 @@ export abstract class Pong extends GameBase {
         break;
       }
     }
+
+    // Process all the edits we've queued during collision checks
+    this.processQueuedEdits();
   }
 
   // Getters & Setters
@@ -455,23 +599,145 @@ export abstract class Pong extends GameBase {
     return this.extraGameData;
   }
 
-  editScore(id: number, delta: number) {
-    this.extraGameData.scores[id] += delta;
+  // Updated to use edit queue
+  async editScore(id: number, delta: number): Promise<void> {
+    const release = await this.acquireLock();
+    try {
+      this.pendingEdits.push({
+        targetId: -2, // Special identifier for extraGameData
+        targetType: "",
+        property: "scores",
+        editor: (scores) => {
+          const newScores = [...scores];
+          newScores[id] += delta;
+          return newScores;
+        },
+      });
+    } finally {
+      release();
+    }
+    this.processQueuedEdits();
   }
 
-  setLastHit(id: number) {
-    this.extraGameData.lastHit = id;
+  // Updated to use edit queue
+  async setLastHit(id: number): Promise<void> {
+    const release = await this.acquireLock();
+    try {
+      this.pendingEdits.push({
+        targetId: -2, // Special identifier for extraGameData
+        targetType: "",
+        property: "lastHit",
+        editor: (_) => id,
+      });
+    } finally {
+      release();
+    }
 
+    this.processQueuedEdits();
     console.log(`New lastHit: ${this.extraGameData.lastHit}`);
   }
 
-  getGameObjects(): PongGameObjects {
-    return this.gameObjects;
+  // Reading gameObjects is safe without locks as long as you only read
+  // within the update method or after ensuring all edits are processed
+  getGameObjectsReadOnly(): Readonly<PongGameObjects> {
+    // Return a readonly version of the game objects
+    // This is safe to call from anywhere
+    return this.gameObjects as Readonly<PongGameObjects>;
   }
 
-  editGameObject<T>(obj: T, edit: GameObjectEdit<T>): void {
-    const property = edit.property;
-    const currentValue = obj[property];
-    obj[property] = edit.editor(currentValue);
+  // For the modifier system
+  findGameObject(id: number, category: string = ""): any | null {
+    // Special cases for our identifier system
+    if (id === -1) return this.gameObjects; // For array replacements
+    if (id === -2) return this.extraGameData; // For extraGameData changes
+
+    let found: any;
+    switch (category) {
+      case "balls":
+        found = this.gameObjects.balls.find((obj) => obj.id === id);
+        if (found) return found;
+        break;
+
+      case "paddles":
+        found = this.gameObjects.paddles.find((obj) => obj.id === id);
+        if (found) return found;
+        break;
+
+      case "walls":
+        found = this.gameObjects.walls.find((obj) => obj.id === id);
+        if (found) return found;
+        break;
+
+      default:
+        for (const category of ["balls", "paddles", "walls"] as const) {
+          found = this.gameObjects[category].find((obj) => obj.id === id);
+          if (found) return found;
+        }
+    }
+
+    return null;
+  }
+
+  // -- Async Safety methods -- //
+  async editGameObject<T, K extends keyof T>(
+    obj: T,
+    property: K,
+    editor: PropertyEditor<T, K>,
+  ): Promise<void> {
+    const release = await this.acquireLock();
+    try {
+      // Apply the edit
+      obj[property] = editor(obj[property]);
+    } finally {
+      release();
+    }
+  }
+
+  // Process all queued edits
+  protected processQueuedEdits(): void {
+    if (this.pendingEdits.length === 0) return;
+
+    for (const edit of this.pendingEdits) {
+      const target = this.findGameObject(edit.targetId, edit.targetType);
+
+      if (target) {
+        if (edit.targetId === -1 && edit.property === "balls") {
+          // Special case for balls array replacement
+          this.gameObjects.balls = edit.editor([]);
+        } else if (edit.targetId >= 0 && edit.property === "ballReset") {
+          // Special case for individual ball reset
+          const ballData = edit.editor(null);
+          const existingBallIndex = this.gameObjects.balls.findIndex(
+            (b) => b.id === edit.targetId,
+          );
+
+          if (existingBallIndex >= 0) {
+            this.gameObjects.balls[existingBallIndex] = ballData;
+          } else {
+            this.gameObjects.balls.push(ballData);
+          }
+        } else {
+          // Normal property edit
+          target[edit.property] = edit.editor(target[edit.property]);
+        }
+      }
+    }
+
+    // Clear the queue after processing
+    this.pendingEdits = [];
+  }
+
+  // Acquire lock for the edits queue
+  protected async acquireLock(): Promise<() => void> {
+    if (this.editsQueueLock) {
+      await this.editsQueueLock;
+    }
+
+    let releaseLock!: () => void;
+    this.editsQueueLock = new Promise<void>((resolve) => {
+      releaseLock = resolve;
+    });
+
+    return releaseLock;
   }
 }
