@@ -13,7 +13,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeButton = document.getElementById("close-sidebar-mobile");
 
   // Function to toggle sidebar
-  window.toggleSidebar = function () {
+  window.toggleSidebar = () => {
+    if (!sidebar || !content || !overlay) return;
     sidebar.classList.toggle("translate-x-full");
     sidebar.classList.toggle("translate-x-0");
     overlay.classList.toggle("opacity-0");
@@ -29,8 +30,8 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // Close sidebar when clicking overlay (mobile)
-  overlay.addEventListener("click", window.toggleSidebar);
+  overlay?.addEventListener("click", window.toggleSidebar);
 
   // Close sidebar with mobile close button
-  closeButton.addEventListener("click", window.toggleSidebar);
+  closeButton?.addEventListener("click", window.toggleSidebar);
 });
