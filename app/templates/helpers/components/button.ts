@@ -6,5 +6,5 @@ export const buttonVariants = (variant: string) => {
     ghost: "bg-transparent text-fg hover:bg-bg-muted",
   };
 
-  return variants[variant] || variants["primary"];
+  return variants[variant] || variants.primary;
 };

@@ -125,4 +125,106 @@
     initial-value: 0deg;
     inherits: false;
   }
+
+  /* Animation classes for chat view transitions */
+  .slide-in-right {
+    animation: slideInRight 0.3s forwards;
+  }
+
+  .slide-out-right {
+    animation: slideOutRight 0.3s forwards;
+  }
+
+  .slide-in-left {
+    animation: slideInLeft 0.3s forwards;
+  }
+
+  .slide-out-left {
+    animation: slideOutLeft 0.3s forwards;
+  }
+
+  /* Animation keyframes */
+  @keyframes slideInRight {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideOutRight {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+
+  @keyframes slideInLeft {
+    from {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideOutLeft {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+  }
+
+  .slide-in-up {
+    animation: slideInUp 0.3s forwards;
+  }
+
+  .slide-out-down {
+    animation: slideOutDown 0.3s forwards;
+  }
+
+  /* Add these new animation keyframes */
+  @keyframes slideInUp {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideOutDown {
+    from {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+  }
+
+  /* Add form to the base styles for animated elements */
+  #chat-rooms-view,
+  #chat-messages-view,
+  #chat-input {
+    position: relative;
+    overflow: hidden;
+    transition: height 0.3s ease;
+  }
 }

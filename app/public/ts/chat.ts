@@ -77,16 +77,30 @@ class Chat {
       return;
     }
 
-    // Update UI visibility
-    elements.roomsView.classList.remove("hidden");
-    elements.messagesView.classList.add("hidden");
-    elements.messagesView.classList.remove("flex");
-    elements.input?.classList.add("hidden");
-    elements.backButton.classList.add("hidden");
-    elements.title.textContent = "All Chats";
+    // Add animation classes
+    elements.messagesView.classList.add("slide-out-right");
+    elements.input?.classList.add("slide-out-down");
 
-    // Reset current room
-    this.currentRoomId = undefined;
+    // Wait for animation to complete
+    setTimeout(() => {
+      // Update UI visibility
+      elements.roomsView?.classList.remove("hidden");
+      elements.roomsView?.classList.add("slide-in-left");
+      elements.messagesView?.classList.add("hidden");
+      elements.messagesView?.classList.remove("flex", "slide-out-right");
+      elements.input?.classList.add("hidden");
+      elements.input?.classList.remove("flex", "slide-out-down");
+      elements.backButton?.classList.add("hidden");
+      if (elements.title) elements.title.textContent = "All Chats";
+
+      // Reset animation class after another short delay
+      setTimeout(() => {
+        elements.roomsView?.classList.remove("slide-in-left");
+      }, 300);
+
+      // Reset current room
+      this.currentRoomId = undefined;
+    }, 300);
   };
 
   scrollToBottom = (): void => {
@@ -164,18 +178,44 @@ class Chat {
         // Update content
         elements.container.innerHTML = html;
 
-        // Update UI visibility
-        elements.roomsView?.classList.add("hidden");
-        this.toggleClasses(elements.messagesView, ["hidden"], ["flex"]);
-        this.toggleClasses(elements.input, ["hidden"], ["flex"]);
-        elements.backButton?.classList.remove("hidden");
+        // Add exit animation to rooms view
+        elements.roomsView?.classList.add("slide-out-left");
 
-        // Update title and current room
-        if (elements.title) elements.title.textContent = roomName;
-        this.currentRoomId = roomId;
+        // Wait for exit animation to complete
+        setTimeout(() => {
+          // Update UI visibility
+          elements.roomsView?.classList.add("hidden");
+          elements.roomsView?.classList.remove("slide-out-left");
 
-        // Scroll to newest messages
-        this.scrollToBottom();
+          // Show messages view with animation
+          this.toggleClasses(
+            elements.messagesView,
+            ["hidden"],
+            ["flex", "slide-in-right"],
+          );
+
+          // Show form with animation
+          this.toggleClasses(
+            elements.input,
+            ["hidden"],
+            ["flex", "slide-in-up"],
+          );
+
+          elements.backButton?.classList.remove("hidden");
+
+          // Update title and current room
+          if (elements.title) elements.title.textContent = roomName;
+          this.currentRoomId = roomId;
+
+          // Scroll to newest messages
+          this.scrollToBottom();
+
+          // Remove animation classes after they complete
+          setTimeout(() => {
+            elements.messagesView?.classList.remove("slide-in-right");
+            elements.input?.classList.remove("slide-in-up");
+          }, 300);
+        }, 300);
       })
       .catch((error) => console.error("Error fetching room:", error));
   }
