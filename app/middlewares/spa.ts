@@ -8,7 +8,7 @@ declare module "fastify" {
 }
 
 export default fp(async (fastify) => {
-  fastify.addHook("preHandler", async (request, reply) => {
+  fastify.addHook("onRequest", async (request, reply) => {
     request.isAjax = () => {
       return (
         (request.query as any).partial === "true" ||

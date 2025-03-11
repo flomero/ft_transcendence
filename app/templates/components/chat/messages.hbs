@@ -1,12 +1,5 @@
-<div id="chat-messages-container" class="col-span-3 h-screen overflow-y-auto">
-    <div id="chat-messages">
-        {{#each messages}}
-            {{> components/chat/message message=this}}
-        {{/each}}
-    </div>
-
-    <form id="chat-input" class="col-span-4" onsubmit="sendMessage(event)" method="POST">
-        <input type="text" required name="message" placeholder="Message...">
-        {{#> components/button}}Send{{/components/button}}
-    </form>
+<div id="chat-messages" class="space-y-4">
+    {{#each messages}}
+        {{> components/chat/message message=this}}
+    {{/each}}
 </div>
