@@ -2,7 +2,7 @@
   Button Component
   @param {String} [url] - Optional URL for link buttons
   @param {String} [variant="primary"] - Button style variant: "primary", "secondary", "danger", "success", "outline"
-  @param {String} [onClick] - JavaScript function name to call on click (for <button> only)
+  @param {String} [onclick] - JavaScript function name to call on click (for <button> only)
   @param {String} [id] - Optional ID attribute
   @param {Boolean} [disabled] - Whether button should be disabled
   @param {String} [class] - Additional CSS classes to apply
@@ -23,7 +23,7 @@
   {{#if id}}id="{{id}}"{{/if}}
   {{#if disabled}}disabled{{/if}}
   {{#if aria-label}}aria-label="{{aria-label}}"{{/if}}
-  {{#if onClick}}onclick="{{onClick}}(event)"{{/if}}>
+  {{#if onclick}}onclick="{{onclick}}(event)"{{/if}}>
   {{> @partial-block }}
 </button>
 {{/if}}

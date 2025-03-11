@@ -1,12 +1,9 @@
 <!-- Chat Header -->
 <div id="chat-header" class="flex-shrink-0 p-3 border-b border-border">
   <div id="chat-title-container" class="flex items-center">
-    <button id="back-to-chats" class="hidden mr-2 p-1 rounded-full hover:bg-bg-muted" onclick="chat.backToChats()">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M19 12H5"></path>
-        <path d="M12 19l-7-7 7-7"></path>
-      </svg>
-    </button>
+    {{#> components/button id="back-to-chats" variant="ghost" class="hidden mr-2" onclick="chat.backToChats()" aria-label="Back to Chats"}}
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left"><path d="m15 18-6-6 6-6"/></svg>
+    {{/components/button}}
     <h3 id="chat-title" class="font-medium">All Chats</h3>
   </div>
 </div>
