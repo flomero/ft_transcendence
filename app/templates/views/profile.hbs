@@ -1,0 +1,75 @@
+<div class="layout p-8 max-w-2xl mx-auto">
+    <h1 class="font-bold text-2xl mb-6 text-gray-100">User Profile</h1>
+
+    <div class="shadow-md p-6 mb-6 border-2 rounded-2xl">
+        <h2 class="font-medium text-lg mb-4 text-gray-200">Current Information</h2>
+        <img src="{{imageUrl}}" alt="User Avatar" class="w-24 h-24 rounded-full mb-4"/>
+        <form method="POST" action="/profile/update/image" enctype="multipart/form-data">
+            <input type="file" name="image" accept="image/jpeg, image/png, image/gif" required="required"/>
+            <input type="submit">
+        </form>
+        <div class="flex items-center gap-2 mb-2">
+            <span class="font-medium text-gray-300">User ID:</span>
+            <span class="text-gray-300">{{userId}}</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="font-medium text-gray-300">Username:</span>
+            <span id="current-username" class="text-gray-300">{{userName}}</span>
+            <form id="edit-username-form" hidden="hidden" onsubmit="saveUsername(event)" method="post">
+                <input type="text" required name="username" value="{{userName}}">
+                <button id="save-username">Save</button>
+            </form>
+            <button id="edit-username-button" onclick="showEditUsernameForm()">Edit</button>
+        </div>
+        <div id="error-message" class="p-3 text-red-500" hidden="hidden"></div>
+    </div>
+</div>
+
+<script>
+    function showEditUsernameForm() {
+        const editUsernameForm = document.getElementById('edit-username-form');
+        const usernameEditButton = document.getElementById('edit-username-button');
+        const currentUsername = document.getElementById('current-username');
+
+        editUsernameForm.hidden = false;
+        usernameEditButton.hidden = true;
+        currentUsername.hidden = true;
+    }
+
+    function hideEditUsernameForm() {
+        const editUsernameForm = document.getElementById('edit-username-form');
+        const usernameEditButton = document.getElementById('edit-username-button');
+        const currentUsername = document.getElementById('current-username');
+
+        editUsernameForm.hidden = true;
+        usernameEditButton.hidden = false;
+        currentUsername.hidden = false;
+    }
+
+    function saveUsername(event) {
+        event.preventDefault();
+        const username = event.target.username.value;
+
+        const errorMessage = document.getElementById('error-message');
+        errorMessage.hidden = true;
+
+        fetch(`/profile/update/username`, {
+            method: 'POST',
+            body: username.toString(),
+        })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        errorMessage.innerText = data.error;
+                        errorMessage.hidden = false;
+                        return;
+                    }
+                    const currentUsername = document.getElementById('current-username');
+                    currentUsername.innerText = username;
+                    hideEditUsernameForm();
+                })
+                .catch(error => {
+                    console.error('Error sending message:', error);
+                });
+    }
+</script>
