@@ -41,7 +41,6 @@ class Chat {
     const chatMessages = document.getElementById("chat-messages");
     if (chatMessages) {
       chatMessages.innerHTML += data.html;
-      this.scrollToBottom();
     }
   }
 
@@ -103,13 +102,6 @@ class Chat {
     }, 300);
   };
 
-  scrollToBottom = (): void => {
-    const messagesDiv = document.getElementById("chat-messages");
-    if (messagesDiv) {
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    }
-  };
-
   sendMessage = (event: Event): void => {
     event.preventDefault();
 
@@ -135,7 +127,6 @@ class Chat {
       })
       .then(() => {
         form.reset();
-        setTimeout(() => this.scrollToBottom(), 100);
       })
       .catch((error) => console.error("Error sending message:", error));
   };
@@ -206,9 +197,6 @@ class Chat {
           // Update title and current room
           if (elements.title) elements.title.textContent = roomName;
           this.currentRoomId = roomId;
-
-          // Scroll to newest messages
-          this.scrollToBottom();
 
           // Remove animation classes after they complete
           setTimeout(() => {
