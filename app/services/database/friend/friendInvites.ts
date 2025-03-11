@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 
-export async function acceptFriendRequest(
+export async function friendInvites(
   friendId: string,
   userId: string,
   fastify: FastifyInstance,
@@ -9,6 +9,5 @@ export async function acceptFriendRequest(
   UPDATE users_friends
   SET accepted = 1 WHERE senderId = ? AND receiverId = ?
   `;
-
   await fastify.sqlite.run(sql, [friendId, userId]);
 }
