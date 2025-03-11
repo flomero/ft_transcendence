@@ -23,10 +23,17 @@ class Lobby {
     this.lobbyOwner = memberId;
   }
 
-  public addMember(memberId: string, socket: WebSocket): void {
+  public addMember(memberId: string): void {
     if (this.lobbyMembers.has(memberId)) {
       throw new Error("Member is already in the lobby");
     }
+    const newMember: LobbyMember = {
+      id: memberId,
+      userState: "notInLobby",
+      isReady: false,
+    };
+
+    this.lobbyMembers.set(memberId, newMember);
   }
 
   public get getLobbyId(): string {
