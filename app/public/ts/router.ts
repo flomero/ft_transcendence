@@ -147,7 +147,7 @@ class Router {
       }
 
       const contentType = response.headers.get("content-type");
-      if (contentType && contentType.includes("application/json")) {
+      if (contentType?.includes("application/json")) {
         const data = await response.json();
         if (data.redirectTo) {
           console.log("JSON redirect to:", data.redirectTo);
@@ -170,27 +170,27 @@ class Router {
   executeScripts(): void {
     // Execute any script tags in the loaded content
     const scripts = this.contentContainer.querySelectorAll("script");
-    scripts.forEach((oldScript) => {
+    for (const oldScript of scripts) {
       const newScript = document.createElement("script");
-      Array.from(oldScript.attributes).forEach((attr) => {
+      for (const attr of Array.from(oldScript.attributes)) {
         newScript.setAttribute(attr.name, attr.value);
-      });
+      }
       newScript.appendChild(document.createTextNode(oldScript.innerHTML));
       if (oldScript.parentNode) {
         oldScript.parentNode.replaceChild(newScript, oldScript);
       }
-    });
+    }
   }
 
   updateActiveLinks(currentPath: string): void {
-    document.querySelectorAll("nav a").forEach((link) => {
+    for (const link of document.querySelectorAll("nav a")) {
       const href = link.getAttribute("href");
       if (href === currentPath) {
         link.classList.add("active");
       } else {
         link.classList.remove("active");
       }
-    });
+    }
   }
 
   handleFormSubmit(e: Event): void {
@@ -203,7 +203,9 @@ class Router {
     e.preventDefault();
 
     const formData = new FormData(form);
-    const searchParams = new URLSearchParams(formData as any);
+    const searchParams = new URLSearchParams(
+      formData as unknown as URLSearchParams,
+    );
     const path = `${form.action.replace(window.location.origin, "")}?${searchParams.toString()}`;
 
     this.navigateTo(path);
