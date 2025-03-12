@@ -2,13 +2,16 @@ import type { LobbyMember } from "../../../types/games/lobby/LobbyMember";
 import type { GameModes } from "../../../types/games/GameModes";
 import { WebSocket } from "ws";
 import { randomUUID } from "node:crypto";
+import MinAndMaxPlayers from "../../../types/games/lobby/MinAndMaxPlayers";
 
 class Lobby {
   private lobbyId: string = randomUUID();
   private lobbyMembers: Map<string, LobbyMember> = new Map();
+  stateLobby: "open" | "closed" | "started"; // make private later
   game: "pong"; //make private later
   gameMode: GameModes; //make private later
   lobbyOwner: string; //make private later
+  memberLimits: { min: number; max: number }; //make private later
 
   constructor(game: "pong", gameMode: GameModes, memberId: string) {
     const newMember: LobbyMember = {
@@ -21,22 +24,33 @@ class Lobby {
     this.game = game;
     this.gameMode = gameMode;
     this.lobbyOwner = memberId;
+    this.stateLobby = "open";
+    this.memberLimits = this.getMemberLimits(gameMode);
+    console.log("Member limits: ", this.memberLimits);
+  }
+
+  public getMemberLimits(gameMode: GameModes): { min: number; max: number } {
+    if (MinAndMaxPlayers[gameMode] !== undefined)
+      return MinAndMaxPlayers[gameMode];
+    throw new Error("Game mode not found: " + gameMode);
   }
 
   public addMember(memberId: string): void {
     if (this.lobbyMembers.has(memberId)) {
       throw new Error("Member is already in the lobby");
+    } else if (this.stateLobby === "closed") {
+      throw new Error("Lobby is closed already");
     }
     const newMember: LobbyMember = {
       id: memberId,
       userState: "notInLobby",
       isReady: false,
     };
-
     this.lobbyMembers.set(memberId, newMember);
+    this.closeLobbyIfMaxMembers();
   }
 
-  public get getLobbyId(): string {
+  public get LobbyId(): string {
     return this.lobbyId;
   }
 
@@ -80,6 +94,23 @@ class Lobby {
     }
     this.lobbyMembers.get(memberId)!.socket = socket;
     this.lobbyMembers.get(memberId)!.userState = "inLobby";
+  }
+
+  public changeState(ownerId: string, newState: "open" | "started"): void {
+    if (this.lobbyOwner !== ownerId) {
+      throw new Error("Only the owner can change the state");
+    }
+    this.stateLobby = newState;
+  }
+
+  public get lobbyState(): "open" | "closed" | "started" {
+    return this.stateLobby;
+  }
+
+  private closeLobbyIfMaxMembers(): void {
+    if (this.lobbyMembers.size === this.memberLimits.max) {
+      this.stateLobby = "closed";
+    }
   }
 }
 
