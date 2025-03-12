@@ -1,7 +1,7 @@
 {
   "pong": {
     "serverTickrateS": 100,
-    "serverMaxDelayTicks": 100,
+    "serverMaxDelayS": 2,
     "gameModes": {
       "classicPong": {
         "className": "ClassicPong",
@@ -12,11 +12,11 @@
           "paddleOffset": 2.5,
           "paddleCoverage": 25,
           "paddleHeight": 1,
-          "paddleSpeedWidthPercent": 1.5
+          "paddleSpeedWidthPercentS": 150
         },
 
         "defaultBallSettings": {
-          "speed": 1.5,
+          "speedWidthPercentS": 50,
           "radius": 0.85
         },
 

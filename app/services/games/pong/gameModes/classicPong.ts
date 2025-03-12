@@ -2,18 +2,27 @@ import { Pong, TargetType } from "../pong";
 import { Rectangle } from "../../../../types/games/pong/rectangle";
 import { Ball } from "../../../../types/games/pong/ball";
 import { Paddle } from "../../../../types/games/pong/paddle";
-import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
+import {
+  BallSettings,
+  GAME_REGISTRY,
+} from "../../../../types/games/gameRegistry";
 
 export class ClassicPong extends Pong {
-  protected defaultBallSettings: Record<string, any>;
+  protected defaultBallSettings: BallSettings;
 
   constructor(gameData: Record<string, any>) {
     super(gameData);
 
-    this.defaultBallSettings =
-      GAME_REGISTRY.pong.gameModes[
-        gameData["gameModeName"]
-      ].defaultBallSettings;
+    const defaultBallSettingsS: Record<string, any> =
+      GAME_REGISTRY.pong.gameModes.classicPong.defaultBallSettings;
+
+    this.defaultBallSettings = {
+      speed:
+        (this.arenaSettings.width *
+          (defaultBallSettingsS.speedWidthPercentS / 100.0)) /
+        this.serverTickrateS,
+      radius: defaultBallSettingsS.radius,
+    };
 
     this.resetBall();
     this.initPaddles();
@@ -35,9 +44,16 @@ export class ClassicPong extends Pong {
 
   initPaddles(): void {
     // Compute initial paddle positions, rotated by alpha
+    // const paddleAmplitude =
+    //   (this.arenaSettings.height - this.arenaSettings.paddleOffset) *
+    //   Math.sin(Math.PI / this.extraGameData.playerCount);
+
     const paddleAmplitude =
-      (this.arenaSettings.height - this.arenaSettings.paddleOffset) *
-      Math.sin(Math.PI / this.extraGameData.playerCount);
+      this.arenaSettings.height - this.arenaSettings.wallHeight;
+
+    const paddleSpeed: number =
+      this.arenaSettings.paddleSpeedWidthPercentS /
+      (100 * this.serverTickrateS);
 
     this.editManager.queueEdit(
       this.editManager.createPropertyEdit(TargetType.Paddles, -1, "", [
@@ -60,9 +76,7 @@ export class ClassicPong extends Pong {
           coverage: this.arenaSettings.paddleCoverage,
           width: paddleAmplitude * (this.arenaSettings.paddleCoverage / 100.0),
           height: this.arenaSettings.paddleHeight,
-          speed:
-            paddleAmplitude *
-            (this.arenaSettings.paddleSpeedWidthPercent / 100.0),
+          speed: paddleAmplitude * paddleSpeed,
           velocity: 0.0,
           displacement: 0.0,
           doMove: true,
@@ -90,9 +104,7 @@ export class ClassicPong extends Pong {
           coverage: this.arenaSettings.paddleCoverage,
           width: paddleAmplitude * (this.arenaSettings.paddleCoverage / 100.0),
           height: this.arenaSettings.paddleHeight,
-          speed:
-            paddleAmplitude *
-            (this.arenaSettings.paddleSpeedWidthPercent / 100.0),
+          speed: paddleAmplitude * paddleSpeed,
           velocity: 0.0,
           displacement: 0.0,
           doMove: true,

@@ -11,13 +11,13 @@ interface GameModifier {
   [key: string]: any; // For custom properties specific to each modifier
 }
 
-interface BallSettings {
+export interface BallSettings {
   speed: number;
   radius: number;
   [key: string]: any;
 }
 
-interface ArenaSettings {
+export interface ArenaSettings {
   width: number;
   height: number;
   wallHeight: number;
@@ -28,7 +28,7 @@ interface ArenaSettings {
   [key: string]: any;
 }
 
-interface PowerUpSettings {
+export interface PowerUpSettings {
   radius: number;
   capacities: Record<string, number>;
   [key: string]: any;

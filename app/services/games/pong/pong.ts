@@ -59,7 +59,10 @@ export abstract class Pong extends GameBase implements Editable<TargetType> {
 
     // Registry settings
     this.serverTickrateS = GAME_REGISTRY.pong.serverTickrateS;
-    this.serverMaxDelayTicks = GAME_REGISTRY.pong.serverMaxDelayTicks;
+
+    const serverMaxDelayS = GAME_REGISTRY.pong.serverMaxDelayS;
+    this.serverMaxDelayTicks = serverMaxDelayS * this.serverTickrateS;
+
     this.arenaSettings =
       GAME_REGISTRY.pong.gameModes[gameData["gameModeName"]].arenaSettings;
 
@@ -264,18 +267,15 @@ export abstract class Pong extends GameBase implements Editable<TargetType> {
     }
 
     const direction = paddle.velocity > 0 ? 1 : -1;
-    const newDisplacement =
-      paddle.displacement +
-      direction * this.arenaSettings.paddleSpeedWidthPercent;
+    const newDisplacement = paddle.displacement + direction * paddle.speed;
+
+    // Calculate movement boundaries based on paddle coverage
+    const maxDisplacement = (100 - paddle.coverage) / 2; // The paddle moves within (-max, +max)
 
     // Check if movement would exceed boundaries
     if (
-      (direction > 0 &&
-        newDisplacement >
-          this.arenaSettings.height / 2.0 - paddle.coverage / 2.0) ||
-      (direction < 0 &&
-        newDisplacement <
-          -(this.arenaSettings.height / 2.0 - paddle.coverage / 2.0))
+      newDisplacement > maxDisplacement ||
+      newDisplacement < -maxDisplacement
     ) {
       console.log(`Can't move in this direction anymore`);
       return;
