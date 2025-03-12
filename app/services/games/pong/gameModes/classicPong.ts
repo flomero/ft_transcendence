@@ -1,4 +1,4 @@
-import { Pong } from "../pong";
+import { Pong, TargetType } from "../pong";
 import { Rectangle } from "../../../../types/games/pong/rectangle";
 import { Ball } from "../../../../types/games/pong/ball";
 import { Paddle } from "../../../../types/games/pong/paddle";
@@ -20,71 +20,86 @@ export class ClassicPong extends Pong {
     this.initWalls();
   }
 
+  startGame(): void {
+    console.log("Starting Game");
+    super.startGame();
+    console.log("Game Started");
+
+    this.editManager.processQueuedEdits();
+    console.log(`Balls: ${this.gameObjects.balls.length}`);
+    console.log(`Paddles: ${this.gameObjects.paddles.length}`);
+    console.log(`Walls: ${this.gameObjects.walls.length}`);
+    // for (const paddle of this.gameObjects.paddles)
+    //   console.log(`  |- ${{...paddle}}\n`);
+  }
+
   initPaddles(): void {
     // Compute initial paddle positions, rotated by alpha
     const paddleAmplitude =
       (this.arenaSettings.height - this.arenaSettings.paddleOffset) *
       Math.sin(Math.PI / this.extraGameData.playerCount);
 
-    this.gameObjects.paddles = [
-      // LEFT PADDLE
-      {
-        id: 0,
-        x:
-          this.arenaSettings.paddleHeight / 2.0 +
-          this.arenaSettings.paddleOffset,
-        y: this.arenaSettings.height / 2.0,
-        alpha: Math.PI,
-        dx: 0.0,
-        dy: -1.0,
-        nx: 1.0,
-        ny: 0.0,
-        absX:
-          this.arenaSettings.paddleHeight / 2.0 +
-          this.arenaSettings.paddleOffset,
-        absY: this.arenaSettings.height / 2.0,
-        coverage: this.arenaSettings.paddleCoverage,
-        width: paddleAmplitude * (this.arenaSettings.paddleCoverage / 100.0),
-        height: this.arenaSettings.paddleHeight,
-        speed:
-          paddleAmplitude *
-          (this.arenaSettings.paddleSpeedWidthPercent / 100.0),
-        velocity: 0.0,
-        displacement: 0.0,
-        doMove: true,
-        isVisible: true,
-      } as Paddle,
+    this.editManager.queueEdit(
+      this.editManager.createPropertyEdit(TargetType.Paddles, -1, "", [
+        // LEFT PADDLE
+        {
+          id: 0,
+          x:
+            this.arenaSettings.paddleHeight / 2.0 +
+            this.arenaSettings.paddleOffset,
+          y: this.arenaSettings.height / 2.0,
+          alpha: Math.PI,
+          dx: 0.0,
+          dy: -1.0,
+          nx: 1.0,
+          ny: 0.0,
+          absX:
+            this.arenaSettings.paddleHeight / 2.0 +
+            this.arenaSettings.paddleOffset,
+          absY: this.arenaSettings.height / 2.0,
+          coverage: this.arenaSettings.paddleCoverage,
+          width: paddleAmplitude * (this.arenaSettings.paddleCoverage / 100.0),
+          height: this.arenaSettings.paddleHeight,
+          speed:
+            paddleAmplitude *
+            (this.arenaSettings.paddleSpeedWidthPercent / 100.0),
+          velocity: 0.0,
+          displacement: 0.0,
+          doMove: true,
+          isVisible: true,
+        } as Paddle,
 
-      // RIGHT PADDLE
-      {
-        id: 1,
-        x:
-          this.arenaSettings.width -
-          this.arenaSettings.paddleHeight / 2.0 -
-          this.arenaSettings.paddleOffset,
-        y: this.arenaSettings.height / 2.0,
-        alpha: 0.0,
-        dx: 0.0,
-        dy: 1.0,
-        nx: -1.0,
-        ny: 0.0,
-        absX:
-          this.arenaSettings.width -
-          this.arenaSettings.paddleHeight / 2.0 -
-          this.arenaSettings.paddleOffset,
-        absY: this.arenaSettings.height / 2.0,
-        coverage: this.arenaSettings.paddleCoverage,
-        width: paddleAmplitude * (this.arenaSettings.paddleCoverage / 100.0),
-        height: this.arenaSettings.paddleHeight,
-        speed:
-          paddleAmplitude *
-          (this.arenaSettings.paddleSpeedWidthPercent / 100.0),
-        velocity: 0.0,
-        displacement: 0.0,
-        doMove: true,
-        isVisible: true,
-      } as Paddle,
-    ];
+        // RIGHT PADDLE
+        {
+          id: 1,
+          x:
+            this.arenaSettings.width -
+            this.arenaSettings.paddleHeight / 2.0 -
+            this.arenaSettings.paddleOffset,
+          y: this.arenaSettings.height / 2.0,
+          alpha: 0.0,
+          dx: 0.0,
+          dy: 1.0,
+          nx: -1.0,
+          ny: 0.0,
+          absX:
+            this.arenaSettings.width -
+            this.arenaSettings.paddleHeight / 2.0 -
+            this.arenaSettings.paddleOffset,
+          absY: this.arenaSettings.height / 2.0,
+          coverage: this.arenaSettings.paddleCoverage,
+          width: paddleAmplitude * (this.arenaSettings.paddleCoverage / 100.0),
+          height: this.arenaSettings.paddleHeight,
+          speed:
+            paddleAmplitude *
+            (this.arenaSettings.paddleSpeedWidthPercent / 100.0),
+          velocity: 0.0,
+          displacement: 0.0,
+          doMove: true,
+          isVisible: true,
+        } as Paddle,
+      ]),
+    );
 
     // this.gameObjects.paddles.forEach((paddle) => {console.log(paddle)})
 
@@ -140,79 +155,81 @@ export class ClassicPong extends Pong {
     //   Math.sin(Math.PI / (2.0 * this.extraGameData.playerCount)) *
     //   (this.arenaSettings.width *
     //     (1 + 1 / (this.extraGameData.playerCount + 0.5)));
-    this.gameObjects.walls = [
-      // LEFT WALL
-      {
-        id: 0,
-        x: 0.0,
-        y: this.arenaSettings.height / 2.0,
-        alpha: Math.PI,
-        dx: 0.0,
-        dy: -1.0,
-        nx: 1.0,
-        ny: 0.0,
-        absX: 0.0,
-        absY: this.arenaSettings.height / 2.0,
-        width: this.arenaSettings.height,
-        height: this.arenaSettings.wallHeight,
-        isVisible: true,
-        isGoal: true,
-      } as Rectangle,
+    this.editManager.queueEdit(
+      this.editManager.createPropertyEdit(TargetType.Walls, -1, "", [
+        // LEFT WALL
+        {
+          id: 0,
+          x: 0.0,
+          y: this.arenaSettings.height / 2.0,
+          alpha: Math.PI,
+          dx: 0.0,
+          dy: -1.0,
+          nx: 1.0,
+          ny: 0.0,
+          absX: 0.0,
+          absY: this.arenaSettings.height / 2.0,
+          width: this.arenaSettings.height,
+          height: this.arenaSettings.wallHeight,
+          isVisible: true,
+          isGoal: true,
+        } as Rectangle,
 
-      // UP WALL
-      {
-        id: 1,
-        x: this.arenaSettings.width / 2.0,
-        y: 0.0,
-        alpha: Math.PI / 4.0,
-        dx: 1.0,
-        dy: 0.0,
-        nx: 0.0,
-        ny: 1.0,
-        absX: this.arenaSettings.width / 2.0,
-        absY: 0.0,
-        width: this.arenaSettings.width,
-        height: this.arenaSettings.wallHeight,
-        isVisible: true,
-        isGoal: false,
-      } as Rectangle,
+        // UP WALL
+        {
+          id: 1,
+          x: this.arenaSettings.width / 2.0,
+          y: 0.0,
+          alpha: Math.PI / 4.0,
+          dx: 1.0,
+          dy: 0.0,
+          nx: 0.0,
+          ny: 1.0,
+          absX: this.arenaSettings.width / 2.0,
+          absY: 0.0,
+          width: this.arenaSettings.width,
+          height: this.arenaSettings.wallHeight,
+          isVisible: true,
+          isGoal: false,
+        } as Rectangle,
 
-      // RIGHT WALL
-      {
-        id: 2,
-        x: this.arenaSettings.width,
-        y: this.arenaSettings.height / 2.0,
-        alpha: 0.0,
-        dx: 0.0,
-        dy: 1.0,
-        nx: -1.0,
-        ny: 0.0,
-        absX: this.arenaSettings.width,
-        absY: this.arenaSettings.height / 2.0,
-        width: this.arenaSettings.height,
-        height: this.arenaSettings.wallHeight,
-        isVisible: true,
-        isGoal: true,
-      } as Rectangle,
+        // RIGHT WALL
+        {
+          id: 2,
+          x: this.arenaSettings.width,
+          y: this.arenaSettings.height / 2.0,
+          alpha: 0.0,
+          dx: 0.0,
+          dy: 1.0,
+          nx: -1.0,
+          ny: 0.0,
+          absX: this.arenaSettings.width,
+          absY: this.arenaSettings.height / 2.0,
+          width: this.arenaSettings.height,
+          height: this.arenaSettings.wallHeight,
+          isVisible: true,
+          isGoal: true,
+        } as Rectangle,
 
-      // DOWN WALL
-      {
-        id: 3,
-        x: this.arenaSettings.width / 2.0,
-        y: this.arenaSettings.height,
-        alpha: -Math.PI / 4.0,
-        dx: -1.0,
-        dy: 0.0,
-        nx: 0.0,
-        ny: -1.0,
-        absX: this.arenaSettings.width / 2.0,
-        absY: this.arenaSettings.height,
-        width: this.arenaSettings.width,
-        height: this.arenaSettings.wallHeight,
-        isVisible: true,
-        isGoal: false,
-      } as Rectangle,
-    ];
+        // DOWN WALL
+        {
+          id: 3,
+          x: this.arenaSettings.width / 2.0,
+          y: this.arenaSettings.height,
+          alpha: -Math.PI / 4.0,
+          dx: -1.0,
+          dy: 0.0,
+          nx: 0.0,
+          ny: -1.0,
+          absX: this.arenaSettings.width / 2.0,
+          absY: this.arenaSettings.height,
+          width: this.arenaSettings.width,
+          height: this.arenaSettings.wallHeight,
+          isVisible: true,
+          isGoal: false,
+        } as Rectangle,
+      ]),
+    );
 
     // this.gameObjects.walls.forEach((wall) => {console.log(wall)})
 
@@ -348,46 +365,20 @@ export class ClassicPong extends Pong {
   }
 
   // Updated to use edit queue
-  async resetBall(ballId: number = -1): Promise<void> {
+  resetBall(ballId: number = -1): void {
     const randomAngle = this.rng.random() * Math.PI * 2.0;
     const ca = Math.cos(randomAngle);
     const sa = Math.sin(randomAngle);
 
-    const release = await this.acquireLock();
-    try {
-      if (ballId < 0) {
-        // Reset all balls
-        this.pendingEdits.push({
-          targetId: -1, // Special identifier for array replacement
-          targetType: "",
-          property: "balls",
-          editor: (_) => [
-            {
-              id: 0,
-              x:
-                this.arenaSettings.width / 2.0 +
-                this.arenaSettings.paddleOffset * ca,
-              y:
-                this.arenaSettings.height / 2.0 +
-                this.arenaSettings.paddleOffset * sa,
-              dx: ca,
-              dy: sa,
-              speed: this.defaultBallSettings.speed,
-              radius: this.defaultBallSettings.radius,
-              isVisible: true,
-              doCollision: true,
-              doGoal: true,
-            },
-          ],
-        });
-      } else {
-        // Find the ball by ID and update it
-        this.pendingEdits.push({
-          targetId: ballId,
-          targetType: "balls",
-          property: "ballReset",
-          editor: (_) => ({
-            id: ballId,
+    if (ballId < 0) {
+      // Reset all balls
+      this.editManager.queueEdit({
+        targetId: -1, // Entire array
+        targetType: TargetType.Balls,
+        property: "",
+        editor: (_) => [
+          {
+            id: 0,
             x:
               this.arenaSettings.width / 2.0 +
               this.arenaSettings.paddleOffset * ca,
@@ -401,15 +392,36 @@ export class ClassicPong extends Pong {
             isVisible: true,
             doCollision: true,
             doGoal: true,
-          }),
-        });
-      }
-    } finally {
-      release();
+          },
+        ],
+      });
+    } else {
+      // Find the ball by ID and update it
+      this.editManager.queueEdit({
+        targetId: ballId,
+        targetType: TargetType.Balls,
+        property: "",
+        editor: (_) => ({
+          id: ballId,
+          x:
+            this.arenaSettings.width / 2.0 +
+            this.arenaSettings.paddleOffset * ca,
+          y:
+            this.arenaSettings.height / 2.0 +
+            this.arenaSettings.paddleOffset * sa,
+          dx: ca,
+          dy: sa,
+          speed: this.defaultBallSettings.speed,
+          radius: this.defaultBallSettings.radius,
+          isVisible: true,
+          doCollision: true,
+          doGoal: true,
+        }),
+      });
     }
 
     // Process the edits
-    this.processQueuedEdits();
+    this.editManager.processQueuedEdits();
   }
 
   rotatePaddles(alpha: number = 0.0): void {

@@ -38,11 +38,7 @@ export abstract class GameBase {
   /**
    * Starts the game.
    */
-  startGame(): void {
-    this.status = GameStatus.RUNNING;
-    console.log("Game started");
-    this.modifierManager.trigger("onGameStart");
-  }
+  abstract startGame(): void;
 
   /**
    * Returns a snapshot of the current game state.

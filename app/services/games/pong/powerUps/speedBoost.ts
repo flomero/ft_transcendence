@@ -1,6 +1,6 @@
 import { TimeLimitedModifierBase } from "../../timeLimitedModifierBase";
 import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
-import { Pong } from "../pong";
+import { Pong, TargetType } from "../pong";
 import { ModifierActivationMode } from "../../modifierBase";
 
 export class SpeedBoost extends TimeLimitedModifierBase {
@@ -62,12 +62,19 @@ export class SpeedBoost extends TimeLimitedModifierBase {
         return;
       }
 
-      // Use the public editGameObject method which properly handles locking and editing
       const ball = gameObjects.balls[0];
       const newSpeed = this.initialSpeed * (1 + this.strength);
 
-      // This method handles all the locking and queue management internally
-      await game.editGameObject(ball, "speed", (_) => newSpeed);
+      // Use the EditManager to queue the speed change
+      await game.getEditManager().queueEdit({
+        targetId: ball.id,
+        targetType: TargetType.Balls,
+        property: "speed",
+        editor: (_) => newSpeed,
+      });
+
+      // Process the edit immediately
+      game.getEditManager().processQueuedEdits();
     }
   }
 
@@ -79,10 +86,16 @@ export class SpeedBoost extends TimeLimitedModifierBase {
     if (gameObjects.balls.length > 0) {
       const ball = gameObjects.balls[0];
 
-      // Using the public API to reset the speed
-      game
-        .editGameObject(ball, "speed", (_) => this.initialSpeed)
-        .catch((err) => console.error("Error resetting ball speed:", err));
+      // Queue the speed reset using EditManager
+      game.getEditManager().queueEdit({
+        targetId: ball.id,
+        targetType: TargetType.Balls,
+        property: "speed",
+        editor: (_) => this.initialSpeed,
+      });
+
+      // Process the edit immediately
+      game.getEditManager().processQueuedEdits();
     }
 
     game.getModifierManager().deletePowerUp(this);
