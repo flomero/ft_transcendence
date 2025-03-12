@@ -235,14 +235,16 @@ export abstract class Pong extends GameBase implements Editable<TargetType> {
         if (paddle.velocity !== 0) this.queuePaddleUpdate(paddle);
 
       // Update ball positions
-      for (const ball of this.gameObjects.balls) {
-        if (ball.doCollision) {
-          this.doCollisionChecks(ball);
-        }
-      }
+      for (const ball of this.gameObjects.balls)
+        if (ball.doCollision) this.doCollisionChecks(ball);
 
       // Apply all the queued edits from paddle and ball updates
       this.editManager.processQueuedEdits();
+
+      // Verify that no balls went out of bounds
+      this.gameObjects.balls.forEach((ball, id) => {
+        if (this.isOutOfBounds(ball)) this.resetBall(id);
+      });
 
       // Trigger modifiers
       this.modifierManager.trigger("onUpdate");

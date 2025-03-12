@@ -91,6 +91,15 @@ export class PhysicsEngine {
     const r_bdx = bdx * ca + bdy * sa;
     const r_bdy = -bdx * sa + bdy * ca;
 
+    // Deactivate collision from inside the Rectangle
+    if (
+      r_bx > -rw / 2.0 &&
+      r_bx < rw / 2.0 &&
+      r_by > -rh / 2.0 &&
+      r_by < rh / 2.0
+    )
+      return null;
+
     // First, check for side collisions
     const potentialTs: Array<[number, null]> = [];
     const tx_1 =

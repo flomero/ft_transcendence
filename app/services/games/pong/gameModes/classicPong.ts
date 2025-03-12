@@ -537,7 +537,7 @@ export class ClassicPong extends Pong {
   // Implementation of isOutOfBounds method
   isOutOfBounds(ball: Ball): boolean {
     const tolerance: number =
-      2.0 * (this.arenaSettings.wallHeight + this.arenaSettings.paddleOffset);
+      this.arenaSettings.wallHeight + this.arenaSettings.paddleOffset;
 
     return (
       ball.x <= -tolerance ||
