@@ -546,4 +546,12 @@ export class ClassicPong extends Pong {
       ball.y >= this.arenaSettings.height + tolerance
     );
   }
+
+  getResults(): number[] {
+    const p1result: number =
+      this.extraGameData.scores[0] > this.extraGameData.scores[1] ? 1 : 2;
+    const p2result: number = (p1result % 2) + 1;
+
+    return [p1result, p2result];
+  }
 }

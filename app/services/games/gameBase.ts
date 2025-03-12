@@ -30,33 +30,18 @@ export abstract class GameBase {
     this.modifierManager = new ModifierManager(this);
   }
 
-  /**
-   * Advances the game by 1 tick.
-   */
   abstract update(): void;
 
-  /**
-   * Starts the game.
-   */
   abstract startGame(): void;
 
-  /**
-   * Returns a snapshot of the current game state.
-   */
   getStateSnapshot(): Record<string, any> {
     return {
       timestamp: this.lastUpdateTime,
     };
   }
 
-  /**
-   * Restores a game state snapshot.
-   */
   abstract loadStateSnapshot(snapshot: Record<string, any>): void;
 
-  /**
-   * Handles a client action.
-   */
   async handleAction(action: Record<string, any>): Promise<void> {}
 
   // Getters & Setters
@@ -79,4 +64,6 @@ export abstract class GameBase {
   getRNG(): RNG {
     return this.rng;
   }
+
+  abstract getResults(): number[];
 }
