@@ -100,6 +100,13 @@ class Chat {
       // Reset current room
       this.currentRoomId = undefined;
     }, 300);
+
+    // Clear current room assignment on server
+    fetch("/chat/-1", {}).then((r) => {
+      if (!r.ok) {
+        console.error("Error clearing current room:", r.status);
+      }
+    });
   };
 
   sendMessage = (event: Event): void => {
