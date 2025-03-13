@@ -16,7 +16,32 @@
         },
 
         "defaultBallSettings": {
-          "speedWidthPercentS": 50,
+          "speedWidthPercentS": 0,
+          "radius": 0.85
+        },
+
+        "defaultPowerUpSettings": {
+          "radius": 12.5,
+          "capacities": {
+            "speedBoost": 1
+          }
+        }
+      },
+
+      "multiplayerPong": {
+        "className": "MultiplayerPong",
+        "arenaSettings": {
+          "radius": 50,
+          "wallHeight": 2,
+          "wallOffset": 1,
+          "paddleOffset": 2.5,
+          "paddleCoverage": 30,
+          "paddleHeight": 1,
+          "paddleSpeedWidthPercentS": 100
+        },
+
+        "defaultBallSettings": {
+          "speedWidthPercentS": 0,
           "radius": 0.85
         },
 

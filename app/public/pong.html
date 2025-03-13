@@ -31,16 +31,27 @@
     <script>
       const canvas = document.getElementById("gameCanvas");
       const ctx = canvas.getContext("2d");
-      canvas.width = 800;
-      canvas.height = 400;
 
-      const ratio = canvas.width / 200.0;
+      let ratio = 0.0;
+      let playerCount = 2;
+
+      const gameModeName = "classicPong";
+
+      if (gameModeName === "multiplayerPong") {
+        canvas.width = 800;
+        canvas.height = 800;
+        ratio = canvas.width / 100.0;
+        playerCount = 7;
+      } else if (gameModeName === "classicPong") {
+        canvas.width = 800;
+        canvas.height = 400;
+        ratio = canvas.width / 200.0;
+      }
 
       // Update to match the pongConsumer endpoint
       const socket = new WebSocket("ws://localhost:3000/game");
 
       let playerId = 0;
-      const playerCount = 2;
       const playerIdDisplay = document.querySelector(".player-id");
 
       socket.onopen = function () {
@@ -51,7 +62,7 @@
             type: "createGame",
             options: {
               gameName: "pong",
-              gameModeName: "classicPong",
+              gameModeName: gameModeName,
               modifierNames: ["powerUpSpawner"],
               powerUpNames: ["speedBoost"],
               playerCount: playerCount,

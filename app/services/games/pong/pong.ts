@@ -267,34 +267,41 @@ export abstract class Pong extends GameBase implements Editable<TargetType> {
       return;
     }
 
-    const direction = paddle.velocity > 0 ? 1 : -1;
-    const newDisplacement = paddle.displacement + direction * paddle.speed;
+    const direction = Math.sign(paddle.velocity); // -1, 0, or 1
 
-    // Calculate movement boundaries based on paddle coverage
-    const maxDisplacement = (100 - paddle.coverage) / 2; // The paddle moves within (-max, +max)
+    // Calculate new displacement as percentage (-50% to +50%)
+    // paddle.velocity now represents percentage of width per tick
+    let newDisplacement = paddle.displacement + paddle.velocity;
 
-    // Check if movement would exceed boundaries
-    if (
-      newDisplacement > maxDisplacement ||
-      newDisplacement < -maxDisplacement
-    ) {
-      console.log(`Can't move in this direction anymore`);
-      return;
-    }
+    // Calculate movement boundaries (e.g., ±35% if coverage is 30%)
+    const maxDisplacementPercent = (100 - paddle.coverage) / 2.0;
 
-    // Queue position updates
+    // Clamp the displacement within allowed range
+    newDisplacement = Math.max(
+      -maxDisplacementPercent,
+      Math.min(maxDisplacementPercent, newDisplacement),
+    );
+
+    // Calculate actual change in displacement
+    const deltaDisplacement = Math.abs(newDisplacement - paddle.displacement);
+
+    // Queue position updates - adjust x,y based on displacement percentage
     this.editManager.queueEdit({
       targetId: paddle.id,
       targetType: TargetType.Paddles,
       property: "x",
-      editor: (x) => x + paddle.velocity * paddle.dx,
+      editor: (x) =>
+        x +
+        direction * (deltaDisplacement / 100.0) * paddle.amplitude * paddle.dx,
     });
 
     this.editManager.queueEdit({
       targetId: paddle.id,
       targetType: TargetType.Paddles,
       property: "y",
-      editor: (y) => y + paddle.velocity * paddle.dy,
+      editor: (y) =>
+        y +
+        direction * (deltaDisplacement / 100.0) * paddle.amplitude * paddle.dy,
     });
 
     this.editManager.queueEdit({
