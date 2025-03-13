@@ -31,3 +31,24 @@ export function toggleClasses(
 
   for (const cls of classes) element.classList.toggle(cls);
 }
+
+export const innerTextById = (id: string, text: string) => {
+  const element = document.getElementById(id);
+  if (element) {
+    element.innerText = text;
+  }
+};
+
+export const valueById = (id: string, text: string) => {
+  const element = document.getElementById(id);
+  if (element && element instanceof HTMLInputElement) {
+    element.value = text;
+  }
+};
+
+export const focusById = (id: string, atEnd?: boolean) => {
+  const element = document.getElementById(id);
+  if (element && element instanceof HTMLElement) {
+    element.focus();
+  }
+};

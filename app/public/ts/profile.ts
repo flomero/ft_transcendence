@@ -1,30 +1,65 @@
-import { showById, hideById } from "./utils.js";
+import {
+  showById,
+  hideById,
+  innerTextById,
+  valueById,
+  focusById,
+} from "./utils.js";
 
 class ProfileEditor {
-  showEditUsernameForm = () => {
-    hideById("edit-username-button");
-    hideById("edit-profile-picture-button");
-    showById("edit-username-form");
-    const form = document.getElementById("edit-username-form");
-    if (form) {
-      form.classList.add("slide-in-up");
-      form.classList.remove("slide-out-down");
+  private showError = (message: string) => {
+    innerTextById("profile-error-message", message);
+    showById("profile-error-message");
+  };
+
+  private hideError = () => {
+    hideById("profile-error-message");
+  };
+
+  private toggleFormVisibility = (formId: string, show: boolean) => {
+    const form = document.getElementById(formId);
+
+    // Hide common elements when showing a form
+    if (show) {
+      hideById("edit-username-button");
+      hideById("edit-profile-picture-button");
+      showById(formId);
+
+      if (form) {
+        form.classList.add("slide-in-up");
+        form.classList.remove("slide-out-down");
+      }
+    } else {
+      if (form && form instanceof HTMLFormElement) {
+        form.classList.remove("slide-in-up");
+        form.classList.add("slide-out-down");
+        form.reset();
+
+        setTimeout(() => {
+          hideById(formId);
+          this.hideError();
+          showById("edit-username-button");
+          showById("edit-profile-picture-button");
+        }, 300);
+      }
     }
   };
 
+  showEditUsernameForm = () => {
+    this.toggleFormVisibility("edit-username-form", true);
+    focusById("edit-username-input");
+  };
+
   hideEditUsernameForm = () => {
-    const form = document.getElementById("edit-username-form");
-    if (form && form instanceof HTMLFormElement) {
-      form.classList.remove("slide-in-up");
-      form.classList.add("slide-out-down");
-      form.reset();
-      setTimeout(() => {
-        hideById("edit-username-form");
-        hideById("error-message");
-        showById("edit-username-button");
-        showById("edit-profile-picture-button");
-      }, 300);
-    }
+    this.toggleFormVisibility("edit-username-form", false);
+  };
+
+  showEditProfilePictureForm = () => {
+    this.toggleFormVisibility("edit-profile-picture-form", true);
+  };
+
+  hideEditProfilePictureForm = () => {
+    this.toggleFormVisibility("edit-profile-picture-form", false);
   };
 
   saveUsername = (event: Event) => {
@@ -32,7 +67,7 @@ class ProfileEditor {
     const form = event.target as HTMLFormElement;
     const username = form.username.value;
 
-    hideById("error-message");
+    this.hideError();
 
     fetch("/profile/update/username", {
       method: "POST",
@@ -41,47 +76,48 @@ class ProfileEditor {
       .then((response) => response.json())
       .then((data) => {
         if (data.error) {
-          const errorMessage = document.getElementById("error-message");
-          if (!errorMessage) return;
-          errorMessage.innerText = data.error;
-          showById("error-message");
+          this.showError(data.error);
           return;
         }
-        const currentUsername = document.getElementById("current-username");
-        if (!currentUsername) return;
-        currentUsername.innerText = username;
+        innerTextById("current-username", username);
         this.hideEditUsernameForm();
       })
       .catch((error) => {
-        console.error("Error sending message:", error);
+        this.showError(error.message || "An error occurred");
       });
   };
 
-  showEditProfilePictureForm = () => {
-    hideById("edit-username-button");
-    hideById("edit-profile-picture-button");
+  saveProfilePicture = (event: Event) => {
+    event.preventDefault();
+    const form = event.target as HTMLFormElement;
+    const formData = new FormData(form);
 
-    showById("edit-profile-picture-form");
-    const form = document.getElementById("edit-profile-picture-form");
-    if (form) {
-      form.classList.add("slide-in-up");
-      form.classList.remove("slide-out-down");
-    }
-  };
+    this.hideError();
 
-  hideEditProfilePictureForm = () => {
-    const form = document.getElementById("edit-profile-picture-form");
-    if (form && form instanceof HTMLFormElement) {
-      form.classList.remove("slide-in-up");
-      form.classList.add("slide-out-down");
-      form.reset();
-      setTimeout(() => {
-        hideById("edit-profile-picture-form");
-        hideById("error-message");
-        showById("edit-username-button");
-        showById("edit-profile-picture-button");
-      }, 300);
-    }
+    fetch("/profile/update/image", {
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.error) {
+          this.showError(data.error);
+          return;
+        }
+
+        const profilePicture = document.querySelector(
+          'img[alt="User Avatar"]',
+        ) as HTMLImageElement;
+        if (profilePicture) {
+          const baseUrl = data.imageUrl || profilePicture.src.split("?")[0];
+          profilePicture.src = `${baseUrl}?t=${new Date().getTime()}`;
+        }
+
+        this.hideEditProfilePictureForm();
+      })
+      .catch((error) => {
+        this.showError(`Error uploading profile picture: ${error}`);
+      });
   };
 }
 

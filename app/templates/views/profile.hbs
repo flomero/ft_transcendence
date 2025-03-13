@@ -8,7 +8,7 @@
       />
       <div>
         <p id="current-username" class="text-2xl">{{userName}}</p>
-        <p class="text-fg-muted">{{userId}}</p>
+        <p class="text-sm text-fg-muted"># {{userId}}</p>
         <div class="flex flex-row flex-wrap gap-2 mt-2">
            {{#> components/button id="edit-username-button" onclick="profileEditor.showEditUsernameForm()" variant="outline"}}
             Edit Username
@@ -22,10 +22,9 @@
               hidden="hidden"
               onsubmit="profileEditor.saveUsername(event)"
               method="post"
-              class="w-full"
+              class="w-full flex flex-col gap-3"
             >
-              <div class="flex flex-col gap-3">
-                <input type="text" required class="input" name="username" value="{{userName}}" />
+                <input type="text" required id="edit-username-input" onfocus="this.value = this.value;" class="input" name="username" placeholder="New Username..." minlength="3" maxlength="30" />
                 <div class="flex gap-2">
                   {{#> components/button type="submit"}}
                     Save
@@ -33,7 +32,6 @@
                   {{#> components/button type="button" variant="outline" onclick="profileEditor.hideEditUsernameForm()"}}
                     Cancel
                   {{/components/button}}
-                </div>
               </div>
             </form>
           </div>
@@ -43,6 +41,7 @@
             method="POST"
             action="/profile/update/image"
             enctype="multipart/form-data"
+            onsubmit="profileEditor.saveProfilePicture(event)"
             hidden="hidden"
             class="mt-4"
           >
@@ -65,7 +64,7 @@
             </div>
           </form>
 
-          <div id="error-message" class="p-3 text-red-500" hidden="hidden"></div>
+          <div id="profile-error-message" class="p-3 text-red-500" hidden="hidden"></div>
         </div>
       </div>
     </div>
