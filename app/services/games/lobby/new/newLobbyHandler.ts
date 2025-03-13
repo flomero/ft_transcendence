@@ -14,7 +14,9 @@ async function newLobbyHandler(
   const lobby = new Lobby(body.gameName, body.gameModeName, request.userId);
 
   if (isUserInAnyLobby(request.userId) === true) {
-    reply.code(400).send({ error: "User is already in a lobby" });
+    reply
+      .code(400)
+      .send({ error: "User is already in lobby: ", lobbyId: lobby.getLobbyId });
     return;
   }
 

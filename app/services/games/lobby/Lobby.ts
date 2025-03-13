@@ -27,9 +27,10 @@ class Lobby {
     this.stateLobby = "open";
     this.memberLimits = this.getMemberLimits(gameMode);
     console.log("Member limits: ", this.memberLimits);
+    this.printLobbyMembers();
   }
 
-  public getMemberLimits(gameMode: GameModes): { min: number; max: number } {
+  private getMemberLimits(gameMode: GameModes): { min: number; max: number } {
     if (MinAndMaxPlayers[gameMode] !== undefined)
       return MinAndMaxPlayers[gameMode];
     throw new Error("Game mode not found: " + gameMode);
@@ -50,7 +51,7 @@ class Lobby {
     this.closeLobbyIfMaxMembers();
   }
 
-  public get LobbyId(): string {
+  public get getLobbyId(): string {
     return this.lobbyId;
   }
 
@@ -111,6 +112,12 @@ class Lobby {
     if (this.lobbyMembers.size === this.memberLimits.max) {
       this.stateLobby = "closed";
     }
+  }
+  private printLobbyMembers(): void {
+    console.log("Lobby members: ");
+    this.lobbyMembers.forEach((member) => {
+      console.log(member.id);
+    });
   }
 }
 
