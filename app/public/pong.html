@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Multiplayer Pong</title>
+    <style>
+      canvas {
+        background: black;
+        display: block;
+        margin: auto;
+      }
+      .controls {
+        text-align: center;
+        margin-top: 10px;
+        color: #333;
+        font-family: Arial, sans-serif;
+      }
+      .player-id {
+        font-weight: bold;
+        color: #0066cc;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="gameCanvas"></canvas>
+    <div class="controls">
+      Player: <span class="player-id">0</span> | Use Arrow Keys to move |
+      Left/Right arrows to switch players
+    </div>
+    <script>
+      const canvas = document.getElementById("gameCanvas");
+      const ctx = canvas.getContext("2d");
+      canvas.width = 800;
+      canvas.height = 400;
+
+      const ratio = canvas.width / 200.0;
+
+      // Update to match the pongConsumer endpoint
+      const socket = new WebSocket("ws://localhost:3000/game");
+
+      let playerId = 0;
+      const playerCount = 2;
+      const playerIdDisplay = document.querySelector(".player-id");
+
+      socket.onopen = function () {
+        console.log("✅ WebSocket connected");
+        // Update message format to match pongConsumer
+        socket.send(
+          JSON.stringify({
+            type: "createGame",
+            options: {
+              gameName: "pong",
+              gameModeName: "classicPong",
+              modifierNames: ["powerUpSpawner"],
+              powerUpNames: ["speedBoost"],
+              playerCount: playerCount,
+            },
+          }),
+        );
+      };
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowLeft") {
+          playerId = (playerId + (playerCount - 1)) % playerCount;
+          playerIdDisplay.textContent = playerId;
+        }
+        if (event.key === "ArrowRight") {
+          playerId = (playerId + 1) % playerCount;
+          playerIdDisplay.textContent = playerId;
+        }
+
+        let action = {
+          type: "userInput",
+          options: {
+            type: null,
+            playerId: playerId,
+            timestamp: Date.now(),
+          },
+        };
+
+        if (event.key === "ArrowUp") action.options.type = "UP";
+        if (event.key === "ArrowDown") action.options.type = "DOWN";
+
+        if (action.options.type) {
+          socket.send(JSON.stringify(action));
+        }
+      });
+
+      document.addEventListener("keyup", (event) => {
+        let action = {
+          type: "userInput",
+          options: {
+            type: null,
+            playerId: playerId,
+            timestamp: Date.now(),
+          },
+        };
+
+        if (event.key === "ArrowUp" || event.key === "ArrowDown")
+          action.options.type = "STOP";
+
+        if (action.options.type) {
+          socket.send(JSON.stringify(action));
+        }
+      });
+
+      let gameState = {};
+      let lastUpdateTime = performance.now();
+
+      socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+
+        // Handle different message types
+        if (data.type === "gameCreated") {
+          console.log("Game created");
+          socket.send(JSON.stringify({ type: "gameStart" }));
+        } else if (data.type === "gameState") {
+          gameState = data.data;
+          lastUpdateTime = performance.now();
+        } else if (data.type === "error") {
+          console.error("Server error:", data.message);
+        }
+      };
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (!gameState.balls) return;
+
+        // Draw balls
+        gameState.balls?.forEach((ball) => {
+          if (ball.isVisible) {
+            ctx.fillStyle = "white";
+            ctx.beginPath();
+            ctx.arc(
+              ball.x * ratio,
+              ball.y * ratio,
+              ball.radius * ratio,
+              0,
+              Math.PI * 2,
+            );
+            ctx.fill();
+          }
+        });
+
+        // Draw paddles
+        gameState.paddles?.forEach((paddle, index) => {
+          if (paddle.isVisible) {
+            // Highlight the current player's paddle
+            ctx.fillStyle = index === playerId ? "#00FFFF" : "white";
+
+            ctx.save(); // Save the current transformation state
+
+            // Move the origin to the paddle's position
+            ctx.translate(paddle.x * ratio, paddle.y * ratio);
+
+            // Rotate using the paddle's direction
+            let angle = Math.atan2(paddle.dy, paddle.dx);
+            ctx.rotate(angle);
+
+            // Draw the paddle (centered at the new origin)
+            ctx.fillRect(
+              -(paddle.width * ratio) / 2, // Center along width
+              -(paddle.height * ratio) / 2, // Center along height
+              paddle.width * ratio,
+              paddle.height * ratio,
+            );
+
+            ctx.restore(); // Restore the previous transformation state
+          }
+        });
+
+        // Draw the walls -> For debugging purposes
+        gameState.walls?.forEach((wall) => {
+          if (wall.isVisible) {
+            ctx.save();
+            ctx.translate(wall.x * ratio, wall.y * ratio);
+            let angle = Math.atan2(wall.dy, wall.dx);
+            ctx.rotate(angle);
+
+            ctx.strokeStyle = "red";
+            ctx.strokeRect(
+              (-wall.width * ratio) / 2,
+              (-wall.height * ratio) / 2,
+              wall.width * ratio,
+              wall.height * ratio,
+            );
+
+            ctx.restore();
+          }
+        });
+
+        // Draw the powerUps
+
+        if (gameState.modifiersData) {
+          gameState.modifiersData.spawnedPowerUps?.forEach((entry) => {
+            const type = entry[0];
+            const powerUp = entry[1];
+            if (powerUp.isVisible) {
+              switch (type) {
+                case "speedBoost":
+                  ctx.fillStyle = "red";
+                  break;
+
+                case "inisVisible_ball_modifier":
+                  ctx.fillStyle = "blue";
+                  break;
+
+                case "multiball_modifier":
+                  ctx.fillStyle = "green";
+                  break;
+
+                case "grasping_vines_debuff_modifier":
+                  ctx.fillStyle = "yellow";
+                  break;
+
+                case "black_hole_debuff_modifier":
+                  ctx.fillStyle = "purple";
+                  break;
+
+                case "carousel_debuff_modifier":
+                  ctx.fillStyle = "lime";
+                  break;
+
+                case "shooting_modifier":
+                  ctx.fillStyle = "yellow";
+                  break;
+
+                default:
+                  ctx.fillStyle = "orange";
+              }
+              ctx.beginPath();
+              ctx.arc(
+                powerUp.x * ratio,
+                powerUp.y * ratio,
+                powerUp.radius * ratio,
+                0,
+                Math.PI * 2,
+              );
+              ctx.fill();
+            }
+          });
+        }
+
+        // Draw scores if available
+        if (gameState.scores) {
+          ctx.fillStyle = "white";
+          ctx.font = "24px Arial";
+          ctx.textAlign = "center";
+
+          // Display scores at the top of the canvas
+          ctx.fillText(
+            `Scores: ${JSON.stringify(gameState.scores)}`,
+            canvas.width / 2,
+            30,
+          );
+        }
+      }
+
+      function gameLoop() {
+        draw();
+        requestAnimationFrame(gameLoop);
+      }
+
+      // Handle connection errors
+      socket.onerror = function (error) {
+        console.error("WebSocket Error:", error);
+      };
+
+      // Handle disconnections
+      socket.onclose = function (event) {
+        console.log("WebSocket connection closed:", event.code, event.reason);
+      };
+
+      gameLoop();
+    </script>
+  </body>
+</html>
