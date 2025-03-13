@@ -5,8 +5,8 @@ function isLobbyClosed(lobbyId: string): boolean {
   const privateLobbies = PrivateLobbies.get(lobbyId);
 
   if (
-    publicLobbies?.lobbyState === "locked" ||
-    privateLobbies?.lobbyState === "locked"
+    publicLobbies?.isLobbyLocked === true ||
+    privateLobbies?.isLobbyLocked === true
   ) {
     return true;
   }

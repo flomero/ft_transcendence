@@ -1,20 +1,21 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { validConnectionCheck } from "../lobbyVaidation/validConnectionCheck";
 import canLobbyBeClosedLocked from "../lobbyVaidation/canLobbyBeLocked";
-import lockLobby from "./lockLobby";
+import { changeLockState } from "./changelockState";
 
 async function lockLobbyHandler(
-  request: FastifyRequest<{ Params: { lobbyId: string } }>,
+  request: FastifyRequest<{ Params: { lobbyId: string; state: boolean } }>,
   reply: FastifyReply,
 ): Promise<void> {
   const userId = request.userId;
   const lobbyId = request.params.lobbyId;
+  const state = request.params.state;
 
   try {
     validConnectionCheck(userId, lobbyId);
     canLobbyBeClosedLocked(lobbyId);
-    lockLobby(lobbyId, userId);
-    reply.code(200).send({ message: "Lobby is locked" });
+    changeLockState(lobbyId, userId, state);
+    reply.code(200).send({ message: "Lobby is locked: " + state });
   } catch (error) {
     if (error instanceof Error) reply.code(400).send({ error: error.message });
     return;

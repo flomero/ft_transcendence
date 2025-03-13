@@ -7,7 +7,8 @@ import MinAndMaxPlayers from "../../../types/games/lobby/MinAndMaxPlayers";
 class Lobby {
   private lobbyId: string = randomUUID();
   private lobbyMembers: Map<string, LobbyMember> = new Map();
-  private stateLobby: "open" | "locked" | "started";
+  private stateLobby: "open" | "started";
+  private locketLobby: boolean = false;
   game: "pong"; //make private later
   gameMode: GameModes; //make private later
   lobbyOwner: string; //make private later
@@ -100,15 +101,15 @@ class Lobby {
     this.stateLobby = newState;
   }
 
-  public get lobbyState(): "open" | "locked" | "started" {
+  public get lobbyState(): "open" | "started" {
     return this.stateLobby;
   }
 
-  public lockLobby(memberId: string): void {
+  public changeLockState(memberId: string, state: boolean): void {
     if (this.lobbyOwner !== memberId) {
       throw new Error("Only the owner can lock the lobby");
     }
-    this.stateLobby = "locked";
+    this.locketLobby = state;
   }
 
   public reachedMinPlayers(): boolean {
@@ -127,7 +128,9 @@ class Lobby {
     return true;
   }
 
-  public getUserState(memberId: string): "notInLobby" | "inLobby" | "inMatch" {
+  public getMemberState(
+    memberId: string,
+  ): "notInLobby" | "inLobby" | "inMatch" {
     if (this.lobbyMembers.has(memberId) === false) {
       throw new Error("Member is not in the lobby");
     }
@@ -144,6 +147,10 @@ class Lobby {
     if (this.allMembersReady()) {
       this.sendMessateToMember(this.lobbyOwner, "Lobby is ready to start");
     }
+  }
+
+  public get isLobbyLocked(): boolean {
+    return this.locketLobby;
   }
 
   private isMemberConnectedToSocket(memberId: string): boolean {
@@ -170,7 +177,7 @@ class Lobby {
   private canMemberBeAddedCheck(memberId: string): void {
     if (this.lobbyMembers.has(memberId)) {
       throw new Error("Member is already in the lobby");
-    } else if (this.stateLobby === "locked") {
+    } else if (this.locketLobby === true) {
       throw new Error("Lobby is locked already");
     } else if (this.isLobbyFull()) {
       throw new Error("Lobby is full");
