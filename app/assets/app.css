@@ -227,4 +227,8 @@
     overflow: hidden;
     transition: height 0.3s ease;
   }
+
+  .input {
+    @apply rounded-lg px-4 py-2 outline;
+  }
 }

@@ -1,4 +1,4 @@
-export {};
+import { toggleClasses } from "./utils.js";
 
 declare global {
   interface Window {
@@ -14,18 +14,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Function to toggle sidebar
   window.toggleSidebar = () => {
-    if (!sidebar || !content || !overlay) return;
-    sidebar.classList.toggle("translate-x-full");
-    sidebar.classList.toggle("translate-x-0");
-    overlay.classList.toggle("opacity-0");
-    overlay.classList.toggle("opacity-100");
-    overlay.classList.toggle("pointer-events-none");
-    overlay.classList.toggle("pointer-events-auto");
+    toggleClasses(sidebar, ["translate-x-full", "translate-x-0"]);
+    toggleClasses(overlay, [
+      "opacity-0",
+      "opacity-100",
+      "pointer-events-none",
+      "pointer-events-auto",
+    ]);
 
     // For desktop behavior
     if (window.innerWidth >= 1024) {
-      content.classList.toggle("w-[calc(100%-300px)]");
-      content.classList.toggle("mr-[300px]");
+      toggleClasses(content, ["w-[calc(100%-300px)]", "mr-[300px]"]);
     }
   };
 

@@ -1,3 +1,5 @@
+import { changeClasses } from "./utils.js";
+
 type Message = {
   type: string;
   id: string;
@@ -181,23 +183,17 @@ class Chat {
 
         // Wait for exit animation to complete
         setTimeout(() => {
-          // Update UI visibility
-          elements.roomsView?.classList.add("hidden");
-          elements.roomsView?.classList.remove("slide-out-left");
+          changeClasses(elements.roomsView, ["slide-out-left"], ["hidden"]);
 
           // Show messages view with animation
-          this.toggleClasses(
+          changeClasses(
             elements.messagesView,
             ["hidden"],
             ["flex", "slide-in-right"],
           );
 
           // Show form with animation
-          this.toggleClasses(
-            elements.input,
-            ["hidden"],
-            ["flex", "slide-in-up"],
-          );
+          changeClasses(elements.input, ["hidden"], ["flex", "slide-in-up"]);
 
           elements.backButton?.classList.remove("hidden");
 
@@ -214,21 +210,7 @@ class Chat {
       })
       .catch((error) => console.error("Error fetching room:", error));
   }
-
-  // Helper to toggle multiple classes at once
-  private toggleClasses(
-    element: HTMLElement | null,
-    classesToRemove: string[],
-    classesToAdd: string[],
-  ): void {
-    if (!element) return;
-
-    for (const cls of classesToRemove) element.classList.remove(cls);
-    for (const cls of classesToAdd) element.classList.add(cls);
-  }
 }
-
-export {};
 
 // Create and export chat instance
 const chat = new Chat();
