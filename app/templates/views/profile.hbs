@@ -1,48 +1,75 @@
 <div class="layout mx-auto max-w-2xl p-8">
-  <h1 class="mb-6 text-2xl font-bold text-gray-100">User Profile</h1>
-
-  <div class="mb-6 rounded-2xl border-2 p-6 shadow-md">
-    <h2 class="mb-4 text-lg font-medium text-gray-200">Current Information</h2>
-    <img
-      src="{{imageUrl}}"
-      alt="User Avatar"
-      class="mb-4 h-24 w-24 rounded-full"
-    />
-    <form
-      method="POST"
-      action="/profile/update/image"
-      enctype="multipart/form-data"
-    >
-      <input
-        type="file"
-        name="image"
-        accept="image/jpeg, image/png, image/gif"
-        required="required"
+  <div class="mb-6 rounded-2xl border p-6 shadow-md transition-height overflow-hidden duration-300 ease-in-out">
+    <div class="flex flex-row gap-4">
+      <img
+        src="{{imageUrl}}"
+        alt="User Avatar"
+        class="mb-4 h-24 w-24 rounded-full border"
       />
-      <input type="submit" />
-    </form>
-    <div class="mb-2 flex items-center gap-2">
-      <span class="font-medium text-gray-300">User ID:</span>
-      <span class="text-gray-300">{{userId}}</span>
+      <div>
+        <p id="current-username" class="text-2xl">{{userName}}</p>
+        <p class="text-fg-muted">{{userId}}</p>
+        <div class="flex flex-row flex-wrap gap-2 mt-2">
+           {{#> components/button id="edit-username-button" onclick="profileEditor.showEditUsernameForm()" variant="outline"}}
+            Edit Username
+           {{/components/button}}
+           {{#> components/button id="edit-profile-picture-button" onclick="profileEditor.showEditProfilePictureForm()" variant="outline"}}
+            Edit Picture
+           {{/components/button}}
+          <div class="flex items-center gap-2 mt-4">
+            <form
+              id="edit-username-form"
+              hidden="hidden"
+              onsubmit="profileEditor.saveUsername(event)"
+              method="post"
+              class="w-full"
+            >
+              <div class="flex flex-col gap-3">
+                <input type="text" required class="input" name="username" value="{{userName}}" />
+                <div class="flex gap-2">
+                  {{#> components/button type="submit"}}
+                    Save
+                  {{/components/button}}
+                  {{#> components/button type="button" variant="outline" onclick="profileEditor.hideEditUsernameForm()"}}
+                    Cancel
+                  {{/components/button}}
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <form
+            id="edit-profile-picture-form"
+            method="POST"
+            action="/profile/update/image"
+            enctype="multipart/form-data"
+            hidden="hidden"
+            class="mt-4"
+          >
+            <div class="flex flex-col gap-3">
+              <input
+                type="file"
+                name="image"
+                accept="image/jpeg, image/png, image/gif"
+                required="required"
+                class="input"
+              />
+              <div class="flex gap-2">
+                {{#> components/button type="submit"}}
+                  Update Image
+                {{/components/button}}
+                {{#> components/button type="button" variant="outline" onclick="profileEditor.hideEditProfilePictureForm()"}}
+                  Cancel
+                {{/components/button}}
+              </div>
+            </div>
+          </form>
+
+          <div id="error-message" class="p-3 text-red-500" hidden="hidden"></div>
+        </div>
+      </div>
     </div>
-    <div class="flex items-center gap-2">
-      <span class="font-medium text-gray-300">Username:</span>
-      <span id="current-username" class="text-gray-300">{{userName}}</span>
-      <form
-        id="edit-username-form"
-        hidden="hidden"
-        onsubmit="profileEditor.saveUsername(event)"
-        method="post"
-      >
-        <input type="text" required name="username" value="{{userName}}" />
-        <button id="save-username">Save</button>
-      </form>
-      <button
-        id="edit-username-button"
-        onclick="profileEditor.showEditUsernameForm()"
-      >Edit</button>
-    </div>
-    <div id="error-message" class="p-3 text-red-500" hidden="hidden"></div>
+    
   </div>
 </div>
 

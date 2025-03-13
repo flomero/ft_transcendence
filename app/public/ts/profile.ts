@@ -2,15 +2,29 @@ import { showById, hideById } from "./utils.js";
 
 class ProfileEditor {
   showEditUsernameForm = () => {
-    showById("edit-username-form");
     hideById("edit-username-button");
-    hideById("current-username");
+    hideById("edit-profile-picture-button");
+    showById("edit-username-form");
+    const form = document.getElementById("edit-username-form");
+    if (form) {
+      form.classList.add("slide-in-up");
+      form.classList.remove("slide-out-down");
+    }
   };
 
   hideEditUsernameForm = () => {
-    hideById("edit-username-form");
-    showById("edit-username-button");
-    showById("current-username");
+    const form = document.getElementById("edit-username-form");
+    if (form && form instanceof HTMLFormElement) {
+      form.classList.remove("slide-in-up");
+      form.classList.add("slide-out-down");
+      form.reset();
+      setTimeout(() => {
+        hideById("edit-username-form");
+        hideById("error-message");
+        showById("edit-username-button");
+        showById("edit-profile-picture-button");
+      }, 300);
+    }
   };
 
   saveUsername = (event: Event) => {
@@ -41,6 +55,33 @@ class ProfileEditor {
       .catch((error) => {
         console.error("Error sending message:", error);
       });
+  };
+
+  showEditProfilePictureForm = () => {
+    hideById("edit-username-button");
+    hideById("edit-profile-picture-button");
+
+    showById("edit-profile-picture-form");
+    const form = document.getElementById("edit-profile-picture-form");
+    if (form) {
+      form.classList.add("slide-in-up");
+      form.classList.remove("slide-out-down");
+    }
+  };
+
+  hideEditProfilePictureForm = () => {
+    const form = document.getElementById("edit-profile-picture-form");
+    if (form && form instanceof HTMLFormElement) {
+      form.classList.remove("slide-in-up");
+      form.classList.add("slide-out-down");
+      form.reset();
+      setTimeout(() => {
+        hideById("edit-profile-picture-form");
+        hideById("error-message");
+        showById("edit-username-button");
+        showById("edit-profile-picture-button");
+      }, 300);
+    }
   };
 }
 
