@@ -1,6 +1,7 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { validConnectionCheck } from "../lobbyVaidation/validConnectionCheck";
 import setLobbyStateToStart from "./setLobbyStateToStart";
+import areAllMembersReady from "../lobbyVaidation/areAllMembersReady";
 
 async function startLobbyHandler(
   request: FastifyRequest<{ Params: { lobbyId: string } }>,
@@ -11,6 +12,7 @@ async function startLobbyHandler(
 
   try {
     validConnectionCheck(userId, lobbyId);
+    areAllMembersReady(lobbyId);
     setLobbyStateToStart(lobbyId, userId);
     reply.code(200).send({ message: "Lobby started" });
   } catch (error) {

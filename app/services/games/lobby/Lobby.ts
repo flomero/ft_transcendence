@@ -17,7 +17,7 @@ class Lobby {
     const newMember: LobbyMember = {
       id: memberId,
       userState: "notInLobby",
-      isReady: false,
+      isReady: true,
     };
 
     this.lobbyMembers.set(memberId, newMember);
@@ -127,6 +127,32 @@ class Lobby {
     return true;
   }
 
+  public getUserState(memberId: string): "notInLobby" | "inLobby" | "inMatch" {
+    if (this.lobbyMembers.has(memberId) === false) {
+      throw new Error("Member is not in the lobby");
+    }
+    return this.lobbyMembers.get(memberId)!.userState;
+  }
+
+  public setMemberReadyState(memberId: string, isReady: boolean): void {
+    if (this.lobbyMembers.has(memberId) === false) {
+      throw new Error("Member is not in the lobby");
+    } else if (this.isMemberConnectedToSocket(memberId) === false) {
+      throw new Error("Member is not connected to the socket");
+    }
+    this.lobbyMembers.get(memberId)!.isReady = isReady;
+    if (this.allMembersReady()) {
+      this.sendMessateToMember(this.lobbyOwner, "Lobby is ready to start");
+    }
+  }
+
+  private isMemberConnectedToSocket(memberId: string): boolean {
+    if (this.lobbyMembers.get(memberId)?.userState !== "inLobby") {
+      return false;
+    }
+    return true;
+  }
+
   private isLobbyFull(): boolean {
     if (this.lobbyMembers.size >= this.memberLimits.max) {
       return true;
@@ -149,6 +175,13 @@ class Lobby {
     } else if (this.isLobbyFull()) {
       throw new Error("Lobby is full");
     }
+  }
+
+  private sendMessateToMember(memberId: string, message: string): void {
+    if (this.lobbyMembers.get(memberId)?.socket === undefined) {
+      throw new Error("Member is not connected to the socket");
+    }
+    this.lobbyMembers.get(memberId)?.socket?.send(message);
   }
 }
 
