@@ -1,0 +1,10 @@
+<div id="chat-container" class="grid grid-cols-4 gap-4 w-full ">
+    <div id="chat-rooms" class="col-span-1 border-2 border-gray-50 rounded-lg p-4">
+        {{#each rooms}}
+            {{> components/chat/room room=this}}
+        {{/each}}
+    </div>
+    {{> components/chat/messages messages=messages}}
+</div>
+
+<script src="/public/js/chat.js"></script>

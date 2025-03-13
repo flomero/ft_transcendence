@@ -93,10 +93,10 @@ export class PhysicsEngine {
 
     // Deactivate collision from inside the Rectangle
     if (
-      r_bx > -rw / 2.0 &&
-      r_bx < rw / 2.0 &&
-      r_by > -rh / 2.0 &&
-      r_by < rh / 2.0
+      r_bx >= -rw / 2.0 &&
+      r_bx <= rw / 2.0 &&
+      r_by >= -rh / 2.0 &&
+      r_by <= rh / 2.0
     )
       return null;
 

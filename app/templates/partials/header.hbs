@@ -1,0 +1,36 @@
+<header class="bg-bg border-b z-30 justify-center flex">
+  <div class="flex h-14 items-center justify-between layout">
+    <div class="flex items-center gap-2">
+      <a href="/" class="text-lg font-bold">ft_transcendence</a>
+      <nav class="text-fg-muted ml-6 hidden items-center gap-6 md:flex">
+        <!-- Your navigation links -->
+        <a
+          href="/"
+          class="hover:text-fg text-sm font-medium transition-colors"
+        >Home</a>
+         <a href="/profile">Profile</a>
+      </nav>
+    </div>
+
+    <div class="flex items-center gap-2">
+    {{#> components/button onclick="toggleSidebar" aria-label="Toggle Sidebar"}}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+          ></path>
+        </svg>
+    {{/components/button}}
+
+    </div>
+  </div>
+</header>
