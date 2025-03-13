@@ -127,7 +127,9 @@ class Router {
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch: ${response.status}`);
+        console.error("Fetch error:", response.status, response.statusText);
+        this.displayError(response.status, response.statusText);
+        return null;
       }
 
       const redirectPath = response.headers.get("X-SPA-Redirect");
@@ -209,6 +211,17 @@ class Router {
     const path = `${form.action.replace(window.location.origin, "")}?${searchParams.toString()}`;
 
     this.navigateTo(path);
+  }
+
+  displayError(status: string | number, message: string): void {
+    const html = `
+      <div class="mt-4 flex flex-col gap-2">
+        <h1>Error ${status}</h1>
+        <pre>${message}</pre>
+        <a href="/" class="underline">Go Home</a>
+      </div>
+    `;
+    this.contentContainer.innerHTML = html;
   }
 
   init(): void {
