@@ -11,3 +11,23 @@ export const showById = (id: string) => {
     element.hidden = false;
   }
 };
+
+export function changeClasses(
+  element: HTMLElement | null,
+  classesToRemove: string[],
+  classesToAdd: string[],
+): void {
+  if (!element) return;
+
+  for (const cls of classesToRemove) element.classList.remove(cls);
+  for (const cls of classesToAdd) element.classList.add(cls);
+}
+
+export function toggleClasses(
+  element: HTMLElement | null,
+  classes: string[],
+): void {
+  if (!element) return;
+
+  for (const cls of classes) element.classList.toggle(cls);
+}

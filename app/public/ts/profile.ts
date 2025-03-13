@@ -20,7 +20,7 @@ class ProfileEditor {
 
     hideById("error-message");
 
-    fetch(`/profile/update/username`, {
+    fetch("/profile/update/username", {
       method: "POST",
       body: username.toString(),
     })
