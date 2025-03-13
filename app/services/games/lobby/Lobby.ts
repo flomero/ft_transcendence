@@ -7,7 +7,7 @@ import MinAndMaxPlayers from "../../../types/games/lobby/MinAndMaxPlayers";
 class Lobby {
   private lobbyId: string = randomUUID();
   private lobbyMembers: Map<string, LobbyMember> = new Map();
-  stateLobby: "open" | "closed" | "started"; // make private later
+  private stateLobby: "open" | "locked" | "started";
   game: "pong"; //make private later
   gameMode: GameModes; //make private later
   lobbyOwner: string; //make private later
@@ -26,7 +26,6 @@ class Lobby {
     this.lobbyOwner = memberId;
     this.stateLobby = "open";
     this.memberLimits = this.getMemberLimits(gameMode);
-    console.log("Member limits: ", this.memberLimits);
     this.printLobbyMembers();
   }
 
@@ -37,18 +36,15 @@ class Lobby {
   }
 
   public addMember(memberId: string): void {
-    if (this.lobbyMembers.has(memberId)) {
-      throw new Error("Member is already in the lobby");
-    } else if (this.stateLobby === "closed") {
-      throw new Error("Lobby is closed already");
-    }
+    this.canMemberBeAddedCheck(memberId);
+
     const newMember: LobbyMember = {
       id: memberId,
       userState: "notInLobby",
       isReady: false,
     };
+
     this.lobbyMembers.set(memberId, newMember);
-    this.closeLobbyIfMaxMembers();
   }
 
   public get getLobbyId(): string {
@@ -104,20 +100,55 @@ class Lobby {
     this.stateLobby = newState;
   }
 
-  public get lobbyState(): "open" | "closed" | "started" {
+  public get lobbyState(): "open" | "locked" | "started" {
     return this.stateLobby;
   }
 
-  private closeLobbyIfMaxMembers(): void {
-    if (this.lobbyMembers.size === this.memberLimits.max) {
-      this.stateLobby = "closed";
+  public lockLobby(memberId: string): void {
+    if (this.lobbyOwner !== memberId) {
+      throw new Error("Only the owner can lock the lobby");
     }
+    this.stateLobby = "locked";
   }
+
+  public reachedMinPlayers(): boolean {
+    if (this.lobbyMembers.size >= this.memberLimits.min) {
+      return true;
+    }
+    return false;
+  }
+
+  public allMembersReady(): boolean {
+    for (const member of this.lobbyMembers.values()) {
+      if (member.isReady === false) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private isLobbyFull(): boolean {
+    if (this.lobbyMembers.size >= this.memberLimits.max) {
+      return true;
+    }
+    return false;
+  }
+
   private printLobbyMembers(): void {
     console.log("Lobby members: ");
     this.lobbyMembers.forEach((member) => {
       console.log(member.id);
     });
+  }
+
+  private canMemberBeAddedCheck(memberId: string): void {
+    if (this.lobbyMembers.has(memberId)) {
+      throw new Error("Member is already in the lobby");
+    } else if (this.stateLobby === "locked") {
+      throw new Error("Lobby is locked already");
+    } else if (this.isLobbyFull()) {
+      throw new Error("Lobby is full");
+    }
   }
 }
 

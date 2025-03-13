@@ -2,7 +2,7 @@ import { FastifyRequest, FastifyReply } from "fastify";
 import { isUserInAnyLobby } from "../lobbyVaidation/isUserInAnyLobby";
 import { isLobbyRegistered } from "../lobbyVaidation/isLobbyRegistered";
 import addUserToExistingLobby from "./addUserToExistingLobby";
-import isLobbyOpen from "./isLobbyOpen";
+import isLobbyOpen from "../lobbyVaidation/isLobbyOpen";
 
 async function joinLobbyHandler(
   request: FastifyRequest<{ Params: { lobbyId: string } }>,
@@ -29,7 +29,6 @@ async function joinLobbyHandler(
       return;
     }
   }
-
   reply.code(200).send({ message: "User is added to Lobby" });
 }
 
