@@ -1,6 +1,6 @@
 import { GameStatus } from "../../gameBase";
 import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
-import { Pong } from "../pong";
+import type { Pong } from "../pong";
 import { PongModifierBase } from "../pongModifierBase";
 
 export class ScoredGame extends PongModifierBase {

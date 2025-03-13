@@ -57,7 +57,7 @@ interface Game {
 export type GameRegistry = Record<string, Game>;
 
 // Export the initialized registry
-export let GAME_REGISTRY: GameRegistry = {};
+export const GAME_REGISTRY: GameRegistry = {};
 
 // Utility type for accessing specific game components with type safety
 export type GameType = keyof GameRegistry;

@@ -24,7 +24,7 @@ export class RNG {
     const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
 
     // Transform to desired distribution with center and calculated stdDev
-    let result = center + stdDev * z0;
+    const result = center + stdDev * z0;
 
     return result;
   }

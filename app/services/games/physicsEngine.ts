@@ -1,5 +1,5 @@
-import { Rectangle } from "../../types/games/pong/rectangle";
-import { Ball } from "../../types/games/pong/ball";
+import type { Rectangle } from "../../types/games/pong/rectangle";
+import type { Ball } from "../../types/games/pong/ball";
 
 const EPSILON = 1e-2;
 

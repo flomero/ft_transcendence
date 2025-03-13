@@ -1,6 +1,6 @@
-import { FastifyRequest } from "fastify";
-import { WebSocket } from "ws";
-import { GameBase, GameStatus } from "../gameBase";
+import type { FastifyRequest } from "fastify";
+import type { WebSocket } from "ws";
+import { type GameBase, GameStatus } from "../gameBase";
 import { GAME_REGISTRY } from "../../../types/games/gameRegistry";
 
 export const pongConsumer = async (

@@ -1,9 +1,9 @@
 import { Pong, TargetType } from "../pong";
-import { Rectangle } from "../../../../types/games/pong/rectangle";
-import { Ball } from "../../../../types/games/pong/ball";
-import { Paddle } from "../../../../types/games/pong/paddle";
+import type { Rectangle } from "../../../../types/games/pong/rectangle";
+import type { Ball } from "../../../../types/games/pong/ball";
+import type { Paddle } from "../../../../types/games/pong/paddle";
 import {
-  BallSettings,
+  type BallSettings,
   GAME_REGISTRY,
 } from "../../../../types/games/gameRegistry";
 

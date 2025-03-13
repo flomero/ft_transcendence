@@ -1,4 +1,4 @@
-import { GameBase } from "../../gameBase";
+import type { GameBase } from "../../gameBase";
 import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
 import { TimeLimitedModifierBase } from "../../timeLimitedModifierBase";
 import { ModifierStatus } from "../../modifierBase";
@@ -75,11 +75,11 @@ export class PowerUpSpawner extends TimeLimitedModifierBase {
   }
 
   onPausing(game: GameBase): void {
-    console.log(`PowerUpSpawner PAUSED`);
+    console.log("PowerUpSpawner PAUSED");
   }
 
   onResuming(game: GameBase): void {
     this.status = ModifierStatus.ACTIVE;
-    console.log(`PowerUpSpawner RESUMED`);
+    console.log("PowerUpSpawner RESUMED");
   }
 }

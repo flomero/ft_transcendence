@@ -1,4 +1,4 @@
-import { GameBase } from "./gameBase";
+import type { GameBase } from "./gameBase";
 
 export enum ModifierStatus {
   INACTIVE,

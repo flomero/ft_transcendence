@@ -1,4 +1,4 @@
-import { GameObject } from "./gameObject";
+import type { GameObject } from "./gameObject";
 
 export interface Rectangle extends GameObject {
   absX: number;

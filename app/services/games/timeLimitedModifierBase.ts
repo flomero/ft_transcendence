@@ -1,4 +1,4 @@
-import { GameBase } from "./gameBase";
+import type { GameBase } from "./gameBase";
 import { ModifierBase, ModifierStatus } from "./modifierBase";
 
 export abstract class TimeLimitedModifierBase extends ModifierBase {

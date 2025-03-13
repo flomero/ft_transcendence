@@ -1,6 +1,9 @@
-import { promises as fs } from "fs";
-import * as path from "path";
-import { GameRegistry, GAME_REGISTRY } from "../../types/games/gameRegistry";
+import { promises as fs } from "node:fs";
+import * as path from "node:path";
+import {
+  type GameRegistry,
+  GAME_REGISTRY,
+} from "../../types/games/gameRegistry";
 
 export async function loadGameRegistry(): Promise<void> {
   const jsonPath = path.join(

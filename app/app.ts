@@ -1,6 +1,6 @@
 import { join } from "node:path";
-import AutoLoad, { AutoloadPluginOptions } from "@fastify/autoload";
-import { FastifyPluginAsync, FastifyServerOptions } from "fastify";
+import AutoLoad, { type AutoloadPluginOptions } from "@fastify/autoload";
+import type { FastifyPluginAsync, FastifyServerOptions } from "fastify";
 import { loadGameRegistry } from "./services/games/gameRegistry";
 
 export interface AppOptions

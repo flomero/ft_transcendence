@@ -1,5 +1,5 @@
 import { ModifierBase } from "../modifierBase";
-import { GameBase } from "../gameBase";
+import type { GameBase } from "../gameBase";
 
 export class PongModifierBase extends ModifierBase {
   onGoal(game: GameBase, args: { playerId: number }): void {}

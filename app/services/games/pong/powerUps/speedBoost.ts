@@ -1,6 +1,6 @@
 import { TimeLimitedModifierBase } from "../../timeLimitedModifierBase";
 import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
-import { Pong, TargetType } from "../pong";
+import { type Pong, TargetType } from "../pong";
 import { ModifierActivationMode } from "../../modifierBase";
 
 export class SpeedBoost extends TimeLimitedModifierBase {

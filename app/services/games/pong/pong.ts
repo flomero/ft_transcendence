@@ -1,10 +1,10 @@
 import { GameBase, GameStatus } from "../gameBase";
-import { PhysicsEngine, Collision } from "../physicsEngine";
+import { PhysicsEngine, type Collision } from "../physicsEngine";
 import { GAME_REGISTRY } from "../../../types/games/gameRegistry";
-import { Paddle } from "../../../types/games/pong/paddle";
-import { Ball } from "../../../types/games/pong/ball";
-import { Rectangle } from "../../../types/games/pong/rectangle";
-import { EditManager, Editable } from "../editManager";
+import type { Paddle } from "../../../types/games/pong/paddle";
+import type { Ball } from "../../../types/games/pong/ball";
+import type { Rectangle } from "../../../types/games/pong/rectangle";
+import { EditManager, type Editable } from "../editManager";
 
 const EPSILON = 1e-2;
 
@@ -64,16 +64,16 @@ export abstract class Pong extends GameBase implements Editable<TargetType> {
     this.serverMaxDelayTicks = serverMaxDelayS * this.serverTickrateS;
 
     this.arenaSettings =
-      GAME_REGISTRY.pong.gameModes[gameData["gameModeName"]].arenaSettings;
+      GAME_REGISTRY.pong.gameModes[gameData.gameModeName].arenaSettings;
 
     // Network playability related
     this.tickData = new Array(this.serverMaxDelayTicks);
 
     // Players & related
     this.extraGameData = {
-      playerCount: gameData["playerCount"],
+      playerCount: gameData.playerCount,
       lastHit: -1,
-      scores: Array(gameData["playerCount"]).fill(0),
+      scores: Array(gameData.playerCount).fill(0),
     };
 
     // Game objects -> w/ collisions
@@ -107,12 +107,13 @@ export abstract class Pong extends GameBase implements Editable<TargetType> {
 
       case TargetType.Balls:
       case TargetType.Paddles:
-      case TargetType.Walls:
+      case TargetType.Walls: {
         // For game object arrays, use the enum value as the key in gameObjects.
         const arr = this.gameObjects[targetType];
         if (targetId === -1) return arr;
         if (targetId >= 0 && targetId < arr.length) return arr[targetId];
         break;
+      }
     }
     return null;
   }

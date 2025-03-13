@@ -1,4 +1,4 @@
-import { Rectangle } from "./rectangle";
+import type { Rectangle } from "./rectangle";
 
 export interface Paddle extends Rectangle {
   velocity: number;

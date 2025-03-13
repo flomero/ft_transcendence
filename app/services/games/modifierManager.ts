@@ -1,9 +1,9 @@
-import { Ball } from "../../types/games/pong/ball";
-import { GameBase } from "./gameBase";
+import type { Ball } from "../../types/games/pong/ball";
+import type { GameBase } from "./gameBase";
 import { GAME_REGISTRY } from "../../types/games/gameRegistry";
 import {
   ModifierActivationMode,
-  ModifierBase,
+  type ModifierBase,
   ModifierStatus,
 } from "./modifierBase";
 
@@ -154,7 +154,7 @@ export class ModifierManager {
           `Error triggering method ${methodName} on object:`,
           error,
         );
-        console.log(`Object details:`, {
+        console.log("Object details:", {
           objectType: obj.constructor.name,
           availableMethods: Object.getOwnPropertyNames(
             Object.getPrototypeOf(obj),
@@ -178,7 +178,7 @@ export class ModifierManager {
   }
 
   loadStateSnapshot(snapshot: Record<string, any>): void {
-    this.spawnedPowerUps = snapshot["spawnedPowerUps"] || [];
+    this.spawnedPowerUps = snapshot.spawnedPowerUps || [];
 
     // For a complete implementation, you would need to reconstruct the modifier
     // and powerUp instances from their states, but that requires additional knowledge
