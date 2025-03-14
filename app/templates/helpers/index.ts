@@ -17,5 +17,17 @@ export function registerHelpers(handlebars: typeof Handlebars) {
     condition ? valueIfTrue : "",
   );
 
+  handlebars.registerHelper("times", (n, block) => {
+    let blocks = "";
+    for (let i = 0; i < n; ++i) blocks += block.fn(i);
+    return blocks;
+  });
+
+  handlebars.registerHelper("multiply", (a, b) => a * b);
+
+  handlebars.registerHelper("add", (a, b) => a + b);
+
+  handlebars.registerHelper("isEven", (value) => value % 2 === 0);
+
   // Add other helpers here as needed
 }
