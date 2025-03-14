@@ -3,6 +3,7 @@ import { saveMessage } from "../database/chat/message";
 import {
   addUserToChatRoom,
   createChatRoom,
+  deleteChatRoom,
   getChatRoomRead,
   setRoomRead,
   setRoomReadForAllUsersBlacklist,
@@ -181,6 +182,24 @@ export async function addRoom(
       type: "room",
       id: roomId,
       html: html,
+    };
+
+    client.socket.send(JSON.stringify(response));
+  }
+}
+
+export async function deleteRoom(fastify: FastifyInstance, roomId: number) {
+  await deleteChatRoom(fastify, roomId);
+
+  for (const client of chatClients) {
+    if (client.currentRoomId === roomId) {
+      client.currentRoomId = -1;
+    }
+
+    const response: ChatWebSocketResponse = {
+      type: "room",
+      id: roomId,
+      html: "",
     };
 
     client.socket.send(JSON.stringify(response));
