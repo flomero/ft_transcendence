@@ -24,7 +24,9 @@
   {{#if disabled}}disabled{{/if}}
   {{#if aria-label}}aria-label="{{aria-label}}"{{/if}}
   {{#if type}}type="{{type}}"{{/if}}
-  {{#if onclick}}onclick="{{onclick}}(event)"{{/if}}>
+  {{#if onclick}}onclick="{{onclick}}(event)"{{/if}}
+  {{#if data-id}}data-id="{{data-id}}"{{/if}}
+  >
   {{> @partial-block }}
 </button>
 {{/if}}
