@@ -223,7 +223,7 @@ class Router {
     <div class="layout fixed inset-0 z-10 flex flex-col items-center justify-center">
       <div class="bg-transparent border relative z-10 p-8 rounded-lg flex flex-col items-center justify-center text-center w-xl max-w-8/12 backdrop-blur-sm">
         <h1 class="text-4xl font-bold text-red-600 mb-1">Error ${status}</h1>
-        <p class="bg-bg-muted p-3 text-center text-balance rounded-lg shadow-md mb-6 overflow-auto font-mono max-h-40">{{message}}</p>
+        <p class="bg-bg-muted p-3 text-center text-balance rounded-lg shadow-md mb-6 overflow-auto font-mono max-h-40">${message}</p>
         <a href="/" class="underline">Go Home</a>
       </div>
     </div>

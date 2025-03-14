@@ -14,7 +14,7 @@ export default fp(async (fastify, opts) => {
       {
         error: error.name,
         message: error.message,
-        statusCode: error.statusCode,
+        statusCode: error.statusCode ?? 500,
       },
       viewOptions,
     );

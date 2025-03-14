@@ -6,7 +6,7 @@ const profile: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.get("/", async (request, reply) => {
     const userData = await getUserById(fastify, request.userId);
     if (!userData) {
-      return reply.code(404).send("No user data found.");
+      throw new Error("No user data found.");
     }
 
     const data = {
