@@ -1,10 +1,4 @@
-import {
-  showById,
-  hideById,
-  innerTextById,
-  valueById,
-  focusById,
-} from "./utils.js";
+import { showById, hideById, innerTextById, focusById } from "./utils.js";
 
 class ProfileEditor {
   private showError = (message: string) => {
