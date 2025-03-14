@@ -1,10 +1,7 @@
 import { FastifyInstance } from "fastify";
-import {
-  createInvite,
-  hasInvite,
-  acceptInvite,
-} from "../database/friend/invites";
-import { isFriend, saveFriend } from "../database/friend/friends";
+import { createInvite, hasInvite } from "../database/friend/invites";
+import { acceptFriendRequestAndAddRoom } from "./accept";
+import { isFriend } from "../database/friend/friends";
 
 export async function requestFriend(
   fastify: FastifyInstance,
@@ -21,8 +18,7 @@ export async function requestFriend(
     return "User is already a friend";
   }
   if (await hasInvite(fastify, friendId, userId)) {
-    await acceptInvite(fastify, friendId, userId);
-    await saveFriend(fastify, userId, friendId);
+    await acceptFriendRequestAndAddRoom(fastify, userId, friendId);
     return undefined;
   }
 
