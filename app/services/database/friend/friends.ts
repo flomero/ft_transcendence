@@ -44,13 +44,14 @@ export async function saveFriend(
   return fastify.sqlite.run(sql, [senderId, receiverId]);
 }
 
-export async function deleteFriend(
+export async function deleteFriendOrInvite(
   fastify: FastifyInstance,
   userId1: string,
   userId2: string,
-) {
+): Promise<number | undefined> {
   const sql =
     "DELETE FROM users_friends WHERE (senderId = ? AND receiverId = ?) OR (senderId = ? AND receiverId = ?)";
 
-  return fastify.sqlite.run(sql, [userId1, userId2, userId2, userId1]);
+  return (await fastify.sqlite.run(sql, [userId1, userId2, userId2, userId1]))
+    .changes;
 }
