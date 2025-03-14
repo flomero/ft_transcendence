@@ -1,9 +1,6 @@
 import { FastifyPluginAsync } from "fastify";
-import { FriendRequestContent } from "../../types/friends/friendRequestContent";
-import { validUserInfo } from "../../services/friends/accept";
-import { friendInvites } from "../../services/database/friend/friendInvites";
-import { saveFriendRequest } from "../../services/database/friend/saveFriendRequest";
-import { checkFriendRequest } from "../../services/friends/request";
+import { acceptFriendRequest } from "../../services/friends/accept";
+import { requestFriend } from "../../services/friends/request";
 
 const friends: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.post("/request/:friendId", async function (request, reply) {
@@ -12,19 +9,9 @@ const friends: FastifyPluginAsync = async (fastify): Promise<void> => {
       return reply.status(400).send({ message: "FriendId ID required" });
     }
 
-    const friendRequestContent: FriendRequestContent = {
-      friendId,
-      userId: request.userId,
-      request,
-      reply,
-    };
-
-    if (!(await checkFriendRequest(friendRequestContent))) return;
-
-    try {
-      await saveFriendRequest(friendId, request.userId, request.server);
-    } catch (error) {
-      reply.status(500).send({ message: "Failed to save friend request" });
+    const error = await requestFriend(request.server, request.userId, friendId);
+    if (error) {
+      reply.status(400).send({ message: error });
       return;
     }
 
@@ -37,18 +24,13 @@ const friends: FastifyPluginAsync = async (fastify): Promise<void> => {
       return reply.status(400).send({ message: "FriendId ID required" });
     }
 
-    const friendRequestContent: FriendRequestContent = {
+    const error = await acceptFriendRequest(
+      request.server,
+      request.userId,
       friendId,
-      userId: request.userId,
-      request,
-      reply,
-    };
-
-    if (!(await validUserInfo(friendRequestContent))) return;
-    try {
-      await friendInvites(friendId, request.userId, request.server);
-    } catch (error) {
-      reply.status(500).send("ERROR MESSAGE: " + error);
+    );
+    if (error) {
+      reply.status(400).send({ message: error });
       return;
     }
 

@@ -1,28 +1,18 @@
-import { isFriend } from "../database/friend/isFriend";
-import { isOpenFriendRequest } from "../database/friend/isOpenFriendRequest";
-import { FriendRequestContent } from "../../types/friends/friendRequestContent";
+import { FastifyInstance } from "fastify";
+import { acceptInvite, hasInvite } from "../database/friend/invites";
+import { saveFriend } from "../database/friend/friends";
 
-export async function validUserInfo(
-  content: FriendRequestContent,
-): Promise<boolean> {
-  if (
-    await isFriend(
-      content.friendId,
-      content.request.userId,
-      content.request.server,
-    )
-  ) {
-    content.reply.status(400).send({ message: "User is already a friend" });
-    return false;
-  } else if (
-    !(await isOpenFriendRequest(
-      content.friendId,
-      content.request.userId,
-      content.request.server,
-    ))
-  ) {
-    content.reply.status(400).send({ message: "No friend request found" });
-    return false;
+export async function acceptFriendRequest(
+  fastify: FastifyInstance,
+  user_id: string,
+  friend_id: string,
+): Promise<string | undefined> {
+  if (!(await hasInvite(fastify, friend_id, user_id))) {
+    return "No invite found";
   }
-  return true;
+
+  await acceptInvite(fastify, friend_id, user_id);
+  await saveFriend(fastify, user_id, friend_id);
+
+  return undefined;
 }

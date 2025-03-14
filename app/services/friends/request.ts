@@ -1,18 +1,32 @@
-import { isFriend } from "../database/friend/isFriend";
-import { FriendRequestContent } from "../../types/friends/friendRequestContent";
-import { userExists } from "../database/user";
+import { FastifyInstance } from "fastify";
+import {
+  createInvite,
+  hasInvite,
+  acceptInvite,
+} from "../database/friend/invites";
+import { isFriend, saveFriend } from "../database/friend/friends";
 
-export async function checkFriendRequest(
-  content: FriendRequestContent,
-): Promise<boolean> {
-  if (!(await userExists(content.request.server, content.friendId))) {
-    content.reply.status(404).send({ message: "User not found" });
-    return false;
-  } else if (
-    await isFriend(content.friendId, content.userId, content.request.server)
-  ) {
-    content.reply.status(400).send({ message: "User is already a friend" });
-    return false;
+export async function requestFriend(
+  fastify: FastifyInstance,
+  userId: string,
+  friendId: string,
+): Promise<string | undefined> {
+  if (userId === friendId) {
+    return "Cannot send request to yourself";
   }
-  return true;
+  if (await hasInvite(fastify, userId, friendId)) {
+    return "Request already sent";
+  }
+  if (await isFriend(fastify, userId, friendId)) {
+    return "User is already a friend";
+  }
+  if (await hasInvite(fastify, friendId, userId)) {
+    await acceptInvite(fastify, friendId, userId);
+    await saveFriend(fastify, userId, friendId);
+    return undefined;
+  }
+
+  await createInvite(fastify, userId, friendId);
+
+  return undefined;
 }
