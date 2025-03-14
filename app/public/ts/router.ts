@@ -123,10 +123,43 @@ class Router {
     try {
       const response = await fetch(`${path}?partial=true`, {
         headers: { "X-Requested-With": "XMLHttpRequest" },
+        redirect: "follow",
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch: ${response.status}`);
+        console.error("Fetch error:", response.status, response.statusText);
+        this.displayError(response.status, response.statusText);
+        return null;
+      }
+
+      const redirectPath = response.headers.get("X-SPA-Redirect");
+      if (redirectPath) {
+        console.log("Custom redirect to:", redirectPath);
+        window.history.replaceState({}, "", redirectPath);
+        this.updateActiveLinks(redirectPath);
+        return await this.fetchContent(redirectPath);
+      }
+
+      if (response.redirected) {
+        const redirectUrl = new URL(response.url);
+        const redirectPath = redirectUrl.pathname;
+        console.log("Redirected to:", redirectPath);
+        window.history.replaceState({}, "", redirectPath);
+        this.updateActiveLinks(redirectPath);
+      }
+
+      const contentType = response.headers.get("content-type");
+      if (contentType?.includes("application/json")) {
+        const data = await response.json();
+        if (data.redirectTo) {
+          console.log("JSON redirect to:", data.redirectTo);
+          window.history.replaceState({}, "", data.redirectTo);
+          this.updateActiveLinks(data.redirectTo);
+          // Instead of returning the JSON response content, fetch the new route's content
+          return await this.fetchContent(data.redirectTo);
+        }
+        // Only for JSON responses that are actually meant to be displayed
+        return `<pre>${JSON.stringify(data, null, 2)}</pre>`;
       }
 
       return await response.text();
@@ -139,27 +172,27 @@ class Router {
   executeScripts(): void {
     // Execute any script tags in the loaded content
     const scripts = this.contentContainer.querySelectorAll("script");
-    scripts.forEach((oldScript) => {
+    for (const oldScript of scripts) {
       const newScript = document.createElement("script");
-      Array.from(oldScript.attributes).forEach((attr) => {
+      for (const attr of Array.from(oldScript.attributes)) {
         newScript.setAttribute(attr.name, attr.value);
-      });
+      }
       newScript.appendChild(document.createTextNode(oldScript.innerHTML));
       if (oldScript.parentNode) {
         oldScript.parentNode.replaceChild(newScript, oldScript);
       }
-    });
+    }
   }
 
   updateActiveLinks(currentPath: string): void {
-    document.querySelectorAll("nav a").forEach((link) => {
+    for (const link of document.querySelectorAll("nav a")) {
       const href = link.getAttribute("href");
       if (href === currentPath) {
         link.classList.add("active");
       } else {
         link.classList.remove("active");
       }
-    });
+    }
   }
 
   handleFormSubmit(e: Event): void {
@@ -172,10 +205,30 @@ class Router {
     e.preventDefault();
 
     const formData = new FormData(form);
-    const searchParams = new URLSearchParams(formData as any);
+    const searchParams = new URLSearchParams(
+      formData as unknown as URLSearchParams,
+    );
     const path = `${form.action.replace(window.location.origin, "")}?${searchParams.toString()}`;
 
     this.navigateTo(path);
+  }
+
+  displayError(status: string | number, message: string): void {
+    const html = `
+     <div class="absolute inset-0 w-full h-full overflow-hidden">
+      <div class="absolute text-[15rem] font-bold opacity-[0.07] select-none top-1/4 -left-10">${status}</div>
+      <div class="absolute text-[15rem] font-bold opacity-[0.07] select-none bottom-1/4 -right-10">${status}</div>
+    </div>
+
+    <div class="layout fixed inset-0 z-10 flex flex-col items-center justify-center">
+      <div class="bg-transparent border relative z-10 p-8 rounded-lg flex flex-col items-center justify-center text-center w-xl max-w-8/12 backdrop-blur-sm">
+        <h1 class="text-4xl font-bold text-red-600 mb-1">Error ${status}</h1>
+        <p class="bg-bg-muted p-3 text-center text-balance rounded-lg shadow-md mb-6 overflow-auto font-mono max-h-40">${message}</p>
+        <a href="/" class="underline">Go Home</a>
+      </div>
+    </div>
+    `;
+    this.contentContainer.innerHTML = html;
   }
 
   init(): void {
