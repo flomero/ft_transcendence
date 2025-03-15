@@ -54,17 +54,78 @@
   }
 }
 
-@layer components {
-  .fade-transition {
-    transition: opacity 0.3s ease-out;
+@theme {
+  --animate-slide-in-right: slideInRight 0.3s forwards;
+  --animate-slide-out-right: slideOutRight 0.3s forwards;
+  --animate-slide-in-left: slideInLeft 0.3s forwards;
+  --animate-slide-out-left: slideOutLeft 0.3s forwards;
+  --animate-slide-in-up: slideInUp 0.3s forwards;
+  --animate-slide-out-down: slideOutDown 0.3s forwards;
+
+  @keyframes slideInUp {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
   }
 
-  .fade-out {
-    opacity: 0;
+  @keyframes slideOutDown {
+    from {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateY(100%);
+      opacity: 0;
+    }
   }
 
-  .fade-in {
-    opacity: 1;
+  @keyframes slideInRight {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideOutRight {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+
+  @keyframes slideInLeft {
+    from {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideOutLeft {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
   }
 
   @keyframes fade-in {
@@ -83,6 +144,20 @@
     to {
       opacity: 0;
     }
+  }
+}
+
+@layer components {
+  .fade-transition {
+    transition: opacity 0.3s ease-out;
+  }
+
+  .fade-out {
+    opacity: 0;
+  }
+
+  .fade-in {
+    opacity: 1;
   }
 
   /* For browsers supporting View Transitions API */
@@ -143,51 +218,6 @@
     animation: slideOutLeft 0.3s forwards;
   }
 
-  /* Animation keyframes */
-  @keyframes slideInRight {
-    from {
-      transform: translateX(100%);
-      opacity: 0;
-    }
-    to {
-      transform: translateX(0);
-      opacity: 1;
-    }
-  }
-
-  @keyframes slideOutRight {
-    from {
-      transform: translateX(0);
-      opacity: 1;
-    }
-    to {
-      transform: translateX(100%);
-      opacity: 0;
-    }
-  }
-
-  @keyframes slideInLeft {
-    from {
-      transform: translateX(-100%);
-      opacity: 0;
-    }
-    to {
-      transform: translateX(0);
-      opacity: 1;
-    }
-  }
-
-  @keyframes slideOutLeft {
-    from {
-      transform: translateX(0);
-      opacity: 1;
-    }
-    to {
-      transform: translateX(-100%);
-      opacity: 0;
-    }
-  }
-
   .slide-in-up {
     animation: slideInUp 0.3s forwards;
   }
@@ -196,30 +226,6 @@
     animation: slideOutDown 0.3s forwards;
   }
 
-  /* Add these new animation keyframes */
-  @keyframes slideInUp {
-    from {
-      transform: translateY(100%);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
-  }
-
-  @keyframes slideOutDown {
-    from {
-      transform: translateY(0);
-      opacity: 1;
-    }
-    to {
-      transform: translateY(100%);
-      opacity: 0;
-    }
-  }
-
-  /* Add form to the base styles for animated elements */
   #chat-rooms-view,
   #chat-messages-view,
   #chat-input {
