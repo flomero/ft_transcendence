@@ -46,6 +46,11 @@ class Router {
     this.loadRoute(path);
   }
 
+  refresh(): void {
+    const path = window.location.pathname;
+    this.loadRoute(path);
+  }
+
   handleLinkClick(e: MouseEvent): void {
     // Only process links within our app
     const target = e.target as HTMLElement;

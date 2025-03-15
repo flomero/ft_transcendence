@@ -6,6 +6,7 @@
   --color-bg-muted: var(--color-zinc-700);
   --color-fg-muted: var(--color-zinc-300);
   --color-border: var(--color-zinc-600);
+  --color-error: var(--color-rose-900);
 }
 
 @layer base {
@@ -201,31 +202,6 @@
     inherits: false;
   }
 
-  /* Animation classes for chat view transitions */
-  .slide-in-right {
-    animation: slideInRight 0.3s forwards;
-  }
-
-  .slide-out-right {
-    animation: slideOutRight 0.3s forwards;
-  }
-
-  .slide-in-left {
-    animation: slideInLeft 0.3s forwards;
-  }
-
-  .slide-out-left {
-    animation: slideOutLeft 0.3s forwards;
-  }
-
-  .slide-in-up {
-    animation: slideInUp 0.3s forwards;
-  }
-
-  .slide-out-down {
-    animation: slideOutDown 0.3s forwards;
-  }
-
   #chat-rooms-view,
   #chat-messages-view,
   #chat-input {
@@ -236,5 +212,9 @@
 
   .input {
     @apply rounded-lg px-4 py-2 outline;
+  }
+
+  a.active {
+    @apply underline;
   }
 }

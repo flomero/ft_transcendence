@@ -39,4 +39,7 @@
   {{#if requestSent}}
     {{> components/user/friendsent}}
   {{/if}}
+  {{#if showRemoveButton}}
+    {{>  components/user/removefriendbutton userId=userId}}
+  {{/if}}
 </div>

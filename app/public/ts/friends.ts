@@ -1,3 +1,13 @@
+import type Router from "./router.js";
+
+declare global {
+  interface Window {
+    FriendsManager: typeof FriendsManager;
+    friendsManager: FriendsManager;
+    router: Router;
+  }
+}
+
 class FriendsManager {
   sendFriendRequest(userID: string) {
     console.log("Sending friend request to:", userID);
@@ -12,7 +22,20 @@ class FriendsManager {
   }
 
   removeFriend(userID: string) {
-    console.log("Removing friend:", userID);
+    fetch(`/friend/delete/${userID}`, {
+      method: "POST",
+    });
+    window.router.refresh(); // TODO: maybe solve this more efficient
+  }
+
+  removeFriendButton(element: HTMLElement) {
+    const userID = element.getAttribute("data-id");
+
+    if (!userID) {
+      console.error("No user ID found on element");
+      return;
+    }
+    this.removeFriend(userID);
   }
 
   sendFriendRequestWithAnimation(element: HTMLElement) {
@@ -38,13 +61,6 @@ class FriendsManager {
         msgElement.classList.remove("opacity-0");
       }, 50);
     }, 300);
-  }
-}
-
-declare global {
-  interface Window {
-    FriendsManager: typeof FriendsManager;
-    friendsManager: FriendsManager;
   }
 }
 
