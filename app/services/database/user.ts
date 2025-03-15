@@ -1,10 +1,28 @@
-import { FastifyInstance } from "fastify";
-import { UUID } from "node:crypto";
+import type { FastifyInstance } from "fastify";
+import type { UUID } from "node:crypto";
 
 export interface User {
   id: string;
   username: string;
   image_id: UUID;
+}
+
+export interface UserWithImage {
+  userId: string;
+  userName: string;
+  imageUrl: string;
+}
+
+export function userToUserWithImage(user: User): UserWithImage {
+  return {
+    userId: user.id,
+    userName: user.username,
+    imageUrl: `/image/${user.image_id}`,
+  };
+}
+
+export function usersToUserWithImages(users: User[]): UserWithImage[] {
+  return users.map(userToUserWithImage);
 }
 
 export async function getUserById(
