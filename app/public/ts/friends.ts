@@ -28,7 +28,8 @@ class FriendsManager {
     window.router.refresh(); // TODO: maybe solve this more efficient
   }
 
-  removeFriendButton(element: HTMLElement) {
+  removeFriendButton(event: Event) {
+    const element = event.target as HTMLElement;
     const userID = element.getAttribute("data-id");
 
     if (!userID) {
@@ -38,7 +39,8 @@ class FriendsManager {
     this.removeFriend(userID);
   }
 
-  sendFriendRequestWithAnimation(element: HTMLElement) {
+  sendFriendRequestWithAnimation(event: Event) {
+    const element = event.target as HTMLElement;
     const userID = element.getAttribute("data-id");
 
     if (!userID) {

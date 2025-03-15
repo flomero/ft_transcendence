@@ -14,8 +14,6 @@ const friends: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     }));
     const data = { friends: usersToUserWithImages(transformedFriends) };
 
-    console.log(JSON.stringify(transformedFriends));
-
     const viewOptions = request.isAjax() ? {} : { layout: "layouts/main" };
     return reply.view("views/friends/index", data, viewOptions);
   });
