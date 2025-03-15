@@ -1,38 +1,42 @@
-<div class="flex flex-row items-center justify-between gap-y-1.5 p-6" data-user-id="{{userId}}">
-  <div class="flex items-center space-x-4 group">
-    <a
-      href="users/{{userId}}"
-      class="bg-bg-muted inline-flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-xs select-none"
-    >
-      <img
-        role="img"
-        src={{imageUrl}}
-        class="h-full w-full object-cover group-has-[a:hover]:border"
-        alt="Profile Picture"
-        loading="lazy"
-      />
-    </a>
+<div
+  class="flex flex-row items-center justify-between gap-y-1.5 p-6"
+  data-user-id="{{userId}}"
+>
+  <div class="group flex items-center space-x-4">
+    {{#if imageUrl}}
+      <a
+        href="users/{{userId}}"
+        class="bg-bg-muted border-fg inline-flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-xs select-none group-has-[a:hover]:border"
+      >
+        <img
+          role="img"
+          src={{imageUrl}}
+          class="h-full w-full object-cover"
+          alt="Profile Picture"
+          loading="lazy"
+        />
+      </a>
+    {{else}}
+      <a
+        href="users/{{userId}}"
+        class="bg-bg-muted border-fg inline-flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-xs select-none group-has-[a:hover]:border"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+      </a>
+    {{/if}}
     <div>
-      <a class="leading-none font-medium group-has-[a:hover]:underline" href="users/{{userId}}">
+      <a
+        class="leading-none font-medium group-has-[a:hover]:underline"
+        href="users/{{userId}}"
+      >
         {{userName}}
       </a>
     </div>
   </div>
   {{#if showFriendButton}}
-    {{#> components/button variant="outline" data-id="{{userId}}" onclick="friendsManager.sendFriendRequestWithAnimation(this)"}}
-      Add Friend 
-      <svg xmlns="http://www.w3.org/2000/svg" class="inline w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round-plus"><path d="M2 21a8 8 0 0 1 13.292-6"/><circle cx="10" cy="8" r="5"/><path d="M19 16v6"/><path d="M22 19h-6"/></svg>
-    {{/components/button}}
+    {{> components/user/friendbutton userId=userId showText=true}}
   {{/if}}
   {{#if requestSent}}
-    <p class="request-sent text-sm flex select-none flex-row items-center gap-1">
-      Friend Request Sent
-      <svg xmlns="http://www.w3.org/2000/svg" class="justify-baseline inline w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round-check"><path d="M2 21a8 8 0 0 1 13.292-6"/><circle cx="10" cy="8" r="5"/><path d="m16 19 2 2 4-4"/></svg>
-    </p>
-  {{else}}
-    <p class="request-sent text-sm flex-row select-none items-center gap-1 hidden fade-transition opacity-0">
-      Friend Request Sent
-      <svg xmlns="http://www.w3.org/2000/svg" class="justify-baseline inline w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round-check"><path d="M2 21a8 8 0 0 1 13.292-6"/><circle cx="10" cy="8" r="5"/><path d="m16 19 2 2 4-4"/></svg>
-    </p>
+    {{> components/user/friendsent}}
   {{/if}}
 </div>
