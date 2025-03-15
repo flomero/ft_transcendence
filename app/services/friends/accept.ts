@@ -1,4 +1,4 @@
-import { FastifyInstance } from "fastify";
+import type { FastifyInstance } from "fastify";
 import { acceptInvite, hasInvite } from "../database/friend/invites";
 import { saveFriend } from "../database/friend/friends";
 import { addRoom } from "../chat/live";

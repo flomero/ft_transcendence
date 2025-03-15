@@ -1,5 +1,5 @@
-import { FastifyInstance } from "fastify";
-import { UUID } from "node:crypto";
+import type { FastifyInstance } from "fastify";
+import type { UUID } from "node:crypto";
 
 export interface User {
   id: string;

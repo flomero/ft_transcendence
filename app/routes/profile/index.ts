@@ -1,6 +1,6 @@
 import type { FastifyPluginAsync } from "fastify";
 import updateProfile from "./update";
-import { getUserById, UserWithImage } from "../../services/database/user";
+import { getUserById, type UserWithImage } from "../../services/database/user";
 
 const profile: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.get("/", async (request, reply) => {

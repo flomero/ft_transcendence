@@ -1,4 +1,4 @@
-import { FastifyInstance } from "fastify";
+import type { FastifyInstance } from "fastify";
 import { searchUsersDB } from "../database/friend/search";
 
 export interface UserInviteSearch {

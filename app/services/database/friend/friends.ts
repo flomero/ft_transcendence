@@ -1,4 +1,4 @@
-import { FastifyInstance } from "fastify";
+import type { FastifyInstance } from "fastify";
 
 export async function getFriends(fastify: FastifyInstance, userId: string) {
   const sql = "SELECT * FROM users_friends WHERE senderId = $1";

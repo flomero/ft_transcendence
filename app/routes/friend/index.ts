@@ -1,11 +1,11 @@
-import { FastifyPluginAsync } from "fastify";
+import type { FastifyPluginAsync } from "fastify";
 import { deleteFriendOrInvite } from "../../services/database/friend/friends";
 import getFriendsRoutes from "./get";
 
 const friends: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.register(getFriendsRoutes);
 
-  fastify.post("/delete/:friendId", async function (request, reply) {
+  fastify.post("/delete/:friendId", async (request, reply) => {
     const { friendId } = request.params as { friendId: string };
     if (!friendId) {
       return reply.status(400).send({ message: "FriendId ID required" });
