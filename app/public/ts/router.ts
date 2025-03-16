@@ -63,6 +63,11 @@ class Router {
     const href = link.getAttribute("href");
     if (!href || href.startsWith("http")) return;
 
+    if (window.location.pathname === href) {
+      e.preventDefault();
+      return;
+    }
+
     e.preventDefault();
     this.navigateTo(href);
   }
