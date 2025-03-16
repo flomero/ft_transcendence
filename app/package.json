@@ -23,6 +23,7 @@
   "dependencies": {
     "@fastify/autoload": "^6.1.0",
     "@fastify/cookie": "^11.0.2",
+    "@fastify/env": "^5.0.2",
     "@fastify/jwt": "^9.0.4",
     "@fastify/multipart": "^9.0.3",
     "@fastify/oauth2": "^8.1.2",
