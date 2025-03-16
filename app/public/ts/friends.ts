@@ -13,40 +13,6 @@ class FriendsManager {
     console.log("Sending friend request to:", userID);
   }
 
-  acceptFriendRequest(userID: string) {
-    console.log("Accepting friend request from:", userID);
-  }
-
-  declineFriendRequest(userID: string) {
-    console.log("Declining friend request from:", userID);
-  }
-
-  removeFriend(userID: string) {
-    fetch(`/friend/delete/${userID}`, {
-      method: "POST",
-    });
-    window.router.refresh(); // TODO: maybe solve this more efficient
-  }
-
-  blockUser(userID: string) {
-    console.log("Blocking user:", userID);
-  }
-
-  unblockUser(userID: string) {
-    console.log("Unblocking user:", userID);
-  }
-
-  removeFriendButton(event: Event) {
-    const element = event.target as HTMLElement;
-    const userID = element.getAttribute("data-id");
-
-    if (!userID) {
-      console.error("No user ID found on element");
-      return;
-    }
-    this.removeFriend(userID);
-  }
-
   sendFriendRequestWithAnimation(event: Event) {
     const element = event.target as HTMLElement;
     const userID = element.getAttribute("data-id");
@@ -71,6 +37,65 @@ class FriendsManager {
         msgElement.classList.remove("opacity-0");
       }, 50);
     }, 300);
+  }
+
+  acceptFriendRequest(userID: string) {
+    fetch(`/friend/accept/${userID}`, {
+      method: "POST",
+    });
+  }
+
+  acceptFriendRequestButton(event: Event) {
+    const element = event.target as HTMLElement;
+    const userID = element.getAttribute("data-id");
+
+    if (!userID) {
+      console.error("No user ID found on element");
+      return;
+    }
+    this.acceptFriendRequest(userID);
+    window.router.refresh(); // TODO: maybe solve this more efficient
+  }
+
+  declineFriendRequest(userID: string) {
+    console.log("Declining friend request from:", userID);
+  }
+
+  declineFriendRequestButton(event: Event) {
+    const element = event.target as HTMLElement;
+    const userID = element.getAttribute("data-id");
+
+    if (!userID) {
+      console.error("No user ID found on element");
+      return;
+    }
+    this.declineFriendRequest(userID);
+    window.router.refresh(); // TODO: maybe solve this more efficient
+  }
+
+  removeFriend(userID: string) {
+    fetch(`/friend/delete/${userID}`, {
+      method: "POST",
+    });
+  }
+
+  removeFriendButton(event: Event) {
+    const element = event.target as HTMLElement;
+    const userID = element.getAttribute("data-id");
+
+    if (!userID) {
+      console.error("No user ID found on element");
+      return;
+    }
+    this.removeFriend(userID);
+    window.router.refresh(); // TODO: maybe solve this more efficient
+  }
+  blockUser(userID: string) {
+    console.log("Blocking user:", userID);
+  }
+
+  unblockUser(userID: string) {
+    console.log("Unblocking user:", userID);
   }
 }
 

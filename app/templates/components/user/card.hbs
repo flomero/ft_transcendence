@@ -34,12 +34,15 @@
     </div>
   </div>
   {{#if showFriendButton}}
-    {{> components/user/friendbutton userId=userId showText=true}}
+    {{> components/user/friendbutton userId=userId showText=showText}}
   {{/if}}
   {{#if requestSent}}
     {{> components/user/friendsent}}
   {{/if}}
   {{#if showRemoveButton}}
-    {{>  components/user/removefriendbutton userId=userId}}
+    {{>  components/user/removefriendbutton userId=userId showText=showText}}
+  {{/if}}
+  {{#if showRequestButtons}}
+    {{> components/user/requestButtons userId=userId showText=showText}}
   {{/if}}
 </div>
