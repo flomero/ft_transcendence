@@ -10,9 +10,9 @@
 			<a href="/friends/new" class="{{twMerge 'px-4 py-2 rounded' (wheneq activeView 'new' 'bg-bg-muted')}}">
 				Add Friend
 			</a>
-			<a href="/users/blocked" class="{{twMerge 'px-4 py-2 rounded' (wheneq activeView 'blocked' 'bg-bg-muted')}}">
+			{{!-- <a href="/users/blocked" class="{{twMerge 'px-4 py-2 rounded' (wheneq activeView 'blocked' 'bg-bg-muted')}}">
 				Blocked Users
-			</a>
+			</a> --}}
 		</div>
 	</div>
 	{{#ifeq activeView "friends" }}
@@ -20,6 +20,9 @@
 	{{/ifeq}}
 	{{#ifeq activeView "requests" }}
 		{{> views/friends/requests friends=friends}}
+	{{/ifeq}}
+	{{#ifeq activeView "new" }}
+		{{> views/friends/new }}
 	{{/ifeq}}
 </div>
 

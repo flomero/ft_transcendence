@@ -214,6 +214,10 @@
     @apply rounded-lg px-4 py-2 outline;
   }
 
+  input:focus-visible {
+    @apply outline-fg-muted;
+  }
+
   a.active {
     @apply underline;
   }

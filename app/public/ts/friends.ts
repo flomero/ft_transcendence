@@ -97,6 +97,31 @@ class FriendsManager {
   unblockUser(userID: string) {
     console.log("Unblocking user:", userID);
   }
+
+  searchFriends(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const value = input.value;
+
+    if (value.length < 3) {
+      return;
+    }
+
+    fetch(`/friends/search/${value}`)
+      .then((response) => {
+        if (response.ok) {
+          return response.text();
+        }
+        throw new Error("Error fetching search results");
+      })
+      .then((html) => {
+        const container = document.getElementById("friends-search-results");
+        if (!container) {
+          console.error("Search results container not found");
+          return;
+        }
+        container.innerHTML = html;
+      });
+  }
 }
 
 window.friendsManager = new FriendsManager();
