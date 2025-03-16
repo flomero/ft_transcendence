@@ -1,12 +1,26 @@
 <div class="layout mt-4 flex flex-col justify-center">
-	<h1>Your Friends</h1>
-	<div class="flex flex-col divide-y divide-bg-muted">
-		{{#each friends}}
-			{{> components/user/card userId=userId userName=userName imageUrl=imageUrl showRemoveButton="true" showText="true"}}
-		{{else}}
-			<p>You have no friends yet.</p>
-		{{/each}}
+	<div class="flex justify-center items-center">
+		<div class="flex flex-row w-fit justify-center items-center rounded-lg gap-2 border p-1">
+			<a href="/friends" class="{{twMerge 'px-4 py-2 rounded' (wheneq activeView 'friends' 'bg-bg-muted')}}">
+				Your Friends
+			</a>
+			<a href="/friends/requests" class="{{twMerge 'px-4 py-2 rounded' (wheneq activeView 'requests' 'bg-bg-muted')}}">
+				Open Requests
+			</a>
+			<a href="/friends/new" class="{{twMerge 'px-4 py-2 rounded' (wheneq activeView 'new' 'bg-bg-muted')}}">
+				Add Friend
+			</a>
+			<a href="/users/blocked" class="{{twMerge 'px-4 py-2 rounded' (wheneq activeView 'blocked' 'bg-bg-muted')}}">
+				Blocked Users
+			</a>
+		</div>
 	</div>
+	{{#ifeq activeView "friends" }}
+		{{> views/friends/friends friends=friends}}
+	{{/ifeq}}
+	{{#ifeq activeView "requests" }}
+		{{> views/friends/requests friends=friends}}
+	{{/ifeq}}
 </div>
 
-<script type="module" src="public/js/friends.js"></script>
+<script type="module" src="/public/js/friends.js"></script>

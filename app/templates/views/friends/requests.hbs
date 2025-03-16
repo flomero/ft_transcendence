@@ -1,0 +1,12 @@
+<div class="flex flex-col divide-y divide-bg-muted justify-center mt-4">
+	{{#each friends}}
+		{{> components/user/card userId=userId userName=userName imageUrl=imageUrl showRemoveButton="true" showText="true"}}
+	{{else}}
+		<div class="gap-2 flex flex-col justify-center items-center">
+			<p>There is no open Invites.</p>
+			{{#> components/button url="/friends/new" variant="outline" }}
+				Find someone!
+			{{/components/button}}
+		</div>
+	{{/each}}
+</div>

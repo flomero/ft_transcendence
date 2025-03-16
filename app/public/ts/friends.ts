@@ -28,6 +28,14 @@ class FriendsManager {
     window.router.refresh(); // TODO: maybe solve this more efficient
   }
 
+  blockUser(userID: string) {
+    console.log("Blocking user:", userID);
+  }
+
+  unblockUser(userID: string) {
+    console.log("Unblocking user:", userID);
+  }
+
   removeFriendButton(event: Event) {
     const element = event.target as HTMLElement;
     const userID = element.getAttribute("data-id");
