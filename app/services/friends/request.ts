@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { createInvite, hasInvite } from "../database/friend/invites";
 import { acceptFriendRequestAndAddRoom } from "./accept";
 import { isFriend } from "../database/friend/friends";
+import { userExists } from "../database/user";
 
 export async function requestFriend(
   fastify: FastifyInstance,
@@ -20,6 +21,9 @@ export async function requestFriend(
   if (await hasInvite(fastify, friendId, userId)) {
     await acceptFriendRequestAndAddRoom(fastify, userId, friendId);
     return undefined;
+  }
+  if (!(await userExists(fastify, friendId))) {
+    return "User does not exist";
   }
 
   await createInvite(fastify, userId, friendId);
