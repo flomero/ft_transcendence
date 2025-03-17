@@ -1,5 +1,4 @@
 import type { FastifyPluginAsync } from "fastify";
-import friendInvites from "./invites";
 import { searchUsers } from "../../services/friends/search";
 import { getInvitesWithUserInfo } from "../../services/database/friend/invites";
 import { getFriendsWithUserInfo } from "../../services/database/friend/friends";
@@ -37,8 +36,6 @@ const getFriendsRoutes: FastifyPluginAsync = async (fastify): Promise<void> => {
       reply.status(500).send({ message: `Internal server error ${error}` });
     }
   });
-
-  fastify.register(friendInvites);
 };
 
 export default getFriendsRoutes;

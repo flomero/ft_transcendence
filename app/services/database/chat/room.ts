@@ -30,6 +30,11 @@ export async function createChatRoom(
   return result.id;
 }
 
+export async function deleteChatRoom(fastify: FastifyInstance, roomId: number) {
+  const sql = "DELETE FROM chat_rooms WHERE id = ?";
+  await fastify.sqlite.run(sql, [roomId]);
+}
+
 export async function addUserToChatRoom(
   fastify: FastifyInstance,
   roomId: number,
