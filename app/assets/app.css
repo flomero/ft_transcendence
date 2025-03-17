@@ -211,11 +211,23 @@
   }
 
   .input {
-    @apply rounded-lg px-4 py-2 outline;
+    @apply rounded-lg outline;
+  }
+
+  button.input {
+    @apply px-4 py-2;
+  }
+
+  input.input:not([type="file"]) {
+    @apply px-4 py-2;
   }
 
   input:focus-visible {
     @apply outline-fg-muted;
+  }
+
+  input[type="file"]::file-selector-button {
+    @apply bg-bg-muted px-4 py-2;
   }
 
   a.active {
