@@ -38,7 +38,10 @@ const friends: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
 
   fastify.get("/requests", async (request, reply) => {
     let invites = await getInvitesWithUserInfo(fastify, request.userId);
-    invites = assignPartnerIds(invites, request.userId);
+    invites = invites.map((item) => ({
+      ...item,
+      id: item.senderId,
+    }));
     const data = {
       activeView: "requests",
       friends: usersToUserWithImages(invites),
