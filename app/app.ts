@@ -79,6 +79,7 @@ const app: FastifyPluginAsync<AppOptions> = async (
     dir: join(__dirname, "middlewares"),
     options: opts,
   });
+  fastify.ready();
 };
 
 export default app;
