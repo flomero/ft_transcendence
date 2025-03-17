@@ -1,9 +1,12 @@
 import S from "fluent-json-schema";
 
-const bodySchema = S.object().prop("matchId", S.string().required());
+const params = S.object().prop(
+  "lobbyId",
+  S.string().minLength(36).maxLength(36).required(),
+);
 
 const startLobbySchema = {
-  body: bodySchema,
+  params: params,
 };
 
 export default startLobbySchema;

@@ -1,9 +1,12 @@
 import S from "fluent-json-schema";
 
-const bodySchema = S.object().prop("matchId", S.string().required());
+const params = S.object().prop(
+  "lobbyId",
+  S.string().maxLength(36).minLength(36).required(),
+);
 
 const joinLobbySchema = {
-  body: bodySchema,
+  params: params,
 };
 
 export default joinLobbySchema;

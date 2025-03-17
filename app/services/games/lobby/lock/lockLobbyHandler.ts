@@ -4,12 +4,12 @@ import canLobbyBeClosedLocked from "../lobbyVaidation/canLobbyBeLocked";
 import { changeLockState } from "./changelockState";
 
 async function lockLobbyHandler(
-  request: FastifyRequest<{ Params: { lobbyId: string; state: boolean } }>,
+  request: FastifyRequest<{ Params: { lobbyId: string; state: string } }>,
   reply: FastifyReply,
 ): Promise<void> {
   const userId = request.userId;
   const lobbyId = request.params.lobbyId;
-  const state = request.params.state;
+  const state = request.params.state.toLowerCase() === "true";
 
   try {
     validConnectionCheck(userId, lobbyId);
