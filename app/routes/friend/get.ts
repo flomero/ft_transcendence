@@ -1,22 +1,7 @@
 import type { FastifyPluginAsync } from "fastify";
 import { searchUsers } from "../../services/friends/search";
-import { getInvitesWithUserInfo } from "../../services/database/friend/invites";
-import { getFriendsWithUserInfo } from "../../services/database/friend/friends";
-import { usersToUserWithImages } from "../../services/database/user";
 
 const getFriendsRoutes: FastifyPluginAsync = async (fastify): Promise<void> => {
-  fastify.get("/list", async (request, reply) => {
-    const friends = await getFriendsWithUserInfo(fastify, request.userId);
-
-    reply.status(200).send({ friends: usersToUserWithImages(friends) });
-  });
-
-  fastify.get("/invites", async (request, reply) => {
-    const invites = await getInvitesWithUserInfo(fastify, request.userId);
-
-    reply.status(200).send({ invites: usersToUserWithImages(invites) });
-  });
-
   fastify.get("/search/:username", async (request, reply) => {
     const { username } = request.params as { username: string };
     if (!username) {
