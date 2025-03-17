@@ -60,7 +60,9 @@ class FriendsManager {
   }
 
   declineFriendRequest(userID: string) {
-    console.log("Declining friend request from:", userID);
+    fetch(`/friend/delete/${userID}`, {
+      method: "POST",
+    });
   }
 
   declineFriendRequestButton(event: Event) {
