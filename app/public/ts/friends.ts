@@ -10,7 +10,9 @@ declare global {
 
 class FriendsManager {
   sendFriendRequest(userID: string) {
-    console.log("Sending friend request to:", userID);
+    fetch(`/friend/request/${userID}`, {
+      method: "POST",
+    });
   }
 
   sendFriendRequestWithAnimation(event: Event) {
