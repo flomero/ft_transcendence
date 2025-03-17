@@ -12,7 +12,7 @@ export async function getInvitesWithUserInfo(
   userId: string,
 ) {
   const sql =
-    "SELECT users_friends.receiverId, users.username, users.image_id FROM users_friends JOIN users ON users_friends.receiverId = users.id WHERE senderId = ? AND accepted = 0";
+    "SELECT users_friends.senderId, users.username, users.image_id FROM users_friends JOIN users ON users_friends.senderId = users.id WHERE receiverId = ? AND accepted = 0";
 
   return await fastify.sqlite.all(sql, userId);
 }
