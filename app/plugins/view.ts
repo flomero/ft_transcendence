@@ -1,40 +1,38 @@
 import fp from "fastify-plugin";
 import view from "@fastify/view";
-import { join } from "path";
 import handlebars from "handlebars";
 import { registerHelpers } from "../templates/helpers";
-import { readdirSync, statSync } from "fs";
-import { relative } from "path";
+import { readdirSync, statSync } from "node:fs";
+import { relative, join } from "node:path";
 
-const componentsDir = join(__dirname, "..", "..", "templates", "components");
-const components: Record<string, string> = {};
+const templatesDir = join(__dirname, "..", "..", "templates");
+const partials: Record<string, string> = {};
 
-// Helper function to recursively scan directories
-function scanComponentsDir(directory: string) {
+function scanTemplatesDir(directory: string) {
   const files = readdirSync(directory);
-  files.forEach((file) => {
+  for (const file of files) {
     const fullPath = join(directory, file);
     const isDirectory = statSync(fullPath).isDirectory();
 
     if (isDirectory) {
-      scanComponentsDir(fullPath); // Recursively scan subdirectories
+      scanTemplatesDir(fullPath);
     } else if (file.endsWith(".hbs")) {
-      // Get path relative to components directory
-      const relativePath = relative(componentsDir, fullPath);
-      // Create component name without extension and with forward slashes
-      const componentName = relativePath
+      if (fullPath.includes("/layouts/")) {
+        continue;
+      }
+
+      const relativePath = relative(templatesDir, fullPath);
+      const partialName = relativePath
         .replace(/\.hbs$/, "")
         .replace(/\\/g, "/");
-      // Create component path relative to templates directory
-      const componentPath = `/components/${relativePath.replace(/\\/g, "/")}`;
+      const partialPath = `/${relativePath.replace(/\\/g, "/")}`;
 
-      components[`components/${componentName}`] = componentPath;
+      partials[partialName] = partialPath;
     }
-  });
+  }
 }
 
-// Start the recursive scan
-scanComponentsDir(componentsDir);
+scanTemplatesDir(templatesDir);
 
 /**
  * This plugin adds template rendering support using Handlebars
@@ -46,14 +44,12 @@ export default fp(async (fastify) => {
     engine: {
       handlebars: handlebars,
     },
-    root: join(__dirname, "..", "..", "templates"),
+    root: templatesDir,
     viewExt: "hbs",
     options: {
+      useDataVariables: true,
       partials: {
-        header: "/partials/header.hbs",
-        footer: "/partials/footer.hbs",
-        head: "/partials/head.hbs",
-        ...components,
+        ...partials,
       },
     },
   });

@@ -10,71 +10,97 @@
         display: block;
         margin: auto;
       }
+      .controls {
+        text-align: center;
+        margin-top: 10px;
+        color: #333;
+        font-family: Arial, sans-serif;
+      }
+      .player-id {
+        font-weight: bold;
+        color: #0066cc;
+      }
     </style>
   </head>
   <body>
     <canvas id="gameCanvas"></canvas>
+    <div class="controls">
+      Player: <span class="player-id">0</span> | Use Arrow Keys to move |
+      Left/Right arrows to switch players
+    </div>
     <script>
       const canvas = document.getElementById("gameCanvas");
       const ctx = canvas.getContext("2d");
       canvas.width = 800;
-      canvas.height = 800;
+      canvas.height = 400;
 
-      width_percent = canvas.width / 100.0;
-      height_percent = canvas.height / 100.0;
+      const ratio = canvas.width / 200.0;
 
-      const socket = new WebSocket("ws://localhost:3000/ws/game/");
+      // Update to match the pongConsumer endpoint
+      const socket = new WebSocket("ws://localhost:3000/game");
 
-      player_id = 0;
-      player_count = 7;
+      let playerId = 0;
+      const playerCount = 2;
+      const playerIdDisplay = document.querySelector(".player-id");
 
       socket.onopen = function () {
         console.log("✅ WebSocket connected");
+        // Update message format to match pongConsumer
         socket.send(
           JSON.stringify({
-            type: "game_creation",
-            gameName: "pong",
-            gameModeName: "moded_multiplayer_pong",
-            modifierNames: [],
-            powerUpNames: [],
-            playerCount: player_count,
+            type: "createGame",
+            options: {
+              gameName: "pong",
+              gameModeName: "classicPong",
+              modifierNames: ["powerUpSpawner"],
+              powerUpNames: ["speedBoost"],
+              playerCount: playerCount,
+            },
           }),
         );
       };
 
       document.addEventListener("keydown", (event) => {
-        if (event.key === "ArrowLeft")
-          player_id = (player_id + 6) % player_count;
-        if (event.key === "ArrowRight")
-          player_id = (player_id + 1) % player_count;
+        if (event.key === "ArrowLeft") {
+          playerId = (playerId + (playerCount - 1)) % playerCount;
+          playerIdDisplay.textContent = playerId;
+        }
+        if (event.key === "ArrowRight") {
+          playerId = (playerId + 1) % playerCount;
+          playerIdDisplay.textContent = playerId;
+        }
 
         let action = {
-          type: "user_input",
-          action: null,
-          timestamp: Date.now(),
-          player_id: player_id,
+          type: "userInput",
+          options: {
+            type: null,
+            playerId: playerId,
+            timestamp: Date.now(),
+          },
         };
-        if (event.key === "ArrowUp") action["action"] = "UP";
-        if (event.key === "ArrowDown") action["action"] = "DOWN";
 
-        if (action["action"]) {
+        if (event.key === "ArrowUp") action.options.type = "UP";
+        if (event.key === "ArrowDown") action.options.type = "DOWN";
+
+        if (action.options.type) {
           socket.send(JSON.stringify(action));
-        } else {
-          console.log("player_id: " + player_id);
         }
       });
 
       document.addEventListener("keyup", (event) => {
         let action = {
-          type: "user_input",
-          action: null,
-          timestamp: Date.now(),
-          player_id: player_id,
+          type: "userInput",
+          options: {
+            type: null,
+            playerId: playerId,
+            timestamp: Date.now(),
+          },
         };
-        if (event.key === "ArrowUp" || event.key === "ArrowDown")
-          action["action"] = "STOP";
 
-        if (action["action"]) {
+        if (event.key === "ArrowUp" || event.key === "ArrowDown")
+          action.options.type = "STOP";
+
+        if (action.options.type) {
           socket.send(JSON.stringify(action));
         }
       });
@@ -83,26 +109,34 @@
       let lastUpdateTime = performance.now();
 
       socket.onmessage = (event) => {
-        gameState = JSON.parse(event.data);
-        lastUpdateTime = performance.now();
-        console.log(gameState);
+        const data = JSON.parse(event.data);
 
-        if (gameState["state"] == "gameCreated")
-          socket.send(JSON.stringify({ type: "startGame" }));
+        // Handle different message types
+        if (data.type === "gameCreated") {
+          console.log("Game created");
+          socket.send(JSON.stringify({ type: "gameStart" }));
+        } else if (data.type === "gameState") {
+          gameState = data.data;
+          lastUpdateTime = performance.now();
+        } else if (data.type === "error") {
+          console.error("Server error:", data.message);
+        }
       };
 
       function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+        if (!gameState.balls) return;
+
         // Draw balls
         gameState.balls?.forEach((ball) => {
-          if (ball.visible) {
+          if (ball.isVisible) {
             ctx.fillStyle = "white";
             ctx.beginPath();
             ctx.arc(
-              ball.x * width_percent,
-              ball.y * height_percent,
-              ball.size * width_percent,
+              ball.x * ratio,
+              ball.y * ratio,
+              ball.radius * ratio,
               0,
               Math.PI * 2,
             );
@@ -111,12 +145,15 @@
         });
 
         // Draw paddles
-        gameState.player_paddles?.forEach((paddle) => {
-          if (paddle.visible) {
+        gameState.paddles?.forEach((paddle, index) => {
+          if (paddle.isVisible) {
+            // Highlight the current player's paddle
+            ctx.fillStyle = index === playerId ? "#00FFFF" : "white";
+
             ctx.save(); // Save the current transformation state
 
             // Move the origin to the paddle's position
-            ctx.translate(paddle.x * width_percent, paddle.y * height_percent);
+            ctx.translate(paddle.x * ratio, paddle.y * ratio);
 
             // Rotate using the paddle's direction
             let angle = Math.atan2(paddle.dy, paddle.dx);
@@ -124,10 +161,10 @@
 
             // Draw the paddle (centered at the new origin)
             ctx.fillRect(
-              -(paddle.width * width_percent) / 2, // Center along width
-              -(paddle.height * height_percent) / 2, // Center along height
-              paddle.width * width_percent,
-              paddle.height * height_percent,
+              -(paddle.width * ratio) / 2, // Center along width
+              -(paddle.height * ratio) / 2, // Center along height
+              paddle.width * ratio,
+              paddle.height * ratio,
             );
 
             ctx.restore(); // Restore the previous transformation state
@@ -136,34 +173,37 @@
 
         // Draw the walls -> For debugging purposes
         gameState.walls?.forEach((wall) => {
-          if (wall.visible) {
+          if (wall.isVisible) {
             ctx.save();
-            ctx.translate(wall.x * width_percent, wall.y * height_percent);
+            ctx.translate(wall.x * ratio, wall.y * ratio);
             let angle = Math.atan2(wall.dy, wall.dx);
             ctx.rotate(angle);
 
             ctx.strokeStyle = "red";
             ctx.strokeRect(
-              (-wall.width * width_percent) / 2,
-              (-wall.height * height_percent) / 2,
-              wall.width * width_percent,
-              wall.height * height_percent,
+              (-wall.width * ratio) / 2,
+              (-wall.height * ratio) / 2,
+              wall.width * ratio,
+              wall.height * ratio,
             );
 
             ctx.restore();
           }
         });
 
-        // Draw the power_ups
-        if (gameState.power_up_manager) {
-          gameState.power_up_manager.spawned_power_ups?.forEach((power_up) => {
-            if (power_up.visible) {
-              switch (power_up.type) {
-                case "speed_boost_modifier":
+        // Draw the powerUps
+
+        if (gameState.modifiersData) {
+          gameState.modifiersData.spawnedPowerUps?.forEach((entry) => {
+            const type = entry[0];
+            const powerUp = entry[1];
+            if (powerUp.isVisible) {
+              switch (type) {
+                case "speedBoost":
                   ctx.fillStyle = "red";
                   break;
 
-                case "invisible_ball_modifier":
+                case "inisVisible_ball_modifier":
                   ctx.fillStyle = "blue";
                   break;
 
@@ -186,12 +226,15 @@
                 case "shooting_modifier":
                   ctx.fillStyle = "yellow";
                   break;
+
+                default:
+                  ctx.fillStyle = "orange";
               }
               ctx.beginPath();
               ctx.arc(
-                power_up.x * width_percent,
-                power_up.y * height_percent,
-                power_up.size * width_percent,
+                powerUp.x * ratio,
+                powerUp.y * ratio,
+                powerUp.radius * ratio,
                 0,
                 Math.PI * 2,
               );
@@ -199,12 +242,36 @@
             }
           });
         }
+
+        // Draw scores if available
+        if (gameState.scores) {
+          ctx.fillStyle = "white";
+          ctx.font = "24px Arial";
+          ctx.textAlign = "center";
+
+          // Display scores at the top of the canvas
+          ctx.fillText(
+            `Scores: ${JSON.stringify(gameState.scores)}`,
+            canvas.width / 2,
+            30,
+          );
+        }
       }
 
       function gameLoop() {
         draw();
         requestAnimationFrame(gameLoop);
       }
+
+      // Handle connection errors
+      socket.onerror = function (error) {
+        console.error("WebSocket Error:", error);
+      };
+
+      // Handle disconnections
+      socket.onclose = function (event) {
+        console.log("WebSocket connection closed:", event.code, event.reason);
+      };
 
       gameLoop();
     </script>

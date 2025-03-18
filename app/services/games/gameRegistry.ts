@@ -1,11 +1,14 @@
-import { promises as fs } from "fs";
-import * as path from "path";
+import { promises as fs } from "node:fs";
+import * as path from "node:path";
+import {
+  type GameRegistry,
+  GAME_REGISTRY,
+} from "../../types/games/gameRegistry";
 
-// Exported registry variable that will be populated on module load.
-export let GAME_REGISTRY: Record<string, any> = {};
-
-async function loadGameRegistry() {
-  const jsonPath = path.join(__dirname, "game_registry.json");
+export async function loadGameRegistry(): Promise<void> {
+  const jsonPath = path.join(
+    "/workspaces/ft_transcendence/app/gameRegistry.json",
+  );
 
   let jsonData: string;
   try {
@@ -14,8 +17,8 @@ async function loadGameRegistry() {
     throw new Error(`Game registry JSON not found at ${jsonPath}`);
   }
 
-  // Parse the JSON file (assumed to follow a strict format)
-  const registry = JSON.parse(jsonData);
+  // Parse the JSON file
+  const registry = JSON.parse(jsonData) as GameRegistry;
 
   // Loop through each game in the registry.
   for (const game in registry) {
@@ -23,21 +26,20 @@ async function loadGameRegistry() {
     const gameData = registry[game];
 
     // Process game modes.
-    if (gameData.game_modes) {
-      for (const mode in gameData.game_modes) {
-        if (!gameData.game_modes.hasOwnProperty(mode)) continue;
-        const modeData = gameData.game_modes[mode];
-        if (modeData.class_name) {
-          // Example: "./pong/game_modes/moded_multiplayer_pong"
-          const modulePath = `./${game}/game_modes/${mode}`;
+    if (gameData.gameModes) {
+      for (const mode in gameData.gameModes) {
+        if (!gameData.gameModes.hasOwnProperty(mode)) continue;
+        const modeData = gameData.gameModes[mode];
+        if (modeData.className) {
+          const modulePath = `./${game}/gameModes/${mode}.js`;
           try {
             const module = await import(modulePath);
-            if (!module[modeData.class_name]) {
+            if (!module[modeData.className]) {
               throw new Error(
-                `Module ${modulePath} does not export ${modeData.class_name}`,
+                `Module ${modulePath} does not export ${modeData.className}`,
               );
             }
-            modeData.class = module[modeData.class_name];
+            modeData.class = module[modeData.className];
           } catch (err) {
             console.error(
               `Error importing game mode "${mode}" for game "${game}":`,
@@ -49,21 +51,20 @@ async function loadGameRegistry() {
     }
 
     // Process game modifiers.
-    if (gameData.game_modifiers) {
-      for (const modifier in gameData.game_modifiers) {
-        if (!gameData.game_modifiers.hasOwnProperty(modifier)) continue;
-        const modData = gameData.game_modifiers[modifier];
-        if (modData.class_name) {
-          // Example: "./pong/game_modifiers/black_hole_debuff_modifier"
-          const modulePath = `./${game}/game_modifiers/${modifier}`;
+    if (gameData.gameModifiers) {
+      for (const modifier in gameData.gameModifiers) {
+        if (!gameData.gameModifiers.hasOwnProperty(modifier)) continue;
+        const modData = gameData.gameModifiers[modifier];
+        if (modData.className) {
+          const modulePath = `./${game}/gameModifiers/${modifier}.js`;
           try {
             const modModule = await import(modulePath);
-            if (!modModule[modData.class_name]) {
+            if (!modModule[modData.className]) {
               throw new Error(
-                `Module ${modulePath} does not export ${modData.class_name}`,
+                `Module ${modulePath} does not export ${modData.className}`,
               );
             }
-            modData.class = modModule[modData.class_name];
+            modData.class = modModule[modData.className];
           } catch (err) {
             console.error(
               `Error importing game modifier "${modifier}" for game "${game}":`,
@@ -75,21 +76,21 @@ async function loadGameRegistry() {
     }
 
     // Process power ups.
-    if (gameData.power_ups) {
-      for (const pu in gameData.power_ups) {
-        if (!gameData.power_ups.hasOwnProperty(pu)) continue;
-        const puData = gameData.power_ups[pu];
-        if (puData.class_name) {
-          // Example: "./pong/power_ups/black_hole_debuff_modifier"
-          const modulePath = `./${game}/power_ups/${pu}`;
+    if (gameData.powerUps) {
+      for (const pu in gameData.powerUps) {
+        if (!gameData.powerUps.hasOwnProperty(pu)) continue;
+        const puData = gameData.powerUps[pu];
+        if (puData.className) {
+          const modulePath = `./${game}/powerUps/${pu}.js`;
           try {
             const puModule = await import(modulePath);
-            if (!puModule[puData.class_name]) {
+            if (!puModule[puData.className]) {
               throw new Error(
-                `Module ${modulePath} does not export ${puData.class_name}`,
+                `Module ${modulePath} does not export ${puData.className}`,
               );
             }
-            puData.class = puModule[puData.class_name];
+            // Fixed the bug in your original code: was using puData.class_name but should be puData.className
+            puData.class = puModule[puData.className];
           } catch (err) {
             console.error(
               `Error importing power up "${pu}" for game "${game}":`,
@@ -102,11 +103,6 @@ async function loadGameRegistry() {
   }
 
   // Save the processed registry to the exported variable.
-  GAME_REGISTRY = registry;
+  Object.assign(GAME_REGISTRY, registry);
   console.log("Loaded GAME_REGISTRY:", GAME_REGISTRY);
 }
-
-// Automatically load the game registry when this module is imported.
-async () => {
-  await loadGameRegistry();
-};

@@ -2,11 +2,18 @@
   "pong": {
     "serverTickrateMs": 30,
     "serverMaxDelayTicks": 100,
-    "paddleSpeedWidthPercent": 3,
     "gameModes": {
-      "vanillaDuelPong": {
+      "classicPong": {
         "className": "ClassicPong",
-        "arenaSettings": {},
+        "arenaSettings": {
+          "width": 200,
+          "height": 100,
+          "wallHeight": 2,
+          "paddleOffset": 2.5,
+          "paddleCoverage": 25,
+          "paddleHeight": 1,
+          "paddleSpeedWidthPercent": 3
+        },
         "defaultBallSettings": {
           "speed": 2.0,
           "size": 0.75
@@ -157,7 +164,7 @@
     }
   },
   "enhancedTicTacToe": {
-    "serverTickrateMs": 10,
+    "serverTickrateMs": 30,
     "gameModes": {
       "enhancedTicTacToeClassic": {
         "className": "EnhancedTicTacToe"

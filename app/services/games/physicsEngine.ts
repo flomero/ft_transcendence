@@ -1,20 +1,20 @@
-import { Rectangle } from "../../types/games/rectangle";
-import { Ball } from "../../types/games/ball";
+import type { Rectangle } from "../../types/games/pong/rectangle";
+import type { Ball } from "../../types/games/pong/ball";
 
 const EPSILON = 1e-2;
 
-interface Collision {
+export interface Collision {
   distance: number;
+  objectId: number;
   normal?: [number, number];
-  object_id?: number;
   type?: string;
 }
 
-class PhysicsEngine {
+export class PhysicsEngine {
   static detectCollision(
     ball: Ball,
     distance: number,
-    objects: Array<Rectangle | Ball>,
+    objects: Array<Rectangle | Ball | Record<string, any>>,
     objectType: string,
   ): Collision | null {
     let closestCollision: Collision | null = null;
@@ -25,17 +25,22 @@ class PhysicsEngine {
       }
 
       let collision: Collision | null;
-      if (objectType !== "power_up") {
+      if (objectType !== "powerUp") {
         collision = PhysicsEngine.ballRectCollision(
           ball,
           distance,
           objects[i] as Rectangle,
+          i,
         );
       } else {
+        // Balls that can't score a goal can't pickup powerUps
+        if (!ball.doGoal) continue;
+
         collision = PhysicsEngine.ballCircleCollision(
           ball,
           distance,
           objects[i] as Ball,
+          i,
         );
       }
 
@@ -43,7 +48,7 @@ class PhysicsEngine {
         collision &&
         (!closestCollision || collision.distance < closestCollision.distance)
       ) {
-        collision.object_id = i;
+        collision.objectId = i;
         collision.type = objectType;
         closestCollision = collision;
       }
@@ -56,6 +61,7 @@ class PhysicsEngine {
     ball: Ball,
     distance: number,
     obj: Rectangle,
+    objId: number,
   ): Collision | null {
     const rx = obj.x;
     const ry = obj.y;
@@ -84,6 +90,15 @@ class PhysicsEngine {
     // local ball direction
     const r_bdx = bdx * ca + bdy * sa;
     const r_bdy = -bdx * sa + bdy * ca;
+
+    // Deactivate collision from inside the Rectangle
+    if (
+      r_bx >= -rw / 2.0 &&
+      r_bx <= rw / 2.0 &&
+      r_by >= -rh / 2.0 &&
+      r_by <= rh / 2.0
+    )
+      return null;
 
     // First, check for side collisions
     const potentialTs: Array<[number, null]> = [];
@@ -209,7 +224,7 @@ class PhysicsEngine {
       return null;
     }
 
-    return { distance: minT, normal: normalGlobal };
+    return { distance: minT, normal: normalGlobal, objectId: objId };
   }
 
   static computeCollision(
@@ -220,6 +235,7 @@ class PhysicsEngine {
     r_bdy: number,
     rw: number,
     rh: number,
+    objId: number,
   ): Collision {
     const intersectionX = r_bx + t * r_bdx;
     const intersectionY = r_by + t * r_bdy;
@@ -239,7 +255,7 @@ class PhysicsEngine {
       normal = [normalX / normLength, normalY / normLength];
     }
 
-    return { distance: t, normal };
+    return { distance: t, normal, objectId: objId };
   }
 
   static resolveCollision(ball: Ball, collision: Collision): void {
@@ -264,6 +280,7 @@ class PhysicsEngine {
     ball: Ball,
     distance: number,
     obj: Ball,
+    objId: number,
   ): Collision | null {
     const a = ball.dx ** 2 + ball.dy ** 2;
     const b = 2.0 * (ball.dx * (ball.x - obj.x) + ball.dy * (ball.y - obj.y));
@@ -283,7 +300,7 @@ class PhysicsEngine {
     const t = (-b - sqrtDelta) / (2.0 * a);
 
     if (EPSILON < t && t <= distance) {
-      return { distance: t };
+      return { distance: t, objectId: objId };
     }
 
     return null;
