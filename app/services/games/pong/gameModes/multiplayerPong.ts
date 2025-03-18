@@ -143,7 +143,7 @@ export class MultiplayerPong extends Pong {
         ),
         width: wallWidth,
         height: this.arenaSettings.wallHeight,
-        isVisible: index % 2 == 1,
+        isVisible: true, //index % 2 == 1,
         absX: 0,
         absY: 0,
         nx: 0,
@@ -335,10 +335,6 @@ export class MultiplayerPong extends Pong {
   }
 
   getResults(): number[] {
-    const p1result: number =
-      this.extraGameData.scores[0] > this.extraGameData.scores[1] ? 1 : 2;
-    const p2result: number = (p1result % 2) + 1;
-
-    return [p1result, p2result];
+    return this.extraGameData.results;
   }
 }

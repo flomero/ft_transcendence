@@ -12,20 +12,18 @@ export class ArenaShrink extends PongModifierBase {
   }
 
   onPlayerElimination(game: Pong, args: { playerId: number }): void {
+    const extraGameData = game.getExtraGameData();
+
     // Get the goal_wall & 2 surrounding walls
     const wallIds: number[] = [1, 0, -1].map(
       (off) =>
-        (2 * args.playerId + off + 2 * game.getExtraGameData().playerCount) %
-        (2 * game.getExtraGameData().playerCount),
+        (2 * args.playerId + off + 2 * extraGameData.playerCount) %
+        (2 * extraGameData.playerCount),
     );
-
-    console.log(`wallIds: ${wallIds}`);
 
     this.shrunkIds.push(wallIds[1]);
 
-    const walls = game.getGameObjects().walls.filter((_, id) => {
-      return wallIds.includes(id);
-    });
+    const walls = wallIds.map((id) => game.getGameObjects().walls[id]);
 
     const leftmost = {
       x: walls[0]["absX"] + game.getArenaSettings().radius,
@@ -59,12 +57,21 @@ export class ArenaShrink extends PongModifierBase {
 
     // If a non-goal wall is surrounded by 2 players that got eliminated, hide it.
     // Check whether adjacent players are eliminated
-    // adjacent_players_status = [
-    // 		-1 if (game.results[(player_id - 1) % game.player_count] != 0) else None,
-    // 		+1 if (game.results[(player_id + 1) % game.player_count] != 0) else None,
-    // ]
+    const adjacentPlayerStatus = [-1, 1].filter((offset) => {
+      const index =
+        (args.playerId + offset + extraGameData.playerCount) %
+        extraGameData.playerCount;
+      return extraGameData.results[index] !== 0;
+    });
 
     // Hide the corresponding wall
+    for (const adjacent of adjacentPlayerStatus) {
+      const adjacentWallId =
+        (2 * args.playerId + adjacent + 2 * extraGameData.playerCount) %
+        (2 * extraGameData.playerCount);
+      game.getGameObjects().walls[adjacentWallId].isVisible = false;
+    }
+
     // for wall_id in adjacent_players_status:
     // 		if wall_id:
     // 				game.walls[(2 * player_id + wall_id) % (2 * game.player_count)]["visible"] = False

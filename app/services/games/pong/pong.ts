@@ -22,6 +22,7 @@ export interface PongExtraGameData {
   lastHit: number;
   players?: Player[];
   scores: number[];
+  results: number[];
 }
 
 export interface PongGameObjects {
@@ -68,6 +69,7 @@ export abstract class Pong extends GameBase {
       playerCount: gameData.playerCount,
       lastHit: -1,
       scores: Array(gameData.playerCount).fill(0),
+      results: Array(gameData.playerCount).fill(0),
     };
 
     // Game objects -> w/ collisions

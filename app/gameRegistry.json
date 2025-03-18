@@ -71,6 +71,10 @@
         "goalObjective": 10
       },
 
+      "survivalGame": {
+        "className": "SurvivalGame"
+      },
+
       "elimination": {
         "className": "Elimination",
         "threshold": 1

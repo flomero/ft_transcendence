@@ -5,7 +5,9 @@ import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
 export class Elimination extends PongModifierBase {
   name = "elimination";
 
-  threshold: number;
+  private threshold: number;
+
+  private eliminatedCounter: number = 0;
 
   constructor() {
     super();
@@ -14,9 +16,6 @@ export class Elimination extends PongModifierBase {
   }
 
   onGoal(game: Pong, args: { playerId: number }): void {
-    console.log(
-      `Player ${args.playerId} took a goal: ${game.getExtraGameData().scores[args.playerId]}`,
-    );
     if (
       args.playerId < 0 ||
       args.playerId >= game.getExtraGameData().playerCount
@@ -27,8 +26,14 @@ export class Elimination extends PongModifierBase {
 
     if (game.getExtraGameData().scores[args.playerId] >= this.threshold) {
       game.getGameObjects().paddles[args.playerId].isVisible = false;
+      game.getExtraGameData().results[args.playerId] =
+        game.getExtraGameData().playerCount - this.eliminatedCounter++;
 
       console.log(`Player ${args.playerId} has been eliminated`);
+      console.log(
+        `  |--> it's results: ${game.getExtraGameData().results[args.playerId]}`,
+      );
+
       game.getModifierManager().trigger("onPlayerElimination", args);
     }
   }
