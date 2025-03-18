@@ -1,4 +1,4 @@
-import { Pong, TargetType } from "../pong";
+import { Pong } from "../pong";
 import type { Rectangle } from "../../../../types/games/pong/rectangle";
 import type { Ball } from "../../../../types/games/pong/ball";
 import type { Paddle } from "../../../../types/games/pong/paddle";
@@ -36,7 +36,6 @@ export class ClassicPong extends Pong {
     super.startGame();
     console.log("Game Started");
 
-    this.editManager.processQueuedEdits();
     console.log(`Balls: ${this.gameObjects.balls.length}`);
     console.log(`Paddles: ${this.gameObjects.paddles.length}`);
     console.log(`Walls: ${this.gameObjects.walls.length}`);
@@ -56,144 +55,145 @@ export class ClassicPong extends Pong {
     const paddleSpeedPercent =
       this.arenaSettings.paddleSpeedWidthPercentS / 100.0;
 
-    this.editManager.queueEdit(
-      this.editManager.createPropertyEdit(TargetType.Paddles, -1, "", [
-        // LEFT PADDLE
-        {
-          id: 0,
-          x:
-            this.arenaSettings.paddleHeight / 2.0 +
-            this.arenaSettings.paddleOffset,
-          y: this.arenaSettings.height / 2.0,
-          alpha: Math.PI,
-          dx: 0.0,
-          dy: -1.0,
-          nx: 1.0,
-          ny: 0.0,
-          absX:
-            this.arenaSettings.paddleHeight / 2.0 +
-            this.arenaSettings.paddleOffset,
-          absY: this.arenaSettings.height / 2.0,
-          coverage: this.arenaSettings.paddleCoverage,
-          amplitude: paddleAmplitude,
-          width: paddleWidth,
-          height: this.arenaSettings.paddleHeight,
-          speed: paddleSpeedPercent,
-          velocity: 0.0,
-          displacement: 0.0,
-          doMove: true,
-          isVisible: true,
-        } as Paddle,
+    this.gameObjects.paddles = [
+      // LEFT PADDLE
+      {
+        doCollision: true,
+        id: 0,
+        x:
+          this.arenaSettings.paddleHeight / 2.0 +
+          this.arenaSettings.paddleOffset,
+        y: this.arenaSettings.height / 2.0,
+        alpha: Math.PI,
+        dx: 0.0,
+        dy: -1.0,
+        nx: 1.0,
+        ny: 0.0,
+        absX:
+          this.arenaSettings.paddleHeight / 2.0 +
+          this.arenaSettings.paddleOffset,
+        absY: this.arenaSettings.height / 2.0,
+        coverage: this.arenaSettings.paddleCoverage,
+        amplitude: paddleAmplitude,
+        width: paddleWidth,
+        height: this.arenaSettings.paddleHeight,
+        speed: paddleSpeedPercent,
+        velocity: 0.0,
+        displacement: 0.0,
+        doMove: true,
+        isVisible: true,
+      } as Paddle,
 
-        // RIGHT PADDLE
-        {
-          id: 1,
-          x:
-            this.arenaSettings.width -
-            this.arenaSettings.paddleHeight / 2.0 -
-            this.arenaSettings.paddleOffset,
-          y: this.arenaSettings.height / 2.0,
-          alpha: 0.0,
-          dx: 0.0,
-          dy: 1.0,
-          nx: -1.0,
-          ny: 0.0,
-          absX:
-            this.arenaSettings.width -
-            this.arenaSettings.paddleHeight / 2.0 -
-            this.arenaSettings.paddleOffset,
-          absY: this.arenaSettings.height / 2.0,
-          coverage: this.arenaSettings.paddleCoverage,
-          amplitude: paddleAmplitude,
-          width: paddleWidth,
-          height: this.arenaSettings.paddleHeight,
-          speed: paddleSpeedPercent,
-          velocity: 0.0,
-          displacement: 0.0,
-          doMove: true,
-          isVisible: true,
-        } as Paddle,
-      ]),
-    );
+      // RIGHT PADDLE
+      {
+        doCollision: true,
+        id: 1,
+        x:
+          this.arenaSettings.width -
+          this.arenaSettings.paddleHeight / 2.0 -
+          this.arenaSettings.paddleOffset,
+        y: this.arenaSettings.height / 2.0,
+        alpha: 0.0,
+        dx: 0.0,
+        dy: 1.0,
+        nx: -1.0,
+        ny: 0.0,
+        absX:
+          this.arenaSettings.width -
+          this.arenaSettings.paddleHeight / 2.0 -
+          this.arenaSettings.paddleOffset,
+        absY: this.arenaSettings.height / 2.0,
+        coverage: this.arenaSettings.paddleCoverage,
+        amplitude: paddleAmplitude,
+        width: paddleWidth,
+        height: this.arenaSettings.paddleHeight,
+        speed: paddleSpeedPercent,
+        velocity: 0.0,
+        displacement: 0.0,
+        doMove: true,
+        isVisible: true,
+      } as Paddle,
+    ];
   }
 
   initWalls(): void {
-    // Initialize walls, rotate by alpha
-    this.editManager.queueEdit(
-      this.editManager.createPropertyEdit(TargetType.Walls, -1, "", [
-        // LEFT WALL
-        {
-          id: 0,
-          x: 0.0,
-          y: this.arenaSettings.height / 2.0,
-          alpha: Math.PI,
-          dx: 0.0,
-          dy: -1.0,
-          nx: 1.0,
-          ny: 0.0,
-          absX: 0.0,
-          absY: this.arenaSettings.height / 2.0,
-          width: this.arenaSettings.height,
-          height: this.arenaSettings.wallHeight,
-          isVisible: true,
-          isGoal: true,
-        } as Rectangle,
+    this.gameObjects.walls = [
+      // LEFT WALL
+      {
+        doCollision: true,
+        id: 0,
+        x: 0.0,
+        y: this.arenaSettings.height / 2.0,
+        alpha: Math.PI,
+        dx: 0.0,
+        dy: -1.0,
+        nx: 1.0,
+        ny: 0.0,
+        absX: 0.0,
+        absY: this.arenaSettings.height / 2.0,
+        width: this.arenaSettings.height,
+        height: this.arenaSettings.wallHeight,
+        isVisible: true,
+        isGoal: true,
+      } as Rectangle,
 
-        // UP WALL
-        {
-          id: 1,
-          x: this.arenaSettings.width / 2.0,
-          y: 0.0,
-          alpha: Math.PI / 4.0,
-          dx: 1.0,
-          dy: 0.0,
-          nx: 0.0,
-          ny: 1.0,
-          absX: this.arenaSettings.width / 2.0,
-          absY: 0.0,
-          width: this.arenaSettings.width,
-          height: this.arenaSettings.wallHeight,
-          isVisible: true,
-          isGoal: false,
-        } as Rectangle,
+      // UP WALL
+      {
+        doCollision: true,
+        id: 1,
+        x: this.arenaSettings.width / 2.0,
+        y: 0.0,
+        alpha: Math.PI / 4.0,
+        dx: 1.0,
+        dy: 0.0,
+        nx: 0.0,
+        ny: 1.0,
+        absX: this.arenaSettings.width / 2.0,
+        absY: 0.0,
+        width: this.arenaSettings.width,
+        height: this.arenaSettings.wallHeight,
+        isVisible: true,
+        isGoal: false,
+      } as Rectangle,
 
-        // RIGHT WALL
-        {
-          id: 2,
-          x: this.arenaSettings.width,
-          y: this.arenaSettings.height / 2.0,
-          alpha: 0.0,
-          dx: 0.0,
-          dy: 1.0,
-          nx: -1.0,
-          ny: 0.0,
-          absX: this.arenaSettings.width,
-          absY: this.arenaSettings.height / 2.0,
-          width: this.arenaSettings.height,
-          height: this.arenaSettings.wallHeight,
-          isVisible: true,
-          isGoal: true,
-        } as Rectangle,
+      // RIGHT WALL
+      {
+        doCollision: true,
+        id: 2,
+        x: this.arenaSettings.width,
+        y: this.arenaSettings.height / 2.0,
+        alpha: 0.0,
+        dx: 0.0,
+        dy: 1.0,
+        nx: -1.0,
+        ny: 0.0,
+        absX: this.arenaSettings.width,
+        absY: this.arenaSettings.height / 2.0,
+        width: this.arenaSettings.height,
+        height: this.arenaSettings.wallHeight,
+        isVisible: true,
+        isGoal: true,
+      } as Rectangle,
 
-        // DOWN WALL
-        {
-          id: 3,
-          x: this.arenaSettings.width / 2.0,
-          y: this.arenaSettings.height,
-          alpha: -Math.PI / 4.0,
-          dx: -1.0,
-          dy: 0.0,
-          nx: 0.0,
-          ny: -1.0,
-          absX: this.arenaSettings.width / 2.0,
-          absY: this.arenaSettings.height,
-          width: this.arenaSettings.width,
-          height: this.arenaSettings.wallHeight,
-          isVisible: true,
-          isGoal: false,
-        } as Rectangle,
-      ]),
-    );
+      // DOWN WALL
+      {
+        doCollision: true,
+        id: 3,
+        x: this.arenaSettings.width / 2.0,
+        y: this.arenaSettings.height,
+        alpha: -Math.PI / 4.0,
+        dx: -1.0,
+        dy: 0.0,
+        nx: 0.0,
+        ny: -1.0,
+        absX: this.arenaSettings.width / 2.0,
+        absY: this.arenaSettings.height,
+        width: this.arenaSettings.width,
+        height: this.arenaSettings.wallHeight,
+        isVisible: true,
+        isGoal: false,
+      } as Rectangle,
+    ];
   }
 
   // Updated to use edit queue
@@ -204,37 +204,9 @@ export class ClassicPong extends Pong {
 
     if (ballId < 0) {
       // Reset all balls
-      this.editManager.queueEdit({
-        targetId: -1, // Entire array
-        targetType: TargetType.Balls,
-        property: "",
-        editor: (_) => [
-          {
-            id: 0,
-            x:
-              this.arenaSettings.width / 2.0 +
-              this.arenaSettings.paddleOffset * ca,
-            y:
-              this.arenaSettings.height / 2.0 +
-              this.arenaSettings.paddleOffset * sa,
-            dx: ca,
-            dy: sa,
-            speed: this.defaultBallSettings.speed,
-            radius: this.defaultBallSettings.radius,
-            isVisible: true,
-            doCollision: true,
-            doGoal: true,
-          },
-        ],
-      });
-    } else {
-      // Find the ball by ID and update it
-      this.editManager.queueEdit({
-        targetId: ballId,
-        targetType: TargetType.Balls,
-        property: "",
-        editor: (_) => ({
-          id: ballId,
+      this.gameObjects.balls = [
+        {
+          id: 0,
           x:
             this.arenaSettings.width / 2.0 +
             this.arenaSettings.paddleOffset * ca,
@@ -248,12 +220,26 @@ export class ClassicPong extends Pong {
           isVisible: true,
           doCollision: true,
           doGoal: true,
-        }),
-      });
+        },
+      ];
+    } else {
+      // Find the ball by ID and update it
+      this.gameObjects.balls[ballId] = {
+        id: ballId,
+        x:
+          this.arenaSettings.width / 2.0 + this.arenaSettings.paddleOffset * ca,
+        y:
+          this.arenaSettings.height / 2.0 +
+          this.arenaSettings.paddleOffset * sa,
+        dx: ca,
+        dy: sa,
+        speed: this.defaultBallSettings.speed,
+        radius: this.defaultBallSettings.radius,
+        isVisible: true,
+        doCollision: true,
+        doGoal: true,
+      };
     }
-
-    // Process the edits
-    this.editManager.processQueuedEdits();
   }
 
   rotatePaddles(alpha: number = 0.0): void {

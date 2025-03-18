@@ -1,26 +1,20 @@
 import { GameBase, GameStatus } from "../gameBase";
 import { PhysicsEngine, type Collision } from "../physicsEngine";
-import { GAME_REGISTRY } from "../../../types/games/gameRegistry";
+import {
+  ArenaSettings,
+  GAME_REGISTRY,
+} from "../../../types/games/gameRegistry";
 import type { Paddle } from "../../../types/games/pong/paddle";
 import type { Ball } from "../../../types/games/pong/ball";
 import type { Rectangle } from "../../../types/games/pong/rectangle";
-import { EditManager, type Editable } from "../editManager";
+import { UserInputManager } from "../userInputManager";
+import { type UserInput } from "../../../types/games/userInput";
 
 const EPSILON = 1e-2;
 
 // Temporary:
 interface Player {
   id: number;
-}
-
-// Define an enum to make target types explicit.
-export enum TargetType {
-  Balls = "balls",
-  Paddles = "paddles",
-  Walls = "walls",
-  ExtraGameDataScores = "extraGameDataScores",
-  ExtraGameDataLastHit = "extraGameDataLastHit",
-  Status = "status",
 }
 
 export interface PongExtraGameData {
@@ -36,7 +30,7 @@ export interface PongGameObjects {
   walls: Rectangle[];
 }
 
-export abstract class Pong extends GameBase implements Editable<TargetType> {
+export abstract class Pong extends GameBase {
   static readonly name = "pong";
 
   protected serverMaxDelayTicks: number;
@@ -49,10 +43,10 @@ export abstract class Pong extends GameBase implements Editable<TargetType> {
   protected gameObjects: PongGameObjects;
   protected gameObjectsLock: Promise<void> | null = null;
 
-  protected arenaSettings: Record<string, any>;
+  protected arenaSettings: ArenaSettings;
 
-  // EditManager instance
-  protected editManager: EditManager<TargetType>;
+  // User input manager
+  protected inputManager: UserInputManager;
 
   constructor(gameData: Record<string, any>) {
     super(gameData);
@@ -83,167 +77,28 @@ export abstract class Pong extends GameBase implements Editable<TargetType> {
       walls: [],
     };
 
-    // Initialize EditManager
-    this.editManager = new EditManager<TargetType>(this);
-  }
-
-  // Implementation of Editable interface
-  findTarget(targetId: number, targetType: TargetType): any | null {
-    switch (targetType) {
-      case TargetType.Status:
-        return this.status;
-
-      case TargetType.ExtraGameDataScores:
-        // For scores, return the entire array if targetId === -1,
-        // otherwise return the specific score element if within bounds.
-        if (targetId === -1) return this.extraGameData.scores;
-        if (targetId >= 0 && targetId < this.extraGameData.scores.length) {
-          return this.extraGameData.scores[targetId];
-        }
-        break;
-
-      case TargetType.ExtraGameDataLastHit:
-        return this.extraGameData.lastHit;
-
-      case TargetType.Balls:
-      case TargetType.Paddles:
-      case TargetType.Walls: {
-        // For game object arrays, use the enum value as the key in gameObjects.
-        const arr = this.gameObjects[targetType];
-        if (targetId === -1) return arr;
-        if (targetId >= 0 && targetId < arr.length) return arr[targetId];
-        break;
-      }
-    }
-    return null;
-  }
-
-  applyUpdate(
-    targetType: TargetType,
-    targetId: number,
-    updates: Record<string, any>,
-  ): void {
-    switch (targetType) {
-      case TargetType.Status:
-        this.status = updates.status;
-        break;
-
-      case TargetType.ExtraGameDataScores:
-        if (targetId === -1) {
-          // Replace the whole scores array
-          this.extraGameData.scores = updates.scores;
-        } else if (
-          targetId >= 0 &&
-          targetId < this.extraGameData.scores.length
-        ) {
-          // Update a specific score
-          const newScores = [...this.extraGameData.scores];
-          newScores[targetId] = updates.primitive;
-          this.extraGameData.scores = newScores;
-        } else {
-          console.warn(`Score index ${targetId} is out of bounds`);
-        }
-        break;
-
-      case TargetType.ExtraGameDataLastHit:
-        this.extraGameData.lastHit = updates.lastHit;
-        break;
-
-      case TargetType.Balls:
-        const updatedBalls = this.updateGameObjectArray(
-          this.gameObjects.balls,
-          targetId,
-          updates,
-        );
-        if (updatedBalls) {
-          this.gameObjects.balls = updatedBalls;
-        }
-        break;
-
-      case TargetType.Paddles:
-        const updatedPaddles = this.updateGameObjectArray(
-          this.gameObjects.paddles,
-          targetId,
-          updates,
-        );
-        if (updatedPaddles) {
-          this.gameObjects.paddles = updatedPaddles;
-        }
-        break;
-
-      case TargetType.Walls:
-        const updatedWalls = this.updateGameObjectArray(
-          this.gameObjects.walls,
-          targetId,
-          updates,
-        );
-        if (updatedWalls) {
-          this.gameObjects.walls = updatedWalls;
-        }
-        break;
-
-      default:
-        console.warn(`Unknown target type: ${targetType}`);
-    }
-  }
-
-  // Helper method to update arrays of game objects
-  private updateGameObjectArray<T extends Record<string, any>>(
-    arr: T[],
-    targetId: number,
-    updates: Record<string, any>,
-  ): T[] | null {
-    if (targetId === -1) {
-      // If 'array' key exists in updates, use it to replace the entire array
-      if ("array" in updates) {
-        return updates.array as T[];
-      }
-      console.warn(
-        'Attempted to replace entire array but no "array" key provided in updates',
-      );
-      return null;
-    }
-
-    if (targetId >= 0 && targetId < arr.length) {
-      // Update a specific object
-      const newArray = [...arr];
-      const updatedObject = { ...newArray[targetId] } as Record<string, any>;
-
-      // Apply each update to the object
-      for (const [key, value] of Object.entries(updates)) {
-        updatedObject[key] = value;
-      }
-
-      newArray[targetId] = updatedObject as T;
-      return newArray;
-    } else {
-      console.warn(`Array index ${targetId} is out of bounds`);
-      return null;
-    }
+    // Initialize UserInputManager
+    this.inputManager = new UserInputManager();
   }
 
   startGame(): void {
     this.status = GameStatus.RUNNING;
-
-    // this.editManager.processQueuedEdits();
-    // this.modifierManager.trigger("onGameStart");
+    this.modifierManager.trigger("onGameStart");
   }
 
-  update(): void {
-    this.editManager.processQueuedEdits();
-
+  async update(): Promise<void> {
     // Update game state
     if (this.status === GameStatus.RUNNING) {
+      // Process any queued user inputs
+      await this.processUserInputs();
+
       // Update paddle positions
       for (const paddle of this.gameObjects.paddles)
-        if (paddle.velocity !== 0) this.queuePaddleUpdate(paddle);
+        if (paddle.velocity !== 0) this.updatePaddle(paddle);
 
       // Update ball positions
       for (const ball of this.gameObjects.balls)
-        if (ball.doCollision) this.doCollisionChecks(ball);
-
-      // Apply all the queued edits from paddle and ball updates
-      this.editManager.processQueuedEdits();
+        if (ball.doCollision) await this.doCollisionChecks(ball);
 
       // Verify that no balls went out of bounds
       this.gameObjects.balls.forEach((ball, id) => {
@@ -259,7 +114,7 @@ export abstract class Pong extends GameBase implements Editable<TargetType> {
     this.saveStateSnapshot(snapshot);
   }
 
-  protected queuePaddleUpdate(paddle: Paddle): void {
+  protected updatePaddle(paddle: Paddle): void {
     if (!paddle.doMove) {
       console.log(
         `Player ${this.gameObjects.paddles.indexOf(paddle)}'s paddle can't be moved`,
@@ -285,31 +140,12 @@ export abstract class Pong extends GameBase implements Editable<TargetType> {
     // Calculate actual change in displacement
     const deltaDisplacement = Math.abs(newDisplacement - paddle.displacement);
 
-    // Queue position updates - adjust x,y based on displacement percentage
-    this.editManager.queueEdit({
-      targetId: paddle.id,
-      targetType: TargetType.Paddles,
-      property: "x",
-      editor: (x) =>
-        x +
-        direction * (deltaDisplacement / 100.0) * paddle.amplitude * paddle.dx,
-    });
-
-    this.editManager.queueEdit({
-      targetId: paddle.id,
-      targetType: TargetType.Paddles,
-      property: "y",
-      editor: (y) =>
-        y +
-        direction * (deltaDisplacement / 100.0) * paddle.amplitude * paddle.dy,
-    });
-
-    this.editManager.queueEdit({
-      targetId: paddle.id,
-      targetType: TargetType.Paddles,
-      property: "displacement",
-      editor: (_) => newDisplacement,
-    });
+    // Update paddle position
+    paddle.x +=
+      direction * (deltaDisplacement / 100.0) * paddle.amplitude * paddle.dx;
+    paddle.y +=
+      direction * (deltaDisplacement / 100.0) * paddle.amplitude * paddle.dy;
+    paddle.displacement = newDisplacement;
 
     // After updating, trigger the modifier
     const paddleIndex = this.gameObjects.paddles.indexOf(paddle);
@@ -318,8 +154,17 @@ export abstract class Pong extends GameBase implements Editable<TargetType> {
     });
   }
 
-  // TODO: Use userInput schema for received action
-  async handleAction(action: Record<string, any>): Promise<void> {
+  // Process all queued user inputs
+  async processUserInputs(): Promise<void> {
+    const inputs = await this.inputManager.getAndClearInputs();
+    if (inputs.length === 0) return;
+
+    // Process each input with lag compensation
+    for (const input of inputs) await this.processUserInput(input);
+  }
+
+  // Process a single user input with lag compensation
+  async processUserInput(action: UserInput): Promise<void> {
     if (
       !(
         action.playerId >= 0 && action.playerId < this.extraGameData.playerCount
@@ -348,38 +193,8 @@ export abstract class Pong extends GameBase implements Editable<TargetType> {
       await this.rewind(delayTicks);
     }
 
-    // Queue the player's action as an edit
-    switch (action.type) {
-      case "UP":
-        this.editManager.queueEdit({
-          targetId: action.playerId,
-          targetType: TargetType.Paddles,
-          property: "velocity",
-          editor: (_) => this.gameObjects.paddles[action.playerId].speed,
-        });
-        break;
-
-      case "DOWN":
-        this.editManager.queueEdit({
-          targetId: action.playerId,
-          targetType: TargetType.Paddles,
-          property: "velocity",
-          editor: (_) => -this.gameObjects.paddles[action.playerId].speed,
-        });
-        break;
-
-      case "STOP":
-        this.editManager.queueEdit({
-          targetId: action.playerId,
-          targetType: TargetType.Paddles,
-          property: "velocity",
-          editor: (_) => 0.0,
-        });
-        break;
-    }
-
-    // Apply edits immediately since we're in a rewound state
-    this.editManager.processQueuedEdits();
+    // Apply the input directly
+    this.applyPlayerAction(action);
 
     // Trigger modifiers for user input
     this.modifierManager.trigger("onUserInput", { input: action });
@@ -391,13 +206,47 @@ export abstract class Pong extends GameBase implements Editable<TargetType> {
     }
   }
 
+  // Apply a player action directly
+  protected applyPlayerAction(action: UserInput): void {
+    if (
+      action.playerId < 0 ||
+      action.playerId >= this.gameObjects.paddles.length
+    ) {
+      console.warn(`Invalid player ID: ${action.playerId}`);
+      return;
+    }
+
+    const paddle = this.gameObjects.paddles[action.playerId];
+
+    switch (action.type) {
+      case "UP":
+        paddle.velocity = paddle.speed;
+        break;
+      case "DOWN":
+        paddle.velocity = -paddle.speed;
+        break;
+      case "STOP":
+        paddle.velocity = 0.0;
+        break;
+    }
+  }
+
+  // Handle incoming user action
+  async handleAction(action: Record<string, any>): Promise<void> {
+    // Queue the action for processing in the next update
+    await this.inputManager.queueInput(action as UserInput);
+  }
+
   getStateSnapshot(): Record<string, any> {
     const gameState = super.getStateSnapshot();
 
-    gameState.balls = this.gameObjects.balls;
-    gameState.paddles = this.gameObjects.paddles;
-    gameState.walls = this.gameObjects.walls;
-    gameState.scores = this.extraGameData.scores;
+    gameState.balls = this.gameObjects.balls.map((ball) => ({ ...ball }));
+    gameState.paddles = this.gameObjects.paddles.map((paddle) => ({
+      ...paddle,
+    }));
+    gameState.walls = this.gameObjects.walls.map((wall) => ({ ...wall }));
+    gameState.scores = [...this.extraGameData.scores];
+    gameState.lastHit = this.extraGameData.lastHit;
     gameState.rng = this.rng.getState();
 
     gameState.modifiersData = this.modifierManager.getStateSnapshot();
@@ -406,10 +255,11 @@ export abstract class Pong extends GameBase implements Editable<TargetType> {
   }
 
   loadStateSnapshot(snapshot: Record<string, any>): void {
-    this.gameObjects.balls = snapshot.balls;
-    this.gameObjects.walls = snapshot.walls;
-    this.gameObjects.paddles = snapshot.player_paddles;
-    this.extraGameData.scores = snapshot.scores;
+    this.gameObjects.balls = snapshot.balls; //.map(ball => ({...ball}));
+    this.gameObjects.paddles = snapshot.paddles; //.map(paddle => ({...paddle}));
+    this.gameObjects.walls = snapshot.walls; //.map(wall => ({...wall}));
+    this.extraGameData.scores = [...snapshot.scores];
+    this.extraGameData.lastHit = snapshot.lastHit;
 
     this.modifierManager.loadStateSnapshot(snapshot.modifiersData);
 
@@ -460,22 +310,43 @@ export abstract class Pong extends GameBase implements Editable<TargetType> {
 
     // Re-simulate the ticks one by one
     for (let i = 0; i < tickCount; i++) {
-      // Use update instead of simulateTick
-      this.update();
-
-      // State snapshots are now saved within the update method
+      // Simulate a tick without processing inputs
+      await this.simulateTick();
     }
   }
 
-  updatePaddle(paddle: Paddle): void {
-    this.queuePaddleUpdate(paddle);
+  // Simulate a tick without processing inputs (for fast-forwarding)
+  protected async simulateTick(): Promise<void> {
+    // Update game state
+    if (this.status === GameStatus.RUNNING) {
+      // Update paddle positions
+      for (const paddle of this.gameObjects.paddles) {
+        if (paddle.velocity !== 0) this.updatePaddle(paddle);
+      }
+
+      // Update ball positions
+      for (const ball of this.gameObjects.balls) {
+        if (ball.doCollision) await this.doCollisionChecks(ball);
+      }
+
+      // Verify that no balls went out of bounds
+      this.gameObjects.balls.forEach((ball, id) => {
+        if (this.isOutOfBounds(ball)) this.resetBall(id);
+      });
+
+      // Trigger modifiers
+      this.modifierManager.trigger("onUpdate");
+    }
+
+    // Save the current state for potential rewinding
+    const snapshot = this.getStateSnapshot();
+    this.saveStateSnapshot(snapshot);
   }
 
   abstract isOutOfBounds(ball: Ball): boolean;
-
   abstract resetBall(ballId: number): void;
 
-  doCollisionChecks(ball: Ball): void {
+  async doCollisionChecks(ball: Ball): Promise<void> {
     const getClosestCollision = (
       collisions: Array<Collision | null>,
     ): Collision | null => {
@@ -498,9 +369,6 @@ export abstract class Pong extends GameBase implements Editable<TargetType> {
     let loopCounter = 0;
 
     while (remainingDistance > EPSILON) {
-      // Make sure to compute using the most recent values
-      this.editManager.processQueuedEdits();
-
       const paddleCollision: Collision | null = PhysicsEngine.detectCollision(
         ball,
         remainingDistance,
@@ -530,42 +398,16 @@ export abstract class Pong extends GameBase implements Editable<TargetType> {
       ]);
 
       if (!tmpCollision) {
-        // Queue normal movement if no collision
-        this.editManager.queueEdit({
-          targetId: ball.id,
-          targetType: TargetType.Balls,
-          property: "x",
-          editor: (x) =>
-            x + Math.round(ball.dx * remainingDistance * 100) / 100,
-        });
-
-        this.editManager.queueEdit({
-          targetId: ball.id,
-          targetType: TargetType.Balls,
-          property: "y",
-          editor: (y) =>
-            y + Math.round(ball.dy * remainingDistance * 100) / 100,
-        });
+        ball.x += Math.round(ball.dx * remainingDistance * 100) / 100;
+        ball.y += Math.round(ball.dy * remainingDistance * 100) / 100;
         break;
       }
 
       let collision: Collision = tmpCollision as Collision;
       const travelDistance = collision.distance;
 
-      // Queue movement up to collision point
-      this.editManager.queueEdit({
-        targetId: ball.id,
-        targetType: TargetType.Balls,
-        property: "x",
-        editor: (x) => x + Math.round(ball.dx * travelDistance * 100) / 100,
-      });
-
-      this.editManager.queueEdit({
-        targetId: ball.id,
-        targetType: TargetType.Balls,
-        property: "y",
-        editor: (y) => y + Math.round(ball.dy * travelDistance * 100) / 100,
-      });
+      ball.x += Math.round(ball.dx * travelDistance * (100 - EPSILON)) / 100;
+      ball.y += Math.round(ball.dy * travelDistance * (100 - EPSILON)) / 100;
 
       switch (collision.type) {
         case "powerUp":
@@ -577,61 +419,12 @@ export abstract class Pong extends GameBase implements Editable<TargetType> {
           break;
 
         case "paddle":
-          // Compute reflection variables before queueing edits
-          const paddleNormal = collision.normal!;
-          const paddleDotProduct =
-            2 * (ball.dx * paddleNormal[0] + ball.dy * paddleNormal[1]);
-          const newPaddleDx = ball.dx - paddleDotProduct * paddleNormal[0];
-          const newPaddleDy = ball.dy - paddleDotProduct * paddleNormal[1];
-
-          // Normalize direction
-          const paddleSpeed = Math.sqrt(newPaddleDx ** 2 + newPaddleDy ** 2);
-          const normalizedPaddleDx = newPaddleDx / paddleSpeed;
-          const normalizedPaddleDy = newPaddleDy / paddleSpeed;
-
-          // Queue updates to direction vectors
-          this.editManager.queueEdit({
-            targetId: ball.id,
-            targetType: TargetType.Balls,
-            property: "dx",
-            editor: (_) => normalizedPaddleDx,
-          });
-
-          this.editManager.queueEdit({
-            targetId: ball.id,
-            targetType: TargetType.Balls,
-            property: "dy",
-            editor: (_) => normalizedPaddleDy,
-          });
-
-          // Move the ball slightly outside the collision surface to prevent sticking
-          this.editManager.queueEdit({
-            targetId: ball.id,
-            targetType: TargetType.Balls,
-            property: "x",
-            editor: (x) => x + normalizedPaddleDx * EPSILON * 10,
-          });
-
-          this.editManager.queueEdit({
-            targetId: ball.id,
-            targetType: TargetType.Balls,
-            property: "y",
-            editor: (y) => y + normalizedPaddleDy * EPSILON * 10,
-          });
-
-          remainingDistance -= EPSILON * 10;
-
+          PhysicsEngine.resolveCollision(ball, collision);
           const playerId = collision.objectId;
 
-          // Update lastHit through edit queue
-          this.editManager.queueEdit({
-            targetId: 0,
-            targetType: TargetType.ExtraGameDataLastHit,
-            property: "lastHit",
-            editor: (_) => playerId,
-          });
-
-          console.log(`Last hit: ${playerId}`);
+          if (this.extraGameData.lastHit !== playerId)
+            console.log(`Last hit: ${playerId}`);
+          this.extraGameData.lastHit = playerId;
 
           // Then trigger paddle bounce effects
           this.modifierManager.trigger("onPaddleBounce", {
@@ -640,61 +433,12 @@ export abstract class Pong extends GameBase implements Editable<TargetType> {
           break;
 
         case "wall":
-          // Compute reflection variables before queueing edits
-          const wallNormal = collision.normal!;
-          const wallDotProduct =
-            2 * (ball.dx * wallNormal[0] + ball.dy * wallNormal[1]);
-          const newWallDx = ball.dx - wallDotProduct * wallNormal[0];
-          const newWallDy = ball.dy - wallDotProduct * wallNormal[1];
-
-          // Normalize direction
-          const wallSpeed = Math.sqrt(newWallDx ** 2 + newWallDy ** 2);
-          const normalizedWallDx = newWallDx / wallSpeed;
-          const normalizedWallDy = newWallDy / wallSpeed;
-
-          // Queue updates to direction vectors
-          this.editManager.queueEdit({
-            targetId: ball.id,
-            targetType: TargetType.Balls,
-            property: "dx",
-            editor: (_) => normalizedWallDx,
-          });
-
-          this.editManager.queueEdit({
-            targetId: ball.id,
-            targetType: TargetType.Balls,
-            property: "dy",
-            editor: (_) => normalizedWallDy,
-          });
-
-          // Move the ball slightly outside the collision surface to prevent sticking
-          this.editManager.queueEdit({
-            targetId: ball.id,
-            targetType: TargetType.Balls,
-            property: "x",
-            editor: (x) => x + normalizedWallDx * EPSILON * 10,
-          });
-
-          this.editManager.queueEdit({
-            targetId: ball.id,
-            targetType: TargetType.Balls,
-            property: "y",
-            editor: (y) => y + normalizedWallDy * EPSILON * 10,
-          });
-
-          remainingDistance -= EPSILON * 10;
+          PhysicsEngine.resolveCollision(ball, collision);
 
           const wall: Rectangle = this.gameObjects.walls[collision.objectId];
           if (wall.isGoal) {
             const goalPlayerId = Math.floor(collision.objectId / 2);
-
-            // Fix the bug in the original code (score + 1 was not being returned)
-            this.editManager.queueEdit({
-              targetId: goalPlayerId,
-              targetType: TargetType.ExtraGameDataScores,
-              property: "",
-              editor: (score) => score + 1,
-            });
+            this.extraGameData.scores[goalPlayerId]++;
 
             // Then trigger goal effects
             this.modifierManager.trigger("onGoal", {
@@ -707,28 +451,25 @@ export abstract class Pong extends GameBase implements Editable<TargetType> {
           console.log(`Unknown collision type: ${collision.type}`);
       }
 
-      remainingDistance -= travelDistance;
+      remainingDistance -= travelDistance * (100 - EPSILON);
 
       loopCounter += 1;
       if (loopCounter > ball.speed * 3.0 + 1) {
         break;
       }
     }
-
-    // Process all the edits we've queued during collision checks
-    this.editManager.processQueuedEdits();
   }
 
-  // Getters & Setters
+  // Getters
   getExtraGameData(): PongExtraGameData {
     return this.extraGameData;
   }
 
-  getGameObjectsReadOnly(): Readonly<PongGameObjects> {
-    return this.gameObjects as Readonly<PongGameObjects>;
+  getGameObjects(): PongGameObjects {
+    return this.gameObjects;
   }
 
-  getEditManager(): EditManager<TargetType> {
-    return this.editManager;
+  getArenaSettings(): ArenaSettings {
+    return this.arenaSettings;
   }
 }

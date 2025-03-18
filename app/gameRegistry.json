@@ -16,7 +16,7 @@
         },
 
         "defaultBallSettings": {
-          "speedWidthPercentS": 0,
+          "speedWidthPercentS": 85,
           "radius": 0.85
         },
 
@@ -41,7 +41,7 @@
         },
 
         "defaultBallSettings": {
-          "speedWidthPercentS": 0,
+          "speedWidthPercentS": 85,
           "radius": 0.85
         },
 
@@ -69,6 +69,15 @@
       "scoredGame": {
         "className": "ScoredGame",
         "goalObjective": 10
+      },
+
+      "elimination": {
+        "className": "Elimination",
+        "threshold": 1
+      },
+
+      "arenaShrink": {
+        "className": "ArenaShrink"
       }
     },
 

@@ -1,6 +1,6 @@
 import { TimeLimitedModifierBase } from "../../timeLimitedModifierBase";
 import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
-import { type Pong, TargetType } from "../pong";
+import { type Pong } from "../pong";
 import { ModifierActivationMode } from "../../modifierBase";
 
 export class SpeedBoost extends TimeLimitedModifierBase {
@@ -44,7 +44,7 @@ export class SpeedBoost extends TimeLimitedModifierBase {
   onActivation(game: Pong): void {
     super.onActivation(game);
 
-    const gameObjects = game.getGameObjectsReadOnly();
+    const gameObjects = game.getGameObjects();
     if (gameObjects.balls.length > 0) {
       this.initialSpeed = gameObjects.balls[0].speed;
     }
@@ -56,25 +56,15 @@ export class SpeedBoost extends TimeLimitedModifierBase {
     if (this.ticks % this.rampUpFrequency == 0) {
       this.strength += this.rampUpStrength;
 
-      const gameObjects = game.getGameObjectsReadOnly();
+      const gameObjects = game.getGameObjects();
       if (!(gameObjects.balls.length > 0)) {
         console.log(`Can't speed up if there's no balls: ${gameObjects.balls}`);
         return;
       }
 
-      const ball = gameObjects.balls[0];
       const newSpeed = this.initialSpeed * (1 + this.strength);
 
-      // Use the EditManager to queue the speed change
-      await game.getEditManager().queueEdit({
-        targetId: ball.id,
-        targetType: TargetType.Balls,
-        property: "speed",
-        editor: (_) => newSpeed,
-      });
-
-      // Process the edit immediately
-      game.getEditManager().processQueuedEdits();
+      game.getGameObjects().balls[0].speed = newSpeed;
     }
   }
 
@@ -82,21 +72,9 @@ export class SpeedBoost extends TimeLimitedModifierBase {
     super.onDeactivation(game);
 
     // Reset ball speed back to initial when deactivating
-    const gameObjects = game.getGameObjectsReadOnly();
-    if (gameObjects.balls.length > 0) {
-      const ball = gameObjects.balls[0];
-
-      // Queue the speed reset using EditManager
-      game.getEditManager().queueEdit({
-        targetId: ball.id,
-        targetType: TargetType.Balls,
-        property: "speed",
-        editor: (_) => this.initialSpeed,
-      });
-
-      // Process the edit immediately
-      game.getEditManager().processQueuedEdits();
-    }
+    const gameObjects = game.getGameObjects();
+    if (gameObjects.balls.length > 0)
+      game.getGameObjects().balls[0].speed = this.initialSpeed;
 
     game.getModifierManager().deletePowerUp(this);
   }

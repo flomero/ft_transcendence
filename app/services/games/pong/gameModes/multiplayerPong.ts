@@ -1,4 +1,4 @@
-import { Pong, TargetType } from "../pong";
+import { Pong } from "../pong";
 import type { Rectangle } from "../../../../types/games/pong/rectangle";
 import type { Ball } from "../../../../types/games/pong/ball";
 import type { Paddle } from "../../../../types/games/pong/paddle";
@@ -37,7 +37,6 @@ export class MultiplayerPong extends Pong {
     super.startGame();
     console.log("Game Started");
 
-    this.editManager.processQueuedEdits();
     console.log(`Balls: ${this.gameObjects.balls.length}`);
     console.log(`Paddles: ${this.gameObjects.paddles.length}`);
     console.log(`Walls: ${this.gameObjects.walls.length}`);
@@ -58,8 +57,6 @@ export class MultiplayerPong extends Pong {
     // paddleSpeed is percentage of width per second (independent of tickrate)
     const paddleSpeedPercent =
       this.arenaSettings.paddleSpeedWidthPercentS / 100.0;
-
-    let paddles: Paddle[] = [];
 
     for (let index = 0; index < this.extraGameData.playerCount; ++index) {
       const angle =
@@ -87,6 +84,7 @@ export class MultiplayerPong extends Pong {
         ny: 0,
         dx: 0,
         dy: 0,
+        doCollision: true,
       };
 
       const tmp: number = Math.sqrt(paddle.x ** 2 + paddle.y ** 2);
@@ -104,12 +102,8 @@ export class MultiplayerPong extends Pong {
       paddle.absX = paddle.x;
       paddle.absY = paddle.y;
 
-      paddles.push(paddle);
+      this.gameObjects.paddles.push(paddle);
     }
-
-    this.editManager.queueEdit(
-      this.editManager.createPropertyEdit(TargetType.Paddles, -1, "", paddles),
-    );
   }
 
   initWalls(): void {
@@ -119,9 +113,6 @@ export class MultiplayerPong extends Pong {
       Math.sin(Math.PI / (2.0 * this.extraGameData.playerCount)) *
       (this.arenaSettings.radius *
         (1 + 1 / (this.extraGameData.playerCount + 0.5)));
-
-    // Create walls forming a regular polygon
-    let walls: Rectangle[] = [];
 
     for (let index = 0; index < 2 * this.extraGameData.playerCount; index++) {
       const wall: Rectangle = {
@@ -160,6 +151,7 @@ export class MultiplayerPong extends Pong {
         dx: 0,
         dy: 0,
         isGoal: index % 2 == 0,
+        doCollision: true,
       };
 
       const tmp = Math.sqrt(wall.x ** 2 + wall.y ** 2);
@@ -177,15 +169,10 @@ export class MultiplayerPong extends Pong {
       wall.dx = wall.ny;
       wall.dy = -wall.nx;
 
-      walls.push(wall);
+      this.gameObjects.walls.push(wall);
     }
-
-    this.editManager.queueEdit(
-      this.editManager.createPropertyEdit(TargetType.Walls, -1, "", walls),
-    );
   }
 
-  // Updated to use edit queue
   resetBall(ballId: number = -1): void {
     const randomAngle = this.rng.random() * Math.PI * 2.0;
     const ca = Math.cos(randomAngle);
@@ -193,33 +180,9 @@ export class MultiplayerPong extends Pong {
 
     if (ballId < 0) {
       // Reset all balls
-      this.editManager.queueEdit({
-        targetId: -1, // Entire array
-        targetType: TargetType.Balls,
-        property: "",
-        editor: (_) => [
-          {
-            id: 0,
-            x: this.arenaSettings.radius + this.arenaSettings.paddleOffset * ca,
-            y: this.arenaSettings.radius + this.arenaSettings.paddleOffset * sa,
-            dx: ca,
-            dy: sa,
-            speed: this.defaultBallSettings.speed,
-            radius: this.defaultBallSettings.radius,
-            isVisible: true,
-            doCollision: true,
-            doGoal: true,
-          },
-        ],
-      });
-    } else {
-      // Find the ball by ID and update it
-      this.editManager.queueEdit({
-        targetId: ballId,
-        targetType: TargetType.Balls,
-        property: "",
-        editor: (_) => ({
-          id: ballId,
+      this.gameObjects.balls = [
+        {
+          id: 0,
           x: this.arenaSettings.radius + this.arenaSettings.paddleOffset * ca,
           y: this.arenaSettings.radius + this.arenaSettings.paddleOffset * sa,
           dx: ca,
@@ -229,12 +192,23 @@ export class MultiplayerPong extends Pong {
           isVisible: true,
           doCollision: true,
           doGoal: true,
-        }),
-      });
+        },
+      ];
+    } else {
+      // Find the ball by ID and update it
+      this.gameObjects.balls[ballId] = {
+        id: ballId,
+        x: this.arenaSettings.radius + this.arenaSettings.paddleOffset * ca,
+        y: this.arenaSettings.radius + this.arenaSettings.paddleOffset * sa,
+        dx: ca,
+        dy: sa,
+        speed: this.defaultBallSettings.speed,
+        radius: this.defaultBallSettings.radius,
+        isVisible: true,
+        doCollision: true,
+        doGoal: true,
+      };
     }
-
-    // Process the edits
-    this.editManager.processQueuedEdits();
   }
 
   rotatePaddles(alpha: number = 0.0): void {
