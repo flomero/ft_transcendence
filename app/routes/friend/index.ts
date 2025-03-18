@@ -1,9 +1,11 @@
 import type { FastifyPluginAsync } from "fastify";
 import { deleteFriendOrInvite } from "../../services/database/friend/friends";
 import getFriendsRoutes from "./get";
+import friendInvites from "./invites";
 
 const friends: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.register(getFriendsRoutes);
+  fastify.register(friendInvites);
 
   fastify.post("/delete/:friendId", async (request, reply) => {
     const { friendId } = request.params as { friendId: string };

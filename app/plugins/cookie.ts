@@ -1,9 +1,9 @@
 import fp from "fastify-plugin";
-import cookie, { FastifyCookieOptions } from "@fastify/cookie";
+import cookie, { type FastifyCookieOptions } from "@fastify/cookie";
 
-export default fp(async function (fastify, opts) {
+export default fp(async (fastify, opts) => {
   fastify.register(cookie, {
-    secret: process.env.COOKIE_SECRET,
+    secret: fastify.config.COOKIE_SECRET,
     hook: "onRequest",
     parseOptions: {
       secure: "auto",

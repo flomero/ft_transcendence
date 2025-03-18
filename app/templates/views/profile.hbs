@@ -4,7 +4,7 @@
       <img
         src="{{imageUrl}}"
         alt="User Avatar"
-        class="mb-4 h-24 w-24 rounded-full border"
+        class="mb-4 h-24 w-24 rounded-full border bg-bg-muted"
       />
       <div>
         <p id="current-username" class="text-2xl">{{userName}}</p>
@@ -14,10 +14,10 @@
           Logout
         </button>
         <div class="flex flex-row flex-wrap gap-2 mt-2">
-           {{#> components/button id="edit-username-button" onclick="profileEditor.showEditUsernameForm()" variant="outline"}}
+           {{#> components/button id="edit-username-button" onclick="profileEditor.showEditUsernameForm" variant="outline"}}
             Edit Username
            {{/components/button}}
-           {{#> components/button id="edit-profile-picture-button" onclick="profileEditor.showEditProfilePictureForm()" variant="outline"}}
+           {{#> components/button id="edit-profile-picture-button" onclick="profileEditor.showEditProfilePictureForm" variant="outline"}}
             Edit Picture
            {{/components/button}}
           <div class="flex items-center gap-2 mt-4">
@@ -28,12 +28,12 @@
               method="post"
               class="w-full flex flex-col gap-3"
             >
-                <input type="text" required id="edit-username-input" onfocus="this.value = this.value;" class="input" name="username" placeholder="New Username..." minlength="3" maxlength="30" />
+                <input type="text" required id="edit-username-input" onfocus="this.value = this.value;" class="input" name="username" placeholder="New Username..." minlength="3" />
                 <div class="flex gap-2">
                   {{#> components/button type="submit"}}
                     Save
                   {{/components/button}}
-                  {{#> components/button type="button" variant="outline" onclick="profileEditor.hideEditUsernameForm()"}}
+                  {{#> components/button type="button" variant="outline" onclick="profileEditor.hideEditUsernameForm"}}
                     Cancel
                   {{/components/button}}
               </div>
@@ -61,7 +61,7 @@
                 {{#> components/button type="submit"}}
                   Update Image
                 {{/components/button}}
-                {{#> components/button type="button" variant="outline" onclick="profileEditor.hideEditProfilePictureForm()"}}
+                {{#> components/button type="button" variant="outline" onclick="profileEditor.hideEditProfilePictureForm"}}
                   Cancel
                 {{/components/button}}
               </div>

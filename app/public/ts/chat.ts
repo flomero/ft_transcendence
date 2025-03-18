@@ -78,32 +78,32 @@ class Chat {
       return;
     }
 
-    // Add animation classes
-    elements.messagesView.classList.add("slide-out-right");
-    elements.input?.classList.add("slide-out-down");
+    changeClasses(elements.messagesView, [], ["animate-slide-out-right"]);
+    changeClasses(elements.input, [], ["animate-slide-out-down"]);
 
-    // Wait for animation to complete
     setTimeout(() => {
-      // Update UI visibility
-      elements.roomsView?.classList.remove("hidden");
-      elements.roomsView?.classList.add("slide-in-left");
-      elements.messagesView?.classList.add("hidden");
-      elements.messagesView?.classList.remove("flex", "slide-out-right");
-      elements.input?.classList.add("hidden");
-      elements.input?.classList.remove("flex", "slide-out-down");
-      elements.backButton?.classList.add("hidden");
+      changeClasses(elements.roomsView, ["hidden"], ["animate-slide-in-left"]);
+      changeClasses(
+        elements.messagesView,
+        ["flex", "animate-slide-out-right"],
+        ["hidden"],
+      );
+      changeClasses(
+        elements.input,
+        ["flex", "animate-slide-out-down"],
+        ["hidden"],
+      );
+      changeClasses(elements.backButton, ["has-[svg]:flex"], ["hidden"]);
+
       if (elements.title) elements.title.textContent = "All Chats";
 
-      // Reset animation class after another short delay
       setTimeout(() => {
-        elements.roomsView?.classList.remove("slide-in-left");
+        changeClasses(elements.roomsView, ["animate-slide-in-left"], []);
       }, 300);
 
-      // Reset current room
       this.currentRoomId = undefined;
     }, 300);
 
-    // Clear current room assignment on server
     fetch("/chat/-1", {}).then((r) => {
       if (!r.ok) {
         console.error("Error clearing current room:", r.status);
@@ -114,7 +114,6 @@ class Chat {
   sendMessage = (event: Event): void => {
     event.preventDefault();
 
-    // Validate form and input
     if (!(event.target instanceof HTMLFormElement) || !this.currentRoomId) {
       return;
     }
@@ -125,7 +124,6 @@ class Chat {
 
     if (!message) return;
 
-    // Send message to server
     fetch(`/chat/${this.currentRoomId}`, {
       method: "POST",
       body: message,
@@ -153,7 +151,6 @@ class Chat {
       return;
     }
 
-    // Load room content
     this.loadRoomContent(roomId, roomName);
   };
 
@@ -175,36 +172,41 @@ class Chat {
 
         if (!elements.container) return;
 
-        // Update content
         elements.container.innerHTML = html;
+        elements.roomsView?.classList.add("animate-slide-out-left");
 
-        // Add exit animation to rooms view
-        elements.roomsView?.classList.add("slide-out-left");
-
-        // Wait for exit animation to complete
         setTimeout(() => {
-          changeClasses(elements.roomsView, ["slide-out-left"], ["hidden"]);
+          changeClasses(
+            elements.roomsView,
+            ["animate-slide-out-left"],
+            ["hidden"],
+          );
 
-          // Show messages view with animation
           changeClasses(
             elements.messagesView,
             ["hidden"],
-            ["flex", "slide-in-right"],
+            ["flex", "animate-slide-in-right"],
           );
 
           // Show form with animation
-          changeClasses(elements.input, ["hidden"], ["flex", "slide-in-up"]);
+          changeClasses(
+            elements.input,
+            ["hidden"],
+            ["flex", "animate-slide-in-up"],
+          );
 
-          elements.backButton?.classList.remove("hidden");
+          changeClasses(
+            elements.backButton,
+            ["hidden", "has-[svg]:hidden"],
+            ["has-[svg]:flex"],
+          );
 
-          // Update title and current room
           if (elements.title) elements.title.textContent = roomName;
           this.currentRoomId = roomId;
 
-          // Remove animation classes after they complete
           setTimeout(() => {
-            elements.messagesView?.classList.remove("slide-in-right");
-            elements.input?.classList.remove("slide-in-up");
+            elements.messagesView?.classList.remove("animate-slide-in-right");
+            elements.input?.classList.remove("animate-slide-in-up");
           }, 300);
         }, 300);
       })
@@ -212,10 +214,8 @@ class Chat {
   }
 }
 
-// Create and export chat instance
 const chat = new Chat();
 
-// Make the chat object available globally
 declare global {
   interface Window {
     chat: Chat;
