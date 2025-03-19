@@ -6,18 +6,35 @@ import { ModifierStatus } from "../../modifierBase";
 export class PowerUpSpawner extends TimeLimitedModifierBase {
   name = "powerUpSpawner";
 
-  private meanDelay: number;
-  private delaySpan: number;
+  protected meanDelay: number = 0;
+  protected delaySpan: number = 0;
 
-  constructor() {
+  constructor(customConfig?: Record<string, any>) {
     super();
 
     const serverTickrateS = GAME_REGISTRY.pong.serverTickrateS;
-    const meanDelayS = GAME_REGISTRY.pong.gameModifiers[this.name].meanDelayS;
-    const delaySpanS = GAME_REGISTRY.pong.gameModifiers[this.name].delaySpanS;
 
-    this.meanDelay = meanDelayS * serverTickrateS;
-    this.delaySpan = delaySpanS * serverTickrateS;
+    // Register transformations for properties
+    this.registerPropertyConfig(
+      "meanDelay",
+      (meanDelayS) => meanDelayS * serverTickrateS,
+      (meanDelay) => meanDelay / serverTickrateS,
+    );
+
+    this.registerPropertyConfig(
+      "delaySpan",
+      (delaySpanS) => delaySpanS * serverTickrateS,
+      (delaySpan) => delaySpan / serverTickrateS,
+    );
+
+    const defaultConfig = {
+      meanDelay: GAME_REGISTRY.pong.gameModifiers[this.name].meanDelayS,
+      delaySpan: GAME_REGISTRY.pong.gameModifiers[this.name].delaySpanS,
+    };
+    this.loadSimpleConfig(defaultConfig);
+
+    // Apply custom configuration if provided
+    if (customConfig) this.loadSimpleConfig(customConfig);
   }
 
   onGameStart(game: GameBase): void {
@@ -35,10 +52,16 @@ export class PowerUpSpawner extends TimeLimitedModifierBase {
   onDeactivation(game: GameBase): void {
     const arenaWidth =
       GAME_REGISTRY.pong.gameModes[game.gameData.gameModeName].arenaSettings
-        .width;
+        .width ||
+      2 *
+        GAME_REGISTRY.pong.gameModes[game.gameData.gameModeName].arenaSettings
+          .radius;
     const arenaHeight =
       GAME_REGISTRY.pong.gameModes[game.gameData.gameModeName].arenaSettings
-        .height;
+        .height ||
+      2 *
+        GAME_REGISTRY.pong.gameModes[game.gameData.gameModeName].arenaSettings
+          .radius;
     const defaultRadius =
       GAME_REGISTRY.pong.gameModes[game.gameData.gameModeName]
         .defaultPowerUpSettings.radius;

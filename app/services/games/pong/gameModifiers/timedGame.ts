@@ -5,12 +5,23 @@ import { TimeLimitedModifierBase } from "../../timeLimitedModifierBase";
 export class TimedGame extends TimeLimitedModifierBase {
   name = "timedGame";
 
-  constructor() {
+  constructor(customConfig?: Record<string, any>) {
     super();
 
-    const durationS = GAME_REGISTRY.pong.gameModifiers[this.name].durationS;
     const serverTickrateS = GAME_REGISTRY.pong.serverTickrateS;
-    this.duration = durationS * serverTickrateS;
+
+    this.registerPropertyConfig(
+      "duration",
+      (durationS) => durationS * serverTickrateS,
+      (duration) => duration / serverTickrateS,
+    );
+
+    const defaultConfig = {
+      duration: GAME_REGISTRY.pong.gameModifiers[this.name].durationS,
+    };
+    this.loadSimpleConfig(defaultConfig);
+
+    if (customConfig) this.loadSimpleConfig(customConfig);
   }
 
   onDeactivation(game: GameBase): void {

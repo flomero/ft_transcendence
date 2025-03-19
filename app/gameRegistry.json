@@ -16,12 +16,12 @@
         },
 
         "defaultBallSettings": {
-          "speedWidthPercentS": 85,
-          "radius": 0.85
+          "speedWidthPercentS": 95,
+          "radius": 0.95
         },
 
         "defaultPowerUpSettings": {
-          "radius": 12.5,
+          "radius": 20,
           "capacities": {
             "speedBoost": 1
           }
@@ -63,7 +63,7 @@
 
       "timedGame": {
         "className": "TimedGame",
-        "durationS": 10
+        "durationS": 60
       },
 
       "scoredGame": {

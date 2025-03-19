@@ -8,11 +8,13 @@ export class ScoredGame extends PongModifierBase {
 
   protected goalObjective: number;
 
-  constructor() {
+  constructor(customConfig?: Record<string, any>) {
     super();
 
     this.goalObjective =
       GAME_REGISTRY.pong.gameModifiers[this.name].goalObjective;
+
+    if (customConfig) this.loadSimpleConfig(customConfig);
   }
 
   onGoal(game: Pong, args: { playerId: number }): void {

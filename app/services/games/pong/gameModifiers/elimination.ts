@@ -5,14 +5,16 @@ import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
 export class Elimination extends PongModifierBase {
   name = "elimination";
 
-  private threshold: number;
+  protected threshold: number;
 
-  private eliminatedCounter: number = 0;
+  protected eliminatedCounter: number = 0;
 
-  constructor() {
+  constructor(customConfig?: Record<string, any>) {
     super();
 
     this.threshold = GAME_REGISTRY.pong.gameModifiers[this.name].threshold;
+
+    if (customConfig) this.loadSimpleConfig(customConfig);
   }
 
   onGoal(game: Pong, args: { playerId: number }): void {

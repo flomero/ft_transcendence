@@ -6,39 +6,80 @@ import { ModifierActivationMode } from "../../modifierBase";
 export class SpeedBoost extends TimeLimitedModifierBase {
   name = "speedBoost";
 
-  private strength: number = 0;
+  protected strength: number = 0;
 
-  private rampUpFrequency: number; // Increment every X ticks
-  private rampUpStrength: number; // Increment by X every increment
+  protected rampUpFrequency: number = 0; // Increment every X ticks
+  protected rampUpStrength: number = 0; // Increment by X every increment
 
-  private initialSpeed: number = 0;
+  protected initialSpeed: number = 0;
 
-  constructor() {
+  constructor(customConfig?: Record<string, any>) {
     super();
 
     const serverTickrateS = GAME_REGISTRY.pong.serverTickrateS;
+    const defaultRegistry = GAME_REGISTRY.pong.powerUps[this.name];
 
-    // duration
-    const durationS = GAME_REGISTRY.pong.powerUps[this.name].durationS;
-    this.duration = durationS * serverTickrateS;
+    this.registerPropertyConfig("spawnWeight", (value) => value, undefined);
 
-    // spawnWeight
-    this.spawnWeight = GAME_REGISTRY.pong.powerUps[this.name].spawnWeight;
+    // Only register transformations for specific properties we want to modify
+    this.registerPropertyConfig(
+      "duration",
+      (_, context) => {
+        const durationS = context.duration || defaultRegistry.durationS;
+        return durationS * serverTickrateS;
+      },
+      undefined,
+    );
 
-    // selfActivation
-    if (GAME_REGISTRY.pong.powerUps[this.name].selfActivation)
-      this.activationMode = ModifierActivationMode.SELF;
+    this.registerPropertyConfig(
+      "activationMode",
+      (_, context) => {
+        const selfActivation =
+          context.activationMode || defaultRegistry.selfActivation
+            ? ModifierActivationMode.SELF
+            : ModifierActivationMode.AUTO;
+        return selfActivation;
+      },
+      undefined,
+    );
 
-    // rampUpFrequency
-    const rampUpFrequencyS =
-      GAME_REGISTRY.pong.powerUps[this.name].rampUpFrequencyS;
-    this.rampUpFrequency = (this.duration * rampUpFrequencyS) / durationS;
+    // Register complex derived properties with clear dependencies
+    this.registerPropertyConfig(
+      "rampUpFrequency",
+      (_, context) => {
+        const rampUpFrequencyS =
+          context.rampUpFrequency || defaultRegistry.rampUpFrequencyS;
+        return serverTickrateS * rampUpFrequencyS;
+      },
+      undefined,
+    );
 
-    // rampUpStrength
-    const totalRampUpStrength =
-      GAME_REGISTRY.pong.powerUps[this.name].totalRampUpStrength;
-    this.rampUpStrength =
-      (totalRampUpStrength * this.rampUpFrequency) / this.duration;
+    this.registerPropertyConfig(
+      "rampUpStrength",
+      (_, context) => {
+        const totalRampUpStrength =
+          context.rampUpStrength || defaultRegistry.totalRampUpStrength;
+        const rampUpFrequency = this.rampUpFrequency;
+        const duration = this.duration;
+        return (totalRampUpStrength * rampUpFrequency) / duration;
+      },
+      undefined,
+      ["rampUpFrequency", "duration"],
+    );
+
+    // Apply custom configuration if provided
+    if (customConfig) {
+      // Map property names if needed
+      const mappedConfig: Record<string, any> = {};
+
+      // Handle direct overrides
+      for (const [key, value] of Object.entries(customConfig)) {
+        mappedConfig[key] = value;
+      }
+
+      // Apply the custom configuration
+      this.loadComplexConfig(mappedConfig);
+    }
   }
 
   onActivation(game: Pong): void {

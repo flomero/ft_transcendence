@@ -7,10 +7,6 @@ export class ArenaShrink extends PongModifierBase {
 
   shrunkIds: number[] = [];
 
-  constructor() {
-    super();
-  }
-
   onPlayerElimination(game: Pong, args: { playerId: number }): void {
     const extraGameData = game.getExtraGameData();
 
@@ -71,11 +67,5 @@ export class ArenaShrink extends PongModifierBase {
         (2 * extraGameData.playerCount);
       game.getGameObjects().walls[adjacentWallId].isVisible = false;
     }
-
-    // for wall_id in adjacent_players_status:
-    // 		if wall_id:
-    // 				game.walls[(2 * player_id + wall_id) % (2 * game.player_count)]["visible"] = False
-    // 				extra_id = player_id if wall_id > 0 else (player_id + game.player_count + wall_id) % game.player_count
-    // 				game.walls[2 * game.player_count + extra_id]["visible"] = False
   }
 }

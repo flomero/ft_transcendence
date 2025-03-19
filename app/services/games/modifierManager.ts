@@ -53,12 +53,21 @@ export class ModifierManager {
     if (modifierRegistry) {
       // Iterate over each key in the gameModifiers object
       Object.keys(modifierRegistry).forEach((modifierName) => {
-        if (this.game.gameData.modifierNames.includes(modifierName)) {
+        if (
+          Object.keys(this.game.gameData.modifierNames).includes(modifierName)
+        ) {
           const modifier = modifierRegistry[modifierName];
           if (modifier && modifier.class) {
-            // Create an instance of the modifier class
+            // Create an instance of the modifier classs
             const ModifierClass = modifier.class;
-            this.modifiers.push(new ModifierClass());
+            console.dir(this.game.gameData.modifierNames[modifierName], {
+              depth: null,
+            });
+            this.modifiers.push(
+              new ModifierClass(
+                this.game.gameData.modifierNames[modifierName] || {},
+              ),
+            );
           }
         }
       });
@@ -95,7 +104,7 @@ export class ModifierManager {
     // Extract available powerUpNames from the capacities object
     // (fixed from using Object.keys on the entire powerUpDefaultProperties)
     Object.keys(this.powerUpDefaultProperties.capacities).forEach((name) => {
-      if (this.game.gameData.powerUpNames.includes(name))
+      if (Object.keys(this.game.gameData.powerUpNames).includes(name))
         this.availablePowerUps.push(name);
       this.powerUpCounters[name] = 0;
     });
@@ -268,7 +277,9 @@ export class ModifierManager {
       return;
     }
 
-    const powerUp: ModifierBase = new powerUpClass() as ModifierBase;
+    const powerUp: ModifierBase = new powerUpClass(
+      this.game.gameData.powerUpNames[powerUpName] || {},
+    ) as ModifierBase;
     if (powerUp.getActivationMode() === ModifierActivationMode.AUTO)
       powerUp.activate(this.game);
     this.modifiers.push(powerUp);
