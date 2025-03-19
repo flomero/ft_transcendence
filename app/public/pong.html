@@ -35,7 +35,7 @@
       let ratio = 0.0;
       let playerCount = 2;
 
-      const gameModeName = "multiplayerPong";
+      const gameModeName = "classicPong";
 
       if (gameModeName === "multiplayerPong") {
         canvas.width = 800;
@@ -48,7 +48,6 @@
         ratio = canvas.width / 200.0;
       }
 
-      // Update to match the pongConsumer endpoint
       const socket = new WebSocket("ws://localhost:3000/game");
 
       let playerId = 0;
@@ -56,16 +55,26 @@
 
       socket.onopen = function () {
         console.log("✅ WebSocket connected");
-        // Update message format to match pongConsumer
         socket.send(
           JSON.stringify({
             type: "createGame",
             options: {
               gameName: "pong",
               gameModeName: gameModeName,
-              gameModeConfig: {},
+              gameModeConfig: {
+                ballSpeedWidthPercentS: 0,
+                powerUpRadius: 0.5,
+                powerUpCapacities: {
+                  speedBoost: 10000,
+                },
+              },
               modifierNames: {
-                powerUpSpawner: {},
+                powerUpSpawner: {
+                  meanDelay: 0.01,
+                  delaySpan: 0.0001,
+                  positionSamplerStrategyName:
+                    "elipticGaussianRectangularArena",
+                },
               },
               powerUpNames: {
                 speedBoost: {},

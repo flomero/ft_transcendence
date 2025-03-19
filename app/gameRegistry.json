@@ -54,7 +54,8 @@
       "powerUpSpawner": {
         "className": "PowerUpSpawner",
         "meanDelayS": 5,
-        "delaySpanS": 2
+        "delaySpanS": 2,
+        "positionSamplerStrategyName": "fullRandomRectangularArena"
       },
 
       "timedGame": {

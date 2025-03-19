@@ -1,7 +1,8 @@
 import { join } from "node:path";
 import AutoLoad, { type AutoloadPluginOptions } from "@fastify/autoload";
 import type { FastifyPluginAsync, FastifyServerOptions } from "fastify";
-import { loadGameRegistry } from "./services/games/gameRegistry";
+import { loadGameRegistry } from "./services/games/gameRegistryLoader";
+import { loadStrategyRegistry } from "./services/strategy/strategyRegistryLoader";
 
 export interface AppOptions
   extends FastifyServerOptions,
@@ -15,6 +16,7 @@ const app: FastifyPluginAsync<AppOptions> = async (
 ): Promise<void> => {
   // Place here your custom code!
   await loadGameRegistry();
+  await loadStrategyRegistry();
 
   // Do not touch the following lines
 

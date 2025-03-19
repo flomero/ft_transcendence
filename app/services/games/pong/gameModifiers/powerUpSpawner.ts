@@ -3,12 +3,19 @@ import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
 import { TimeLimitedModifierBase } from "../../timeLimitedModifierBase";
 import { ModifierStatus } from "../../modifierBase";
 import { Pong } from "../pong";
+import { StrategyManager } from "../../../strategy/strategyManager";
+import { type IPongPowerUpPositionSampler } from "../../../../types/strategy/IPongPowerUpPositionSampler";
 
 export class PowerUpSpawner extends TimeLimitedModifierBase {
   name = "powerUpSpawner";
 
   protected meanDelay: number = 0;
   protected delaySpan: number = 0;
+  protected positionSamplerStrategyManager: StrategyManager<
+    IPongPowerUpPositionSampler,
+    "samplePosition"
+  >;
+  protected positionSamplerStrategyName: string = "";
 
   constructor(customConfig?: Record<string, any>) {
     super();
@@ -31,12 +38,20 @@ export class PowerUpSpawner extends TimeLimitedModifierBase {
     const defaultConfig = {
       meanDelay: GAME_REGISTRY.pong.gameModifiers[this.name].meanDelayS,
       delaySpan: GAME_REGISTRY.pong.gameModifiers[this.name].delaySpanS,
+      positionSamplerStrategyName:
+        GAME_REGISTRY.pong.gameModifiers[this.name].positionSamplerStrategyName,
     };
     this.configManager.loadSimpleConfigIntoContainer(defaultConfig, this);
 
     // Apply custom configuration if provided
     if (customConfig)
       this.configManager.loadSimpleConfigIntoContainer(customConfig, this);
+
+    this.positionSamplerStrategyManager = new StrategyManager(
+      this.positionSamplerStrategyName,
+      "pongPowerUpPositionSampler",
+      "samplePosition",
+    );
   }
 
   onGameStart(game: GameBase): void {
@@ -48,36 +63,16 @@ export class PowerUpSpawner extends TimeLimitedModifierBase {
       .getRNG()
       .randomGaussian(this.meanDelay, this.delaySpan);
 
-    console.log(`Next powerUpSpawn in ${this.duration} ticks`);
+    // console.log(`Next powerUpSpawn in ${this.duration} ticks`);
   }
 
   onDeactivation(game: Pong): void {
-    const halfWidth = game.getSettings().arenaWidth / 2.0;
-    const halfHeight = game.getSettings().arenaHeight / 2.0;
-
-    const defaultRadius = game.getSettings().powerUpRadius;
-
-    const offset = game.getSettings().wallsHeight;
-
-    const x = Math.min(
-      Math.max(
-        game.getRNG().randomGaussian(halfWidth, halfWidth / 2.0),
-        defaultRadius + offset,
-      ),
-      halfWidth * 2.0 - (defaultRadius + offset),
-    );
-
-    const y = Math.min(
-      Math.max(
-        game.getRNG().randomGaussian(halfHeight, halfHeight / 1.05),
-        defaultRadius + offset,
-      ),
-      halfHeight * 2.0 - (defaultRadius + offset),
-    );
+    const sampledPosition: { x: number; y: number } =
+      this.positionSamplerStrategyManager.executeStrategy(game);
 
     const spawned = game
       .getModifierManager()
-      .spawnRandomPowerUp(game.getRNG(), [x, y]);
+      .spawnRandomPowerUp(game.getRNG(), sampledPosition);
 
     this.activate(game);
     if (!spawned) this.pause(game);

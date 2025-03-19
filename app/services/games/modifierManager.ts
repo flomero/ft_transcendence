@@ -178,7 +178,7 @@ export class ModifierManager {
 
   spawnRandomPowerUp(
     rng: { random: () => number },
-    position: [number, number],
+    position: { x: number; y: number },
   ): boolean {
     const powerUpName: string | null = this.sampleRandomPowerUp(rng);
     if (!powerUpName) {
@@ -197,8 +197,8 @@ export class ModifierManager {
     this.spawnedPowerUps.push([
       powerUpName,
       {
-        x: position[0],
-        y: position[1],
+        x: position.x,
+        y: position.y,
         dx: 0.0,
         dy: 0.0,
         speed: 0.0,
