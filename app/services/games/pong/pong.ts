@@ -1,8 +1,8 @@
 import { GameBase, GameStatus } from "../gameBase";
 import { PhysicsEngine, type Collision } from "../physicsEngine";
 import {
-  ArenaSettings,
   GAME_REGISTRY,
+  GameModeCombinedSettings,
 } from "../../../types/games/gameRegistry";
 import type { Paddle } from "../../../types/games/pong/paddle";
 import type { Ball } from "../../../types/games/pong/ball";
@@ -44,8 +44,6 @@ export abstract class Pong extends GameBase {
   protected gameObjects: PongGameObjects;
   protected gameObjectsLock: Promise<void> | null = null;
 
-  protected arenaSettings: ArenaSettings;
-
   // User input manager
   protected inputManager: UserInputManager;
 
@@ -57,9 +55,6 @@ export abstract class Pong extends GameBase {
 
     const serverMaxDelayS = GAME_REGISTRY.pong.serverMaxDelayS;
     this.serverMaxDelayTicks = serverMaxDelayS * this.serverTickrateS;
-
-    this.arenaSettings =
-      GAME_REGISTRY.pong.gameModes[gameData.gameModeName].arenaSettings;
 
     // Network playability related
     this.tickData = new Array(this.serverMaxDelayTicks);
@@ -84,6 +79,8 @@ export abstract class Pong extends GameBase {
   }
 
   startGame(): void {
+    super.startGame();
+
     this.status = GameStatus.RUNNING;
     this.modifierManager.trigger("onGameStart");
   }
@@ -471,7 +468,5 @@ export abstract class Pong extends GameBase {
     return this.gameObjects;
   }
 
-  getArenaSettings(): ArenaSettings {
-    return this.arenaSettings;
-  }
+  abstract getSettings(): GameModeCombinedSettings;
 }

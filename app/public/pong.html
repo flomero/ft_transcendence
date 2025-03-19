@@ -35,7 +35,7 @@
       let ratio = 0.0;
       let playerCount = 2;
 
-      const gameModeName = "classicPong";
+      const gameModeName = "multiplayerPong";
 
       if (gameModeName === "multiplayerPong") {
         canvas.width = 800;
@@ -63,6 +63,7 @@
             options: {
               gameName: "pong",
               gameModeName: gameModeName,
+              gameModeConfig: {},
               modifierNames: {
                 powerUpSpawner: {},
               },

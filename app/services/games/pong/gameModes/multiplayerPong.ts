@@ -3,29 +3,61 @@ import type { Rectangle } from "../../../../types/games/pong/rectangle";
 import type { Ball } from "../../../../types/games/pong/ball";
 import type { Paddle } from "../../../../types/games/pong/paddle";
 import {
-  type BallSettings,
   GAME_REGISTRY,
+  type GameModeCombinedSettings,
 } from "../../../../types/games/gameRegistry";
 
 export class MultiplayerPong extends Pong {
   name = "multiplayerPong";
 
-  protected defaultBallSettings: BallSettings;
+  protected settings: GameModeCombinedSettings;
 
   constructor(gameData: Record<string, any>) {
     super(gameData);
 
-    const defaultBallSettingsS: Record<string, any> =
-      GAME_REGISTRY.pong.gameModes[this.name].defaultBallSettings;
+    const customConfig = gameData.gameModeConfig || {};
+    const registry = GAME_REGISTRY.pong.gameModes[this.name];
+    this.settings = {
+      // Fixed settings
+      arenaWidth: registry.fixedSettings.arenaWidth,
+      arenaHeight: registry.fixedSettings.arenaHeight,
+      paddleOffset: registry.fixedSettings.paddleOffset,
+      paddleHeight: registry.fixedSettings.paddleHeight,
+      wallsHeight: registry.fixedSettings.wallsHeight,
+      wallsOffset: registry.fixedSettings.wallsOffset,
 
-    this.defaultBallSettings = {
-      speed:
-        (2.0 *
-          this.arenaSettings.radius *
-          (defaultBallSettingsS.speedWidthPercentS / 100.0)) /
-        this.serverTickrateS,
-      radius: defaultBallSettingsS.radius,
+      // Customizable settings
+      ballSpeedWidthPercentS:
+        customConfig.ballSpeedWidthPercentS ||
+        registry.customizableSettings.ballSpeedWidthPercentS,
+      ballRadius:
+        customConfig.ballRadius || registry.customizableSettings.ballRadius,
+      paddleCoveragePercent:
+        customConfig.paddleCoveragePercent ||
+        registry.customizableSettings.paddleCoveragePercent,
+      paddleSpeedWidthPercentS:
+        customConfig.paddleSpeedWidthPercentS ||
+        registry.customizableSettings.paddleSpeedWidthPercentS,
+      powerUpRadius:
+        customConfig.powerUpRadius ||
+        registry.customizableSettings.powerUpRadius,
+      powerUpCapacities: registry.customizableSettings.powerUpCapacities,
     };
+
+    this.settings.ballSpeed =
+      (this.settings.arenaWidth *
+        (this.settings.ballSpeedWidthPercentS / 100)) /
+      this.serverTickrateS;
+    this.settings.arenaRadius = this.settings.arenaWidth / 2.0;
+
+    if (customConfig.powerUpCapacities)
+      for (const [key, value] of Object.entries(
+        customConfig.powerUpCapacities as Record<string, number>,
+      ))
+        this.settings.powerUpCapacities[key] = value;
+
+    console.log("Loaded settings:");
+    console.dir(this.settings, { depth: null });
 
     this.resetBall();
     this.initPaddles();
@@ -45,34 +77,32 @@ export class MultiplayerPong extends Pong {
   initPaddles(): void {
     // Calculate paddleAmplitude - the maximum possible distance the paddle can travel
     const paddleAmplitude =
-      (this.arenaSettings.radius - this.arenaSettings.paddleOffset) *
+      (this.settings.arenaRadius - this.settings.paddleOffset) *
       Math.sin(Math.PI / this.extraGameData.playerCount);
 
     // Calculate the coverage percentage (0 to 1)
-    const coverage = this.arenaSettings.paddleCoverage / 100.0;
+    const coverage = this.settings.paddleCoveragePercent / 100.0;
 
     // Calculate actual paddle width based on amplitude and coverage
     const paddleWidth = paddleAmplitude * coverage;
 
     // paddleSpeed is percentage of width per second (independent of tickrate)
-    const paddleSpeedPercent =
-      this.arenaSettings.paddleSpeedWidthPercentS / 100.0;
+    const paddleSpeedPercent = this.settings.paddleSpeedWidthPercentS / 100.0;
 
     for (let index = 0; index < this.extraGameData.playerCount; ++index) {
       const angle =
         Math.PI + (Math.PI * 2 * index) / this.extraGameData.playerCount;
-      const radius =
-        this.arenaSettings.radius - this.arenaSettings.paddleOffset;
+      const radius = this.settings.arenaRadius - this.settings.paddleOffset;
 
       let paddle: Paddle = {
         id: index,
         x: parseFloat((radius * Math.cos(angle)).toFixed(3)),
         y: parseFloat((radius * Math.sin(angle)).toFixed(3)),
         alpha: parseFloat(angle.toFixed(3)),
-        coverage: this.arenaSettings.paddleCoverage,
+        coverage: this.settings.paddleCoveragePercent,
         amplitude: paddleAmplitude,
         width: paddleWidth,
-        height: this.arenaSettings.paddleHeight,
+        height: this.settings.paddleHeight,
         speed: paddleSpeedPercent,
         doMove: true,
         isVisible: true,
@@ -93,8 +123,8 @@ export class MultiplayerPong extends Pong {
         paddle.ny = -paddle.y / tmp;
       }
 
-      paddle.x += this.arenaSettings.radius;
-      paddle.y += this.arenaSettings.radius;
+      paddle.x += this.settings.arenaRadius;
+      paddle.y += this.settings.arenaRadius;
 
       paddle.dx = paddle.ny;
       paddle.dy = -paddle.nx;
@@ -111,7 +141,7 @@ export class MultiplayerPong extends Pong {
     const wallWidth =
       2.0 *
       Math.sin(Math.PI / (2.0 * this.extraGameData.playerCount)) *
-      (this.arenaSettings.radius *
+      (this.settings.arenaRadius *
         (1 + 1 / (this.extraGameData.playerCount + 0.5)));
 
     for (let index = 0; index < 2 * this.extraGameData.playerCount; index++) {
@@ -119,8 +149,8 @@ export class MultiplayerPong extends Pong {
         id: index,
         x: parseFloat(
           (
-            (this.arenaSettings.radius -
-              this.arenaSettings.wallOffset * (index % 2)) *
+            (this.settings.arenaRadius -
+              this.settings.wallsOffset * (index % 2)) *
             Math.cos(
               (Math.PI * index) / this.extraGameData.playerCount + Math.PI,
             )
@@ -128,8 +158,8 @@ export class MultiplayerPong extends Pong {
         ),
         y: parseFloat(
           (
-            (this.arenaSettings.radius -
-              this.arenaSettings.wallOffset * (index % 2)) *
+            (this.settings.arenaRadius -
+              this.settings.wallsOffset * (index % 2)) *
             Math.sin(
               (Math.PI * index) / this.extraGameData.playerCount + Math.PI,
             )
@@ -142,7 +172,7 @@ export class MultiplayerPong extends Pong {
           ).toFixed(3),
         ),
         width: wallWidth,
-        height: this.arenaSettings.wallHeight,
+        height: this.settings.wallsHeight,
         isVisible: true, //index % 2 == 1,
         absX: 0,
         absY: 0,
@@ -163,8 +193,8 @@ export class MultiplayerPong extends Pong {
 
       wall.absX = wall.x;
       wall.absY = wall.y;
-      wall.x += this.arenaSettings.radius;
-      wall.y += this.arenaSettings.radius;
+      wall.x += this.settings.arenaRadius;
+      wall.y += this.settings.arenaRadius;
 
       wall.dx = wall.ny;
       wall.dy = -wall.nx;
@@ -183,12 +213,12 @@ export class MultiplayerPong extends Pong {
       this.gameObjects.balls = [
         {
           id: 0,
-          x: this.arenaSettings.radius + this.arenaSettings.paddleOffset * ca,
-          y: this.arenaSettings.radius + this.arenaSettings.paddleOffset * sa,
+          x: this.settings.arenaRadius + this.settings.paddleOffset * ca,
+          y: this.settings.arenaRadius + this.settings.paddleOffset * sa,
           dx: ca,
           dy: sa,
-          speed: this.defaultBallSettings.speed,
-          radius: this.defaultBallSettings.radius,
+          speed: this.settings.ballSpeed,
+          radius: this.settings.ballRadius,
           isVisible: true,
           doCollision: true,
           doGoal: true,
@@ -198,12 +228,12 @@ export class MultiplayerPong extends Pong {
       // Find the ball by ID and update it
       this.gameObjects.balls[ballId] = {
         id: ballId,
-        x: this.arenaSettings.radius + this.arenaSettings.paddleOffset * ca,
-        y: this.arenaSettings.radius + this.arenaSettings.paddleOffset * sa,
+        x: this.settings.arenaRadius + this.settings.paddleOffset * ca,
+        y: this.settings.arenaRadius + this.settings.paddleOffset * sa,
         dx: ca,
         dy: sa,
-        speed: this.defaultBallSettings.speed,
-        radius: this.defaultBallSettings.radius,
+        speed: this.settings.ballSpeed,
+        radius: this.settings.ballRadius,
         isVisible: true,
         doCollision: true,
         doGoal: true,
@@ -213,7 +243,7 @@ export class MultiplayerPong extends Pong {
 
   rotatePaddles(alpha: number = 0.0): void {
     const paddleAmplitude =
-      (this.arenaSettings.wallDistance - this.arenaSettings.paddleOffset) *
+      (this.settings.arenaRadius - this.settings.paddleOffset) *
       Math.sin(Math.PI / this.extraGameData.playerCount);
 
     for (let idx = 0; idx < this.gameObjects.paddles.length; idx++) {
@@ -226,10 +256,10 @@ export class MultiplayerPong extends Pong {
 
       // Compute base position
       const baseX =
-        (this.arenaSettings.wallDistance - this.arenaSettings.paddleOffset) *
+        (this.settings.arenaRadius - this.settings.paddleOffset) *
         Math.cos(newAngle);
       const baseY =
-        (this.arenaSettings.wallDistance - this.arenaSettings.paddleOffset) *
+        (this.settings.arenaRadius - this.settings.paddleOffset) *
         Math.sin(newAngle);
 
       // Compute normal vector
@@ -243,44 +273,30 @@ export class MultiplayerPong extends Pong {
       paddle.dx = paddle.ny;
       paddle.dy = -paddle.nx;
 
-      // Get current displacement
-      const disp = Math.floor(
-        paddle.displacement / this.arenaSettings.paddleSpeedWidthPercent,
-      );
-
       // Update position with displacement
-      const finalX = baseX + disp * paddle.dx * paddle.speed;
-      const finalY = baseY + disp * paddle.dy * paddle.speed;
+      const finalX = baseX + paddle.displacement * paddle.dx * paddle.speed;
+      const finalY = baseY + paddle.displacement * paddle.dy * paddle.speed;
 
       // Adjust for arena offset
-      paddle.x = parseFloat(
-        (finalX + this.arenaSettings.wallDistance).toFixed(3),
-      );
-      paddle.y = parseFloat(
-        (finalY + this.arenaSettings.wallDistance).toFixed(3),
-      );
+      paddle.x = parseFloat((finalX + this.settings.arenaRadius).toFixed(3));
+      paddle.y = parseFloat((finalY + this.settings.arenaRadius).toFixed(3));
 
       // Update angle
       paddle.alpha = parseFloat(newAngle.toFixed(3));
 
       // Update width and speed
       paddle.width = parseFloat(
-        (paddleAmplitude * (this.arenaSettings.paddleCoverage / 100.0)).toFixed(
-          3,
-        ),
-      );
-      paddle.speed = parseFloat(
         (
           paddleAmplitude *
-          (this.arenaSettings.paddleSpeedWidthPercent / 100.0)
+          (this.settings.paddleCoveragePercent / 100.0)
         ).toFixed(3),
       );
     }
   }
 
   rotateWalls(alpha: number = 0.0): void {
-    const centerX = this.arenaSettings.wallDistance;
-    const centerY = this.arenaSettings.wallDistance;
+    const centerX = this.settings.arenaRadius;
+    const centerY = this.settings.arenaRadius;
     const cosA = Math.cos(alpha);
     const sinA = Math.sin(alpha);
 
@@ -324,17 +340,22 @@ export class MultiplayerPong extends Pong {
   // Implementation of isOutOfBounds method
   isOutOfBounds(ball: Ball): boolean {
     const tolerance: number =
-      this.arenaSettings.wallHeight + this.arenaSettings.paddleOffset;
+      this.settings.wallsHeight + this.settings.paddleOffset;
+    this.settings.wallsHeight + this.settings.paddleOffset;
 
     const distance =
-      (ball.x - this.arenaSettings.radius) ** 2 +
-      (ball.y - this.arenaSettings.radius) ** 2;
+      (ball.x - this.settings.arenaRadius) ** 2 +
+      (ball.y - this.settings.arenaRadius) ** 2;
     return (
-      distance >= tolerance + this.arenaSettings.radius ** 2 + ball.radius ** 2
+      distance >= tolerance + this.settings.arenaRadius ** 2 + ball.radius ** 2
     );
   }
 
   getResults(): number[] {
     return this.extraGameData.results;
+  }
+
+  getSettings(): GameModeCombinedSettings {
+    return this.settings;
   }
 }

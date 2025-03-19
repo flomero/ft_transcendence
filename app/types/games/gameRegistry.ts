@@ -1,71 +1,75 @@
 // Base types for game components
-interface PowerUp {
+export interface PowerUp {
   className: string;
   spawnWeight: number;
   durationS: number;
   [key: string]: any; // For custom properties specific to each power up
 }
 
-interface GameModifier {
+export interface GameModifier {
   className: string;
   [key: string]: any; // For custom properties specific to each modifier
 }
 
-export interface BallSettings {
-  speed: number;
-  radius: number;
-  [key: string]: any;
-}
+export interface FixedSettings {
+  // Arena Settings
+  arenaWidth: number;
+  arenaHeight: number;
 
-export interface ArenaSettings {
-  width: number;
-  height: number;
-  wallHeight: number;
+  // Paddle Settings
   paddleOffset: number;
-  paddleCoverage: number;
   paddleHeight: number;
-  paddleSpeedWidthPercent: number;
-  [key: string]: any;
+
+  // Wall Settings
+  wallsHeight: number;
+
+  [key: string]: any; // any gameMode specific additional fixedSettings
 }
 
-export interface PowerUpSettings {
-  radius: number;
-  capacities: Record<string, number>;
-  [key: string]: any;
+export interface CustomizableSettings {
+  // Ball Settings
+  ballSpeedWidthPercentS: number;
+  ballRadius: number;
+
+  // Paddle Settings
+  paddleCoveragePercent: number;
+  paddleSpeedWidthPercentS: number;
+
+  // PowerUp Settings
+  powerUpRadius: number;
+  powerUpCapacities: Record<string, number>;
+
+  [key: string]: any; // any gameMode specific additional customizableSettings
 }
 
-interface GameMode {
+export interface GameMode {
   className: string;
-  arenaSettings: ArenaSettings;
-  defaultBallSettings: BallSettings;
-  defaultPowerUpSettings: PowerUpSettings;
-  [key: string]: any;
-  class?: any; // Added during runtime
+  fixedSettings: FixedSettings;
+  customizableSettings: CustomizableSettings;
+  [key: string]: any; // Additional properties if needed
+  class?: any; // Added at runtime
 }
 
-// Game specific structure
-interface Game {
+export interface Game {
   serverTickrateS: number;
   serverMaxDelayTicks: number;
   gameModes: Record<string, GameMode>;
   gameModifiers: Record<string, GameModifier>;
   powerUps: Record<string, PowerUp>;
-  [key: string]: any; // For any additional game-specific properties
+  [key: string]: any;
 }
 
-// The complete registry type
 export type GameRegistry = Record<string, Game>;
 
-// Export the initialized registry
-export const GAME_REGISTRY: GameRegistry = {};
-
-// Utility type for accessing specific game components with type safety
 export type GameType = keyof GameRegistry;
 export type GameModeType<G extends GameType> =
   keyof GameRegistry[G]["gameModes"];
 export type PowerUpType<G extends GameType> = keyof GameRegistry[G]["powerUps"];
 export type ModifierType<G extends GameType> =
   keyof GameRegistry[G]["gameModifiers"];
+
+export type GameModeCombinedSettings = GameMode["fixedSettings"] &
+  GameMode["customizableSettings"];
 
 // Helper functions to access the registry with type safety
 export function getGame<G extends GameType>(gameName: G): Game {
@@ -92,3 +96,6 @@ export function getGameModifier<G extends GameType, M extends ModifierType<G>>(
 ): GameModifier {
   return GAME_REGISTRY[gameName].gameModifiers[modifierName as string];
 }
+
+// Export the initialized registry.
+export const GAME_REGISTRY: GameRegistry = {};

@@ -14,7 +14,8 @@ export class Elimination extends PongModifierBase {
 
     this.threshold = GAME_REGISTRY.pong.gameModifiers[this.name].threshold;
 
-    if (customConfig) this.loadSimpleConfig(customConfig);
+    if (customConfig)
+      this.configManager.loadSimpleConfigIntoContainer(customConfig, this);
   }
 
   onGoal(game: Pong, args: { playerId: number }): void {

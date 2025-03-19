@@ -19,10 +19,14 @@ export class SpeedBoost extends TimeLimitedModifierBase {
     const serverTickrateS = GAME_REGISTRY.pong.serverTickrateS;
     const defaultRegistry = GAME_REGISTRY.pong.powerUps[this.name];
 
-    this.registerPropertyConfig("spawnWeight", (value) => value, undefined);
+    this.configManager.registerPropertyConfig(
+      "spawnWeight",
+      (value) => value,
+      undefined,
+    );
 
     // Only register transformations for specific properties we want to modify
-    this.registerPropertyConfig(
+    this.configManager.registerPropertyConfig(
       "duration",
       (_, context) => {
         const durationS = context.duration || defaultRegistry.durationS;
@@ -31,7 +35,7 @@ export class SpeedBoost extends TimeLimitedModifierBase {
       undefined,
     );
 
-    this.registerPropertyConfig(
+    this.configManager.registerPropertyConfig(
       "activationMode",
       (_, context) => {
         const selfActivation =
@@ -44,7 +48,7 @@ export class SpeedBoost extends TimeLimitedModifierBase {
     );
 
     // Register complex derived properties with clear dependencies
-    this.registerPropertyConfig(
+    this.configManager.registerPropertyConfig(
       "rampUpFrequency",
       (_, context) => {
         const rampUpFrequencyS =
@@ -54,7 +58,7 @@ export class SpeedBoost extends TimeLimitedModifierBase {
       undefined,
     );
 
-    this.registerPropertyConfig(
+    this.configManager.registerPropertyConfig(
       "rampUpStrength",
       (_, context) => {
         const totalRampUpStrength =
@@ -78,7 +82,7 @@ export class SpeedBoost extends TimeLimitedModifierBase {
       }
 
       // Apply the custom configuration
-      this.loadComplexConfig(mappedConfig);
+      this.configManager.loadComplexConfigIntoContainer(mappedConfig, this);
     }
   }
 

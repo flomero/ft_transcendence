@@ -7,11 +7,6 @@ import {
   ModifierStatus,
 } from "./modifierBase";
 
-interface PowerUpProperties {
-  radius: number;
-  capacities: Record<string, number>;
-}
-
 export class ModifierManager {
   // Arrays that maintain the allowed names and their definitions.
   protected game: GameBase;
@@ -21,10 +16,6 @@ export class ModifierManager {
   protected unavailablePowerUps: string[] = []; // List of power-up names that are unavailable
 
   protected powerUpCounters: Record<string, number> = {};
-  protected powerUpDefaultProperties: PowerUpProperties = {
-    radius: 10,
-    capacities: {},
-  };
 
   protected probabilityDensityFunction: number[] = [];
   protected cumulativeDensityFunction: number[] = [];
@@ -36,15 +27,9 @@ export class ModifierManager {
 
   constructor(game: GameBase) {
     this.game = game;
-
-    // Initialize modifiers from registry
-    this.initializeModifiers();
-
-    // Initialize power-ups
-    this.initializePowerUps();
   }
 
-  protected initializeModifiers(): void {
+  initializeModifiers(): void {
     // Get the gameModifiers object from the registry
     const modifierRegistry =
       GAME_REGISTRY[this.game.gameData.gameName]?.gameModifiers;
@@ -75,35 +60,15 @@ export class ModifierManager {
 
     this.modifiers.forEach((modifier) => {
       modifier.activate(this.game);
+      console.dir(modifier, { depth: null });
     });
   }
 
-  protected initializePowerUps(): void {
-    // Get the power ups object from the registry with proper type safety
-    const gameMode =
-      GAME_REGISTRY[this.game.gameData.gameName]?.gameModes[
-        this.game.gameData.gameModeName
-      ];
-
-    if (!gameMode) {
-      console.error(
-        `Game mode ${this.game.gameData.gameModeName} not found for game ${this.game.gameData.gameName}`,
-      );
-      return;
-    }
-
-    // Make sure the default settings exist
-    if (gameMode.defaultPowerUpSettings) {
-      this.powerUpDefaultProperties = gameMode.defaultPowerUpSettings;
-    } else {
-      console.warn(
-        `No default power up settings found for ${this.game.gameData.gameModeName}`,
-      );
-    }
+  initializePowerUps(): void {
+    const gameSettings = this.game.getSettings();
 
     // Extract available powerUpNames from the capacities object
-    // (fixed from using Object.keys on the entire powerUpDefaultProperties)
-    Object.keys(this.powerUpDefaultProperties.capacities).forEach((name) => {
+    Object.keys(gameSettings.powerUpCapacities).forEach((name) => {
       if (Object.keys(this.game.gameData.powerUpNames).includes(name))
         this.availablePowerUps.push(name);
       this.powerUpCounters[name] = 0;
@@ -201,14 +166,14 @@ export class ModifierManager {
     // Loop over the CDF and return the first power-up whose cumulative value exceeds rnd
     for (let i = 0; i < this.cumulativeDensityFunction.length; i++)
       if (rnd < this.cumulativeDensityFunction[i])
-        return Object.keys(this.powerUpDefaultProperties.capacities)[i];
+        return Object.keys(this.game.getSettings().powerUpCapacities)[i];
 
     // Fallback: return a random allowed power-up
     const index = Math.floor(
       rng.random() *
-        Object.keys(this.powerUpDefaultProperties.capacities).length,
+        Object.keys(this.game.getSettings().powerUpCapacities).length,
     );
-    return Object.keys(this.powerUpDefaultProperties.capacities)[index];
+    return Object.keys(this.game.getSettings().powerUpCapacities)[index];
   }
 
   spawnRandomPowerUp(
@@ -237,7 +202,7 @@ export class ModifierManager {
         dx: 0.0,
         dy: 0.0,
         speed: 0.0,
-        radius: this.powerUpDefaultProperties.radius,
+        radius: this.game.getSettings().powerUpRadius,
         isVisible: true,
         doCollision: true,
         doGoal: false,
@@ -290,7 +255,7 @@ export class ModifierManager {
     if (
       this.unavailablePowerUps.includes(powerUpName) &&
       this.powerUpCounters[powerUpName] <
-        (this.powerUpDefaultProperties.capacities[powerUpName] || -1)
+        (this.game.getSettings().powerUpCapacities[powerUpName] || -1)
     ) {
       // Remove the name from unavailablePowerUps
       const i = this.unavailablePowerUps.indexOf(powerUpName);
@@ -303,7 +268,7 @@ export class ModifierManager {
     if (
       !this.unavailablePowerUps.includes(powerUpName) &&
       this.powerUpCounters[powerUpName] >=
-        (this.powerUpDefaultProperties.capacities[powerUpName] || -1)
+        (this.game.getSettings().powerUpCapacities[powerUpName] || -1)
     ) {
       // Add the name to unavailablePowerUps
       this.unavailablePowerUps.push(powerUpName);

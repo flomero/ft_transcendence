@@ -9,6 +9,8 @@ export class ArenaShrink extends PongModifierBase {
 
   onPlayerElimination(game: Pong, args: { playerId: number }): void {
     const extraGameData = game.getExtraGameData();
+    const arenaRadius =
+      game.getSettings().arenaRadius || game.getSettings().arenaWidth / 2.0;
 
     // Get the goal_wall & 2 surrounding walls
     const wallIds: number[] = [1, 0, -1].map(
@@ -22,15 +24,15 @@ export class ArenaShrink extends PongModifierBase {
     const walls = wallIds.map((id) => game.getGameObjects().walls[id]);
 
     const leftmost = {
-      x: walls[0]["absX"] + game.getArenaSettings().radius,
-      y: walls[0]["absY"] + game.getArenaSettings().radius,
+      x: walls[0]["absX"] + arenaRadius,
+      y: walls[0]["absY"] + arenaRadius,
       absX: walls[0]["absX"],
       absY: walls[0]["absY"],
     };
 
     const rightmost = {
-      x: walls[2]["absX"] + game.getArenaSettings().radius,
-      y: walls[2]["absY"] + game.getArenaSettings().radius,
+      x: walls[2]["absX"] + arenaRadius,
+      y: walls[2]["absY"] + arenaRadius,
       absX: walls[2]["absX"],
       absY: walls[2]["absY"],
     };

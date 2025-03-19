@@ -14,7 +14,8 @@ export class ScoredGame extends PongModifierBase {
     this.goalObjective =
       GAME_REGISTRY.pong.gameModifiers[this.name].goalObjective;
 
-    if (customConfig) this.loadSimpleConfig(customConfig);
+    if (customConfig)
+      this.configManager.loadSimpleConfigIntoContainer(customConfig, this);
   }
 
   onGoal(game: Pong, args: { playerId: number }): void {

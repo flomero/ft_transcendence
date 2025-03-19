@@ -2,6 +2,7 @@ import type { GameBase } from "../../gameBase";
 import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
 import { TimeLimitedModifierBase } from "../../timeLimitedModifierBase";
 import { ModifierStatus } from "../../modifierBase";
+import { Pong } from "../pong";
 
 export class PowerUpSpawner extends TimeLimitedModifierBase {
   name = "powerUpSpawner";
@@ -15,13 +16,13 @@ export class PowerUpSpawner extends TimeLimitedModifierBase {
     const serverTickrateS = GAME_REGISTRY.pong.serverTickrateS;
 
     // Register transformations for properties
-    this.registerPropertyConfig(
+    this.configManager.registerPropertyConfig(
       "meanDelay",
       (meanDelayS) => meanDelayS * serverTickrateS,
       (meanDelay) => meanDelay / serverTickrateS,
     );
 
-    this.registerPropertyConfig(
+    this.configManager.registerPropertyConfig(
       "delaySpan",
       (delaySpanS) => delaySpanS * serverTickrateS,
       (delaySpan) => delaySpan / serverTickrateS,
@@ -31,10 +32,11 @@ export class PowerUpSpawner extends TimeLimitedModifierBase {
       meanDelay: GAME_REGISTRY.pong.gameModifiers[this.name].meanDelayS,
       delaySpan: GAME_REGISTRY.pong.gameModifiers[this.name].delaySpanS,
     };
-    this.loadSimpleConfig(defaultConfig);
+    this.configManager.loadSimpleConfigIntoContainer(defaultConfig, this);
 
     // Apply custom configuration if provided
-    if (customConfig) this.loadSimpleConfig(customConfig);
+    if (customConfig)
+      this.configManager.loadSimpleConfigIntoContainer(customConfig, this);
   }
 
   onGameStart(game: GameBase): void {
@@ -49,40 +51,28 @@ export class PowerUpSpawner extends TimeLimitedModifierBase {
     console.log(`Next powerUpSpawn in ${this.duration} ticks`);
   }
 
-  onDeactivation(game: GameBase): void {
-    const arenaWidth =
-      GAME_REGISTRY.pong.gameModes[game.gameData.gameModeName].arenaSettings
-        .width ||
-      2 *
-        GAME_REGISTRY.pong.gameModes[game.gameData.gameModeName].arenaSettings
-          .radius;
-    const arenaHeight =
-      GAME_REGISTRY.pong.gameModes[game.gameData.gameModeName].arenaSettings
-        .height ||
-      2 *
-        GAME_REGISTRY.pong.gameModes[game.gameData.gameModeName].arenaSettings
-          .radius;
-    const defaultRadius =
-      GAME_REGISTRY.pong.gameModes[game.gameData.gameModeName]
-        .defaultPowerUpSettings.radius;
-    const offset =
-      GAME_REGISTRY.pong.gameModes[game.gameData.gameModeName].arenaSettings
-        .wallHeight;
+  onDeactivation(game: Pong): void {
+    const halfWidth = game.getSettings().arenaWidth / 2.0;
+    const halfHeight = game.getSettings().arenaHeight / 2.0;
+
+    const defaultRadius = game.getSettings().powerUpRadius;
+
+    const offset = game.getSettings().wallsHeight;
 
     const x = Math.min(
       Math.max(
-        game.getRNG().randomGaussian(arenaWidth / 2.0, arenaWidth / 4.0),
+        game.getRNG().randomGaussian(halfWidth, halfWidth / 2.0),
         defaultRadius + offset,
       ),
-      arenaWidth - (defaultRadius + offset),
+      halfWidth * 2.0 - (defaultRadius + offset),
     );
 
     const y = Math.min(
       Math.max(
-        game.getRNG().randomGaussian(arenaHeight / 2.0, arenaHeight / 2.2),
+        game.getRNG().randomGaussian(halfHeight, halfHeight / 1.05),
         defaultRadius + offset,
       ),
-      arenaHeight - (defaultRadius + offset),
+      halfHeight * 2.0 - (defaultRadius + offset),
     );
 
     const spawned = game
