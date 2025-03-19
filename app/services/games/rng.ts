@@ -29,6 +29,10 @@ export class RNG {
     return result;
   }
 
+  randomInt(min: number = 0, max: number = 1): number {
+    return Math.floor(this.random() * (max - min + 1)) + min;
+  }
+
   // Getters & setters
   setSeed(seed: number) {
     this.seed = seed;

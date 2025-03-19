@@ -1,8 +1,8 @@
 import { IPongPowerUpPositionSampler } from "../../../types/strategy/IPongPowerUpPositionSampler";
 import { Pong } from "../../games/pong/pong";
 
-export class FullRandomRectangularArena implements IPongPowerUpPositionSampler {
-  name = "fullRandomRectangularArena";
+export class UniformRectangularArena implements IPongPowerUpPositionSampler {
+  name = "uniformRectangularArena";
 
   samplePosition(game: Pong): { x: number; y: number } {
     const width = game.getSettings().arenaWidth;

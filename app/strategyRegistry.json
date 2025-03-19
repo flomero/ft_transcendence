@@ -1,11 +1,23 @@
 {
   "pongPowerUpPositionSampler": {
-    "fullRandomRectangularArena": {
-      "className": "FullRandomRectangularArena"
+    "uniformRectangularArena": {
+      "className": "UniformRectangularArena"
     },
 
     "elipticGaussianRectangularArena": {
       "className": "ElipticGaussianRectangularArena"
+    },
+
+    "uniformCircularArena": {
+      "className": "UniformCircularArena"
+    },
+
+    "flowerGaussianCircularArena": {
+      "className": "FlowerGaussianCircularArena",
+      "stdAngleDeviationDeg": 60,
+      "baseRadiusFactor": 0.45,
+      "variationStrength": 0.2,
+      "stdDistanceDeviationPercent": 15
     }
   }
 }

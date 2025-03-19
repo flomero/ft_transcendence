@@ -44,10 +44,10 @@ export class MultiplayerPong extends Pong {
       powerUpCapacities: registry.customizableSettings.powerUpCapacities,
     };
 
-    this.settings.ballSpeed =
-      (this.settings.arenaWidth *
-        (this.settings.ballSpeedWidthPercentS / 100)) /
-      this.serverTickrateS;
+    this.settings.ballSpeed = 0;
+    // (this.settings.arenaWidth *
+    //   (this.settings.ballSpeedWidthPercentS / 100)) /
+    // this.serverTickrateS;
     this.settings.arenaRadius = this.settings.arenaWidth / 2.0;
 
     if (customConfig.powerUpCapacities)
