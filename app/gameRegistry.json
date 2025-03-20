@@ -83,6 +83,11 @@
 
       "arenaShrink": {
         "className": "ArenaShrink"
+      },
+
+      "goalReset": {
+        "className": "GoalReset",
+        "delayS": 2
       }
     },
 
