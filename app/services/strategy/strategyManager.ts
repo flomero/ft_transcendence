@@ -10,7 +10,8 @@ import { STRATEGY_REGISTRY } from "./strategyRegistryLoader";
  * @template K - The key of T that represents the primary method (e.g. "samplePosition" or "nextMove").
  */
 export class StrategyManager<T, K extends keyof T> {
-  private strategy: T;
+  private loadedStrategies: Record<string, T> = {};
+  private currentStrategy: string;
   private strategyTypeName: string;
   private defaultMethod: K;
 
@@ -43,14 +44,15 @@ export class StrategyManager<T, K extends keyof T> {
       );
     }
 
-    this.strategy = new strategyClass();
+    this.loadedStrategies[initialStrategyName] = new strategyClass();
+    this.currentStrategy = initialStrategyName;
   }
 
   /**
    * Returns the current strategy instance.
    */
   public getStrategy(): T {
-    return this.strategy;
+    return this.loadedStrategies[this.currentStrategy];
   }
 
   /**
@@ -61,6 +63,12 @@ export class StrategyManager<T, K extends keyof T> {
    * @param strategyName The name of the strategy (as defined in the registry).
    */
   public setStrategy(strategyName: string): void {
+    const strategy = this.loadedStrategies[strategyName];
+    if (strategy) {
+      this.currentStrategy = strategyName;
+      return;
+    }
+
     const strategies = STRATEGY_REGISTRY[this.strategyTypeName];
     if (!strategies) {
       throw new Error(
@@ -73,7 +81,9 @@ export class StrategyManager<T, K extends keyof T> {
         `Strategy "${strategyName}" not found under ${this.strategyTypeName}`,
       );
     }
-    this.strategy = new strategyClass();
+
+    this.loadedStrategies[strategyName] = new strategyClass();
+    this.currentStrategy = strategyName;
   }
 
   /**
@@ -88,12 +98,13 @@ export class StrategyManager<T, K extends keyof T> {
   public executeStrategy(
     ...args: T[K] extends (...args: infer A) => any ? A : never
   ): T[K] extends (...args: any[]) => infer R ? R : never {
-    const method = this.strategy[this.defaultMethod];
+    const method =
+      this.loadedStrategies[this.currentStrategy][this.defaultMethod];
     if (typeof method !== "function") {
       throw new Error(
         `The default method ${String(this.defaultMethod)} is not a function`,
       );
     }
-    return method.apply(this.strategy, args);
+    return method.apply(this.loadedStrategies[this.currentStrategy], args);
   }
 }

@@ -15,8 +15,9 @@
         },
 
         "customizableSettings": {
-          "ballSpeedWidthPercentS": 95,
+          "ballSpeedWidthPercentS": 85,
           "ballRadius": 0.95,
+          "ballResetSamplerStrategyName": "biasedQuadrantGaussianRA",
           "paddleCoveragePercent": 25,
           "paddleSpeedWidthPercentS": 150,
           "powerUpRadius": 20,
@@ -41,6 +42,7 @@
         "customizableSettings": {
           "ballSpeedWidthPercentS": 85,
           "ballRadius": 0.85,
+          "ballResetSamplerStrategyName": "biasedQuadrantGaussianRA",
           "paddleCoveragePercent": 20,
           "paddleSpeedWidthPercentS": 150,
           "powerUpRadius": 10,
@@ -57,7 +59,7 @@
         "className": "PowerUpSpawner",
         "meanDelayS": 5,
         "delaySpanS": 2,
-        "positionSamplerStrategyName": "fullRandomRectangularArena"
+        "positionSamplerStrategyName": "elipticGaussianRA"
       },
 
       "timedGame": {

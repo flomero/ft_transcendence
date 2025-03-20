@@ -1,8 +1,8 @@
 import { IPongPowerUpPositionSampler } from "../../../types/strategy/IPongPowerUpPositionSampler";
 import { Pong } from "../../games/pong/pong";
 
-export class UniformCircularArena implements IPongPowerUpPositionSampler {
-  name = "uniformCircularArena";
+export class UniformCA implements IPongPowerUpPositionSampler {
+  name = "uniformCA";
 
   samplePosition(game: Pong): { x: number; y: number } {
     const radius =

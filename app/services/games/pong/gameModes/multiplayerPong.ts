@@ -32,6 +32,9 @@ export class MultiplayerPong extends Pong {
         registry.customizableSettings.ballSpeedWidthPercentS,
       ballRadius:
         customConfig.ballRadius || registry.customizableSettings.ballRadius,
+      ballResetSamplerStrategyName:
+        customConfig.ballResetSamplerStrategyName ||
+        registry.customizableSettings.ballResetSamplerStrategyName,
       paddleCoveragePercent:
         customConfig.paddleCoveragePercent ||
         registry.customizableSettings.paddleCoveragePercent,

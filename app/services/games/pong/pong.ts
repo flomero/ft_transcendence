@@ -20,6 +20,7 @@ interface Player {
 export interface PongExtraGameData {
   playerCount: number;
   lastHit: number;
+  lastGoal: number;
   players?: Player[];
   scores: number[];
   results: number[];
@@ -63,6 +64,7 @@ export abstract class Pong extends GameBase {
     this.extraGameData = {
       playerCount: gameData.playerCount,
       lastHit: -1,
+      lastGoal: -1,
       scores: Array(gameData.playerCount).fill(0),
       results: Array(gameData.playerCount).fill(0),
     };
@@ -438,6 +440,7 @@ export abstract class Pong extends GameBase {
           if (wall.isGoal) {
             const goalPlayerId = Math.floor(collision.objectId / 2);
             this.extraGameData.scores[goalPlayerId]++;
+            this.extraGameData.lastGoal = goalPlayerId;
 
             // Then trigger goal effects
             this.modifierManager.trigger("onGoal", {

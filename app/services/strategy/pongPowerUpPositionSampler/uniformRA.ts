@@ -1,10 +1,8 @@
 import { IPongPowerUpPositionSampler } from "../../../types/strategy/IPongPowerUpPositionSampler";
 import { Pong } from "../../games/pong/pong";
 
-export class ElipticGaussianRectangularArena
-  implements IPongPowerUpPositionSampler
-{
-  name = "elipticGaussianRectangularArena";
+export class UniformRA implements IPongPowerUpPositionSampler {
+  name = "uniformRA";
 
   samplePosition(game: Pong): { x: number; y: number } {
     const width = game.getSettings().arenaWidth;
@@ -14,18 +12,12 @@ export class ElipticGaussianRectangularArena
     const offset = game.getSettings().wallsHeight;
 
     const x = Math.min(
-      Math.max(
-        game.getRNG().randomGaussian(width / 2.0, width / 4.0),
-        powerUpRadius + offset,
-      ),
+      Math.max(game.getRNG().random() * width, powerUpRadius + offset),
       width - (powerUpRadius + offset),
     );
 
     const y = Math.min(
-      Math.max(
-        game.getRNG().randomGaussian(height / 2.0, height / 4.0),
-        powerUpRadius + offset,
-      ),
+      Math.max(game.getRNG().random() * height, powerUpRadius + offset),
       height - (powerUpRadius + offset),
     );
 

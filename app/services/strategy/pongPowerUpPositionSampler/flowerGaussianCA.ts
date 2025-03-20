@@ -2,10 +2,8 @@ import { IPongPowerUpPositionSampler } from "../../../types/strategy/IPongPowerU
 import { Pong } from "../../games/pong/pong";
 import { STRATEGY_REGISTRY } from "../strategyRegistryLoader";
 
-export class FlowerGaussianCircularArena
-  implements IPongPowerUpPositionSampler
-{
-  name = "flowerGaussianCircularArena";
+export class FlowerGaussianCA implements IPongPowerUpPositionSampler {
+  name = "flowerGaussianCA";
 
   protected stdAngleDeviation: number = 0;
   protected baseRadiusFactor: number = 0;

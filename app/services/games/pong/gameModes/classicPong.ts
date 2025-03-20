@@ -6,11 +6,18 @@ import {
   GAME_REGISTRY,
   type GameModeCombinedSettings,
 } from "../../../../types/games/gameRegistry";
+import { IPongBallResetSampler } from "../../../../types/strategy/IPongBallResetSampler";
+import { StrategyManager } from "../../../strategy/strategyManager";
 
 export class ClassicPong extends Pong {
   name = "classicPong";
 
   protected settings: GameModeCombinedSettings;
+
+  protected ballResetSampler: StrategyManager<
+    IPongBallResetSampler,
+    "sampleDirection"
+  >;
 
   constructor(gameData: Record<string, any>) {
     super(gameData);
@@ -32,6 +39,9 @@ export class ClassicPong extends Pong {
         registry.customizableSettings.ballSpeedWidthPercentS,
       ballRadius:
         customConfig.ballRadius || registry.customizableSettings.ballRadius,
+      ballResetSamplerStrategyName:
+        customConfig.ballResetSamplerStrategyName ||
+        registry.customizableSettings.ballResetSamplerStrategyName,
       paddleCoveragePercent:
         customConfig.paddleCoveragePercent ||
         registry.customizableSettings.paddleCoveragePercent,
@@ -56,6 +66,12 @@ export class ClassicPong extends Pong {
         this.settings.powerUpCapacities[key] = value;
 
     console.dir(this.settings, { depth: null });
+
+    this.ballResetSampler = new StrategyManager(
+      this.settings.ballResetSamplerStrategyName,
+      "pongBallResetSampler",
+      "sampleDirection",
+    );
 
     // Initializing GameObjects
     this.resetBall();
@@ -223,19 +239,22 @@ export class ClassicPong extends Pong {
     ];
   }
 
-  // Updated to use edit queue
   resetBall(ballId: number = -1): void {
-    const randomAngle = this.rng.random() * Math.PI * 2.0;
-    const ca = Math.cos(randomAngle);
-    const sa = Math.sin(randomAngle);
+    const sampledDirection = this.ballResetSampler.executeStrategy(this);
+
+    const ca = Math.cos(sampledDirection.angularDirection);
+    const sa = Math.sin(sampledDirection.angularDirection);
+
+    const x = this.settings.arenaWidth / 2.0 + sampledDirection.magnitude * ca;
+    const y = this.settings.arenaHeight / 2.0 + sampledDirection.magnitude * sa;
 
     if (ballId < 0) {
       // Reset all balls
       this.gameObjects.balls = [
         {
           id: 0,
-          x: this.settings.arenaWidth / 2.0 + this.settings.paddleOffset * ca,
-          y: this.settings.arenaHeight / 2.0 + this.settings.paddleOffset * sa,
+          x: x,
+          y: y,
           dx: ca,
           dy: sa,
           speed: this.settings.ballSpeed,
@@ -249,8 +268,8 @@ export class ClassicPong extends Pong {
       // Find the ball by ID and update it
       this.gameObjects.balls[ballId] = {
         id: ballId,
-        x: this.settings.arenaWidth / 2.0 + this.settings.paddleOffset * ca,
-        y: this.settings.arenaHeight / 2.0 + this.settings.paddleOffset * sa,
+        x: x,
+        y: y,
         dx: ca,
         dy: sa,
         speed: this.settings.ballSpeed,
@@ -262,7 +281,6 @@ export class ClassicPong extends Pong {
     }
   }
 
-  // Implementation of isOutOfBounds method
   isOutOfBounds(ball: Ball): boolean {
     const tolerance: number =
       this.settings.wallsHeight + this.settings.paddleOffset;
