@@ -74,9 +74,9 @@ export class ClassicPong extends Pong {
     );
 
     // Initializing GameObjects
-    this.resetBall();
     this.initPaddles();
     this.initWalls();
+    this.resetBall();
   }
 
   startGame(): void {

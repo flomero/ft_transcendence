@@ -46,7 +46,7 @@ export class GoalReset extends PongModifierBase {
     this.ticks = this.delay;
     this.status = ModifierStatus.PAUSED;
 
-    game.resetBall(0);
+    game.resetBall(-1);
     this.ballSpeed = game.getGameObjects().balls[0].speed;
     game.getGameObjects().balls[0].speed = 0;
   }

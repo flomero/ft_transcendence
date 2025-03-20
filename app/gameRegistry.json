@@ -32,7 +32,7 @@
         "className": "MultiplayerPong",
         "fixedSettings": {
           "arenaWidth": 100,
-          "arenaheight": 100,
+          "arenaHeight": 100,
           "paddleOffset": 2.5,
           "paddleHeight": 1,
           "wallsHeight": 2,
@@ -40,9 +40,9 @@
         },
 
         "customizableSettings": {
-          "ballSpeedWidthPercentS": 85,
+          "ballSpeedWidthPercentS": 90,
           "ballRadius": 0.85,
-          "ballResetSamplerStrategyName": "biasedQuadrantGaussianRA",
+          "ballResetSamplerStrategyName": "biasedGaussianCA",
           "paddleCoveragePercent": 20,
           "paddleSpeedWidthPercentS": 150,
           "powerUpRadius": 10,

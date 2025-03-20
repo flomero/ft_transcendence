@@ -6,11 +6,18 @@ import {
   GAME_REGISTRY,
   type GameModeCombinedSettings,
 } from "../../../../types/games/gameRegistry";
+import { StrategyManager } from "../../../strategy/strategyManager";
+import { IPongBallResetSampler } from "../../../../types/strategy/IPongBallResetSampler";
 
 export class MultiplayerPong extends Pong {
   name = "multiplayerPong";
 
   protected settings: GameModeCombinedSettings;
+
+  private ballResetSampler: StrategyManager<
+    IPongBallResetSampler,
+    "sampleDirection"
+  >;
 
   constructor(gameData: Record<string, any>) {
     super(gameData);
@@ -62,9 +69,15 @@ export class MultiplayerPong extends Pong {
     console.log("Loaded settings:");
     console.dir(this.settings, { depth: null });
 
-    this.resetBall();
+    this.ballResetSampler = new StrategyManager(
+      this.settings.ballResetSamplerStrategyName,
+      "pongBallResetSampler",
+      "sampleDirection",
+    );
+
     this.initPaddles();
     this.initWalls();
+    this.resetBall(-1);
   }
 
   startGame(): void {
@@ -207,17 +220,21 @@ export class MultiplayerPong extends Pong {
   }
 
   resetBall(ballId: number = -1): void {
-    const randomAngle = this.rng.random() * Math.PI * 2.0;
-    const ca = Math.cos(randomAngle);
-    const sa = Math.sin(randomAngle);
+    const sampledDirection = this.ballResetSampler.executeStrategy(this);
+
+    const ca = Math.cos(sampledDirection.angularDirection);
+    const sa = Math.sin(sampledDirection.angularDirection);
+
+    const x = this.settings.arenaWidth / 2.0 + sampledDirection.magnitude * ca;
+    const y = this.settings.arenaHeight / 2.0 + sampledDirection.magnitude * sa;
 
     if (ballId < 0) {
       // Reset all balls
       this.gameObjects.balls = [
         {
           id: 0,
-          x: this.settings.arenaRadius + this.settings.paddleOffset * ca,
-          y: this.settings.arenaRadius + this.settings.paddleOffset * sa,
+          x: x,
+          y: y,
           dx: ca,
           dy: sa,
           speed: this.settings.ballSpeed,
@@ -231,8 +248,8 @@ export class MultiplayerPong extends Pong {
       // Find the ball by ID and update it
       this.gameObjects.balls[ballId] = {
         id: ballId,
-        x: this.settings.arenaRadius + this.settings.paddleOffset * ca,
-        y: this.settings.arenaRadius + this.settings.paddleOffset * sa,
+        x: x,
+        y: y,
         dx: ca,
         dy: sa,
         speed: this.settings.ballSpeed,

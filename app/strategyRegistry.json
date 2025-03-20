@@ -22,6 +22,10 @@
 
     "biasedQuadrantGaussianRATester": {
       "className": "BiasedQuadrantGaussianRATester"
+    },
+
+    "biasedGaussianCATester": {
+      "className": "BiasedGaussianCATester"
     }
   },
 
@@ -33,6 +37,14 @@
       "stdVelocityVariationPercent": 10,
       "maxVelocityPercent": 30,
       "lastGoalBiasPercent": 65
+    },
+
+    "biasedGaussianCA": {
+      "className": "BiasedGaussianCA",
+      "stdAngularVariationPercent": 105,
+      "stdVelocityVariationPercent": 15,
+      "maxVelocityPercent": 40,
+      "lastGoalBiasPercent": 75
     }
   }
 }
