@@ -49,7 +49,10 @@ export const pongConsumer = async (
   ws.on("message", async (message) => {
     try {
       const rawData: Record<string, any> = JSON.parse(message.toString());
-      console.log(rawData);
+
+      console.log("Raw data received:");
+      console.dir(rawData);
+
       const messageType = rawData.type;
       const data = rawData.options;
 

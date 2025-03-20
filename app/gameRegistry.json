@@ -21,7 +21,8 @@
           "paddleSpeedWidthPercentS": 150,
           "powerUpRadius": 20,
           "powerUpCapacities": {
-            "speedBoost": 1
+            "speedBoost": 1,
+            "blinkingBall": 1
           }
         }
       },
@@ -44,7 +45,8 @@
           "paddleSpeedWidthPercentS": 150,
           "powerUpRadius": 10,
           "powerUpCapacities": {
-            "speedBoost": 1
+            "speedBoost": 1,
+            "blinkingBall": 1
           }
         }
       }
@@ -90,6 +92,15 @@
         "durationS": 2,
         "totalRampUpStrength": 0.75,
         "rampUpFrequencyS": 0.25
+      },
+
+      "blinkingBall": {
+        "className": "BlinkingBall",
+        "spawnWeight": 1.0,
+        "selfActivation": false,
+        "durationS": 6,
+        "blinkIntervalS": 0.5,
+        "blinkDurationPercent": 50
       }
     }
   }

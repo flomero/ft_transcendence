@@ -6,6 +6,7 @@ import {
   type ModifierBase,
   ModifierStatus,
 } from "./modifierBase";
+import { RNG } from "./rng";
 
 export class ModifierManager {
   // Arrays that maintain the allowed names and their definitions.
@@ -68,11 +69,15 @@ export class ModifierManager {
     const gameSettings = this.game.getSettings();
 
     // Extract available powerUpNames from the capacities object
-    Object.keys(gameSettings.powerUpCapacities).forEach((name) => {
-      if (Object.keys(this.game.gameData.powerUpNames).includes(name))
+
+    Object.keys(this.game.gameData.powerUpNames)
+      .filter((name) =>
+        Object.keys(gameSettings.powerUpCapacities).includes(name),
+      )
+      .forEach((name) => {
         this.availablePowerUps.push(name);
-      this.powerUpCounters[name] = 0;
-    });
+        this.powerUpCounters[name] = 0;
+      });
 
     this.computeCDF();
   }
@@ -159,27 +164,19 @@ export class ModifierManager {
     // about the ModifierBase class implementation
   }
 
-  sampleRandomPowerUp(rng: { random: () => number }): string | null {
+  sampleRandomPowerUp(rng: RNG): string | null {
     if (this.cumulativeDensityFunction.length <= 0) return null;
 
     const rnd = rng.random();
     // Loop over the CDF and return the first power-up whose cumulative value exceeds rnd
     for (let i = 0; i < this.cumulativeDensityFunction.length; i++)
       if (rnd < this.cumulativeDensityFunction[i])
-        return Object.keys(this.game.getSettings().powerUpCapacities)[i];
+        return this.availablePowerUps[i];
 
-    // Fallback: return a random allowed power-up
-    const index = Math.floor(
-      rng.random() *
-        Object.keys(this.game.getSettings().powerUpCapacities).length,
-    );
-    return Object.keys(this.game.getSettings().powerUpCapacities)[index];
+    return null;
   }
 
-  spawnRandomPowerUp(
-    rng: { random: () => number },
-    position: { x: number; y: number },
-  ): boolean {
+  spawnRandomPowerUp(rng: RNG, position: { x: number; y: number }): boolean {
     const powerUpName: string | null = this.sampleRandomPowerUp(rng);
     if (!powerUpName) {
       console.log("Can't spawn any power up");

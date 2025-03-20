@@ -44,10 +44,10 @@ export class ClassicPong extends Pong {
       powerUpCapacities: registry.customizableSettings.powerUpCapacities,
     };
 
-    this.settings.ballSpeed = 0;
-    // (this.settings.arenaWidth *
-    //   (this.settings.ballSpeedWidthPercentS / 100)) /
-    // this.serverTickrateS;
+    this.settings.ballSpeed =
+      (this.settings.arenaWidth *
+        (this.settings.ballSpeedWidthPercentS / 100)) /
+      this.serverTickrateS;
 
     if (customConfig.powerUpCapacities)
       for (const [key, value] of Object.entries(

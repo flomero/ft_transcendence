@@ -25,7 +25,6 @@ export class SpeedBoost extends TimeLimitedModifierBase {
       undefined,
     );
 
-    // Only register transformations for specific properties we want to modify
     this.configManager.registerPropertyConfig(
       "duration",
       (_, context) => {
@@ -47,7 +46,6 @@ export class SpeedBoost extends TimeLimitedModifierBase {
       undefined,
     );
 
-    // Register complex derived properties with clear dependencies
     this.configManager.registerPropertyConfig(
       "rampUpFrequency",
       (_, context) => {
@@ -71,19 +69,7 @@ export class SpeedBoost extends TimeLimitedModifierBase {
       ["rampUpFrequency", "duration"],
     );
 
-    // Apply custom configuration if provided
-    if (customConfig) {
-      // Map property names if needed
-      const mappedConfig: Record<string, any> = {};
-
-      // Handle direct overrides
-      for (const [key, value] of Object.entries(customConfig)) {
-        mappedConfig[key] = value;
-      }
-
-      // Apply the custom configuration
-      this.configManager.loadComplexConfigIntoContainer(mappedConfig, this);
-    }
+    this.configManager.loadComplexConfigIntoContainer(customConfig || {}, this);
   }
 
   onActivation(game: Pong): void {
@@ -95,7 +81,7 @@ export class SpeedBoost extends TimeLimitedModifierBase {
     }
   }
 
-  async onUpdate(game: Pong): Promise<void> {
+  onUpdate(game: Pong): void {
     super.onUpdate(game);
 
     if (this.ticks % this.rampUpFrequency == 0) {

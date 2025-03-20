@@ -26,8 +26,6 @@ export abstract class GameBase {
     this.lastUpdateTime = Date.now();
     this.startTimeMs = Date.now();
 
-    console.log(gameData);
-
     this.rng = new RNG();
     this.modifierManager = new ModifierManager(this);
     this.configManager = new ConfigManager();
