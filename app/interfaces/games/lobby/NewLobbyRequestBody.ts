@@ -1,11 +1,7 @@
-import type { GameModes } from "../../../types/games/GameModes";
+import { GameSettings } from "./GameSettings";
 
-interface NewLobbyRequestBody {
-  gameName: "pong";
-  gameModeName: GameModes;
-  modifierNames: string[];
-  powerUpNames: string[];
+interface NewLobbyRequestBody extends GameSettings {
   lobbyMode: "public" | "private";
 }
 
-export type { NewLobbyRequestBody };
+export default NewLobbyRequestBody;

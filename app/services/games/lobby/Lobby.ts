@@ -1,5 +1,5 @@
 import type { LobbyMember } from "../../../types/games/lobby/LobbyMember";
-import type { GameModes } from "../../../types/games/GameModes";
+import type { GameSettings } from "../../../interfaces/games/lobby/GameSettings";
 import { WebSocket } from "ws";
 import { randomUUID } from "node:crypto";
 import MinAndMaxPlayers from "../../../types/games/lobby/MinAndMaxPlayers";
@@ -9,12 +9,11 @@ class Lobby {
   private lobbyMembers: Map<string, LobbyMember> = new Map();
   private stateLobby: "open" | "started";
   private locketLobby: boolean = false;
-  game: "pong"; //make private later
-  gameMode: GameModes; //make private later
+  gameSettings: GameSettings; //make private later
   lobbyOwner: string; //make private later
   memberLimits: { min: number; max: number }; //make private later
 
-  constructor(game: "pong", gameMode: GameModes, memberId: string) {
+  constructor(gameSettings: GameSettings, memberId: string) {
     const newMember: LobbyMember = {
       id: memberId,
       userState: "notInLobby",
@@ -22,18 +21,17 @@ class Lobby {
     };
 
     this.lobbyMembers.set(memberId, newMember);
-    this.game = game;
-    this.gameMode = gameMode;
     this.lobbyOwner = memberId;
     this.stateLobby = "open";
-    this.memberLimits = this.getMemberLimits(gameMode);
+    this.gameSettings = gameSettings;
+    this.memberLimits = this.getMemberLimits();
     this.printLobbyMembers();
   }
 
-  private getMemberLimits(gameMode: GameModes): { min: number; max: number } {
-    if (MinAndMaxPlayers[gameMode] !== undefined)
-      return MinAndMaxPlayers[gameMode];
-    throw new Error("Game mode not found: " + gameMode);
+  private getMemberLimits(): { min: number; max: number } {
+    if (MinAndMaxPlayers[this.gameSettings.gameMode] !== undefined)
+      return MinAndMaxPlayers[this.gameSettings.gameMode];
+    throw new Error("Game mode not found: " + this.gameSettings.gameMode);
   }
 
   public addMember(memberId: string): void {
@@ -172,6 +170,11 @@ class Lobby {
     this.lobbyMembers.forEach((member) => {
       console.log(member.id);
     });
+  }
+
+  public printGameSettings(): void {
+    console.log("GameSettings: ");
+    console.log(this.gameSettings);
   }
 
   private canMemberBeAddedCheck(memberId: string): void {
