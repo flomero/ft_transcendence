@@ -1,6 +1,11 @@
 <div class="chat-room flex items-center p-3 rounded-lg cursor-pointer mb-2 {{#if room.selected}}{{/if}}" data-room-id="{{room.id}}" data-read="{{room.read}}" onclick="chat.selectRoom(event)">
+    {{#if room.user}}
+        <div class="flex-shrink-0 mr-3">
+            <img src="{{room.user.imageUrl}}" alt="{{room.user.userName}}" class="w-10 h-10 rounded-full">
+        </div>
+    {{/if}}
     <div class="chat-room-name font-medium flex justify-between w-full">
-        <p>{{room.name}}</p>
+        <p>{{#if room.user}}{{room.user.userName}}{{else}}{{room.name}}{{/if}}</p>
         {{#unless room.read}}
             <span class="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">New</span>
         {{/unless}}
