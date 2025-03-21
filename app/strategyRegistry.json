@@ -30,6 +30,10 @@
   },
 
   "pongBallResetSampler": {
+    "uniformCA": {
+      "className": "UniformCA"
+    },
+
     "biasedQuadrantGaussianRA": {
       "className": "BiasedQuadrantGaussianRA",
       "stdAngularVariationDeg": 10,
