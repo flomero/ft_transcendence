@@ -33,9 +33,6 @@ export async function createChatRoom(
 export async function deleteChatRoom(fastify: FastifyInstance, roomId: number) {
   try {
     await fastify.sqlite.run("DELETE FROM chat_rooms WHERE id = ?;", [roomId]);
-    await fastify.sqlite.run("DELETE FROM r_users_chat WHERE room_id = ?;", [
-      roomId,
-    ]);
   } catch (error) {
     fastify.log.error(error);
   }
