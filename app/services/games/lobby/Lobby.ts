@@ -50,6 +50,10 @@ class Lobby {
     return this.lobbyId;
   }
 
+  public get getGameSettings(): GameSettings {
+    return this.gameSettings;
+  }
+
   public isUserInLobby(memberId: string): boolean {
     return this.lobbyMembers.has(memberId);
   }
@@ -175,6 +179,10 @@ class Lobby {
   public printGameSettings(): void {
     console.log("GameSettings: ");
     console.log(this.gameSettings);
+  }
+
+  public getMemberAsArray(): LobbyMember[] {
+    return Array.from(this.lobbyMembers.values());
   }
 
   private canMemberBeAddedCheck(memberId: string): void {
