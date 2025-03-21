@@ -207,3 +207,8 @@ export async function deleteRoom(fastify: FastifyInstance, roomId: number) {
     client.socket.send(JSON.stringify(response));
   }
 }
+
+export function userIsOnline(userId: string) {
+  const client = chatClients.find((client) => client.userId === userId);
+  return client !== undefined;
+}

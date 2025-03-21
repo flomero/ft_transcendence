@@ -1,5 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import type { UUID } from "node:crypto";
+import { userIsOnline } from "../chat/live";
 
 export interface User {
   id: string;
@@ -11,6 +12,7 @@ export interface UserWithImage {
   userId: string;
   userName: string;
   imageUrl: string;
+  online?: boolean;
 }
 
 export function userToUserWithImage(user: User): UserWithImage {
@@ -18,6 +20,7 @@ export function userToUserWithImage(user: User): UserWithImage {
     userId: user.id,
     userName: user.username,
     imageUrl: `/image/${user.image_id}`,
+    online: userIsOnline(user.id),
   };
 }
 

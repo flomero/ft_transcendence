@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { UserWithImage } from "../user";
+import { User, userToUserWithImage, UserWithImage } from "../user";
 
 export interface ChatRoom {
   id: number;
@@ -78,19 +78,23 @@ export async function getChatRoomsForUser(
 
   const results = await fastify.sqlite.all(sql, [userId, userId]);
 
-  return results.map((row) => ({
-    id: row.id,
-    name: row.name,
-    type: row.type,
-    read: row.read,
-    user: row["user.id"]
-      ? {
-          userId: row["user.id"],
-          userName: row["user.username"],
-          imageUrl: `/image/${row["user.image_id"]}`,
-        }
-      : undefined,
-  }));
+  function mapRowToChatRoom(row: any): ChatRoom {
+    return {
+      id: row.id,
+      name: row.name,
+      type: row.type,
+      read: row.read,
+      user: row["user.id"]
+        ? userToUserWithImage({
+            id: row["user.id"],
+            username: row["user.username"],
+            image_id: row["user.image_id"],
+          })
+        : undefined,
+    };
+  }
+
+  return results.map(mapRowToChatRoom);
 }
 
 export async function getChatRoomTwoUsers(
