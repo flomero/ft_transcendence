@@ -6,6 +6,7 @@
   --color-bg-muted: var(--color-zinc-700);
   --color-fg-muted: var(--color-zinc-300);
   --color-border: var(--color-zinc-600);
+  --color-error: var(--color-rose-900);
 }
 
 @layer base {
@@ -54,96 +55,36 @@
   }
 }
 
-@layer components {
-  .fade-transition {
-    transition: opacity 0.3s ease-out;
-  }
+@theme {
+  --animate-slide-in-right: slideInRight 0.3s forwards;
+  --animate-slide-out-right: slideOutRight 0.3s forwards;
+  --animate-slide-in-left: slideInLeft 0.3s forwards;
+  --animate-slide-out-left: slideOutLeft 0.3s forwards;
+  --animate-slide-in-up: slideInUp 0.3s forwards;
+  --animate-slide-out-down: slideOutDown 0.3s forwards;
 
-  .fade-out {
-    opacity: 0;
-  }
-
-  .fade-in {
-    opacity: 1;
-  }
-
-  @keyframes fade-in {
+  @keyframes slideInUp {
     from {
+      transform: translateY(100%);
       opacity: 0;
     }
     to {
+      transform: translateY(0);
       opacity: 1;
     }
   }
 
-  @keyframes fade-out {
+  @keyframes slideOutDown {
     from {
+      transform: translateY(0);
       opacity: 1;
     }
     to {
+      transform: translateY(100%);
       opacity: 0;
     }
   }
 
-  /* For browsers supporting View Transitions API */
-  ::view-transition-old(root) {
-    animation: 300ms fade-out ease-out forwards;
-  }
-
-  ::view-transition-new(root) {
-    animation: 300ms fade-in ease-out forwards;
-  }
-
-  .fancy-border {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: 1px solid transparent;
-    background:
-      linear-gradient(var(--color-bg), var(--color-bg)) padding-box,
-      linear-gradient(var(--angle), var(--color-border) 80%, #fff 90%)
-        border-box;
-    animation: 5s fancy-border linear infinite;
-  }
-
-  button.fancy-border:hover,
-  a.fancy-border:hover {
-    background:
-      linear-gradient(var(--color-bg-muted), var(--color-bg-muted)) padding-box,
-      linear-gradient(var(--angle), var(--color-border) 80%, #fff 90%)
-        border-box;
-  }
-
-  @keyframes fancy-border {
-    to {
-      --angle: 360deg;
-    }
-  }
-
-  @property --angle {
-    syntax: "<angle>";
-    initial-value: 0deg;
-    inherits: false;
-  }
-
-  /* Animation classes for chat view transitions */
-  .slide-in-right {
-    animation: slideInRight 0.3s forwards;
-  }
-
-  .slide-out-right {
-    animation: slideOutRight 0.3s forwards;
-  }
-
-  .slide-in-left {
-    animation: slideInLeft 0.3s forwards;
-  }
-
-  .slide-out-left {
-    animation: slideOutLeft 0.3s forwards;
-  }
-
-  /* Animation keyframes */
   @keyframes slideInRight {
     from {
       transform: translateX(100%);
@@ -188,38 +129,79 @@
     }
   }
 
-  .slide-in-up {
-    animation: slideInUp 0.3s forwards;
-  }
-
-  .slide-out-down {
-    animation: slideOutDown 0.3s forwards;
-  }
-
-  /* Add these new animation keyframes */
-  @keyframes slideInUp {
+  @keyframes fade-in {
     from {
-      transform: translateY(100%);
       opacity: 0;
     }
     to {
-      transform: translateY(0);
       opacity: 1;
     }
   }
 
-  @keyframes slideOutDown {
+  @keyframes fade-out {
     from {
-      transform: translateY(0);
       opacity: 1;
     }
     to {
-      transform: translateY(100%);
       opacity: 0;
     }
   }
+}
 
-  /* Add form to the base styles for animated elements */
+@layer components {
+  .fade-transition {
+    transition: opacity 0.3s ease-out;
+  }
+
+  .fade-out {
+    opacity: 0;
+  }
+
+  .fade-in {
+    opacity: 1;
+  }
+
+  /* For browsers supporting View Transitions API */
+  ::view-transition-old(root) {
+    animation: 300ms fade-out ease-out forwards;
+  }
+
+  ::view-transition-new(root) {
+    animation: 300ms fade-in ease-out forwards;
+  }
+
+  .fancy-border {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid transparent;
+    background:
+      linear-gradient(var(--color-bg), var(--color-bg)) padding-box,
+      linear-gradient(var(--angle), var(--color-border) 80%, #fff 90%)
+        border-box;
+    animation: 5s fancy-border linear infinite;
+  }
+
+  button.fancy-border:hover,
+  a.fancy-border:hover {
+    background:
+      linear-gradient(var(--color-bg-muted), var(--color-bg-muted)) padding-box,
+      linear-gradient(var(--angle), var(--color-border) 80%, #fff 90%)
+        border-box;
+  }
+
+  @keyframes fancy-border {
+    to {
+      --angle: 360deg;
+    }
+  }
+
+  @property --angle {
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
+  }
+
   #chat-rooms-view,
   #chat-messages-view,
   #chat-input {
@@ -229,6 +211,26 @@
   }
 
   .input {
-    @apply rounded-lg px-4 py-2 outline;
+    @apply rounded-lg outline;
+  }
+
+  button.input {
+    @apply px-4 py-2;
+  }
+
+  input.input:not([type="file"]) {
+    @apply px-4 py-2;
+  }
+
+  input:focus-visible {
+    @apply outline-fg-muted;
+  }
+
+  input[type="file"]::file-selector-button {
+    @apply bg-bg-muted px-4 py-2;
+  }
+
+  a.active {
+    @apply underline;
   }
 }

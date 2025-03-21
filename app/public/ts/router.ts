@@ -46,6 +46,11 @@ class Router {
     this.loadRoute(path);
   }
 
+  refresh(): void {
+    const path = window.location.pathname;
+    this.loadRoute(path);
+  }
+
   handleLinkClick(e: MouseEvent): void {
     // Only process links within our app
     const target = e.target as HTMLElement;
@@ -57,6 +62,11 @@ class Router {
 
     const href = link.getAttribute("href");
     if (!href || href.startsWith("http")) return;
+
+    if (window.location.pathname === href) {
+      e.preventDefault();
+      return;
+    }
 
     e.preventDefault();
     this.navigateTo(href);
@@ -127,7 +137,9 @@ class Router {
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch: ${response.status}`);
+        console.error("Fetch error:", response.status, response.statusText);
+        this.displayError(response.status, response.statusText);
+        return null;
       }
 
       const redirectPath = response.headers.get("X-SPA-Redirect");
@@ -209,6 +221,24 @@ class Router {
     const path = `${form.action.replace(window.location.origin, "")}?${searchParams.toString()}`;
 
     this.navigateTo(path);
+  }
+
+  displayError(status: string | number, message: string): void {
+    const html = `
+     <div class="absolute inset-0 w-full h-full overflow-hidden">
+      <div class="absolute text-[15rem] font-bold opacity-[0.07] select-none top-1/4 -left-10">${status}</div>
+      <div class="absolute text-[15rem] font-bold opacity-[0.07] select-none bottom-1/4 -right-10">${status}</div>
+    </div>
+
+    <div class="layout fixed inset-0 z-10 flex flex-col items-center justify-center">
+      <div class="bg-transparent border relative z-10 p-8 rounded-lg flex flex-col items-center justify-center text-center w-xl max-w-8/12 backdrop-blur-sm">
+        <h1 class="text-4xl font-bold text-red-600 mb-1">Error ${status}</h1>
+        <p class="bg-bg-muted p-3 text-center text-balance rounded-lg shadow-md mb-6 overflow-auto font-mono max-h-40">${message}</p>
+        <a href="/" class="underline">Go Home</a>
+      </div>
+    </div>
+    `;
+    this.contentContainer.innerHTML = html;
   }
 
   init(): void {

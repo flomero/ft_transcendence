@@ -30,6 +30,14 @@ export async function createChatRoom(
   return result.id;
 }
 
+export async function deleteChatRoom(fastify: FastifyInstance, roomId: number) {
+  try {
+    await fastify.sqlite.run("DELETE FROM chat_rooms WHERE id = ?;", [roomId]);
+  } catch (error) {
+    fastify.log.error(error);
+  }
+}
+
 export async function addUserToChatRoom(
   fastify: FastifyInstance,
   roomId: number,
@@ -46,6 +54,23 @@ export async function getChatRoomsForUser(
   const sql =
     "SELECT chat_rooms.id, chat_rooms.name, r_users_chat.read FROM chat_rooms JOIN r_users_chat ON chat_rooms.id = r_users_chat.room_id WHERE r_users_chat.user_id = ?";
   return await fastify.sqlite.all(sql, [userId]);
+}
+
+export async function getChatRoomTwoUsers(
+  fastify: FastifyInstance,
+  userId1: string,
+  userId2: string,
+) {
+  const sql = `SELECT room_id
+FROM r_users_chat
+WHERE user_id IN (?, ?)
+GROUP BY room_id
+HAVING COUNT(DISTINCT user_id) = 2;`;
+
+  const result = await fastify.sqlite.get(sql, [userId1, userId2]);
+
+  fastify.log.info(`Result: ${JSON.stringify(result)}`);
+  return result?.room_id;
 }
 
 export async function setRoomRead(

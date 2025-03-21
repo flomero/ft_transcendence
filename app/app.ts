@@ -3,6 +3,37 @@ import AutoLoad, { type AutoloadPluginOptions } from "@fastify/autoload";
 import type { FastifyPluginAsync, FastifyServerOptions } from "fastify";
 import { loadGameRegistry } from "./services/games/gameRegistryLoader";
 import { loadStrategyRegistry } from "./services/strategy/strategyRegistryLoader";
+import fastifyEnv from "@fastify/env";
+
+const envSchema = {
+  type: "object",
+  required: [
+    "COOKIE_SECRET",
+    "JWT_SECRET",
+    "GOOGLE_CLIENT_SECRET",
+    "GOOGLE_CLIENT_ID",
+    "PUBLIC_URL",
+  ],
+  properties: {
+    COOKIE_SECRET: { type: "string" },
+    JWT_SECRET: { type: "string" },
+    GOOGLE_CLIENT_SECRET: { type: "string" },
+    GOOGLE_CLIENT_ID: { type: "string" },
+    PUBLIC_URL: { type: "string" },
+  },
+};
+
+declare module "fastify" {
+  interface FastifyInstance {
+    config: {
+      COOKIE_SECRET: string;
+      JWT_SECRET: string;
+      GOOGLE_CLIENT_SECRET: string;
+      GOOGLE_CLIENT_ID: string;
+      PUBLIC_URL: string;
+    };
+  }
+}
 
 export interface AppOptions
   extends FastifyServerOptions,
@@ -15,6 +46,15 @@ const app: FastifyPluginAsync<AppOptions> = async (
   opts,
 ): Promise<void> => {
   // Place here your custom code!
+
+  // load env vars and stop the server if it fails
+  fastify.register(fastifyEnv, { schema: envSchema }).ready((err) => {
+    if (err) {
+      fastify.log.error(err);
+      fastify.close().then(() => process.exit(1));
+    }
+  });
+
   await loadGameRegistry();
   await loadStrategyRegistry();
 
@@ -41,6 +81,7 @@ const app: FastifyPluginAsync<AppOptions> = async (
     dir: join(__dirname, "middlewares"),
     options: opts,
   });
+  fastify.ready();
 };
 
 export default app;

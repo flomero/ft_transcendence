@@ -19,12 +19,14 @@
 </a>
 {{else}}
 <button 
-  class="{{twMerge 'rounded-lg transition-colors w-fit px-4 py-2' (buttonVariants variant) (when disabled 'opacity-50 cursor-not-allowed') class}}"
+  class="{{twMerge 'rounded-lg transition-colors w-fit px-4 py-2 has-[svg]:gap-1 has-[svg]:flex has-[svg]:text-center has-[svg]:items-center' (buttonVariants variant) (when disabled 'opacity-50 cursor-not-allowed') class}}"
   {{#if id}}id="{{id}}"{{/if}}
   {{#if disabled}}disabled{{/if}}
   {{#if aria-label}}aria-label="{{aria-label}}"{{/if}}
   {{#if type}}type="{{type}}"{{/if}}
-  {{#if onclick}}onclick="{{onclick}}(event)"{{/if}}>
+  {{#if onclick}}onclick="{{onclick}}(event)"{{/if}}
+  {{#if data-id}}data-id="{{data-id}}"{{/if}}
+  >
   {{> @partial-block }}
 </button>
 {{/if}}

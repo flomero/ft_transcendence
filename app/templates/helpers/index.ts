@@ -17,5 +17,36 @@ export function registerHelpers(handlebars: typeof Handlebars) {
     condition ? valueIfTrue : "",
   );
 
+  handlebars.registerHelper("wheneq", (a, b, valueIfTrue) =>
+    a === b ? valueIfTrue : "",
+  );
+
+  handlebars.registerHelper(
+    "ifeq",
+    function (
+      this: unknown,
+      a: string,
+      b: string,
+      options: Handlebars.HelperOptions,
+    ) {
+      if (a === b) {
+        return options.fn(this);
+      }
+      return options.inverse(this);
+    },
+  );
+
+  handlebars.registerHelper("times", (n, block) => {
+    let blocks = "";
+    for (let i = 0; i < n; ++i) blocks += block.fn(i);
+    return blocks;
+  });
+
+  handlebars.registerHelper("multiply", (a, b) => a * b);
+
+  handlebars.registerHelper("add", (a, b) => a + b);
+
+  handlebars.registerHelper("isEven", (value) => value % 2 === 0);
+
   // Add other helpers here as needed
 }
