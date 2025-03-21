@@ -5,6 +5,7 @@ import {
   createChatRoom,
   deleteChatRoom,
   getChatRoomRead,
+  RoomType,
   setRoomRead,
   setRoomReadForAllUsersBlacklist,
 } from "../database/chat/room";
@@ -153,9 +154,10 @@ export async function sendMessage(
 export async function addRoom(
   fastify: FastifyInstance,
   roomName: string,
+  roomType: RoomType,
   userIds: string[],
 ) {
-  const roomId = await createChatRoom(fastify, roomName);
+  const roomId = await createChatRoom(fastify, roomName, roomType);
   for (const userId of userIds) {
     await addUserToChatRoom(fastify, roomId, userId);
 

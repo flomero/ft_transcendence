@@ -4,6 +4,12 @@ export interface ChatRoom {
   id: number;
   name: string;
   read: boolean;
+  type: RoomType;
+}
+
+export enum RoomType {
+  Direct = "DIRECT",
+  Game = "GAME",
 }
 
 export async function getChatRoomRead(
@@ -23,9 +29,10 @@ export async function getChatRoomRead(
 export async function createChatRoom(
   fastify: FastifyInstance,
   name: string,
+  type: RoomType,
 ): Promise<number> {
-  const sql = "INSERT INTO chat_rooms (name) VALUES (?) RETURNING id";
-  const result = await fastify.sqlite.get(sql, [name]);
+  const sql = "INSERT INTO chat_rooms (name, type) VALUES (?, ?) RETURNING id";
+  const result = await fastify.sqlite.get(sql, [name, type]);
   fastify.log.trace(`Created chat_room with id: ${result.id}`);
   return result.id;
 }
@@ -52,7 +59,7 @@ export async function getChatRoomsForUser(
   userId: string,
 ): Promise<ChatRoom[]> {
   const sql =
-    "SELECT chat_rooms.id, chat_rooms.name, r_users_chat.read FROM chat_rooms JOIN r_users_chat ON chat_rooms.id = r_users_chat.room_id WHERE r_users_chat.user_id = ?";
+    "SELECT chat_rooms.id, chat_rooms.name, chat_rooms.type, r_users_chat.read FROM chat_rooms JOIN r_users_chat ON chat_rooms.id = r_users_chat.room_id WHERE r_users_chat.user_id = ?";
   return await fastify.sqlite.all(sql, [userId]);
 }
 
