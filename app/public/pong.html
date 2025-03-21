@@ -41,7 +41,7 @@
         canvas.width = 800;
         canvas.height = 800;
         ratio = canvas.width / 100.0;
-        playerCount = 7;
+        playerCount = 5;
       } else if (gameModeName === "classicPong") {
         canvas.width = 800;
         canvas.height = 400;
@@ -61,12 +61,18 @@
             options: {
               gameName: "pong",
               gameModeName: gameModeName,
-              gameModeConfig: {},
-              modifierNames: {
-                goalReset: {
-                  delay: 1,
+              gameModeConfig: {
+                powerUpRadius: 0.17,
+                powerUpCapacities: {
+                  speedBoost: 50000,
                 },
-                powerUpSpawner: {},
+              },
+              modifierNames: {
+                powerUpSpawner: {
+                  meanDelay: 0.005,
+                  delaySpan: 0.0001,
+                  positionSamplerStrategyName: "biasedGaussianCATester",
+                },
               },
               powerUpNames: {
                 speedBoost: {},

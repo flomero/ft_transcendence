@@ -41,9 +41,11 @@
 
     "biasedGaussianCA": {
       "className": "BiasedGaussianCA",
-      "stdAngularVariationPercent": 105,
-      "stdVelocityVariationPercent": 15,
-      "maxVelocityPercent": 40,
+      "stdAngularVariationPercent": 50,
+      "angularOffsetPercent": 85,
+      "stdVelocityVariationPercent": 35,
+      "minVelocityPercent": 20,
+      "maxVelocityPercent": 60,
       "lastGoalBiasPercent": 75
     }
   }

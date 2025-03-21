@@ -6,9 +6,11 @@ export class BiasedGaussianCATester implements IPongPowerUpPositionSampler {
   name = "biasedGaussianCATester";
 
   protected stdAngularVariationPercent: number = 0;
+  protected angularOffset: number = 0;
 
   protected stdVelocityVariation: number = 0;
   protected maxVelocity: number = 0;
+  protected minVelocity: number = 0;
 
   protected lastGoalBias: number = 0;
 
@@ -17,12 +19,19 @@ export class BiasedGaussianCATester implements IPongPowerUpPositionSampler {
       STRATEGY_REGISTRY.pongBallResetSampler["biasedGaussianCA"]
         .stdAngularVariationPercent / 100.0;
 
+    this.angularOffset =
+      STRATEGY_REGISTRY.pongBallResetSampler["biasedGaussianCA"]
+        .angularOffsetPercent / 100.0;
+
     this.stdVelocityVariation =
       STRATEGY_REGISTRY.pongBallResetSampler["biasedGaussianCA"]
         .stdVelocityVariationPercent / 100.0;
     this.maxVelocity =
       STRATEGY_REGISTRY.pongBallResetSampler["biasedGaussianCA"]
         .maxVelocityPercent / 100.0;
+    this.minVelocity =
+      STRATEGY_REGISTRY.pongBallResetSampler["biasedGaussianCA"]
+        .minVelocityPercent / 100.0;
 
     this.lastGoalBias =
       STRATEGY_REGISTRY.pongBallResetSampler["biasedGaussianCA"]
@@ -31,11 +40,14 @@ export class BiasedGaussianCATester implements IPongPowerUpPositionSampler {
 
   samplePosition(game: Pong): { x: number; y: number } {
     const playerCount = game.getExtraGameData().playerCount;
+    const halfDeltaAlpha = Math.PI / (2 * playerCount);
 
     const stdAngularVariation =
-      (this.stdAngularVariationPercent * Math.PI) / (2.0 * playerCount);
+      this.stdAngularVariationPercent * halfDeltaAlpha;
 
     const rng = game.getRNG();
+
+    // -- Select a random player -- //
     let playerId = game.getExtraGameData().lastGoal;
     if (playerId === -1)
       // If no one took a goal yet (ball out of bounds ?) then randomize the bias
@@ -59,6 +71,16 @@ export class BiasedGaussianCATester implements IPongPowerUpPositionSampler {
 
     const rnd = rng.random();
     const rndPlayer = cdf.findIndex((value) => rnd <= value);
+    // -------------------------- //
+
+    // Generate a random angle following a Gaussian
+    let alpha = rng.randomGaussian(
+      this.angularOffset * halfDeltaAlpha,
+      stdAngularVariation,
+    );
+    // Create a symmetry
+    alpha *= Math.pow(-1, rng.randomInt(0, 1));
+    alpha += game.getGameObjects().paddles[rndPlayer].alpha;
 
     // Allows to test w/o hvaing the ball moving
     const tmpBallSpeedWidthPercentS = 100;
@@ -69,14 +91,9 @@ export class BiasedGaussianCATester implements IPongPowerUpPositionSampler {
     // For test purposes
     const distanceFactor = 15;
 
-    // Generate a random angle following a Gaussian
-    let alpha = rng.randomGaussian(0, stdAngularVariation);
-
-    alpha += game.getGameObjects().paddles[rndPlayer].alpha;
-
     const distance = Math.min(
       Math.max(
-        stdVelocity - this.maxVelocity,
+        stdVelocity - this.minVelocity,
         rng.randomGaussian(stdVelocity, this.stdVelocityVariation),
       ),
       stdVelocity + this.maxVelocity,

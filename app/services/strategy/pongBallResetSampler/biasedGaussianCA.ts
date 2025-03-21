@@ -6,9 +6,11 @@ export class BiasedGaussianCA implements IPongBallResetSampler {
   name = "biasedGaussianCA";
 
   protected stdAngularVariationPercent: number = 0;
+  protected angularOffset: number = 0;
 
   protected stdVelocityVariation: number = 0;
   protected maxVelocity: number = 0;
+  protected minVelocity: number = 0;
 
   protected lastGoalBias: number = 0;
 
@@ -17,11 +19,18 @@ export class BiasedGaussianCA implements IPongBallResetSampler {
       STRATEGY_REGISTRY.pongBallResetSampler[this.name]
         .stdAngularVariationPercent / 100.0;
 
+    this.angularOffset =
+      STRATEGY_REGISTRY.pongBallResetSampler[this.name].angularOffsetPercent /
+      100.0;
+
     this.stdVelocityVariation =
       STRATEGY_REGISTRY.pongBallResetSampler[this.name]
         .stdVelocityVariationPercent / 100.0;
     this.maxVelocity =
       STRATEGY_REGISTRY.pongBallResetSampler[this.name].maxVelocityPercent /
+      100.0;
+    this.minVelocity =
+      STRATEGY_REGISTRY.pongBallResetSampler[this.name].minVelocityPercent /
       100.0;
 
     this.lastGoalBias =
@@ -31,10 +40,14 @@ export class BiasedGaussianCA implements IPongBallResetSampler {
 
   sampleDirection(game: Pong): { angularDirection: number; magnitude: number } {
     const playerCount = game.getExtraGameData().playerCount;
+    const deltaAlpha = Math.PI / playerCount;
+
     const stdAngularVariation =
-      (this.stdAngularVariationPercent * Math.PI) / (2.0 * playerCount);
+      (this.stdAngularVariationPercent * deltaAlpha) / 2.0;
 
     const rng = game.getRNG();
+
+    // -- Select a random player -- //
     let playerId = game.getExtraGameData().lastGoal;
     if (playerId === -1)
       // If no one took a goal yet (ball out of bounds ?) then randomize the bias
@@ -58,22 +71,25 @@ export class BiasedGaussianCA implements IPongBallResetSampler {
 
     const rnd = rng.random();
     const rndPlayer = cdf.findIndex((value) => rnd <= value);
+    // -------------------------- //
 
-    console.log(`rnd: ${rnd}\nrndPlayer: ${rndPlayer}`);
+    // Generate a random angle following a Gaussian
+    let alpha = rng.randomGaussian(
+      this.angularOffset * deltaAlpha,
+      stdAngularVariation,
+    );
+    // Create a symmetry
+    alpha *= Math.pow(-1, rng.randomInt(0, 1));
+    alpha += game.getGameObjects().paddles[rndPlayer].alpha;
 
     const ballSpeedWidthPercentS = game.getSettings().ballSpeedWidthPercentS;
     const stdVelocity =
       (game.getSettings().arenaWidth * (ballSpeedWidthPercentS / 100.0)) /
       game.getServerTickrateS();
 
-    // Generate a random angle following a Gaussian
-    let alpha = rng.randomGaussian(0, stdAngularVariation);
-
-    alpha += game.getGameObjects().paddles[rndPlayer].alpha;
-
     const distance = Math.min(
       Math.max(
-        stdVelocity - this.maxVelocity,
+        stdVelocity - this.minVelocity,
         rng.randomGaussian(stdVelocity, this.stdVelocityVariation),
       ),
       stdVelocity + this.maxVelocity,
