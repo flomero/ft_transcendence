@@ -5,6 +5,7 @@ import {
   createChatRoom,
   deleteChatRoom,
   getChatRoomRead,
+  getUserIdsFromDirectChatRooms,
   RoomType,
   setRoomRead,
   setRoomReadForAllUsersBlacklist,
@@ -19,15 +20,30 @@ interface ChatClient {
 
 const chatClients: ChatClient[] = [];
 
-export function addChatClient(client: ChatClient) {
+export function addChatClient(fastify: FastifyInstance, client: ChatClient) {
   chatClients.push(client);
+
+  updateOnlineStatus(fastify, client.userId);
 }
 
-export function removeChatClient(userId: string) {
+export function removeChatClient(fastify: FastifyInstance, userId: string) {
   chatClients.splice(
     chatClients.findIndex((client) => client.userId === userId),
     1,
   );
+
+  updateOnlineStatus(fastify, userId);
+}
+
+async function updateOnlineStatus(fastify: FastifyInstance, userId: string) {
+  const userIdsAndRoomIds = await getUserIdsFromDirectChatRooms(
+    fastify,
+    userId,
+  );
+
+  for (const { userId, roomId } of userIdsAndRoomIds) {
+    sendRoomUpdate(fastify, false, roomId, userId);
+  }
 }
 
 interface ChatWebSocketResponse {
@@ -54,12 +70,7 @@ export async function sendRoomUpdate(
   const dbRoom = await getChatRoomRead(fastify, roomId, userId);
 
   const html = await fastify.view("components/chat/room", {
-    room: {
-      id: roomId,
-      name: dbRoom.name,
-      read: dbRoom.read,
-      selected: selected,
-    },
+    room: dbRoom,
   });
 
   const response: ChatWebSocketResponse = {
