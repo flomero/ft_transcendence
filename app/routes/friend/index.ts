@@ -35,9 +35,7 @@ const friends: FastifyPluginAsync = async (fastify): Promise<void> => {
     );
 
     if (roomId) {
-      fastify.log.info(`Deleting room ${roomId}`);
-      await deleteRoom(request.server, roomId);
-      fastify.log.info("Deleted chat room");
+      deleteRoom(request.server, roomId);
     }
 
     reply.status(200).send({ message: "Friend deleted" });
