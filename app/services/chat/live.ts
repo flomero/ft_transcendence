@@ -5,6 +5,8 @@ import {
   createChatRoom,
   deleteChatRoom,
   getChatRoomRead,
+  getUserIdsFromDirectChatRooms,
+  RoomType,
   setRoomRead,
   setRoomReadForAllUsersBlacklist,
 } from "../database/chat/room";
@@ -18,15 +20,30 @@ interface ChatClient {
 
 const chatClients: ChatClient[] = [];
 
-export function addChatClient(client: ChatClient) {
+export function addChatClient(fastify: FastifyInstance, client: ChatClient) {
   chatClients.push(client);
+
+  updateOnlineStatus(fastify, client.userId);
 }
 
-export function removeChatClient(userId: string) {
+export function removeChatClient(fastify: FastifyInstance, userId: string) {
   chatClients.splice(
     chatClients.findIndex((client) => client.userId === userId),
     1,
   );
+
+  updateOnlineStatus(fastify, userId);
+}
+
+async function updateOnlineStatus(fastify: FastifyInstance, userId: string) {
+  const userIdsAndRoomIds = await getUserIdsFromDirectChatRooms(
+    fastify,
+    userId,
+  );
+
+  for (const { userId, roomId } of userIdsAndRoomIds) {
+    sendRoomUpdate(fastify, roomId, userId);
+  }
 }
 
 interface ChatWebSocketResponse {
@@ -35,9 +52,8 @@ interface ChatWebSocketResponse {
   html: string;
 }
 
-export async function sendRoomUpdate(
+async function sendRoomUpdate(
   fastify: FastifyInstance,
-  selected: boolean,
   roomId: number,
   userId: string,
 ) {
@@ -53,12 +69,7 @@ export async function sendRoomUpdate(
   const dbRoom = await getChatRoomRead(fastify, roomId, userId);
 
   const html = await fastify.view("components/chat/room", {
-    room: {
-      id: roomId,
-      name: dbRoom.name,
-      read: dbRoom.read,
-      selected: selected,
-    },
+    room: dbRoom,
   });
 
   const response: ChatWebSocketResponse = {
@@ -79,13 +90,10 @@ export async function setCurrentRoomId(
   if (!client) {
     return;
   }
-
-  await sendRoomUpdate(fastify, false, client.currentRoomId, userId);
-
   client.currentRoomId = roomId;
 
   await setRoomRead(fastify, true, roomId, userId);
-  await sendRoomUpdate(fastify, true, roomId, userId);
+  sendRoomUpdate(fastify, roomId, userId);
 }
 
 export async function sendMessage(
@@ -153,9 +161,10 @@ export async function sendMessage(
 export async function addRoom(
   fastify: FastifyInstance,
   roomName: string,
+  roomType: RoomType,
   userIds: string[],
 ) {
-  const roomId = await createChatRoom(fastify, roomName);
+  const roomId = await createChatRoom(fastify, roomName, roomType);
   for (const userId of userIds) {
     await addUserToChatRoom(fastify, roomId, userId);
 
@@ -188,8 +197,8 @@ export async function addRoom(
   }
 }
 
-export async function deleteRoom(fastify: FastifyInstance, roomId: number) {
-  await deleteChatRoom(fastify, roomId);
+export function deleteRoom(fastify: FastifyInstance, roomId: number) {
+  deleteChatRoom(fastify, roomId);
 
   for (const client of chatClients) {
     if (client.currentRoomId === roomId) {
@@ -204,4 +213,9 @@ export async function deleteRoom(fastify: FastifyInstance, roomId: number) {
 
     client.socket.send(JSON.stringify(response));
   }
+}
+
+export function userIsOnline(userId: string) {
+  const client = chatClients.find((client) => client.userId === userId);
+  return client !== undefined;
 }

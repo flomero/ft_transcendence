@@ -8,7 +8,7 @@ const chatWebSocket: FastifyPluginAsync = async (fastify): Promise<void> => {
 
     const rooms = await getChatRoomsForUser(fastify, request.userId);
 
-    addChatClient({
+    addChatClient(fastify, {
       socket: socket,
       roomIds: rooms.map((room) => room.id),
       userId: request.userId,
@@ -21,12 +21,12 @@ const chatWebSocket: FastifyPluginAsync = async (fastify): Promise<void> => {
 
     socket.on("close", async () => {
       fastify.log.trace("Chat client disconnected");
-      removeChatClient(request.userId);
+      removeChatClient(fastify, request.userId);
     });
 
     socket.on("error", async (error) => {
       fastify.log.trace("Chat client error", error);
-      removeChatClient(request.userId);
+      removeChatClient(fastify, request.userId);
     });
   });
 };

@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { acceptInvite, hasInvite } from "../database/friend/invites";
 import { saveFriend } from "../database/friend/friends";
 import { addRoom } from "../chat/live";
+import { RoomType } from "../database/chat/room";
 
 export async function acceptFriendRequest(
   fastify: FastifyInstance,
@@ -25,5 +26,8 @@ export async function acceptFriendRequestAndAddRoom(
   await acceptInvite(fastify, friend_id, user_id);
   await saveFriend(fastify, user_id, friend_id);
 
-  await addRoom(fastify, `${user_id} and ${friend_id}`, [user_id, friend_id]);
+  await addRoom(fastify, `${user_id} and ${friend_id}`, RoomType.Direct, [
+    user_id,
+    friend_id,
+  ]);
 }
