@@ -2,22 +2,56 @@ import type { GameBase } from "../../gameBase";
 import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
 import { TimeLimitedModifierBase } from "../../timeLimitedModifierBase";
 import { ModifierStatus } from "../../modifierBase";
+import { Pong } from "../pong";
+import { StrategyManager } from "../../../strategy/strategyManager";
+import { type IPongPowerUpPositionSampler } from "../../../../types/strategy/IPongPowerUpPositionSampler";
 
 export class PowerUpSpawner extends TimeLimitedModifierBase {
   name = "powerUpSpawner";
 
-  private meanDelay: number;
-  private delaySpan: number;
+  protected meanDelay: number = 0;
+  protected delaySpan: number = 0;
+  protected positionSamplerStrategyManager: StrategyManager<
+    IPongPowerUpPositionSampler,
+    "samplePosition"
+  >;
+  protected positionSamplerStrategyName: string = "";
 
-  constructor() {
+  constructor(customConfig?: Record<string, any>) {
     super();
 
     const serverTickrateS = GAME_REGISTRY.pong.serverTickrateS;
-    const meanDelayS = GAME_REGISTRY.pong.gameModifiers[this.name].meanDelayS;
-    const delaySpanS = GAME_REGISTRY.pong.gameModifiers[this.name].delaySpanS;
 
-    this.meanDelay = meanDelayS * serverTickrateS;
-    this.delaySpan = delaySpanS * serverTickrateS;
+    // Register transformations for properties
+    this.configManager.registerPropertyConfig(
+      "meanDelay",
+      (meanDelayS) => meanDelayS * serverTickrateS,
+      (meanDelay) => meanDelay / serverTickrateS,
+    );
+
+    this.configManager.registerPropertyConfig(
+      "delaySpan",
+      (delaySpanS) => delaySpanS * serverTickrateS,
+      (delaySpan) => delaySpan / serverTickrateS,
+    );
+
+    const defaultConfig = {
+      meanDelay: GAME_REGISTRY.pong.gameModifiers[this.name].meanDelayS,
+      delaySpan: GAME_REGISTRY.pong.gameModifiers[this.name].delaySpanS,
+      positionSamplerStrategyName:
+        GAME_REGISTRY.pong.gameModifiers[this.name].positionSamplerStrategyName,
+    };
+    this.configManager.loadSimpleConfigIntoContainer(defaultConfig, this);
+
+    // Apply custom configuration if provided
+    if (customConfig)
+      this.configManager.loadSimpleConfigIntoContainer(customConfig, this);
+
+    this.positionSamplerStrategyManager = new StrategyManager(
+      this.positionSamplerStrategyName,
+      "pongPowerUpPositionSampler",
+      "samplePosition",
+    );
   }
 
   onGameStart(game: GameBase): void {
@@ -29,42 +63,16 @@ export class PowerUpSpawner extends TimeLimitedModifierBase {
       .getRNG()
       .randomGaussian(this.meanDelay, this.delaySpan);
 
-    console.log(`Next powerUpSpawn in ${this.duration} ticks`);
+    // console.log(`Next powerUpSpawn in ${this.duration} ticks`);
   }
 
-  onDeactivation(game: GameBase): void {
-    const arenaWidth =
-      GAME_REGISTRY.pong.gameModes[game.gameData.gameModeName].arenaSettings
-        .width;
-    const arenaHeight =
-      GAME_REGISTRY.pong.gameModes[game.gameData.gameModeName].arenaSettings
-        .height;
-    const defaultRadius =
-      GAME_REGISTRY.pong.gameModes[game.gameData.gameModeName]
-        .defaultPowerUpSettings.radius;
-    const offset =
-      GAME_REGISTRY.pong.gameModes[game.gameData.gameModeName].arenaSettings
-        .wallHeight;
-
-    const x = Math.min(
-      Math.max(
-        game.getRNG().randomGaussian(arenaWidth / 2.0, arenaWidth / 4.0),
-        defaultRadius + offset,
-      ),
-      arenaWidth - (defaultRadius + offset),
-    );
-
-    const y = Math.min(
-      Math.max(
-        game.getRNG().randomGaussian(arenaHeight / 2.0, arenaHeight / 2.2),
-        defaultRadius + offset,
-      ),
-      arenaHeight - (defaultRadius + offset),
-    );
+  onDeactivation(game: Pong): void {
+    const sampledPosition: { x: number; y: number } =
+      this.positionSamplerStrategyManager.executeStrategy(game);
 
     const spawned = game
       .getModifierManager()
-      .spawnRandomPowerUp(game.getRNG(), [x, y]);
+      .spawnRandomPowerUp(game.getRNG(), sampledPosition);
 
     this.activate(game);
     if (!spawned) this.pause(game);

@@ -1,5 +1,6 @@
 import { RNG } from "./rng";
 import { ModifierManager } from "./modifierManager";
+import { ConfigManager } from "./configManager";
 
 export enum GameStatus {
   CREATED,
@@ -19,20 +20,23 @@ export abstract class GameBase {
 
   protected rng: RNG;
   protected modifierManager: ModifierManager;
+  protected configManager: ConfigManager;
 
   constructor(public gameData: Record<string, any>) {
     this.lastUpdateTime = Date.now();
     this.startTimeMs = Date.now();
 
-    console.log(gameData);
-
     this.rng = new RNG();
     this.modifierManager = new ModifierManager(this);
+    this.configManager = new ConfigManager();
   }
 
   abstract update(): void;
 
-  abstract startGame(): void;
+  startGame(): void {
+    this.modifierManager.initializeModifiers();
+    this.modifierManager.initializePowerUps();
+  }
 
   getStateSnapshot(): Record<string, any> {
     return {
@@ -66,4 +70,5 @@ export abstract class GameBase {
   }
 
   abstract getResults(): number[];
+  abstract getSettings(): Record<string, any>;
 }

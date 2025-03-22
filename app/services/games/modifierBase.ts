@@ -1,3 +1,4 @@
+import { ConfigManager } from "./configManager";
 import type { GameBase } from "./gameBase";
 
 export enum ModifierStatus {
@@ -21,7 +22,11 @@ export class ModifierBase {
 
   protected playerId: number = -1;
 
-  constructor() {}
+  protected configManager: ConfigManager;
+
+  constructor() {
+    this.configManager = new ConfigManager();
+  }
 
   activate(game: GameBase): void {
     this.status = ModifierStatus.ACTIVE;

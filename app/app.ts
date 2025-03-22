@@ -1,7 +1,8 @@
 import { join } from "node:path";
 import AutoLoad, { type AutoloadPluginOptions } from "@fastify/autoload";
 import type { FastifyPluginAsync, FastifyServerOptions } from "fastify";
-import { loadGameRegistry } from "./services/games/gameRegistry";
+import { loadGameRegistry } from "./services/games/gameRegistryLoader";
+import { loadStrategyRegistry } from "./services/strategy/strategyRegistryLoader";
 import fastifyEnv from "@fastify/env";
 
 const envSchema = {
@@ -55,6 +56,7 @@ const app: FastifyPluginAsync<AppOptions> = async (
   });
 
   await loadGameRegistry();
+  await loadStrategyRegistry();
 
   // Do not touch the following lines
 
