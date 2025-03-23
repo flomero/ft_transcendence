@@ -52,6 +52,26 @@ interface ChatWebSocketResponse {
   html: string;
 }
 
+async function createChatRoomWebSocketResponse(
+  fastify: FastifyInstance,
+  roomId: number,
+  userId: string,
+) {
+  const dbRoom = await getChatRoomRead(fastify, roomId, userId);
+
+  const html = await fastify.view("components/chat/room", {
+    room: dbRoom,
+  });
+
+  const response: ChatWebSocketResponse = {
+    type: "room",
+    id: roomId,
+    html: html,
+  };
+
+  return response;
+}
+
 async function sendRoomUpdate(
   fastify: FastifyInstance,
   roomId: number,
@@ -66,17 +86,11 @@ async function sendRoomUpdate(
     return;
   }
 
-  const dbRoom = await getChatRoomRead(fastify, roomId, userId);
-
-  const html = await fastify.view("components/chat/room", {
-    room: dbRoom,
-  });
-
-  const response: ChatWebSocketResponse = {
-    type: "room",
-    id: roomId,
-    html: html,
-  };
+  const response = await createChatRoomWebSocketResponse(
+    fastify,
+    roomId,
+    userId,
+  );
 
   client.socket.send(JSON.stringify(response));
 }
@@ -179,19 +193,11 @@ export async function addRoom(
       continue;
     }
 
-    const html = await fastify.view("components/chat/room", {
-      room: {
-        id: roomId,
-        name: roomName,
-        read: false,
-      },
-    });
-
-    const response: ChatWebSocketResponse = {
-      type: "room",
-      id: roomId,
-      html: html,
-    };
+    const response = await createChatRoomWebSocketResponse(
+      fastify,
+      roomId,
+      client.userId,
+    );
 
     client.socket.send(JSON.stringify(response));
   }
