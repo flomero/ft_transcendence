@@ -33,6 +33,10 @@ export class RNG {
     return Math.floor(this.random() * (max - min + 1)) + min;
   }
 
+  randomSign(posBias: number = 0.5): number {
+    return this.random() < posBias ? 1 : -1;
+  }
+
   // Getters & setters
   setSeed(seed: number) {
     this.seed = seed;

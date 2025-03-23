@@ -95,6 +95,7 @@ export class ClassicPong extends Pong {
 
     // Calculate the coverage percentage (0 to 1)
     const coverage = this.settings.paddleCoveragePercent / 100.0;
+    const maxDisplacement = (100 - this.settings.paddleCoveragePercent) / 2.0;
 
     // Calculate actual paddle width based on amplitude and coverage
     const paddleWidth = paddleAmplitude * coverage;
@@ -125,6 +126,7 @@ export class ClassicPong extends Pong {
         displacement: 0.0,
         doMove: true,
         isVisible: true,
+        maxDisplacement: maxDisplacement,
       } as Paddle,
 
       // RIGHT PADDLE
@@ -155,6 +157,7 @@ export class ClassicPong extends Pong {
         displacement: 0.0,
         doMove: true,
         isVisible: true,
+        maxDisplacement: maxDisplacement,
       } as Paddle,
     ];
   }

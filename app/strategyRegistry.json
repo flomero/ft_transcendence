@@ -52,5 +52,11 @@
       "maxVelocityPercent": 60,
       "lastGoalBiasPercent": 75
     }
+  },
+
+  "pongPaddlePositionSampler": {
+    "random": {
+      "className": "Random"
+    }
   }
 }

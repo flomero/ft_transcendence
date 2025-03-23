@@ -98,6 +98,7 @@ export class MultiplayerPong extends Pong {
 
     // Calculate the coverage percentage (0 to 1)
     const coverage = this.settings.paddleCoveragePercent / 100.0;
+    const maxDisplacement = (100 - this.settings.paddleCoveragePercent) / 2.0;
 
     // Calculate actual paddle width based on amplitude and coverage
     const paddleWidth = paddleAmplitude * coverage;
@@ -131,6 +132,7 @@ export class MultiplayerPong extends Pong {
         dx: 0,
         dy: 0,
         doCollision: true,
+        maxDisplacement: maxDisplacement,
       };
 
       const tmp: number = Math.sqrt(paddle.x ** 2 + paddle.y ** 2);
