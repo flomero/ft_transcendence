@@ -11,7 +11,7 @@ export async function getBlockedUsers(
   return fastify.sqlite.all(sql, [userId]);
 }
 
-export async function blockUser(
+export async function saveBlockedUser(
   fastify: FastifyInstance,
   userId: string,
   blockedUserId: string,
@@ -21,7 +21,7 @@ export async function blockUser(
   return fastify.sqlite.run(sql, [userId, blockedUserId]);
 }
 
-export async function unblockUser(
+export async function deleteBlockedUser(
   fastify: FastifyInstance,
   userId: string,
   blockedUserId: string,

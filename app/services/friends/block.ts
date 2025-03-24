@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
-import { getBlockedUsers } from "../database/friend/block";
+import { deleteFriendOrInvite } from "../database/friend/friends";
+import { getBlockedUsers, saveBlockedUser } from "../database/friend/block";
 import { usersToUserWithImages } from "../database/user";
 
 export async function getBlockedUsersWithUserInfo(
@@ -9,4 +10,13 @@ export async function getBlockedUsersWithUserInfo(
   const blockedUsers = await getBlockedUsers(fastify, userId);
 
   return usersToUserWithImages(blockedUsers);
+}
+
+export async function blockUser(
+  fastify: FastifyInstance,
+  userId: string,
+  blockedUserId: string,
+) {
+  await deleteFriendOrInvite(fastify, userId, blockedUserId);
+  await saveBlockedUser(fastify, userId, blockedUserId);
 }
