@@ -1,6 +1,6 @@
 <div class="flex w-max max-w-[75%] flex-col gap-1 rounded-t-lg px-3 py-2 text-sm {{#if message.isOwnMessage}}bg-fg text-bg rounded-l-lg  ml-auto{{else}}bg-bg-muted text-fg rounded-r-lg{{/if}}">
     {{#unless message.isOwnMessage}}
-        <span class="text-xs text-fg-muted">{{message.userName}}</span>
+        <span class="text-xs text-fg-muted truncate">{{message.userName}}</span>
     {{/unless}}
     <span class="font-light text-wrap break-words hyphens-auto">
       {{message.message}}
