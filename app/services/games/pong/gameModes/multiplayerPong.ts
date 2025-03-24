@@ -77,7 +77,7 @@ export class MultiplayerPong extends Pong {
 
     this.initPaddles();
     this.initWalls();
-    this.resetBall(-1);
+    this.resetBall(this.gameState, -1);
   }
 
   startGame(): void {
@@ -85,16 +85,16 @@ export class MultiplayerPong extends Pong {
     super.startGame();
     console.log("Game Started");
 
-    console.log(`Balls: ${this.gameObjects.balls.length}`);
-    console.log(`Paddles: ${this.gameObjects.paddles.length}`);
-    console.log(`Walls: ${this.gameObjects.walls.length}`);
+    console.log(`Balls: ${this.gameState.balls.length}`);
+    console.log(`Paddles: ${this.gameState.paddles.length}`);
+    console.log(`Walls: ${this.gameState.walls.length}`);
   }
 
   initPaddles(): void {
     // Calculate paddleAmplitude - the maximum possible distance the paddle can travel
     const paddleAmplitude =
       (this.settings.arenaRadius - this.settings.paddleOffset) *
-      Math.sin(Math.PI / this.extraGameData.playerCount);
+      Math.sin(Math.PI / this.gameState.playerCount);
 
     // Calculate the coverage percentage (0 to 1)
     const coverage = this.settings.paddleCoveragePercent / 100.0;
@@ -106,9 +106,9 @@ export class MultiplayerPong extends Pong {
     // paddleSpeed is percentage of width per second (independent of tickrate)
     const paddleSpeedPercent = this.settings.paddleSpeedWidthPercentS / 100.0;
 
-    for (let index = 0; index < this.extraGameData.playerCount; ++index) {
+    for (let index = 0; index < this.gameState.playerCount; ++index) {
       const angle =
-        Math.PI + (Math.PI * 2 * index) / this.extraGameData.playerCount;
+        Math.PI + (Math.PI * 2 * index) / this.gameState.playerCount;
       const radius = this.settings.arenaRadius - this.settings.paddleOffset;
 
       let paddle: Paddle = {
@@ -150,7 +150,7 @@ export class MultiplayerPong extends Pong {
       paddle.absX = paddle.x;
       paddle.absY = paddle.y;
 
-      this.gameObjects.paddles.push(paddle);
+      this.gameState.paddles.push(paddle);
     }
   }
 
@@ -158,36 +158,29 @@ export class MultiplayerPong extends Pong {
     // Initialize walls, rotate by alpha
     const wallWidth =
       2.0 *
-      Math.sin(Math.PI / (2.0 * this.extraGameData.playerCount)) *
+      Math.sin(Math.PI / (2.0 * this.gameState.playerCount)) *
       (this.settings.arenaRadius *
-        (1 + 1 / (this.extraGameData.playerCount + 0.5)));
+        (1 + 1 / (this.gameState.playerCount + 0.5)));
 
-    for (let index = 0; index < 2 * this.extraGameData.playerCount; index++) {
+    for (let index = 0; index < 2 * this.gameState.playerCount; index++) {
       const wall: Rectangle = {
         id: index,
         x: parseFloat(
           (
             (this.settings.arenaRadius -
               this.settings.wallsOffset * (index % 2)) *
-            Math.cos(
-              (Math.PI * index) / this.extraGameData.playerCount + Math.PI,
-            )
+            Math.cos((Math.PI * index) / this.gameState.playerCount + Math.PI)
           ).toFixed(3),
         ),
         y: parseFloat(
           (
             (this.settings.arenaRadius -
               this.settings.wallsOffset * (index % 2)) *
-            Math.sin(
-              (Math.PI * index) / this.extraGameData.playerCount + Math.PI,
-            )
+            Math.sin((Math.PI * index) / this.gameState.playerCount + Math.PI)
           ).toFixed(3),
         ),
         alpha: parseFloat(
-          (
-            Math.PI +
-            (Math.PI * index) / this.extraGameData.playerCount
-          ).toFixed(3),
+          (Math.PI + (Math.PI * index) / this.gameState.playerCount).toFixed(3),
         ),
         width: wallWidth,
         height: this.settings.wallsHeight,
@@ -217,11 +210,11 @@ export class MultiplayerPong extends Pong {
       wall.dx = wall.ny;
       wall.dy = -wall.nx;
 
-      this.gameObjects.walls.push(wall);
+      this.gameState.walls.push(wall);
     }
   }
 
-  resetBall(ballId: number = -1): void {
+  resetBall(gameState: Record<string, any>, ballId: number = -1): void {
     const sampledDirection = this.ballResetSampler.executeStrategy(this);
 
     const ca = Math.cos(sampledDirection.angularDirection);
@@ -232,7 +225,7 @@ export class MultiplayerPong extends Pong {
 
     if (ballId < 0) {
       // Reset all balls
-      this.gameObjects.balls = [
+      gameState.balls = [
         {
           id: 0,
           x: x,
@@ -248,7 +241,7 @@ export class MultiplayerPong extends Pong {
       ];
     } else {
       // Find the ball by ID and update it
-      this.gameObjects.balls[ballId] = {
+      gameState.balls[ballId] = {
         id: ballId,
         x: x,
         y: y,
@@ -266,12 +259,12 @@ export class MultiplayerPong extends Pong {
   rotatePaddles(alpha: number = 0.0): void {
     const paddleAmplitude =
       (this.settings.arenaRadius - this.settings.paddleOffset) *
-      Math.sin(Math.PI / this.extraGameData.playerCount);
+      Math.sin(Math.PI / this.gameState.playerCount);
 
-    for (let idx = 0; idx < this.gameObjects.paddles.length; idx++) {
-      const paddle = this.gameObjects.paddles[idx];
+    for (let idx = 0; idx < this.gameState.paddles.length; idx++) {
+      const paddle = this.gameState.paddles[idx];
       const baseAngle =
-        Math.PI + (2 * Math.PI * idx) / this.extraGameData.playerCount;
+        Math.PI + (2 * Math.PI * idx) / this.gameState.playerCount;
 
       // Apply rotation offset
       const newAngle = baseAngle + alpha;
@@ -322,13 +315,13 @@ export class MultiplayerPong extends Pong {
     const cosA = Math.cos(alpha);
     const sinA = Math.sin(alpha);
 
-    for (let id = 0; id < this.gameObjects.walls.length; id++) {
+    for (let id = 0; id < this.gameState.walls.length; id++) {
       // Skip the center wall and extra walls
-      if (id >= 2 * this.extraGameData.playerCount) {
+      if (id >= 2 * this.gameState.playerCount) {
         continue;
       }
 
-      const wall = this.gameObjects.walls[id];
+      const wall = this.gameState.walls[id];
 
       // Get base position
       const baseX = wall.absX;
@@ -374,7 +367,7 @@ export class MultiplayerPong extends Pong {
   }
 
   getResults(): number[] {
-    return this.extraGameData.results;
+    return this.gameState.results;
   }
 
   getSettings(): GameModeCombinedSettings {

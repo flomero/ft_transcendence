@@ -33,7 +33,8 @@ export class FlowerGaussianCA implements IPongPowerUpPositionSampler {
   }
 
   samplePosition(game: Pong): { x: number; y: number } {
-    const playerCount = game.getExtraGameData().playerCount;
+    const gameState = game.getState();
+    const playerCount = gameState.playerCount;
     const rng = game.getRNG();
 
     const totalOffset =

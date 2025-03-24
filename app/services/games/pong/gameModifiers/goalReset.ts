@@ -36,7 +36,7 @@ export class GoalReset extends PongModifierBase {
 
     --this.ticks;
     if (this.ticks < 0) {
-      game.getGameObjects().balls[0].speed = this.ballSpeed;
+      game.getState().balls[0].speed = this.ballSpeed;
       this.status = ModifierStatus.ACTIVE;
     }
   }
@@ -46,8 +46,10 @@ export class GoalReset extends PongModifierBase {
     this.ticks = this.delay;
     this.status = ModifierStatus.PAUSED;
 
-    game.resetBall(-1);
-    this.ballSpeed = game.getGameObjects().balls[0].speed;
-    game.getGameObjects().balls[0].speed = 0;
+    const gameState = game.getState();
+
+    game.resetBall(gameState, -1);
+    this.ballSpeed = gameState.balls[0].speed;
+    gameState.balls[0].speed = 0;
   }
 }

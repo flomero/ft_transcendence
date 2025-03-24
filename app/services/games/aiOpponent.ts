@@ -9,7 +9,6 @@ export abstract class AIOpponent {
   protected tickrateS: number = 1;
   protected data: AIData;
   protected game: any; // Abstract class doesn't assume a specific game type
-  protected gameState: Record<string, any> = {};
   protected rng: RNG = new RNG();
 
   constructor(game: any, data: AIData) {

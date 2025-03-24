@@ -54,16 +54,16 @@ export class PowerUpSpawner extends TimeLimitedModifierBase {
     );
   }
 
-  onGameStart(game: GameBase): void {
+  onGameStart(game: Pong): void {
     this.activate(game);
   }
 
-  onActivation(game: GameBase): void {
+  onActivation(game: Pong): void {
     this.duration = game
       .getRNG()
       .randomGaussian(this.meanDelay, this.delaySpan);
 
-    // console.log(`Next powerUpSpawn in ${this.duration} ticks`);
+    console.log(`Next powerUpSpawn in ${this.duration} ticks`);
   }
 
   onDeactivation(game: Pong): void {

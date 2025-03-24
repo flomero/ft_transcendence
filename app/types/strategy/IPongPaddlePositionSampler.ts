@@ -1,4 +1,5 @@
 import { AIOpponent } from "../../services/games/aiOpponent";
+import { PongGameState } from "../../services/games/pong/pong";
 
 export interface PongPaddlePosition {
   displacement: number;
@@ -6,8 +7,5 @@ export interface PongPaddlePosition {
 }
 
 export interface IPongPaddlePositionSampler {
-  nextPositions(
-    ai: AIOpponent,
-    gameState: Record<string, any>,
-  ): PongPaddlePosition[];
+  nextPositions(ai: AIOpponent, gameState: PongGameState): PongPaddlePosition[];
 }

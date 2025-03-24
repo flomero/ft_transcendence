@@ -149,11 +149,11 @@ export class ModifierManager {
   }
 
   getStateSnapshot(): Record<string, any> {
-    return {
+    const state = {
       spawnedPowerUps: this.spawnedPowerUps,
-      // modifiers: this.modifiers.map(modifier => modifier.getState()),
-      // activePowerUps: this.activePowerUps.map(powerUp => powerUp.getState())
     };
+
+    return state;
   }
 
   loadStateSnapshot(snapshot: Record<string, any>): void {

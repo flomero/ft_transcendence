@@ -57,6 +57,10 @@
   "pongPaddlePositionSampler": {
     "random": {
       "className": "Random"
+    },
+
+    "naive": {
+      "className": "Naive"
     }
   }
 }

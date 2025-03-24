@@ -5,10 +5,12 @@ import {
   PongPaddlePosition,
 } from "../../../types/strategy/IPongPaddlePositionSampler";
 import { UserInput } from "../../../types/games/userInput";
+import { Pong, PongGameState } from "./pong";
 
 export class PongAIOpponent extends AIOpponent {
   protected inputQueue: UserInput[] = [];
 
+  protected gameState: PongGameState;
   protected paddlePositionSampler: StrategyManager<
     IPongPaddlePositionSampler,
     "nextPositions"
@@ -18,6 +20,7 @@ export class PongAIOpponent extends AIOpponent {
     super(game, data);
 
     this.data = data;
+    this.gameState = JSON.parse(JSON.stringify(game.getState()));
     this.paddlePositionSampler = new StrategyManager(
       this.data.strategyName,
       "pongPaddlePositionSampler",
@@ -28,7 +31,7 @@ export class PongAIOpponent extends AIOpponent {
   }
 
   update(): void {
-    this.gameState = this.game.getStateSnapshot();
+    this.gameState = JSON.parse(JSON.stringify((this.game as Pong).getState()));
 
     const absoluteSamples: PongPaddlePosition[] =
       this.paddlePositionSampler.executeStrategy(this, this.gameState);
@@ -57,7 +60,7 @@ export class PongAIOpponent extends AIOpponent {
         const startMovement: UserInput = {
           type: value.deltaDisplacement > 0 ? "UP" : "DOWN",
           playerId: this.data.playerId,
-          timestamp: value.timestamp - timeNeeded,
+          timestamp: Math.max(Date.now(), value.timestamp - timeNeeded), // The ai shouldn't be able to give an input in the past
         };
 
         // Stop moving as requested
@@ -86,5 +89,9 @@ export class PongAIOpponent extends AIOpponent {
         (input) => input.timestamp > now,
       );
     }, this.game.serverTickrateS / 1000.0);
+  }
+
+  getGame(): Pong {
+    return this.game;
   }
 }

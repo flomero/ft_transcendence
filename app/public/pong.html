@@ -207,8 +207,8 @@
 
         // Draw the powerUps
 
-        if (gameState.modifiersData) {
-          gameState.modifiersData.spawnedPowerUps?.forEach((entry) => {
+        if (gameState.modifiersState) {
+          gameState.modifiersState.spawnedPowerUps?.forEach((entry) => {
             const type = entry[0];
             const powerUp = entry[1];
             if (powerUp.isVisible) {

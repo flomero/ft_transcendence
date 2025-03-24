@@ -37,8 +37,9 @@ export class BiasedQuadrantGaussianRA implements IPongBallResetSampler {
   }
 
   sampleDirection(game: Pong): { angularDirection: number; magnitude: number } {
+    const gameState = game.getState();
     const rng = game.getRNG();
-    let playerId = game.getExtraGameData().lastGoal;
+    let playerId = gameState.lastGoal;
     if (playerId === -1)
       // If no one took a goal yet (ball out of bounds ?) then randomize the bias
       playerId = rng.randomInt(0, 1);

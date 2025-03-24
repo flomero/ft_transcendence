@@ -1,4 +1,4 @@
-import { GameBase, GameStatus } from "../gameBase";
+import { GameBase, GameBaseState, GameStatus } from "../gameBase";
 import { PhysicsEngine, type Collision } from "../physicsEngine";
 import {
   GAME_REGISTRY,
@@ -9,28 +9,28 @@ import type { Ball } from "../../../types/games/pong/ball";
 import type { Rectangle } from "../../../types/games/pong/rectangle";
 import { UserInputManager } from "../userInputManager";
 import { type UserInput } from "../../../types/games/userInput";
+import { RNG } from "../rng";
+import { ExtendedCollisionData } from "../../../types/games/pong/extendedCollisionData";
 
 const EPSILON = 1e-2;
 
-// Temporary:
-interface Player {
-  id: number;
-}
-
-export interface PongExtraGameData {
-  playerCount: number;
-  lastHit: number;
-  lastGoal: number;
-  players?: Player[];
-  scores: number[];
-  results: number[];
-}
-
-export interface PongGameObjects {
+// Combined GameState interface w/ GameBaseState + <GameSpecific>State
+export type PongGameState = GameBaseState & {
+  // gameObjects
   balls: Ball[];
   paddles: Paddle[];
   walls: Rectangle[];
-}
+
+  // utils
+  rng: RNG;
+  lastHit: number;
+  lastGoal: number;
+  scores: number[];
+  results: number[];
+
+  // const additionalData
+  playerCount: number;
+};
 
 export abstract class Pong extends GameBase {
   static readonly name = "pong";
@@ -40,10 +40,7 @@ export abstract class Pong extends GameBase {
   protected tickData: Record<string, any>[];
   protected tickDataLock: Promise<void> | null = null;
 
-  protected extraGameData: PongExtraGameData;
-
-  protected gameObjects: PongGameObjects;
-  protected gameObjectsLock: Promise<void> | null = null;
+  protected gameState: PongGameState;
 
   // User input manager
   protected inputManager: UserInputManager;
@@ -60,20 +57,21 @@ export abstract class Pong extends GameBase {
     // Network playability related
     this.tickData = new Array(this.serverMaxDelayTicks);
 
-    // Players & related
-    this.extraGameData = {
-      playerCount: gameData.playerCount,
+    // Initial gameState
+    this.gameState = {
+      startDate: this.gameBaseState.startDate,
+      lastUpdate: this.gameBaseState.lastUpdate,
+      status: this.gameBaseState.status,
+
+      balls: [],
+      paddles: [],
+      walls: [],
+      rng: new RNG(),
       lastHit: -1,
       lastGoal: -1,
       scores: Array(gameData.playerCount).fill(0),
       results: Array(gameData.playerCount).fill(0),
-    };
-
-    // Game objects -> w/ collisions
-    this.gameObjects = {
-      balls: [],
-      paddles: [],
-      walls: [],
+      playerCount: gameData.playerCount,
     };
 
     // Initialize UserInputManager
@@ -83,27 +81,27 @@ export abstract class Pong extends GameBase {
   startGame(): void {
     super.startGame();
 
-    this.status = GameStatus.RUNNING;
+    // this.gameBaseState.status = GameStatus.RUNNING;
     this.modifierManager.trigger("onGameStart");
   }
 
   async update(): Promise<void> {
     // Update game state
-    if (this.status === GameStatus.RUNNING) {
+    if (this.gameBaseState.status === GameStatus.RUNNING) {
       // Process any queued user inputs
       await this.processUserInputs();
 
       // Update paddle positions
-      for (const paddle of this.gameObjects.paddles)
+      for (const paddle of this.gameState.paddles)
         if (paddle.velocity !== 0) this.updatePaddle(paddle);
 
       // Update ball positions
-      for (const ball of this.gameObjects.balls)
-        if (ball.doCollision) await this.doCollisionChecks(ball);
+      for (const ball of this.gameState.balls)
+        if (ball.doCollision) this.doCollisionChecks(this.gameState, ball);
 
       // Verify that no balls went out of bounds
-      this.gameObjects.balls.forEach((ball, id) => {
-        if (this.isOutOfBounds(ball)) this.resetBall(id);
+      this.gameState.balls.forEach((ball, id) => {
+        if (this.isOutOfBounds(ball)) this.resetBall(this.gameState, id);
       });
 
       // Trigger modifiers
@@ -118,7 +116,7 @@ export abstract class Pong extends GameBase {
   protected updatePaddle(paddle: Paddle): void {
     if (!paddle.doMove) {
       console.log(
-        `Player ${this.gameObjects.paddles.indexOf(paddle)}'s paddle can't be moved`,
+        `Player ${this.gameState.paddles.indexOf(paddle)}'s paddle can't be moved`,
       );
       return;
     }
@@ -129,13 +127,10 @@ export abstract class Pong extends GameBase {
     // paddle.velocity now represents percentage of width per tick
     let newDisplacement = paddle.displacement + paddle.velocity;
 
-    // Calculate movement boundaries (e.g., ±35% if coverage is 30%)
-    const maxDisplacementPercent = (100 - paddle.coverage) / 2.0;
-
     // Clamp the displacement within allowed range
     newDisplacement = Math.max(
-      -maxDisplacementPercent,
-      Math.min(maxDisplacementPercent, newDisplacement),
+      -paddle.maxDisplacement,
+      Math.min(paddle.maxDisplacement, newDisplacement),
     );
 
     // Calculate actual change in displacement
@@ -149,7 +144,7 @@ export abstract class Pong extends GameBase {
     paddle.displacement = newDisplacement;
 
     // After updating, trigger the modifier
-    const paddleIndex = this.gameObjects.paddles.indexOf(paddle);
+    const paddleIndex = this.gameState.paddles.indexOf(paddle);
     this.modifierManager.trigger("onPlayerMovement", {
       playerId: paddleIndex,
     });
@@ -167,17 +162,15 @@ export abstract class Pong extends GameBase {
   // Process a single user input with lag compensation
   async processUserInput(action: UserInput): Promise<void> {
     if (
-      !(
-        action.playerId >= 0 && action.playerId < this.extraGameData.playerCount
-      )
+      !(action.playerId >= 0 && action.playerId < this.gameState.playerCount)
     ) {
       console.log(
-        `Can't handle player ${action.playerId}'s action: game has ${this.extraGameData.playerCount} players`,
+        `Can't handle player ${action.playerId}'s action: game has ${this.gameState.playerCount} players`,
       );
       return;
     }
 
-    const delayS = (this.lastUpdateTime - action.timestamp) / 1000.0;
+    const delayS = (this.gameState.lastUpdate - action.timestamp) / 1000.0;
     const delayTicks = Math.round(delayS / this.serverTickrateS);
 
     if (delayTicks > this.serverMaxDelayTicks) {
@@ -203,7 +196,7 @@ export abstract class Pong extends GameBase {
     // Fast-forward back to current state
     if (delayTicks > 0) {
       console.log(`Fast-forwarding ${delayTicks} ticks`);
-      await this.fastForward(delayTicks);
+      await this.fastForward(delayTicks, this.gameState);
     }
   }
 
@@ -211,13 +204,13 @@ export abstract class Pong extends GameBase {
   protected applyPlayerAction(action: UserInput): void {
     if (
       action.playerId < 0 ||
-      action.playerId >= this.gameObjects.paddles.length
+      action.playerId >= this.gameState.paddles.length
     ) {
       console.warn(`Invalid player ID: ${action.playerId}`);
       return;
     }
 
-    const paddle = this.gameObjects.paddles[action.playerId];
+    const paddle = this.gameState.paddles[action.playerId];
 
     switch (action.type) {
       case "UP":
@@ -239,32 +232,39 @@ export abstract class Pong extends GameBase {
   }
 
   getStateSnapshot(): Record<string, any> {
-    const gameState = super.getStateSnapshot();
+    const gameBaseState = super.getStateSnapshot();
 
-    gameState.balls = this.gameObjects.balls.map((ball) => ({ ...ball }));
-    gameState.paddles = this.gameObjects.paddles.map((paddle) => ({
-      ...paddle,
-    }));
-    gameState.walls = this.gameObjects.walls.map((wall) => ({ ...wall }));
-    gameState.scores = [...this.extraGameData.scores];
-    gameState.lastHit = this.extraGameData.lastHit;
-    gameState.rng = this.rng.getState();
+    const snapshot = {
+      startDate: gameBaseState.startDate,
+      lastUpdate: gameBaseState.lastUpdate,
+      status: gameBaseState.status,
+      modifiersState: gameBaseState.modifiersState,
 
-    gameState.modifiersData = this.modifierManager.getStateSnapshot();
+      balls: this.gameState.balls,
+      paddles: this.gameState.paddles,
+      walls: this.gameState.walls,
 
-    return gameState;
+      rng: this.gameState.rng.getState(),
+      lastHit: this.gameState.lastHit,
+      lastGoal: this.gameState.lastGoal,
+      scores: this.gameState.scores,
+      results: this.gameState.results,
+      playerCount: this.gameState.playerCount,
+    };
+
+    return snapshot;
   }
 
   loadStateSnapshot(snapshot: Record<string, any>): void {
-    this.gameObjects.balls = snapshot.balls; //.map(ball => ({...ball}));
-    this.gameObjects.paddles = snapshot.paddles; //.map(paddle => ({...paddle}));
-    this.gameObjects.walls = snapshot.walls; //.map(wall => ({...wall}));
-    this.extraGameData.scores = [...snapshot.scores];
-    this.extraGameData.lastHit = snapshot.lastHit;
+    this.gameState.balls = snapshot.balls; //.map(ball => ({...ball}));
+    this.gameState.paddles = snapshot.paddles; //.map(paddle => ({...paddle}));
+    this.gameState.walls = snapshot.walls; //.map(wall => ({...wall}));
+    this.gameState.scores = [...snapshot.scores];
+    this.gameState.lastHit = snapshot.lastHit;
 
     this.modifierManager.loadStateSnapshot(snapshot.modifiersData);
 
-    this.rng.setState(snapshot.rng);
+    this.gameState.rng.setState(snapshot.rng);
   }
 
   protected async saveStateSnapshot(
@@ -295,8 +295,10 @@ export abstract class Pong extends GameBase {
     this.loadStateSnapshot(this.tickData[this.tickData.length - toTick]);
   }
 
-  async fastForward(tickCount: number): Promise<void> {
-    // Remove the outdated ticks from the end
+  async fastForward(
+    tickCount: number,
+    gameState: PongGameState,
+  ): Promise<void> {
     if (this.tickDataLock === null) {
       this.tickDataLock = Promise.resolve();
     }
@@ -309,81 +311,63 @@ export abstract class Pong extends GameBase {
       });
     });
 
-    // Re-simulate the ticks one by one
-    for (let i = 0; i < tickCount; i++) {
-      // Simulate a tick without processing inputs
-      await this.simulateTick();
-    }
+    // Simulate the ticks without modifying the real game state
+    for (let i = 0; i < tickCount; i++) this.simulateTick(gameState);
   }
 
-  // Simulate a tick without processing inputs (for fast-forwarding)
-  protected async simulateTick(): Promise<void> {
-    // Update game state
-    if (this.status === GameStatus.RUNNING) {
-      // Update paddle positions
-      for (const paddle of this.gameObjects.paddles) {
-        if (paddle.velocity !== 0) this.updatePaddle(paddle);
-      }
+  // Simulate a tick using a given game state
+  protected simulateTick(gameState: PongGameState): void {
+    // Update paddle positions
+    for (const paddle of gameState.paddles)
+      if (paddle.velocity !== 0) this.updatePaddle(paddle);
 
-      // Update ball positions
-      for (const ball of this.gameObjects.balls) {
-        if (ball.doCollision) await this.doCollisionChecks(ball);
-      }
+    // Update ball positions
+    for (const ball of gameState.balls)
+      if (ball.doCollision) this.doCollisionChecks(gameState, ball);
 
-      // Verify that no balls went out of bounds
-      this.gameObjects.balls.forEach((ball, id) => {
-        if (this.isOutOfBounds(ball)) this.resetBall(id);
-      });
+    // Verify that no balls went out of bounds
+    gameState.balls.forEach((ball, id) => {
+      if (this.isOutOfBounds(ball)) this.resetBall(gameState, id);
+    });
 
-      // Trigger modifiers
-      this.modifierManager.trigger("onUpdate");
-    }
-
-    // Save the current state for potential rewinding
-    const snapshot = this.getStateSnapshot();
-    this.saveStateSnapshot(snapshot);
+    // Trigger modifiers
+    this.modifierManager.trigger("onUpdate");
   }
 
   abstract isOutOfBounds(ball: Ball): boolean;
-  abstract resetBall(ballId: number): void;
+  abstract resetBall(gameState: PongGameState, ballId: number): void;
 
-  async doCollisionChecks(ball: Ball): Promise<void> {
+  protected doCollisionChecks(gameState: PongGameState, ball: Ball): void {
     const getClosestCollision = (
       collisions: Array<Collision | null>,
     ): Collision | null => {
       let minIndex = -1;
       let minValue = Infinity;
-
       for (let k = 0; k < collisions.length; k++) {
         if (!collisions[k]) continue;
-
         if (collisions[k]!.distance < minValue) {
           minValue = collisions[k]!.distance;
           minIndex = k;
         }
       }
-
       return minIndex >= 0 ? collisions[minIndex] : null;
     };
 
     let remainingDistance = ball.speed;
     let loopCounter = 0;
-
     while (remainingDistance > EPSILON) {
       const paddleCollision: Collision | null = PhysicsEngine.detectCollision(
         ball,
         remainingDistance,
-        this.gameObjects.paddles,
+        gameState.paddles,
         "paddle",
       );
-
       const wallCollision: Collision | null = PhysicsEngine.detectCollision(
         ball,
         remainingDistance,
-        this.gameObjects.walls,
+        gameState.walls,
         "wall",
       );
-
       const powerUpCollision: Collision | null = PhysicsEngine.detectCollision(
         ball,
         remainingDistance,
@@ -391,7 +375,6 @@ export abstract class Pong extends GameBase {
         "powerUp",
       );
 
-      // Determine the closest collision
       const tmpCollision: Collision | null = getClosestCollision([
         paddleCollision,
         wallCollision,
@@ -404,30 +387,25 @@ export abstract class Pong extends GameBase {
         break;
       }
 
-      let collision: Collision = tmpCollision as Collision;
+      const collision: Collision = tmpCollision;
       const travelDistance = collision.distance;
-
-      ball.x += Math.round(ball.dx * travelDistance * (100 - EPSILON)) / 100;
-      ball.y += Math.round(ball.dy * travelDistance * (100 - EPSILON)) / 100;
+      ball.x +=
+        Math.round(ball.dx * travelDistance * (100 - 2 * EPSILON)) / 100;
+      ball.y +=
+        Math.round(ball.dy * travelDistance * (100 - 2 * EPSILON)) / 100;
 
       switch (collision.type) {
         case "powerUp":
-          console.log(
-            `\nPlayer ${this.extraGameData.lastHit} picked up a powerUp\n`,
-          );
-
+          console.log(`\nPlayer ${gameState.lastHit} picked up a powerUp\n`);
           this.modifierManager.pickupPowerUp(collision.objectId);
           break;
 
         case "paddle":
           PhysicsEngine.resolveCollision(ball, collision);
           const playerId = collision.objectId;
-
-          if (this.extraGameData.lastHit !== playerId)
+          if (gameState.lastHit !== playerId)
             console.log(`Last hit: ${playerId}`);
-          this.extraGameData.lastHit = playerId;
-
-          // Then trigger paddle bounce effects
+          gameState.lastHit = playerId;
           this.modifierManager.trigger("onPaddleBounce", {
             playerId: collision.objectId,
           });
@@ -435,26 +413,22 @@ export abstract class Pong extends GameBase {
 
         case "wall":
           PhysicsEngine.resolveCollision(ball, collision);
-
-          const wall: Rectangle = this.gameObjects.walls[collision.objectId];
-          if (wall.isGoal) {
+          const wall: Rectangle = gameState.walls[collision.objectId];
+          if (wall.isGoal && ball.doGoal) {
             const goalPlayerId = Math.floor(collision.objectId / 2);
-            this.extraGameData.scores[goalPlayerId]++;
-            this.extraGameData.lastGoal = goalPlayerId;
-
-            // Then trigger goal effects
-            this.modifierManager.trigger("onGoal", {
-              playerId: goalPlayerId,
-            });
-          } else this.modifierManager.trigger("onWallBounce");
+            gameState.scores[goalPlayerId]++;
+            gameState.lastGoal = goalPlayerId;
+            this.modifierManager.trigger("onGoal", { playerId: goalPlayerId });
+          } else {
+            this.modifierManager.trigger("onWallBounce");
+          }
           break;
 
         default:
           console.log(`Unknown collision type: ${collision.type}`);
       }
 
-      remainingDistance -= travelDistance * (100 - EPSILON);
-
+      remainingDistance -= travelDistance * (100 - 2 * EPSILON);
       loopCounter += 1;
       if (loopCounter > ball.speed * 3.0 + 1) {
         break;
@@ -462,13 +436,70 @@ export abstract class Pong extends GameBase {
     }
   }
 
-  // Getters
-  getExtraGameData(): PongExtraGameData {
-    return this.extraGameData;
+  /**
+   * Predicts the next collision between the ball and a target object (paddle or wall)
+   * given an initial game state, simulating forward for up to maxTicks.
+   *
+   * @param initialState - The starting snapshot of your game state.
+   * @param maxTicks - Maximum number of ticks to simulate.
+   * @param targetId - The ID of the target game object (index in its array).
+   * @param targetCategory - The type of target, either "paddle" or "wall".
+   * @returns An object with the tick number and collision details, or null if none is found.
+   */
+  findNextCollisions(
+    gameState: PongGameState,
+    maxTicks: number,
+    targetId: number,
+    targetCategory: "paddle" | "wall",
+  ): ExtendedCollisionData[] {
+    const collisionsData = [];
+    for (let tick = 1; tick <= maxTicks; tick++) {
+      // Retrieve the ball
+      const ball = gameState.balls[0];
+      // Use the ball's speed as the per-tick movement distance.
+      const tickDelta = ball.speed;
+
+      // Retrieve the target object based on its category.
+      let target: any;
+      if (targetCategory === "paddle") {
+        target = gameState.paddles[targetId];
+      } else if (targetCategory === "wall") {
+        target = gameState.walls[targetId];
+      }
+
+      // Use the PhysicsEngine to detect a collision.
+      const collision = PhysicsEngine.detectCollision(
+        ball,
+        tickDelta,
+        [target],
+        targetCategory,
+      );
+
+      // If a collision is detected, return the tick number and details.
+      if (collision !== null) {
+        const ballPosOnCollision = {
+          x: ball.x + ball.dx * collision.distance,
+          y: ball.y + ball.dy * collision.distance,
+        };
+        collisionsData.push({
+          tick: tick,
+          collisionPos: ballPosOnCollision,
+          collision: collision,
+        });
+      }
+
+      // Simulate one tick forward.
+      this.simulateTick(gameState);
+    }
+    return collisionsData;
   }
 
-  getGameObjects(): PongGameObjects {
-    return this.gameObjects;
+  getRNG(): RNG {
+    return this.gameState.rng;
+  }
+
+  getState(): PongGameState {
+    return this.gameState;
   }
 
   abstract getSettings(): GameModeCombinedSettings;

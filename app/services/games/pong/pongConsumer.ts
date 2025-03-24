@@ -33,6 +33,8 @@ export const pongConsumer = async (
 
       // Send the updated state to clients
       const gameState = game.getStateSnapshot();
+      // console.log(`State snapshot:`);
+      // console.dir(gameState.modifiersState);
       ws.send(
         JSON.stringify({
           type: "gameState",
@@ -81,7 +83,7 @@ export const pongConsumer = async (
 
           aiOpponent = new PongAIOpponent(currentGame, {
             playerId: 1,
-            strategyName: "random",
+            strategyName: "naive",
           });
 
           // Send confirmation back to client

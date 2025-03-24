@@ -3,13 +3,14 @@ import {
   PongPaddlePosition,
 } from "../../../types/strategy/IPongPaddlePositionSampler";
 import { AIOpponent } from "../../games/aiOpponent";
+import { PongGameState } from "../../games/pong/pong";
 
 export class Random implements IPongPaddlePositionSampler {
   name = "random";
 
   nextPositions(
     ai: AIOpponent,
-    gameState: Record<string, any>,
+    gameState: PongGameState,
   ): PongPaddlePosition[] {
     const rndSign = ai.getRNG().randomSign();
     const rndDisplacement =
