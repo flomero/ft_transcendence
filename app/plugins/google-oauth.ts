@@ -1,7 +1,7 @@
-import { FastifyPluginAsync } from "fastify";
+import type { FastifyPluginAsync } from "fastify";
 import fp from "fastify-plugin";
 import oauthPlugin from "@fastify/oauth2";
-import { OAuth2Namespace } from "@fastify/oauth2";
+import type { OAuth2Namespace } from "@fastify/oauth2";
 import { signJWT } from "../services/auth/jwt";
 import { getGoogleProfile } from "../services/auth/google-api";
 import { insertUser } from "../services/auth/newUser";
@@ -17,14 +17,14 @@ const googleOAuthPlugin: FastifyPluginAsync = async (fastify, opts) => {
     name: "googleOAuth2",
     credentials: {
       client: {
-        id: process.env.GOOGLE_CLIENT_ID!,
-        secret: process.env.GOOGLE_CLIENT_SECRET!,
+        id: fastify.config.GOOGLE_CLIENT_ID,
+        secret: fastify.config.GOOGLE_CLIENT_SECRET,
       },
       auth: oauthPlugin.GOOGLE_CONFIGURATION,
     },
     scope: ["profile", "email"],
     startRedirectPath: "/login/google",
-    callbackUri: process.env.PUBLIC_URL + "/login/google/callback",
+    callbackUri: `${fastify.config.PUBLIC_URL}/login/google/callback`,
     callbackUriParams: {
       access_type: "offline",
       prompt: "consent",

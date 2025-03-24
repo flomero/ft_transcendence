@@ -31,29 +31,52 @@
     <script>
       const canvas = document.getElementById("gameCanvas");
       const ctx = canvas.getContext("2d");
-      canvas.width = 800;
-      canvas.height = 400;
 
-      const ratio = canvas.width / 200.0;
+      let ratio = 0.0;
+      let playerCount = 2;
 
-      // Update to match the pongConsumer endpoint
+      const gameModeName = "multiplayerPong";
+
+      if (gameModeName === "multiplayerPong") {
+        canvas.width = 800;
+        canvas.height = 800;
+        ratio = canvas.width / 100.0;
+        playerCount = 5;
+      } else if (gameModeName === "classicPong") {
+        canvas.width = 800;
+        canvas.height = 400;
+        ratio = canvas.width / 200.0;
+      }
+
       const socket = new WebSocket("ws://localhost:3000/game");
 
       let playerId = 0;
-      const playerCount = 2;
       const playerIdDisplay = document.querySelector(".player-id");
 
       socket.onopen = function () {
         console.log("✅ WebSocket connected");
-        // Update message format to match pongConsumer
         socket.send(
           JSON.stringify({
             type: "createGame",
             options: {
               gameName: "pong",
-              gameModeName: "classicPong",
-              modifierNames: ["powerUpSpawner"],
-              powerUpNames: ["speedBoost"],
+              gameModeName: gameModeName,
+              gameModeConfig: {
+                powerUpRadius: 0.17,
+                powerUpCapacities: {
+                  speedBoost: 50000,
+                },
+              },
+              modifierNames: {
+                powerUpSpawner: {
+                  meanDelay: 0.005,
+                  delaySpan: 0.0001,
+                  positionSamplerStrategyName: "biasedGaussianCATester",
+                },
+              },
+              powerUpNames: {
+                speedBoost: {},
+              },
               playerCount: playerCount,
             },
           }),
@@ -203,7 +226,7 @@
                   ctx.fillStyle = "red";
                   break;
 
-                case "inisVisible_ball_modifier":
+                case "blinkingBall":
                   ctx.fillStyle = "blue";
                   break;
 

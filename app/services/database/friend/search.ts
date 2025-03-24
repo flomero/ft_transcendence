@@ -13,8 +13,8 @@ export async function searchUsersDB(
   username: string,
 ): Promise<UserInviteSearchDB[]> {
   const users = await fastify.sqlite.all(
-    "SELECT users.id, users.username, users.image_id, users_friends.accepted FROM users LEFT JOIN users_friends ON users.id = users_friends.receiverId AND users_friends.senderId = ? WHERE users.username LIKE ? LIMIT 10",
-    [userId, `%${username}%`],
+    "SELECT users.id, users.username, users.image_id, users_friends.accepted FROM users LEFT JOIN users_friends ON users.id = users_friends.receiverId AND users_friends.senderId = ? WHERE users.username LIKE ? AND users.id != ? LIMIT 10",
+    [userId, `%${username}%`, userId],
   );
 
   return users;

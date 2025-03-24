@@ -1,0 +1,56 @@
+{
+  "pongPowerUpPositionSampler": {
+    "uniformRA": {
+      "className": "UniformRA"
+    },
+
+    "elipticGaussianRA": {
+      "className": "ElipticGaussianRA"
+    },
+
+    "uniformCA": {
+      "className": "UniformCA"
+    },
+
+    "flowerGaussianCA": {
+      "className": "FlowerGaussianCA",
+      "stdAngleDeviationDeg": 60,
+      "baseRadiusFactor": 0.45,
+      "variationStrength": 0.2,
+      "stdDistanceDeviationPercent": 15
+    },
+
+    "biasedQuadrantGaussianRATester": {
+      "className": "BiasedQuadrantGaussianRATester"
+    },
+
+    "biasedGaussianCATester": {
+      "className": "BiasedGaussianCATester"
+    }
+  },
+
+  "pongBallResetSampler": {
+    "uniformCA": {
+      "className": "UniformCA"
+    },
+
+    "biasedQuadrantGaussianRA": {
+      "className": "BiasedQuadrantGaussianRA",
+      "stdAngularVariationDeg": 10,
+      "angularOffsetDeg": 30,
+      "stdVelocityVariationPercent": 10,
+      "maxVelocityPercent": 30,
+      "lastGoalBiasPercent": 65
+    },
+
+    "biasedGaussianCA": {
+      "className": "BiasedGaussianCA",
+      "stdAngularVariationPercent": 50,
+      "angularOffsetPercent": 85,
+      "stdVelocityVariationPercent": 35,
+      "minVelocityPercent": 20,
+      "maxVelocityPercent": 60,
+      "lastGoalBiasPercent": 75
+    }
+  }
+}

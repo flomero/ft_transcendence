@@ -5,25 +5,50 @@
     "gameModes": {
       "classicPong": {
         "className": "ClassicPong",
-        "arenaSettings": {
-          "width": 200,
-          "height": 100,
-          "wallHeight": 2,
+
+        "fixedSettings": {
+          "arenaWidth": 200,
+          "arenaHeight": 100,
           "paddleOffset": 2.5,
-          "paddleCoverage": 25,
           "paddleHeight": 1,
-          "paddleSpeedWidthPercentS": 150
+          "wallsHeight": 2
         },
 
-        "defaultBallSettings": {
-          "speedWidthPercentS": 50,
-          "radius": 0.85
+        "customizableSettings": {
+          "ballSpeedWidthPercentS": 85,
+          "ballRadius": 0.95,
+          "ballResetSamplerStrategyName": "biasedQuadrantGaussianRA",
+          "paddleCoveragePercent": 25,
+          "paddleSpeedWidthPercentS": 150,
+          "powerUpRadius": 20,
+          "powerUpCapacities": {
+            "speedBoost": 1,
+            "blinkingBall": 1
+          }
+        }
+      },
+
+      "multiplayerPong": {
+        "className": "MultiplayerPong",
+        "fixedSettings": {
+          "arenaWidth": 100,
+          "arenaHeight": 100,
+          "paddleOffset": 2.5,
+          "paddleHeight": 1,
+          "wallsHeight": 2,
+          "wallsOffset": 1
         },
 
-        "defaultPowerUpSettings": {
-          "radius": 12.5,
-          "capacities": {
-            "speedBoost": 1
+        "customizableSettings": {
+          "ballSpeedWidthPercentS": 0,
+          "ballRadius": 0.85,
+          "ballResetSamplerStrategyName": "biasedGaussianCA",
+          "paddleCoveragePercent": 20,
+          "paddleSpeedWidthPercentS": 150,
+          "powerUpRadius": 10,
+          "powerUpCapacities": {
+            "speedBoost": 1,
+            "blinkingBall": 1
           }
         }
       }
@@ -33,17 +58,36 @@
       "powerUpSpawner": {
         "className": "PowerUpSpawner",
         "meanDelayS": 5,
-        "delaySpanS": 2
+        "delaySpanS": 2,
+        "positionSamplerStrategyName": "elipticGaussianRA"
       },
 
       "timedGame": {
         "className": "TimedGame",
-        "durationS": 10
+        "durationS": 60
       },
 
       "scoredGame": {
         "className": "ScoredGame",
         "goalObjective": 10
+      },
+
+      "survivalGame": {
+        "className": "SurvivalGame"
+      },
+
+      "elimination": {
+        "className": "Elimination",
+        "threshold": 1
+      },
+
+      "arenaShrink": {
+        "className": "ArenaShrink"
+      },
+
+      "goalReset": {
+        "className": "GoalReset",
+        "delayS": 2
       }
     },
 
@@ -55,6 +99,15 @@
         "durationS": 2,
         "totalRampUpStrength": 0.75,
         "rampUpFrequencyS": 0.25
+      },
+
+      "blinkingBall": {
+        "className": "BlinkingBall",
+        "spawnWeight": 1.0,
+        "selfActivation": false,
+        "durationS": 6,
+        "blinkIntervalS": 0.5,
+        "blinkDurationPercent": 50
       }
     }
   }

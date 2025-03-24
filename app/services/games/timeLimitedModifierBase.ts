@@ -19,7 +19,7 @@ export abstract class TimeLimitedModifierBase extends ModifierBase {
     if (this.duration <= 0 || this.status !== ModifierStatus.ACTIVE) return;
 
     this.ticks--;
-    if (this.ticks <= 0) this.deactivate(game);
+    if (this.ticks < 0) this.deactivate(game);
   }
 
   // Getters & Setters

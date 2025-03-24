@@ -3,7 +3,10 @@ import { saveMessage } from "../database/chat/message";
 import {
   addUserToChatRoom,
   createChatRoom,
+  deleteChatRoom,
   getChatRoomRead,
+  getUserIdsFromDirectChatRooms,
+  RoomType,
   setRoomRead,
   setRoomReadForAllUsersBlacklist,
 } from "../database/chat/room";
@@ -17,15 +20,30 @@ interface ChatClient {
 
 const chatClients: ChatClient[] = [];
 
-export function addChatClient(client: ChatClient) {
+export function addChatClient(fastify: FastifyInstance, client: ChatClient) {
   chatClients.push(client);
+
+  updateOnlineStatus(fastify, client.userId);
 }
 
-export function removeChatClient(userId: string) {
+export function removeChatClient(fastify: FastifyInstance, userId: string) {
   chatClients.splice(
     chatClients.findIndex((client) => client.userId === userId),
     1,
   );
+
+  updateOnlineStatus(fastify, userId);
+}
+
+async function updateOnlineStatus(fastify: FastifyInstance, userId: string) {
+  const userIdsAndRoomIds = await getUserIdsFromDirectChatRooms(
+    fastify,
+    userId,
+  );
+
+  for (const { userId, roomId } of userIdsAndRoomIds) {
+    sendRoomUpdate(fastify, roomId, userId);
+  }
 }
 
 interface ChatWebSocketResponse {
@@ -34,9 +52,28 @@ interface ChatWebSocketResponse {
   html: string;
 }
 
-export async function sendRoomUpdate(
+async function createChatRoomWebSocketResponse(
   fastify: FastifyInstance,
-  selected: boolean,
+  roomId: number,
+  userId: string,
+) {
+  const dbRoom = await getChatRoomRead(fastify, roomId, userId);
+
+  const html = await fastify.view("components/chat/room", {
+    room: dbRoom,
+  });
+
+  const response: ChatWebSocketResponse = {
+    type: "room",
+    id: roomId,
+    html: html,
+  };
+
+  return response;
+}
+
+async function sendRoomUpdate(
+  fastify: FastifyInstance,
   roomId: number,
   userId: string,
 ) {
@@ -49,22 +86,11 @@ export async function sendRoomUpdate(
     return;
   }
 
-  const dbRoom = await getChatRoomRead(fastify, roomId, userId);
-
-  const html = await fastify.view("components/chat/room", {
-    room: {
-      id: roomId,
-      name: dbRoom.name,
-      read: dbRoom.read,
-      selected: selected,
-    },
-  });
-
-  const response: ChatWebSocketResponse = {
-    type: "room",
-    id: roomId,
-    html: html,
-  };
+  const response = await createChatRoomWebSocketResponse(
+    fastify,
+    roomId,
+    userId,
+  );
 
   client.socket.send(JSON.stringify(response));
 }
@@ -78,13 +104,10 @@ export async function setCurrentRoomId(
   if (!client) {
     return;
   }
-
-  await sendRoomUpdate(fastify, false, client.currentRoomId, userId);
-
   client.currentRoomId = roomId;
 
   await setRoomRead(fastify, true, roomId, userId);
-  await sendRoomUpdate(fastify, true, roomId, userId);
+  sendRoomUpdate(fastify, roomId, userId);
 }
 
 export async function sendMessage(
@@ -152,9 +175,10 @@ export async function sendMessage(
 export async function addRoom(
   fastify: FastifyInstance,
   roomName: string,
+  roomType: RoomType,
   userIds: string[],
 ) {
-  const roomId = await createChatRoom(fastify, roomName);
+  const roomId = await createChatRoom(fastify, roomName, roomType);
   for (const userId of userIds) {
     await addUserToChatRoom(fastify, roomId, userId);
 
@@ -169,20 +193,35 @@ export async function addRoom(
       continue;
     }
 
-    const html = await fastify.view("components/chat/room", {
-      room: {
-        id: roomId,
-        name: roomName,
-        read: false,
-      },
-    });
+    const response = await createChatRoomWebSocketResponse(
+      fastify,
+      roomId,
+      client.userId,
+    );
+
+    client.socket.send(JSON.stringify(response));
+  }
+}
+
+export function deleteRoom(fastify: FastifyInstance, roomId: number) {
+  deleteChatRoom(fastify, roomId);
+
+  for (const client of chatClients) {
+    if (client.currentRoomId === roomId) {
+      client.currentRoomId = -1;
+    }
 
     const response: ChatWebSocketResponse = {
       type: "room",
       id: roomId,
-      html: html,
+      html: "",
     };
 
     client.socket.send(JSON.stringify(response));
   }
+}
+
+export function userIsOnline(userId: string) {
+  const client = chatClients.find((client) => client.userId === userId);
+  return client !== undefined;
 }

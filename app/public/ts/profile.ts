@@ -20,13 +20,13 @@ class ProfileEditor {
       showById(formId);
 
       if (form) {
-        form.classList.add("slide-in-up");
-        form.classList.remove("slide-out-down");
+        form.classList.add("animate-slide-in-up");
+        form.classList.remove("animate-slide-out-down");
       }
     } else {
       if (form && form instanceof HTMLFormElement) {
-        form.classList.remove("slide-in-up");
-        form.classList.add("slide-out-down");
+        form.classList.remove("animate-slide-in-up");
+        form.classList.add("animate-slide-out-down");
         form.reset();
 
         setTimeout(() => {

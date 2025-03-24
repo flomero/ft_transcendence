@@ -9,13 +9,25 @@ const friendInvites: FastifyPluginAsync = async (fastify): Promise<void> => {
       return reply.status(400).send({ message: "FriendId ID required" });
     }
 
-    const error = await requestFriend(request.server, request.userId, friendId);
-    if (error) {
-      reply.status(400).send({ message: error });
-      return;
-    }
+    try {
+      const error = await requestFriend(
+        request.server,
+        request.userId,
+        friendId,
+      );
+      if (error) {
+        reply.status(400).send({ message: error });
+        return;
+      }
 
-    reply.status(200).send({ message: "Request sent" });
+      reply.status(200).send({ message: "Request sent" });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        reply.status(400).send({ message: error.message });
+      } else {
+        reply.status(400).send({ message: "Unknown error" });
+      }
+    }
   });
 
   fastify.post("/accept/:friendId", async (request, reply) => {

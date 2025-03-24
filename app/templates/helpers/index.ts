@@ -17,6 +17,25 @@ export function registerHelpers(handlebars: typeof Handlebars) {
     condition ? valueIfTrue : "",
   );
 
+  handlebars.registerHelper("wheneq", (a, b, valueIfTrue) =>
+    a === b ? valueIfTrue : "",
+  );
+
+  handlebars.registerHelper(
+    "ifeq",
+    function (
+      this: unknown,
+      a: string,
+      b: string,
+      options: Handlebars.HelperOptions,
+    ) {
+      if (a === b) {
+        return options.fn(this);
+      }
+      return options.inverse(this);
+    },
+  );
+
   handlebars.registerHelper("times", (n, block) => {
     let blocks = "";
     for (let i = 0; i < n; ++i) blocks += block.fn(i);
