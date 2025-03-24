@@ -1,6 +1,6 @@
 const MinAndMaxPlayers = {
-  ClassicPong: { min: 2, max: 2 },
-  MultiplayerPong: { min: 2, max: 8 },
+  classicPong: { min: 2, max: 2 },
+  multiplayerPong: { min: 2, max: 8 },
 };
 
 export default MinAndMaxPlayers;

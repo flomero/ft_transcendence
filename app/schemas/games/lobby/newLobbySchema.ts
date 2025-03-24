@@ -1,8 +1,12 @@
 import S from "fluent-json-schema";
 
 export const GAME_MODES = {
-  CLASSIC: "ClassicPong",
-  MULTIPLAYER: "MultiplayerPong",
+  CLASSIC: "classicPong",
+  MULTIPLAYER: "multiplayerPong",
+} as const;
+
+export const GAME_NAMES = {
+  PONG: "pong",
 } as const;
 
 const powerUpCapacitiesSchema = S.object().prop(
@@ -10,7 +14,7 @@ const powerUpCapacitiesSchema = S.object().prop(
   S.number().required(),
 );
 
-const customizableSettingsSchema = S.object()
+const gameModeConfigSchema = S.object()
   .prop("ballSpeedWidthPercentS", S.number())
   .prop("ballRadius", S.number())
   .prop("paddleCoveragePercent", S.number())
@@ -19,42 +23,41 @@ const customizableSettingsSchema = S.object()
   .prop("powerUpCapacities", powerUpCapacitiesSchema);
 
 const powerUpSpawnerSchema = S.object()
-  .prop("className", S.const("PowerUpSpawner"))
   .prop("meanDelayS", S.number())
   .prop("delaySpanS", S.number());
 
-const timedGameSchema = S.object()
-  .prop("className", S.const("TimedGame"))
-  .prop("durationS", S.number());
+const timedGameSchema = S.object().prop("durationS", S.number().minimum(0));
 
-const scoredGameSchema = S.object()
-  .prop("className", S.const("ScoredGame"))
-  .prop("goalObjective", S.number());
-
-const survivalGameSchema = S.object().prop(
-  "className",
-  S.const("SurvivalGame"),
+const scoredGameSchema = S.object().prop(
+  "goalObjective",
+  S.number().minimum(0),
 );
 
-const eliminationSchema = S.object()
-  .prop("className", S.const("Elimination"))
-  .prop("threshold", S.number());
+const eliminationSchema = S.object().prop("threshold", S.number().minimum(0));
 
-const arenaShrinkSchema = S.object().prop("className", S.const("ArenaShrink"));
-
-const gameModifiersSchema = S.object()
+const modifierNamesScheama = S.object()
   .prop("powerUpSpawner", powerUpSpawnerSchema)
   .prop("timedGame", timedGameSchema)
   .prop("scoredGame", scoredGameSchema)
-  .prop("survivalGame", survivalGameSchema)
+  .prop("survivalGame", S.array().maxItems(0).minItems(0))
   .prop("elimination", eliminationSchema)
-  .prop("arenaShrink", arenaShrinkSchema);
+  .prop("arenaShrink", S.array().maxItems(0).minItems(0));
+
+const speedBoostSchema = S.object()
+  .prop("spawnWeight", S.number().minimum(0))
+  .prop("selfActivation", S.boolean())
+  .prop("durationS", S.number().minimum(0))
+  .prop("totalRampUpStrength", S.number().minimum(0))
+  .prop("rampUpFrequencyS", S.number().minimum(0));
+
+const powerupSchema = S.object().prop("speedBoost", speedBoostSchema);
 
 const bodySchema = S.object()
-  .prop("gameName", S.string().required())
-  .prop("gameMode", S.enum(Object.values(GAME_MODES)).required())
-  .prop("customizableSettings", customizableSettingsSchema)
-  .prop("gameModifiers", gameModifiersSchema);
+  .prop("gameName", S.enum(Object.values(GAME_NAMES)).required())
+  .prop("gameModeName", S.enum(Object.values(GAME_MODES)).required())
+  .prop("gameModeConfig", gameModeConfigSchema)
+  .prop("modifierNames", modifierNamesScheama)
+  .prop("powerUpNames", powerupSchema);
 
 const newLobbySchema = {
   body: bodySchema,

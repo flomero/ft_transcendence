@@ -6,7 +6,7 @@ interface PowerUpCapacities {
   speedBoost: number;
 }
 
-interface CustomizableSettings {
+interface GameModeConfig {
   ballSpeedWidthPercentS: number;
   ballRadius: number;
   paddleCoveragePercent: number;
@@ -16,48 +16,50 @@ interface CustomizableSettings {
 }
 
 interface PowerUpSpawner {
-  className: "PowerUpSpawner";
   meanDelayS: number;
   delaySpanS: number;
 }
 
 interface TimedGame {
-  className: "TimedGame";
   durationS: number;
 }
 
 interface ScoredGame {
-  className: "ScoredGame";
   goalObjective: number;
 }
 
-interface SurvivalGame {
-  className: "SurvivalGame";
-}
-
 interface Elimination {
-  className: "Elimination";
   threshold: number;
 }
 
-interface ArenaShrink {
-  className: "ArenaShrink";
-}
-
-interface GameModifiers {
+interface ModifierNames {
   powerUpSpawner?: PowerUpSpawner;
   timedGame?: TimedGame;
   scoredGame?: ScoredGame;
-  survivalGame?: SurvivalGame;
+  survivalGame?: {};
   elimination?: Elimination;
-  arenaShrink?: ArenaShrink;
+  arenaShrink?: {};
+}
+
+interface SpeedBoost {
+  spawnWeight?: number;
+  selfActivation?: boolean;
+  durationS?: number;
+  totalRampUpStrength: number;
+  rampUpFrequencyS: number;
+}
+
+interface PowerUp {
+  speedBoost: SpeedBoost;
 }
 
 interface GameSettings {
   gameName: "pong";
-  gameMode: GameMode;
-  customizableSettings: CustomizableSettings;
-  gameModifiers?: GameModifiers;
+  gameModeName: GameMode;
+  gameModeConfig: GameModeConfig;
+  modifierNames?: ModifierNames;
+  powerUpNames?: PowerUp;
+  playerCount: number;
 }
 
 export type { GameSettings };

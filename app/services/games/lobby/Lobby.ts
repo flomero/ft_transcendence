@@ -29,9 +29,9 @@ class Lobby {
   }
 
   private getMemberLimits(): { min: number; max: number } {
-    if (MinAndMaxPlayers[this.gameSettings.gameMode] !== undefined)
-      return MinAndMaxPlayers[this.gameSettings.gameMode];
-    throw new Error("Game mode not found: " + this.gameSettings.gameMode);
+    if (MinAndMaxPlayers[this.gameSettings.gameModeName] !== undefined)
+      return MinAndMaxPlayers[this.gameSettings.gameModeName];
+    throw new Error("Game mode not found: " + this.gameSettings.gameModeName);
   }
 
   public addMember(memberId: string): void {

@@ -31,16 +31,21 @@ const addMatchToDatabase = async (
   gameSettings: GameSettings,
 ) => {
   const sql = `
-  INSERT INTO games (id, game, gameMode, modifiers, customizableSettings)
+  INSERT INTO matches (
+   id,
+   gameName,
+   gameModeName,
+   gameModeConfig,
+   modifierNames)
   VALUES (?, ?, ?, ?)
   `;
   db.run(
     sql,
     gameManager.getId,
     gameSettings.gameName,
-    gameSettings.gameMode,
-    gameSettings.gameModifiers,
-    gameSettings.customizableSettings,
+    gameSettings.gameModeName,
+    gameSettings.gameModeConfig,
+    gameSettings.modifierNames,
   );
 };
 export default addGameToDatabase;

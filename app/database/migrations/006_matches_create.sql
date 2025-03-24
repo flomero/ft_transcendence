@@ -1,10 +1,10 @@
 CREATE TABLE IF NOT EXISTS matches (
 	id TEXT PRIMARY KEY,
-	game TEXT NOT NULL,
-	gameMode TEXT NOT NULL,
-	gameModifiers JSON,
-	customizableSettings JSON NOT NULL,
-	result TEXT NOT NULL,
-	tournamentId TEXT NOT NULL,
+	gameName TEXT NOT NULL,
+	gameModeName TEXT NOT NULL,
+	gameModeConfig JSON NOT NULL,
+	modifierNames JSON,
+	result TEXT,
+	tournamentId TEXT,
 	FOREIGN KEY (tournamentId) REFERENCES turnaments(id)
 );

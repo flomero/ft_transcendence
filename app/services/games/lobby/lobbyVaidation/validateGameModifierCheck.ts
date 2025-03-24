@@ -1,26 +1,26 @@
 import { GameSettings } from "../../../../interfaces/games/lobby/GameSettings";
 
 const invalidEliminationOrArenaShrink = (gameSettings: GameSettings) => {
-  if (gameSettings.gameModifiers?.survivalGame) return false;
+  if (gameSettings.modifierNames?.survivalGame) return false;
   if (
-    gameSettings.gameModifiers?.elimination ||
-    gameSettings.gameModifiers?.arenaShrink
+    gameSettings.modifierNames?.elimination ||
+    gameSettings.modifierNames?.arenaShrink
   )
     return true;
   return false;
 };
 
 const validateGameModifierCheck = (gameSettings: GameSettings) => {
-  if (gameSettings.gameModifiers === undefined) return;
+  if (gameSettings.modifierNames === undefined) return;
 
-  const modifierKeys: Array<keyof typeof gameSettings.gameModifiers> = [
+  const modifierKeys: Array<keyof typeof gameSettings.modifierNames> = [
     "timedGame",
     "scoredGame",
     "survivalGame",
   ];
 
   const selectedModifiers = modifierKeys.filter(
-    (key) => gameSettings.gameModifiers?.[key] !== undefined,
+    (key) => gameSettings.modifierNames?.[key] !== undefined,
   );
 
   if (selectedModifiers.length > 1) {
