@@ -139,6 +139,9 @@ class Chat {
   };
 
   selectRoom = (event: Event): void => {
+    const target = event.target as Element;
+    if (target.closest("a[href]")) return;
+
     const clickedRoom = event.currentTarget as Element;
     if (!clickedRoom) return;
 
