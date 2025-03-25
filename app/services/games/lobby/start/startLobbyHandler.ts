@@ -5,7 +5,7 @@ import areAllMembersReady from "../lobbyVaidation/areAllMembersReady";
 import gameManagerCreate from "./gameManagerCreate";
 import GameManager from "../../gameHandler/GameManager";
 import addGameToDatabase from "./addGameToDatabase";
-import { getActiveLobby } from "../lobbyWebsocket/getActiveLobby";
+import { getLobby } from "../lobbyWebsocket/getLobby";
 
 export const GameManagers = new Map<string, GameManager>();
 
@@ -15,7 +15,7 @@ async function startLobbyHandler(
 ) {
   const lobbyId = request.params.lobbyId;
   const userId = request.userId;
-  const lobby = getActiveLobby(lobbyId);
+  const lobby = getLobby(lobbyId);
 
   try {
     validConnectionCheck(userId, lobbyId);

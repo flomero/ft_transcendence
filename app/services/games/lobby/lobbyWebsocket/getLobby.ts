@@ -1,7 +1,7 @@
 import { Lobby } from "../Lobby";
 import { PublicLobbies, PrivateLobbies } from "../new/newLobbyHandler";
 
-function getActiveLobby(lobbyId: string): Lobby {
+function getLobby(lobbyId: string): Lobby {
   if (PublicLobbies.has(lobbyId)) {
     return PublicLobbies.get(lobbyId)!;
   } else if (PrivateLobbies.has(lobbyId)) {
@@ -10,4 +10,4 @@ function getActiveLobby(lobbyId: string): Lobby {
   throw new Error("Lobby does not exist");
 }
 
-export { getActiveLobby };
+export { getLobby };

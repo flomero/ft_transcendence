@@ -1,6 +1,6 @@
 import GameManager from "../../gameHandler/GameManager";
 import { createNewGameClass } from "./createNewGameClass";
-import { getActiveLobby } from "../lobbyWebsocket/getActiveLobby";
+import { getLobby } from "../lobbyWebsocket/getLobby";
 
 const gameManagerCreate = (lobbyId: string) => {
   const game = createNewGameClass(lobbyId);
@@ -13,7 +13,7 @@ const addTransferMemberToGameManager = (
   gameManager: GameManager,
   lobbyId: string,
 ) => {
-  const lobby = getActiveLobby(lobbyId);
+  const lobby = getLobby(lobbyId);
   const lobbyMember = lobby.getMemberAsArray();
   for (const member of lobbyMember) gameManager.addPlayer(member.id);
 };

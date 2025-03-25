@@ -1,7 +1,7 @@
 import { FastifyRequest } from "fastify";
 import { WebSocket } from "ws";
 import { validConnectionCheck } from "../lobbyVaidation/validConnectionCheck";
-import { getActiveLobby } from "./getActiveLobby";
+import { getLobby } from "./getLobby";
 import closePossibleLobbySocketConnection from "../leave/closePossibleLobbySocketConnection";
 
 const lobbyWebsocketHandler = async (
@@ -13,7 +13,7 @@ const lobbyWebsocketHandler = async (
 
   try {
     validConnectionCheck(userId, lobbyId);
-    const lobby = getActiveLobby(lobbyId);
+    const lobby = getLobby(lobbyId);
     lobby.addSocketToMember(userId, connection);
 
     connection.on("close", () => {

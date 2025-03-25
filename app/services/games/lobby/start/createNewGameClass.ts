@@ -1,7 +1,7 @@
 import { GameBase } from "../../gameBase";
 import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
 import { GameSettings } from "../../../../interfaces/games/lobby/GameSettings";
-import { getActiveLobby } from "../lobbyWebsocket/getActiveLobby";
+import { getLobby } from "../lobbyWebsocket/getLobby";
 
 function createNewGameClass(lobbyId: string): GameBase {
   const settings = getGameSettings(lobbyId);
@@ -13,7 +13,7 @@ function createNewGameClass(lobbyId: string): GameBase {
 }
 
 function getGameSettings(lobbyId: string): GameSettings {
-  const lobby = getActiveLobby(lobbyId);
+  const lobby = getLobby(lobbyId);
   return lobby.gameSettings;
 }
 
