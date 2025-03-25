@@ -6,5 +6,5 @@ CREATE TABLE IF NOT EXISTS matches (
 	modifierNames JSON,
 	result TEXT,
 	tournamentId TEXT,
-	FOREIGN KEY (tournamentId) REFERENCES turnaments(id)
+	FOREIGN KEY (tournamentId) REFERENCES tournaments(id)
 );

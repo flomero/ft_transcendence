@@ -53,6 +53,7 @@ const speedBoostSchema = S.object()
 const powerupSchema = S.object().prop("speedBoost", speedBoostSchema);
 
 const bodySchema = S.object()
+  .additionalProperties(false)
   .prop("gameName", S.enum(Object.values(GAME_NAMES)).required())
   .prop("gameModeName", S.enum(Object.values(GAME_MODES)).required())
   .prop("gameModeConfig", gameModeConfigSchema)

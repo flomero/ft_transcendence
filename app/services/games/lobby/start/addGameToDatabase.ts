@@ -9,15 +9,16 @@ const addGameToDatabase = async (
   gameSettings: GameSettings,
 ) => {
   addMatchToDatabase(gameManager, db, gameSettings);
-  addPlayersToMatchOnDatabase(gameManager, db);
+  addUserMatchesToDB(gameManager, db);
 };
 
-const addPlayersToMatchOnDatabase = async (
-  gameManager: GameManager,
-  db: Database,
-) => {
+const addUserMatchesToDB = async (gameManager: GameManager, db: Database) => {
   const sql = `
-  INSERT INTO players (id, userId, userId, matchId, score)
+  INSERT INTO r_users_matches (
+    id,
+    userId,
+    matchId,
+    score)
   VALUES (?, ?, ?, ?)
   `;
   for (const userId of gameManager.players.keys()) {
@@ -37,15 +38,16 @@ const addMatchToDatabase = async (
    gameModeName,
    gameModeConfig,
    modifierNames)
-  VALUES (?, ?, ?, ?)
+  VALUES (?, ?, ?, ?, ?)
   `;
+
   db.run(
     sql,
     gameManager.getId,
     gameSettings.gameName,
     gameSettings.gameModeName,
-    gameSettings.gameModeConfig,
-    gameSettings.modifierNames,
+    JSON.stringify(gameSettings.gameModeConfig),
+    JSON.stringify(gameSettings.modifierNames),
   );
 };
 export default addGameToDatabase;
