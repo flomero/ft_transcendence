@@ -28,10 +28,11 @@ const friends: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     let friends = await getFriendsWithUserInfo(fastify, request.userId);
     friends = assignPartnerIds(friends, request.userId);
     const data = {
+      title: "Your Friends | ft_transcendence",
       activeView: "friends",
       friends: usersToUserWithImages(friends),
     };
-
+    reply.header("X-Page-Title", "Your Friends | ft_transcendence");
     const viewOptions = request.isAjax() ? {} : { layout: "layouts/main" };
     return reply.view("views/friends/index", data, viewOptions);
   });
@@ -43,19 +44,21 @@ const friends: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       id: item.senderId,
     }));
     const data = {
+      title: "Open Requests | ft_transcendence",
       activeView: "requests",
       friends: usersToUserWithImages(invites),
     };
-
+    reply.header("X-Page-Title", "Open Requests | ft_transcendence");
     const viewOptions = request.isAjax() ? {} : { layout: "layouts/main" };
     return reply.view("views/friends/index", data, viewOptions);
   });
 
   fastify.get("/new", async (request, reply) => {
     const data = {
+      title: "Add Friends | ft_transcendence",
       activeView: "new",
     };
-
+    reply.header("X-Page-Title", "Add Friends | ft_transcendence");
     const viewOptions = request.isAjax() ? {} : { layout: "layouts/main" };
     return reply.view("views/friends/index", data, viewOptions);
   });
