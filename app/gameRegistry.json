@@ -96,8 +96,8 @@
         "className": "SpeedBoost",
         "spawnWeight": 1.0,
         "selfActivation": false,
-        "durationS": 2,
-        "totalRampUpStrength": 0.75,
+        "durationS": 5,
+        "totalRampUpStrength": 1.25,
         "rampUpFrequencyS": 0.25
       },
 

@@ -61,6 +61,11 @@
 
     "naive": {
       "className": "Naive"
+    },
+
+    "improvedNaive": {
+      "className": "ImprovedNaive",
+      "widthPercentFactor": 90
     }
   }
 }

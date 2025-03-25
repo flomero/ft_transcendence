@@ -7,6 +7,12 @@ import {
 import { UserInput } from "../../../types/games/userInput";
 import { Pong, PongGameState } from "./pong";
 
+interface MovementInterval {
+  type: "UP" | "DOWN";
+  start: number;
+  stop: number;
+}
+
 export class PongAIOpponent extends AIOpponent {
   protected inputQueue: UserInput[] = [];
 
@@ -42,36 +48,60 @@ export class PongAIOpponent extends AIOpponent {
     absoluteSamples: PongPaddlePosition[],
   ): UserInput[] {
     const inputs: UserInput[] = [];
+
     const paddle = this.gameState.paddles[this.data.playerId];
 
-    absoluteSamples
-      .map((sample) => {
-        return {
-          deltaDisplacement: sample.displacement - paddle.displacement,
-          timestamp: sample.timestamp,
-        };
-      })
-      .forEach((value) => {
-        const paddleSpeedMs =
-          (paddle.speed * this.game.serverTickrateS) / 1000.0;
-        const timeNeeded = Math.abs(value.deltaDisplacement) / paddleSpeedMs;
+    // Convert each displacement sample into a movement interval.
+    const intervals: MovementInterval[] = absoluteSamples.map((sample) => {
+      const deltaDisplacement = sample.displacement - paddle.displacement;
+      // Paddle speed in displacement per millisecond.
+      const paddleSpeedMs = (paddle.speed * this.game.serverTickrateS) / 1000.0;
+      // Time needed to cover the required displacement.
+      const timeNeeded = Math.abs(deltaDisplacement) / paddleSpeedMs;
+      // Original computed start time.
+      const computedStart = sample.timestamp - timeNeeded;
+      // If computed start is in the past, start immediately.
+      const actualStart =
+        computedStart < Date.now() ? Date.now() : computedStart;
+      // Adjust stop time to always honor the movement duration.
+      const actualStop =
+        computedStart < Date.now() ? Date.now() + timeNeeded : sample.timestamp;
+      const direction: "UP" | "DOWN" = deltaDisplacement > 0 ? "UP" : "DOWN";
+      return {
+        type: direction,
+        start: actualStart,
+        stop: actualStop,
+      };
+    });
 
-        // Figure out when to start moving to end up stopping at the right position at the right time
-        const startMovement: UserInput = {
-          type: value.deltaDisplacement > 0 ? "UP" : "DOWN",
-          playerId: this.data.playerId,
-          timestamp: Math.max(Date.now(), value.timestamp - timeNeeded), // The ai shouldn't be able to give an input in the past
-        };
+    // Sort intervals by their start time.
+    intervals.sort((a, b) => a.start - b.start);
 
-        // Stop moving as requested
-        const stopMovement: UserInput = {
-          type: "STOP",
-          playerId: this.data.playerId,
-          timestamp: value.timestamp,
-        };
+    // Merge overlapping or consecutive intervals that share the same direction.
+    const mergedIntervals: MovementInterval[] = [];
+    for (const intv of intervals) {
+      const last = mergedIntervals[mergedIntervals.length - 1];
+      if (last && last.type === intv.type && intv.start <= last.stop) {
+        // Extend the previous interval if needed.
+        last.stop = Math.max(last.stop, intv.stop);
+      } else {
+        mergedIntervals.push({ ...intv });
+      }
+    }
 
-        inputs.push(startMovement, stopMovement);
+    // Translate merged intervals into input commands.
+    for (const intv of mergedIntervals) {
+      inputs.push({
+        type: intv.type,
+        playerId: this.data.playerId,
+        timestamp: intv.start,
       });
+      inputs.push({
+        type: "STOP",
+        playerId: this.data.playerId,
+        timestamp: intv.stop,
+      });
+    }
 
     return inputs;
   }

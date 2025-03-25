@@ -77,7 +77,7 @@ export class ClassicPong extends Pong {
     this.initPaddles();
     this.initWalls();
 
-    this.resetBall(this.gameState, -1);
+    this.resetBall(this.gameState, -1, true);
   }
 
   startGame(): void {
@@ -243,7 +243,11 @@ export class ClassicPong extends Pong {
     ];
   }
 
-  resetBall(gameState: Record<string, any>, ballId: number): void {
+  resetBall(
+    gameState: Record<string, any>,
+    ballId: number,
+    doTriggers: boolean,
+  ): void {
     const sampledDirection = this.ballResetSampler.executeStrategy(this);
 
     const ca = Math.cos(sampledDirection.angularDirection);
@@ -283,6 +287,8 @@ export class ClassicPong extends Pong {
         doGoal: true,
       };
     }
+
+    if (doTriggers) this.modifierManager.trigger("onBallReset");
   }
 
   isOutOfBounds(ball: Ball): boolean {

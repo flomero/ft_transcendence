@@ -22,7 +22,7 @@ export class Naive implements IPongPaddlePositionSampler {
       .getGame()
       .findNextCollisions(
         gameState,
-        10 * serverTickrateS,
+        3 * serverTickrateS,
         2 * ai.getId(),
         "wall",
       );

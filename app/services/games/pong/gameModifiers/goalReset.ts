@@ -48,7 +48,7 @@ export class GoalReset extends PongModifierBase {
 
     const gameState = game.getState();
 
-    game.resetBall(gameState, -1);
+    game.resetBall(gameState, -1, true);
     this.ballSpeed = gameState.balls[0].speed;
     gameState.balls[0].speed = 0;
   }

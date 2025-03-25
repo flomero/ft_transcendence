@@ -77,7 +77,7 @@ export class MultiplayerPong extends Pong {
 
     this.initPaddles();
     this.initWalls();
-    this.resetBall(this.gameState, -1);
+    this.resetBall(this.gameState, -1, true);
   }
 
   startGame(): void {
@@ -214,7 +214,11 @@ export class MultiplayerPong extends Pong {
     }
   }
 
-  resetBall(gameState: Record<string, any>, ballId: number = -1): void {
+  resetBall(
+    gameState: Record<string, any>,
+    ballId: number = -1,
+    doTriggers: boolean,
+  ): void {
     const sampledDirection = this.ballResetSampler.executeStrategy(this);
 
     const ca = Math.cos(sampledDirection.angularDirection);
@@ -254,6 +258,8 @@ export class MultiplayerPong extends Pong {
         doGoal: true,
       };
     }
+
+    if (doTriggers) this.modifierManager.trigger("onBallReset");
   }
 
   rotatePaddles(alpha: number = 0.0): void {

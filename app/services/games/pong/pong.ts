@@ -93,15 +93,16 @@ export abstract class Pong extends GameBase {
 
       // Update paddle positions
       for (const paddle of this.gameState.paddles)
-        if (paddle.velocity !== 0) this.updatePaddle(paddle);
+        if (paddle.velocity !== 0) this.updatePaddle(paddle, true);
 
       // Update ball positions
       for (const ball of this.gameState.balls)
-        if (ball.doCollision) this.doCollisionChecks(this.gameState, ball);
+        if (ball.doCollision)
+          this.doCollisionChecks(this.gameState, ball, true);
 
       // Verify that no balls went out of bounds
       this.gameState.balls.forEach((ball, id) => {
-        if (this.isOutOfBounds(ball)) this.resetBall(this.gameState, id);
+        if (this.isOutOfBounds(ball)) this.resetBall(this.gameState, id, true);
       });
 
       // Trigger modifiers
@@ -113,7 +114,7 @@ export abstract class Pong extends GameBase {
     this.saveStateSnapshot(snapshot);
   }
 
-  protected updatePaddle(paddle: Paddle): void {
+  protected updatePaddle(paddle: Paddle, doTriggers: boolean): void {
     if (!paddle.doMove) {
       console.log(
         `Player ${this.gameState.paddles.indexOf(paddle)}'s paddle can't be moved`,
@@ -145,9 +146,10 @@ export abstract class Pong extends GameBase {
 
     // After updating, trigger the modifier
     const paddleIndex = this.gameState.paddles.indexOf(paddle);
-    this.modifierManager.trigger("onPlayerMovement", {
-      playerId: paddleIndex,
-    });
+    if (doTriggers)
+      this.modifierManager.trigger("onPlayerMovement", {
+        playerId: paddleIndex,
+      });
   }
 
   // Process all queued user inputs
@@ -312,32 +314,40 @@ export abstract class Pong extends GameBase {
     });
 
     // Simulate the ticks without modifying the real game state
-    for (let i = 0; i < tickCount; i++) this.simulateTick(gameState);
+    for (let i = 0; i < tickCount; i++) this.simulateTick(gameState, true);
   }
 
   // Simulate a tick using a given game state
-  protected simulateTick(gameState: PongGameState): void {
+  protected simulateTick(gameState: PongGameState, doTriggers: boolean): void {
     // Update paddle positions
     for (const paddle of gameState.paddles)
-      if (paddle.velocity !== 0) this.updatePaddle(paddle);
+      if (paddle.velocity !== 0) this.updatePaddle(paddle, doTriggers);
 
     // Update ball positions
     for (const ball of gameState.balls)
-      if (ball.doCollision) this.doCollisionChecks(gameState, ball);
+      if (ball.doCollision) this.doCollisionChecks(gameState, ball, doTriggers);
 
     // Verify that no balls went out of bounds
     gameState.balls.forEach((ball, id) => {
-      if (this.isOutOfBounds(ball)) this.resetBall(gameState, id);
+      if (this.isOutOfBounds(ball)) this.resetBall(gameState, id, doTriggers);
     });
 
     // Trigger modifiers
-    this.modifierManager.trigger("onUpdate");
+    if (doTriggers) this.modifierManager.trigger("onUpdate");
   }
 
   abstract isOutOfBounds(ball: Ball): boolean;
-  abstract resetBall(gameState: PongGameState, ballId: number): void;
+  abstract resetBall(
+    gameState: PongGameState,
+    ballId: number,
+    doTriggers: boolean,
+  ): void;
 
-  protected doCollisionChecks(gameState: PongGameState, ball: Ball): void {
+  protected doCollisionChecks(
+    gameState: PongGameState,
+    ball: Ball,
+    doTriggers: boolean,
+  ): void {
     const getClosestCollision = (
       collisions: Array<Collision | null>,
     ): Collision | null => {
@@ -418,9 +428,12 @@ export abstract class Pong extends GameBase {
             const goalPlayerId = Math.floor(collision.objectId / 2);
             gameState.scores[goalPlayerId]++;
             gameState.lastGoal = goalPlayerId;
-            this.modifierManager.trigger("onGoal", { playerId: goalPlayerId });
+            if (doTriggers)
+              this.modifierManager.trigger("onGoal", {
+                playerId: goalPlayerId,
+              });
           } else {
-            this.modifierManager.trigger("onWallBounce");
+            if (doTriggers) this.modifierManager.trigger("onWallBounce");
           }
           break;
 
@@ -488,8 +501,8 @@ export abstract class Pong extends GameBase {
         });
       }
 
-      // Simulate one tick forward.
-      this.simulateTick(gameState);
+      // Simulate one tick forward w/o triggering modifiers
+      this.simulateTick(gameState, false);
     }
     return collisionsData;
   }

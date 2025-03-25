@@ -83,7 +83,7 @@ export const pongConsumer = async (
 
           aiOpponent = new PongAIOpponent(currentGame, {
             playerId: 1,
-            strategyName: "naive",
+            strategyName: "improvedNaive",
           });
 
           // Send confirmation back to client
