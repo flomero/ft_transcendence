@@ -13,8 +13,11 @@ const login: FastifyPluginAsync = async (fastify): Promise<void> => {
       return reply.redirect("/");
     }
     const viewOptions = request.isAjax() ? {} : { layout: "layouts/noauth" };
-
-    return reply.view("views/login", {}, viewOptions);
+    return reply.view(
+      "views/login",
+      { title: "Login | ft_transcendence" },
+      viewOptions,
+    );
   });
 };
 

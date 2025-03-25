@@ -142,6 +142,11 @@ class Router {
         return null;
       }
 
+      const pageTitle = response.headers.get("X-Page-Title");
+      if (pageTitle) {
+        document.title = pageTitle;
+      }
+
       const redirectPath = response.headers.get("X-SPA-Redirect");
       if (redirectPath) {
         console.log("Custom redirect to:", redirectPath);
