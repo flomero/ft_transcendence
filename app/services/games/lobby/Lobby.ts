@@ -184,8 +184,33 @@ class Lobby {
     console.log(this.gameSettings);
   }
 
+  public isUserLastMember(memberId: string): boolean {
+    if (this.lobbyMembers.has(memberId) === false) {
+      throw new Error("Member is not in the lobby");
+    } else if (this.lobbyMembers.size === 1) {
+      return true;
+    }
+    return false;
+  }
+
   public getMemberAsArray(): LobbyMember[] {
     return Array.from(this.lobbyMembers.values());
+  }
+
+  public isMemberOwner(memberId: string): boolean {
+    if (this.lobbyMembers.has(memberId) === false) {
+      throw new Error("Member is not in the lobby");
+    }
+    return this.lobbyOwner === memberId;
+  }
+
+  public disconnectAllMembers(): void {
+    for (const member of this.lobbyMembers.values()) {
+      this.sendMessateToMember(member.id, "Lobby is closed");
+      if (member.socket !== undefined) {
+        member.socket.close();
+      }
+    }
   }
 
   private canMemberBeAddedCheck(memberId: string): void {
