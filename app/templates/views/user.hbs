@@ -11,11 +11,29 @@
       <div class="flex min-w-0 flex-1 flex-col">
         <p id="current-username" class="truncate text-2xl">{{userName}}</p>
         <p class="text-fg-muted truncate text-sm"># {{userId}}</p>
+        <div class="mt-4 space-y-2">
+          {{#if showFriendButton}}
+            {{#unless isBlocked}}
+              {{> components/user/friendbutton userId=userId showText=showText}}
+            {{/unless}}
+            {{> components/user/blockbutton userId=userId showText=showText isBlocked=isBlocked}}
+          {{/if}}
+          {{#if requestSent}}
+            {{> components/user/friendsent}}
+          {{/if}}
+          {{#if showRemoveButton}}
+            {{>  components/user/removefriendbutton userId=userId showText=showText}}
+          {{/if}}
+          {{#if showRequestButtons}}
+            {{> components/user/requestButtons userId=userId showText=showText}}
+          {{/if}}
+        </div>
       </div>
     </div>
-
   </div>
 </div>
 
 <script type="module" src="/public/js/profile.js">
+</script>
+<script type="module" src="/public/js/friends.js">
 </script>
