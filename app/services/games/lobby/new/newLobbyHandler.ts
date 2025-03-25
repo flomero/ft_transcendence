@@ -18,9 +18,7 @@ async function newLobbyHandler(
       throw new Error("User is already in a lobby");
     validateGameModifierCheck(body);
     const lobby = new Lobby(body, request.userId);
-
     setLobby(lobby, body.lobbyMode);
-    lobby.printGameSettings();
     reply.send({ lobbyId: lobby.getLobbyId });
   } catch (error) {
     if (error instanceof Error) reply.code(400).send({ error: error.message });

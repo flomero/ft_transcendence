@@ -1,7 +1,5 @@
 import { FastifyRequest } from "fastify";
 import { WebSocket } from "ws";
-import { PublicLobbies } from "../new/newLobbyHandler";
-import { PrivateLobbies } from "../new/newLobbyHandler";
 import { validConnectionCheck } from "../lobbyVaidation/validConnectionCheck";
 import { getActiveLobby } from "./getActiveLobby";
 import closePossibleLobbySocketConnection from "../leave/closePossibleLobbySocketConnection";
@@ -25,14 +23,8 @@ const lobbyWebsocketHandler = async (
     if (error instanceof Error)
       connection.send(JSON.stringify({ error: error.message }));
     connection.close();
-    printLobbys();
     return;
   }
 };
-
-function printLobbys() {
-  console.log("PublicLobbies:", PublicLobbies);
-  console.log("PrivateLobbies:", PrivateLobbies);
-}
 
 export default lobbyWebsocketHandler;
