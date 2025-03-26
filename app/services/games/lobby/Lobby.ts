@@ -89,6 +89,7 @@ class Lobby {
     if (newState === "started") {
       this.gameSettings.playerCount = this.lobbyMembers.size;
     }
+    this.sendMessateToMember(ownerId, JSON.stringify(this.gameSettings));
     this.stateLobby = newState;
   }
 
@@ -113,6 +114,12 @@ class Lobby {
     return true;
   }
 
+  public sendMessateToAllMembers(message: string): void {
+    this.lobbyMembers.forEach((member) => {
+      member.socket?.send(message);
+    });
+  }
+
   public setMemberReadyState(memberId: string, isReady: boolean): void {
     if (this.lobbyMembers.has(memberId) === false) {
       throw new Error("Member is not in the lobby");
@@ -121,7 +128,9 @@ class Lobby {
     }
     this.lobbyMembers.get(memberId)!.isReady = isReady;
     if (this.allMembersReady()) {
-      this.sendMessateToMember(this.lobbyOwner, "Lobby is ready to start");
+      this.sendMessateToAllMembers(
+        JSON.stringify({ type: "allReady", data: "" }),
+      );
     }
   }
 
