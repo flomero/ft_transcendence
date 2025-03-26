@@ -20,12 +20,7 @@ export class Naive implements IPongPaddlePositionSampler {
 
     const collisionData: ExtendedCollisionData[] = ai
       .getGame()
-      .findNextCollisions(
-        gameState,
-        3 * serverTickrateS,
-        2 * ai.getId(),
-        "wall",
-      );
+      .findNextCollisions(gameState, serverTickrateS, 2 * ai.getId(), "wall");
 
     if (collisionData.length === 0)
       return [

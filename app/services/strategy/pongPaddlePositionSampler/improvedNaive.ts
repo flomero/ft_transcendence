@@ -29,12 +29,7 @@ export class ImprovedNaive implements IPongPaddlePositionSampler {
     // Look ahead for collisions with the wall up to 3 seconds.
     const collisionData: ExtendedCollisionData[] = ai
       .getGame()
-      .findNextCollisions(
-        gameState,
-        3 * serverTickrateS,
-        2 * ai.getId(),
-        "wall",
-      );
+      .findNextCollisions(gameState, serverTickrateS, 2 * ai.getId(), "wall");
 
     // If no collisions found, return idle sample.
     if (collisionData.length === 0) {
@@ -94,26 +89,43 @@ export class ImprovedNaive implements IPongPaddlePositionSampler {
       });
     });
 
-    // Optionally add an idle sample before the first collision if there is a gap.
-    const currentTime = Date.now();
-    const idleThresholdMs = 200;
-    if (
-      desiredPositions.length > 0 &&
-      desiredPositions[0].timestamp - currentTime > idleThresholdMs
-    ) {
-      desiredPositions.unshift({
-        displacement: 0,
-        timestamp: currentTime + idleThresholdMs,
-      });
+    // ADD TO REGISTRY
+    const idleFactor = 85 / 100.0;
+
+    if (paddle.displacement !== 0) {
+      // Compute time required to move back to the idle position
+      let timeNeeded = Math.abs(paddle.displacement) / paddle.speed;
+
+      // Compute how much time from idle to first collision
+      let travelTime = Math.round(
+        Math.abs(desiredPositions[0].displacement) / paddle.speed + 0.5,
+      );
+
+      // Compute the total travel time, to idle, from idle to collision.
+      let totalTravelTime = timeNeeded + travelTime;
+
+      // Go idle if there's enough time
+      if (totalTravelTime < idleFactor * collisionData[0].tick) {
+        desiredPositions.unshift({
+          displacement: 0,
+          timestamp: Date.now() + (timeNeeded * 1000.0) / serverTickrateS,
+        });
+      }
     }
-    // Also add an idle sample after the last collision if there's a long gap.
-    const lastSample = desiredPositions[desiredPositions.length - 1];
-    if (lastSample.timestamp - currentTime > 1000) {
-      desiredPositions.push({
-        displacement: 0,
-        timestamp: lastSample.timestamp + 300, // small delay before returning to center
-      });
-    }
+
+    const lastCollisionId = collisionData.length - 1;
+    // Compute time needed from last collision to idle
+    let timeNeeded = Math.round(
+      Math.abs(desiredPositions[lastCollisionId].displacement) / paddle.speed +
+        0.5,
+    );
+
+    desiredPositions.push({
+      displacement: 0,
+      timestamp:
+        desiredPositions[lastCollisionId].timestamp +
+        (timeNeeded * 1000.0) / serverTickrateS,
+    });
 
     return desiredPositions;
   }
