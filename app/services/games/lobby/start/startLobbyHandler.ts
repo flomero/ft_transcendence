@@ -1,11 +1,11 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { validConnectionCheck } from "../lobbyVaidation/validConnectionCheck";
 import setLobbyStateToStart from "./setLobbyStateToStart";
-import areAllMembersReady from "../lobbyVaidation/areAllMembersReady";
 import gameManagerCreate from "./gameManagerCreate";
 import GameManager from "../../gameHandler/GameManager";
 import addGameToDatabase from "./addGameToDatabase";
 import { getLobby } from "../lobbyWebsocket/getLobby";
+import { canLobbyBeStartedCheck } from "./canLobbyBeStartedCheck";
 
 export const GameManagers = new Map<string, GameManager>();
 
@@ -19,7 +19,7 @@ async function startLobbyHandler(
 
   try {
     validConnectionCheck(userId, lobbyId);
-    areAllMembersReady(lobbyId);
+    canLobbyBeStartedCheck(lobbyId);
     setLobbyStateToStart(lobbyId, userId);
     const newGameManager = gameManagerCreate(lobbyId);
     GameManagers.set(newGameManager.getId, newGameManager);
@@ -28,7 +28,7 @@ async function startLobbyHandler(
       request.server.sqlite,
       lobby.getGameSettings,
     );
-    reply.code(200).send({ message: "Lobby started: " + newGameManager.getId });
+    reply.code(200).send({ gameId: newGameManager.getId }); // game created connect to game websocket
   } catch (error) {
     if (error instanceof Error)
       reply.code(400).send({ message: error.message });
