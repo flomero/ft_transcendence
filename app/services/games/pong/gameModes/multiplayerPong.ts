@@ -39,9 +39,9 @@ export class MultiplayerPong extends Pong {
         registry.customizableSettings.ballSpeedWidthPercentS,
       ballRadius:
         customConfig.ballRadius || registry.customizableSettings.ballRadius,
-      ballResetSamplerStrategyName:
-        customConfig.ballResetSamplerStrategyName ||
-        registry.customizableSettings.ballResetSamplerStrategyName,
+      ballResetSampler:
+        customConfig.ballResetSampler ||
+        registry.customizableSettings.ballResetSampler,
       paddleCoveragePercent:
         customConfig.paddleCoveragePercent ||
         registry.customizableSettings.paddleCoveragePercent,
@@ -70,7 +70,7 @@ export class MultiplayerPong extends Pong {
     console.dir(this.settings, { depth: null });
 
     this.ballResetSampler = new StrategyManager(
-      this.settings.ballResetSamplerStrategyName,
+      this.settings.ballResetSampler,
       "pongBallResetSampler",
       "sampleDirection",
     );

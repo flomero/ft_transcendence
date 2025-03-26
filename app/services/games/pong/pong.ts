@@ -74,6 +74,13 @@ export abstract class Pong extends GameBase {
       playerCount: gameData.playerCount,
     };
 
+    // Simulate random scores
+    // this.gameState.scores = this.gameState.scores.map(
+    //   (_, id) => (id === 2 ? this.gameState.playerCount : 1),
+    //   // (_, id) => Math.round(Math.pow(3, id)),
+    //   // this.gameState.rng.randomInt(0, 2 * this.gameState.playerCount),
+    // );
+
     // Initialize UserInputManager
     this.inputManager = new UserInputManager();
   }

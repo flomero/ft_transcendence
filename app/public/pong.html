@@ -35,13 +35,13 @@
       let ratio = 0.0;
       let playerCount = 2;
 
-      const gameModeName = "classicPong";
+      const gameModeName = "multiplayerPong";
 
       if (gameModeName === "multiplayerPong") {
         canvas.width = 800;
         canvas.height = 800;
         ratio = canvas.width / 100.0;
-        playerCount = 5;
+        playerCount = 7;
       } else if (gameModeName === "classicPong") {
         canvas.width = 800;
         canvas.height = 400;
@@ -61,9 +61,18 @@
             options: {
               gameName: "pong",
               gameModeName: gameModeName,
-              gameModeConfig: {},
+              gameModeConfig: {
+                powerUpRadius: 0.13,
+                powerUpCapacities: {
+                  speedBoost: 100000,
+                },
+              },
               modifierNames: {
-                powerUpSpawner: {},
+                powerUpSpawner: {
+                  meanDelay: 0.005,
+                  delaySpan: 0.0001,
+                  positionSamplerStrategyName: "flowerGaussianCA",
+                },
               },
               powerUpNames: {
                 speedBoost: {},

@@ -37,6 +37,28 @@ export class RNG {
     return this.random() < posBias ? 1 : -1;
   }
 
+  randomWeighted(weights: number[]): number {
+    if (weights.length === 0) return 0;
+
+    const totalWeight = weights.reduce((prev, curr) => prev + curr);
+    if (totalWeight === 0) return this.randomInt(0, weights.length - 1);
+    const unitPdf = weights.map((weight) => weight / totalWeight);
+
+    let cumul = 0;
+    const cdf = [];
+    for (const density of unitPdf) {
+      cumul += density;
+      cdf.push(cumul);
+    }
+
+    const rnd = this.random();
+    for (const cumulDensity of cdf)
+      if (rnd < cumulDensity) return cdf.indexOf(cumulDensity);
+
+    // fallback -> any element
+    return this.randomInt(0, weights.length - 1);
+  }
+
   // Getters & setters
   setSeed(seed: number) {
     this.seed = seed;
