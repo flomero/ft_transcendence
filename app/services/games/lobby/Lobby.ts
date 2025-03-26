@@ -28,12 +28,6 @@ class Lobby {
     this.printLobbyMembers();
   }
 
-  private getMemberLimits(): { min: number; max: number } {
-    if (MinAndMaxPlayers[this.gameSettings.gameModeName] !== undefined)
-      return MinAndMaxPlayers[this.gameSettings.gameModeName];
-    throw new Error("Game mode not found: " + this.gameSettings.gameModeName);
-  }
-
   public addMember(memberId: string): void {
     this.canMemberBeAddedCheck(memberId);
 
@@ -44,14 +38,6 @@ class Lobby {
     };
 
     this.lobbyMembers.set(memberId, newMember);
-  }
-
-  public get getLobbyId(): string {
-    return this.lobbyId;
-  }
-
-  public get getGameSettings(): GameSettings {
-    return this.gameSettings;
   }
 
   public isUserInLobby(memberId: string): boolean {
@@ -106,10 +92,6 @@ class Lobby {
     this.stateLobby = newState;
   }
 
-  public get lobbyState(): "open" | "started" {
-    return this.stateLobby;
-  }
-
   public changeLockState(memberId: string, state: boolean): void {
     if (this.lobbyOwner !== memberId) {
       throw new Error("Only the owner can lock the lobby");
@@ -133,15 +115,6 @@ class Lobby {
     return true;
   }
 
-  public getMemberState(
-    memberId: string,
-  ): "notInLobby" | "inLobby" | "inMatch" {
-    if (this.lobbyMembers.has(memberId) === false) {
-      throw new Error("Member is not in the lobby");
-    }
-    return this.lobbyMembers.get(memberId)!.userState;
-  }
-
   public setMemberReadyState(memberId: string, isReady: boolean): void {
     if (this.lobbyMembers.has(memberId) === false) {
       throw new Error("Member is not in the lobby");
@@ -154,8 +127,69 @@ class Lobby {
     }
   }
 
+  public isMemberOwner(memberId: string): boolean {
+    if (this.lobbyMembers.has(memberId) === false) {
+      throw new Error("Member is not in the lobby");
+    }
+    return this.lobbyOwner === memberId;
+  }
+
+  public disconnectAllMembers(): void {
+    for (const member of this.lobbyMembers.values()) {
+      this.sendMessateToMember(member.id, "Lobby is closed");
+      if (member.socket !== undefined) {
+        member.socket.close();
+      }
+    }
+  }
+
+  public isUserLastMember(memberId: string): boolean {
+    if (this.lobbyMembers.has(memberId) === false) {
+      throw new Error("Member is not in the lobby");
+    } else if (this.lobbyMembers.size === 1) {
+      return true;
+    }
+    return false;
+  }
+
+  public getMemberState(
+    memberId: string,
+  ): "notInLobby" | "inLobby" | "inMatch" {
+    if (this.lobbyMembers.has(memberId) === false) {
+      throw new Error("Member is not in the lobby");
+    }
+    return this.lobbyMembers.get(memberId)!.userState;
+  }
+
+  public get lobbyState(): "open" | "started" {
+    return this.stateLobby;
+  }
+
+  public get getLobbyId(): string {
+    return this.lobbyId;
+  }
+
+  public get getGameSettings(): GameSettings {
+    return this.gameSettings;
+  }
+
   public get isLobbyLocked(): boolean {
     return this.locketLobby;
+  }
+
+  public getMemberAsArray(): LobbyMember[] {
+    return Array.from(this.lobbyMembers.values());
+  }
+
+  public printGameSettings(): void {
+    console.log("GameSettings: ");
+    console.log(this.gameSettings);
+  }
+
+  private getMemberLimits(): { min: number; max: number } {
+    if (MinAndMaxPlayers[this.gameSettings.gameModeName] !== undefined)
+      return MinAndMaxPlayers[this.gameSettings.gameModeName];
+    throw new Error("Game mode not found: " + this.gameSettings.gameModeName);
   }
 
   private isMemberConnectedToSocket(memberId: string): boolean {
@@ -177,40 +211,6 @@ class Lobby {
     this.lobbyMembers.forEach((member) => {
       console.log(member.id);
     });
-  }
-
-  public printGameSettings(): void {
-    console.log("GameSettings: ");
-    console.log(this.gameSettings);
-  }
-
-  public isUserLastMember(memberId: string): boolean {
-    if (this.lobbyMembers.has(memberId) === false) {
-      throw new Error("Member is not in the lobby");
-    } else if (this.lobbyMembers.size === 1) {
-      return true;
-    }
-    return false;
-  }
-
-  public getMemberAsArray(): LobbyMember[] {
-    return Array.from(this.lobbyMembers.values());
-  }
-
-  public isMemberOwner(memberId: string): boolean {
-    if (this.lobbyMembers.has(memberId) === false) {
-      throw new Error("Member is not in the lobby");
-    }
-    return this.lobbyOwner === memberId;
-  }
-
-  public disconnectAllMembers(): void {
-    for (const member of this.lobbyMembers.values()) {
-      this.sendMessateToMember(member.id, "Lobby is closed");
-      if (member.socket !== undefined) {
-        member.socket.close();
-      }
-    }
   }
 
   private canMemberBeAddedCheck(memberId: string): void {
