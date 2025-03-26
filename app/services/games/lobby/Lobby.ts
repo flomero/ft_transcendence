@@ -100,9 +100,7 @@ class Lobby {
   }
 
   public reachedMinPlayers(): boolean {
-    if (this.lobbyMembers.size >= this.memberLimits.min) {
-      return true;
-    }
+    if (this.lobbyMembers.size >= this.memberLimits.min === true) return true;
     return false;
   }
 
@@ -159,6 +157,15 @@ class Lobby {
       throw new Error("Member is not in the lobby");
     }
     return this.lobbyMembers.get(memberId)!.userState;
+  }
+
+  public allMembersConnectedToSocket(): boolean {
+    for (const member of this.lobbyMembers.values()) {
+      if (member.socket === undefined) {
+        return false;
+      }
+    }
+    return true;
   }
 
   public get lobbyState(): "open" | "started" {
