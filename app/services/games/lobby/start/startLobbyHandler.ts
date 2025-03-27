@@ -20,7 +20,7 @@ async function startLobbyHandler(
   try {
     validConnectionCheck(userId, lobbyId);
     canLobbyBeStartedCheck(lobbyId);
-    setLobbyStateToStart(lobbyId, userId);
+    setLobbyStateToStart(userId, lobbyId);
     const newGameManager = gameManagerCreate(lobbyId);
     lobby.sendMessateToAllMembers("hallo");
     GameManagers.set(newGameManager.getId, newGameManager);
