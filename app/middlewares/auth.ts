@@ -1,6 +1,8 @@
 import fp from "fastify-plugin";
 import { decodeJWT, verifyJWT } from "../services/auth/jwt";
 import { refreshJWT } from "../services/auth/google-oauth";
+import { insertUserIfNotExists, userExists } from "../services/database/user";
+import { saveImage } from "../services/database/image/image";
 
 declare module "fastify" {
   interface FastifyRequest {
@@ -16,6 +18,21 @@ export default fp(async (fastify) => {
   fastify.decorateRequest("isAuthenticated", false);
 
   fastify.addHook("onRequest", async (req, reply) => {
+    if (fastify.config.DEV_MODE) {
+      if (req.cookies.name != null) {
+        if (!(await userExists(fastify, req.cookies.name))) {
+          await insertUserIfNotExists(fastify, {
+            id: req.cookies.name,
+            username: req.cookies.name,
+            image_id: await saveImage(fastify, ""),
+          });
+        }
+        req.userId = req.cookies.name;
+        req.userName = req.cookies.name;
+        req.isAuthenticated = true;
+      }
+    }
+
     const token = req.cookies.token;
     if (!token) {
       return;
