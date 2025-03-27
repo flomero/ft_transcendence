@@ -38,6 +38,9 @@ class Lobby {
     };
 
     this.lobbyMembers.set(memberId, newMember);
+    this.sendMessateToAllMembers(
+      JSON.stringify({ type: "memberJoined", data: memberId }),
+    );
   }
 
   public isUserInLobby(memberId: string): boolean {
@@ -49,6 +52,9 @@ class Lobby {
       throw new Error("[removeMember] Member is not in the lobby");
     }
     this.lobbyMembers.delete(memberId);
+    this.sendMessateToAllMembers(
+      JSON.stringify({ type: "memberLeft", data: memberId }),
+    );
   }
 
   public memberStatus(memberId: string): "notInLobby" | "inLobby" | "inMatch" {
@@ -89,7 +95,6 @@ class Lobby {
     if (newState === "started") {
       this.gameSettings.playerCount = this.lobbyMembers.size;
     }
-    this.sendMessateToMember(ownerId, JSON.stringify(this.gameSettings));
     this.stateLobby = newState;
   }
 
@@ -127,8 +132,12 @@ class Lobby {
       throw new Error("Member is not connected to the socket");
     }
     this.lobbyMembers.get(memberId)!.isReady = isReady;
+    this.sendMessateToAllMembers(
+      JSON.stringify({ type: "memberReady", data: { memberId } }),
+    );
     if (this.allMembersReady()) {
-      this.sendMessateToAllMembers(
+      this.sendMessateToMember(
+        this.lobbyOwner,
         JSON.stringify({ type: "allReady", data: "" }),
       );
     }
