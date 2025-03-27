@@ -21,7 +21,8 @@ export async function getMessages(
   fastify: FastifyInstance,
   roomId: number,
 ): Promise<any[]> {
-  const sql = "SELECT * FROM messages WHERE room_id = ?";
+  const sql =
+    "SELECT * FROM messages LEFT JOIN blocked_users ON messages.sender_id = blocked_users.blockedUserId WHERE room_id = ? AND blocked_users.blockedUserId != NULL";
   return await fastify.sqlite.all(sql, [roomId]);
 }
 
