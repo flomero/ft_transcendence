@@ -22,7 +22,6 @@ async function startLobbyHandler(
     canLobbyBeStartedCheck(lobbyId);
     setLobbyStateToStart(userId, lobbyId);
     const newGameManager = gameManagerCreate(lobbyId);
-    lobby.sendMessateToAllMembers("hallo");
     GameManagers.set(newGameManager.getId, newGameManager);
     addGameToDatabase(
       newGameManager,
