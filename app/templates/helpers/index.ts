@@ -48,5 +48,6 @@ export function registerHelpers(handlebars: typeof Handlebars) {
 
   handlebars.registerHelper("isEven", (value) => value % 2 === 0);
 
+  handlebars.registerHelper("not", (value) => !value);
   // Add other helpers here as needed
 }

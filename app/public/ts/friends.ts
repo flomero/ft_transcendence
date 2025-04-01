@@ -94,12 +94,31 @@ class FriendsManager {
     this.removeFriend(userID);
     window.router.refresh(); // TODO: maybe solve this more efficient
   }
+
   blockUser(userID: string) {
-    console.log("Blocking user:", userID);
+    fetch(`/friend/block/${userID}`, {
+      method: "POST",
+    });
+  }
+
+  blockUserWithAnimation(event: Event) {
+    const element = event.target as HTMLElement;
+    const userID = element.getAttribute("data-id");
+
+    if (!userID) {
+      console.error("No user ID found on element");
+      return;
+    }
+    this.blockUser(userID);
+    // TODO: maybe add animation
+    window.router.refresh();
   }
 
   unblockUser(userID: string) {
-    console.log("Unblocking user:", userID);
+    fetch(`/friend/unblock/${userID}`, {
+      method: "POST",
+    });
+    window.router.refresh();
   }
 
   searchFriends(event: Event) {
