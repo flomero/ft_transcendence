@@ -419,10 +419,38 @@ export abstract class Pong extends GameBase {
 
         case "paddle":
           PhysicsEngine.resolveCollision(ball, collision);
+
           const playerId = collision.objectId;
           if (gameState.lastHit !== playerId)
             console.log(`Last hit: ${playerId}`);
           gameState.lastHit = playerId;
+
+          const paddle = this.gameState.paddles[playerId];
+
+          // Compute the dot product between the ball's direction and the paddle's movement direction.
+          // A high |dot| means the ball is moving almost aligned with the paddle's direction.
+          const dot = ball.dx * paddle.dx + ball.dy * paddle.dy;
+
+          // Multiply by |dot| so that the influence is higher when the ball is aligned with the paddle's direction.
+          const angularInfluence =
+            (dot *
+              this.getSettings().paddleVelocityAngularTransmissionPercent) /
+            100.0;
+
+          // Adjust the ball's velocity using the paddle's velocity.
+          ball.dx += angularInfluence * paddle.dx;
+          ball.dy += angularInfluence * paddle.dy;
+
+          const speedInfluence =
+            (dot * this.getSettings().paddleVelocitySpeedTransmissionPercent) /
+            100.0;
+          ball.speed += speedInfluence * paddle.velocity;
+
+          // Normalize the ball's direction vector to avoid unintended scaling.
+          const norm = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+          ball.dx /= norm;
+          ball.dy /= norm;
+
           this.modifierManager.trigger("onPaddleBounce", {
             playerId: collision.objectId,
           });

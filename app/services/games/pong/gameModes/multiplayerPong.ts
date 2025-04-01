@@ -48,6 +48,12 @@ export class MultiplayerPong extends Pong {
       paddleSpeedWidthPercentS:
         customConfig.paddleSpeedWidthPercentS ||
         registry.customizableSettings.paddleSpeedWidthPercentS,
+      paddleVelocityAngularTransmissionPercent:
+        customConfig.paddleVelocityAngularTransmissionPercent ||
+        registry.customizableSettings.paddleVelocityAngularTransmissionPercent,
+      paddleVelocitySpeedTransmissionPercent:
+        customConfig.paddleVelocitySpeedTransmissionPercent ||
+        registry.customizableSettings.paddleVelocitySpeedTransmissionPercent,
       powerUpRadius:
         customConfig.powerUpRadius ||
         registry.customizableSettings.powerUpRadius,

@@ -48,6 +48,12 @@ export class ClassicPong extends Pong {
       paddleSpeedWidthPercentS:
         customConfig.paddleSpeedWidthPercentS ||
         registry.customizableSettings.paddleSpeedWidthPercentS,
+      paddleVelocityAngularTransmissionPercent:
+        customConfig.paddleVelocityAngularTransmissionPercent ||
+        registry.customizableSettings.paddleVelocityAngularTransmissionPercent,
+      paddleVelocitySpeedTransmissionPercent:
+        customConfig.paddleVelocitySpeedTransmissionPercent ||
+        registry.customizableSettings.paddleVelocitySpeedTransmissionPercent,
       powerUpRadius:
         customConfig.powerUpRadius ||
         registry.customizableSettings.powerUpRadius,
@@ -292,8 +298,7 @@ export class ClassicPong extends Pong {
   }
 
   isOutOfBounds(ball: Ball): boolean {
-    const tolerance: number =
-      this.settings.wallsHeight + this.settings.paddleOffset;
+    const tolerance: number = -this.settings.wallsHeight / 3.0;
 
     return (
       ball.x <= -tolerance ||

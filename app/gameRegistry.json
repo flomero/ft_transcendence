@@ -15,11 +15,13 @@
         },
 
         "customizableSettings": {
-          "ballSpeedWidthPercentS": 85,
+          "ballSpeedWidthPercentS": 65,
           "ballRadius": 0.95,
           "ballResetSampler": "biasedQuadrantGaussianRA",
           "paddleCoveragePercent": 25,
           "paddleSpeedWidthPercentS": 150,
+          "paddleVelocityAngularTransmissionPercent": 18,
+          "paddleVelocitySpeedTransmissionPercent": 8,
           "powerUpRadius": 20,
           "powerUpCapacities": {
             "speedBoost": 1,
@@ -40,7 +42,7 @@
         },
 
         "customizableSettings": {
-          "ballSpeedWidthPercentS": 80,
+          "ballSpeedWidthPercentS": 60,
           "ballRadius": 0.85,
           "ballResetSampler": "biasedGaussianCA",
           "paddleCoveragePercent": 20,

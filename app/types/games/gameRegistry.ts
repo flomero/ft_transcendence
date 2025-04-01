@@ -35,6 +35,8 @@ export interface CustomizableSettings {
   // Paddle Settings
   paddleCoveragePercent: number;
   paddleSpeedWidthPercentS: number;
+  paddleVelocityAngularTransmissionPercent: number;
+  paddleVelocitySpeedTransmissionPercent: number;
 
   // PowerUp Settings
   powerUpRadius: number;
