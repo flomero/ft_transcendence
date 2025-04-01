@@ -19,6 +19,7 @@ class MatchMatkingManager {
     if (member === undefined) {
       throw new Error(`Member with id ${memberId} not found`);
     }
+    member.socket?.close();
     member.socket = undefined;
   }
 
@@ -58,6 +59,13 @@ class MatchMatkingManager {
     const members = Array.from(this.members.values()).slice(-2);
     this.members.delete(members[0].memberId);
     this.members.delete(members[1].memberId);
+  }
+
+  public removeMember(memberId: string) {
+    if (this.members.has(memberId) === false) {
+      throw new Error(`Member with id ${memberId} not found`);
+    }
+    this.members.delete(memberId);
   }
 
   public get memberSize(): number {
