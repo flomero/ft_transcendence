@@ -1,5 +1,5 @@
 import { FastifyPluginAsync } from "fastify";
-import lobbyWebsocketHandler from "../../../services/games/lobby/lobbyWebsocket/lobbyWebsocketHandler";
+import matchMakingSocketHandler from "../../../services/games/matchMaking/matchMakingSocketHandler";
 
 const matchMakingSocket: FastifyPluginAsync = async (
   fastify,
@@ -10,7 +10,7 @@ const matchMakingSocket: FastifyPluginAsync = async (
     {
       websocket: true,
     },
-    lobbyWebsocketHandler,
+    matchMakingSocketHandler,
   );
 };
 
