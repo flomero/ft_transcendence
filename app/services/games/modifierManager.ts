@@ -171,7 +171,9 @@ export class ModifierManager {
     // Loop over the CDF and return the first power-up whose cumulative value exceeds rnd
     for (let i = 0; i < this.cumulativeDensityFunction.length; i++)
       if (rnd < this.cumulativeDensityFunction[i])
-        return this.availablePowerUps[i];
+        return this.availablePowerUps.filter(
+          (name) => !this.unavailablePowerUps.includes(name),
+        )[i];
 
     return null;
   }
