@@ -4,6 +4,7 @@ import {
   RoundResult,
 } from "../../../types/strategy/ITournamentBracketGenerator";
 import { RNG } from "../../games/rng";
+import { type TournamentResult } from "../../tournament/tournament";
 
 export class RoundRobin implements ITournamentBracketGenerator {
   name = "roundRobin";
@@ -270,22 +271,16 @@ export class RoundRobin implements ITournamentBracketGenerator {
     return results;
   }
 
-  protected initialRound(): RoundMatches {
-    const playerCount: number = this.tournamentData.playerCount;
-    const matches: RoundMatches = Array.from({ length: playerCount }, () => []);
+  /**
+   * Generate for each player all their matches results
+   */
+  finalResults(): TournamentResult {
+    const map = new Map<string, Array<[string, number]>>();
 
-    (this.tournamentData.players as string[]).forEach((playerId, index) => {
-      // If there's 4 players / match, then player 7 goes to 7/4 ~ 1 -> game 1.
-      const matchId = Math.floor(
-        index / this.tournamentData.gameData.playerCount,
-      );
-
-      matches[matchId].push(playerId);
-    });
-
-    // Only keep match with enough players: 7 players match of 2 -> match[3].length = 1 !== 2.
-    return matches.filter(
-      (match) => match.length === this.tournamentData.gameData.playerCount,
+    (this.tournamentData.players as string[]).forEach((playerId) =>
+      map.set(playerId, this.getPlayerResults(playerId)),
     );
+
+    return map;
   }
 }

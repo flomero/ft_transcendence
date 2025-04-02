@@ -30,11 +30,6 @@ export class StrategyManager<T, K extends keyof T> {
     this.strategyTypeName = strategyTypeName;
     this.defaultMethod = defaultMethod;
 
-    console.log("StrategyManager received:");
-    console.dir(initialStrategyName, { depth: null });
-    console.dir(strategyTypeName, { depth: null });
-    console.dir(defaultMethod, { depth: null });
-
     console.log("\nRegistry");
     console.dir(STRATEGY_REGISTRY, { depth: null });
 
@@ -108,6 +103,27 @@ export class StrategyManager<T, K extends keyof T> {
     if (typeof method !== "function") {
       throw new Error(
         `The default method ${String(this.defaultMethod)} is not a function`,
+      );
+    }
+    return method.apply(this.loadedStrategies[this.currentStrategy], args);
+  }
+
+  /**
+   * Executes a specified method on the current strategy.
+   *
+   * @template M - The key of T that represents the method to be executed.
+   * @param methodName - The name of the method to execute.
+   * @param args - Arguments required by the specified method.
+   * @returns The result of calling the specified method.
+   */
+  public execute<M extends keyof T>(
+    methodName: M,
+    ...args: T[M] extends (...args: infer A) => any ? A : never
+  ): T[M] extends (...args: any[]) => infer R ? R : never {
+    const method = this.loadedStrategies[this.currentStrategy][methodName];
+    if (typeof method !== "function") {
+      throw new Error(
+        `The method ${String(methodName)} is not a function on the current strategy`,
       );
     }
     return method.apply(this.loadedStrategies[this.currentStrategy], args);

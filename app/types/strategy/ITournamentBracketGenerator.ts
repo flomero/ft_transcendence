@@ -1,3 +1,5 @@
+import { TournamentResult } from "../../services/tournament/tournament";
+
 export type PlayerResult = {
   id: string;
   result: number;
@@ -14,4 +16,5 @@ export type RoundMatches = MatchPlayers[];
 // Thus they only need the last round results to keep it up to date
 export interface ITournamentBracketGenerator {
   nextRound(lastRoundResults: RoundResult): RoundMatches;
+  finalResults(): TournamentResult;
 }

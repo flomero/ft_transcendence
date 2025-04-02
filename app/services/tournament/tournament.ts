@@ -16,6 +16,9 @@ export enum TournamentStatus {
   FINISHED,
 }
 
+export type SingleMatchResult = Array<[string, number]>;
+export type TournamentResult = Map<string, SingleMatchResult>;
+
 export class Tournament {
   // All tournament related data given at creation
   protected tournamentData: Record<string, any>;
@@ -119,5 +122,9 @@ export class Tournament {
   // Getters & Setters
   getStatus(): TournamentStatus {
     return this.status;
+  }
+
+  getResults(): TournamentResult {
+    return this.bracketManager.execute("finalResults");
   }
 }
