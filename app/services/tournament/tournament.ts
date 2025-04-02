@@ -16,8 +16,8 @@ export enum TournamentStatus {
   FINISHED,
 }
 
-export type SingleMatchResult = Array<[string, number]>;
-export type TournamentResult = Map<string, SingleMatchResult>;
+export type SingleMatchResult = [string, number];
+export type TournamentResult = Map<string, SingleMatchResult[]>;
 
 export class Tournament {
   // All tournament related data given at creation
@@ -126,5 +126,33 @@ export class Tournament {
 
   getResults(): TournamentResult {
     return this.bracketManager.execute("finalResults");
+  }
+
+  getOverallResults(): Map<string, number> {
+    const finalResults = this.bracketManager.execute("finalResults");
+    const overallResults = new Map<string, number>();
+
+    if (!(finalResults instanceof Map)) {
+      console.error(
+        "Expected finalResults to be a Map, but got:",
+        typeof finalResults,
+      );
+      return overallResults; // Return empty map if finalResults is invalid
+    }
+
+    finalResults.forEach((matches, playerId) => {
+      if (!Array.isArray(matches)) {
+        console.error(`Unexpected data for player ${playerId}:`, matches);
+        return;
+      }
+
+      const overallResult = matches
+        .map((matchResult) => matchResult[1]) // Extract the score
+        .reduce((prev, curr) => prev + curr, 0); // Sum up the values
+
+      overallResults.set(playerId, overallResult);
+    });
+
+    return overallResults;
   }
 }

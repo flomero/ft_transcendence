@@ -45,9 +45,8 @@ export class RoundRobin implements ITournamentBracketGenerator {
   // lastRoundResults: Array<Array<{id: string, result: number}>>:
   //   [match1: [p1: [id, result], p2: [id, result]], ...]
   nextRound(lastRoundResults: RoundResult): RoundMatches {
-    if (this.possibleMatches.length === 0) return [];
-
     if (lastRoundResults.length !== 0) this.saveResult(lastRoundResults);
+    if (this.possibleMatches.length === 0) return [];
 
     const nextRound = this.possibleMatches.pop();
     if (!nextRound) {
