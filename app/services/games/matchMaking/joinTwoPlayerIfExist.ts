@@ -1,5 +1,5 @@
 import { matchMakingManager } from "./join/joinMatchMakingHandler";
-import { createVanillaMatch } from "./createVanillaMatch";
+import { createVanillaMatch } from "./creatVanillaMatch";
 const joinTwoPlayerIfExist = async (): Promise<void> => {
   if (matchMakingManager.memberSize >= 2) {
     const lastMembers = matchMakingManager.getLastTwoMember();

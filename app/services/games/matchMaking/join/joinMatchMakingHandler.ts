@@ -1,7 +1,7 @@
-import MatchMatkingManager from "../MatchMakingManager";
+import MatchMakingManager from "../MatchMakingManager";
 import { FastifyRequest, FastifyReply } from "fastify";
 
-export const matchMakingManager = new MatchMatkingManager();
+export const matchMakingManager = new MatchMakingManager();
 
 const joinMatchMakingHandler = async (
   request: FastifyRequest,

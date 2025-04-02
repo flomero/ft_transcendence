@@ -17,7 +17,9 @@ class MatchMakingManager {
   public removeMemberSocket(memberId: string) {
     const member = this.members.get(memberId);
     if (member === undefined) {
-      throw new Error(`Member with id ${memberId} not found`);
+      throw new Error(
+        `[ removeMemberSocket ] Member with id ${memberId} not found`,
+      );
     }
     member.socket?.close();
     member.socket = undefined;
@@ -29,7 +31,9 @@ class MatchMakingManager {
 
   public getLastTwoMember(): MemberMatchMaking[] {
     if (this.members.size <= 1)
-      throw new Error("Less than two members in the match making");
+      throw new Error(
+        "[ getLastTwoMember ] Less than two members in the match making",
+      );
     const members = Array.from(this.members.values());
     return members.slice(-2);
   }
@@ -37,17 +41,23 @@ class MatchMakingManager {
   public sendMessageToMember(memberId: string, message: string): void {
     const member = this.members.get(memberId);
     if (member === undefined) {
-      throw new Error(`Member with id ${memberId} not found`);
+      throw new Error(
+        `[ sendMessageToMember ] Member with id ${memberId} not found`,
+      );
     }
     if (member.socket === undefined) {
-      throw new Error(`Member with id ${memberId} has no socket`);
+      throw new Error(
+        `[ sendMessageToMember ] Member with id ${memberId} has no socket`,
+      );
     }
     member.socket.send(message);
   }
 
   public closeSocketConnectionOfLastTwoMembers(): void {
     if (this.members.size <= 1)
-      throw new Error("Less than two members in the match making");
+      throw new Error(
+        "[ closeSocketConnectionOfLastTwoMembers ] Less than two members in the match making",
+      );
     const members = Array.from(this.members.values()).slice(-2);
     if (members[0].socket !== undefined) members[0].socket.close();
     if (members[1].socket !== undefined) members[1].socket.close();
@@ -55,7 +65,9 @@ class MatchMakingManager {
 
   public removeLastTwoMembers(): void {
     if (this.members.size <= 1)
-      throw new Error("Less than two members in the match making");
+      throw new Error(
+        "[ removeLastTwoMembers ] Less than two members in the match making",
+      );
     const members = Array.from(this.members.values()).slice(-2);
     this.members.delete(members[0].memberId);
     this.members.delete(members[1].memberId);
@@ -63,7 +75,7 @@ class MatchMakingManager {
 
   public removeMember(memberId: string) {
     if (this.members.has(memberId) === false) {
-      throw new Error(`Member with id ${memberId} not found`);
+      throw new Error(`[ removeMember ] Member with id ${memberId} not found`);
     }
     this.members.delete(memberId);
   }
@@ -75,10 +87,12 @@ class MatchMakingManager {
   public setMemberSocket(memberId: string, socket: WebSocket) {
     const member = this.members.get(memberId);
     if (member === undefined) {
-      throw new Error(`Member with id ${memberId} not found`);
+      throw new Error(
+        `[set member socket] Member with id ${memberId} not found`,
+      );
     }
     member.socket = socket;
   }
 }
 
-export default MatchMatkingManager;
+export default MatchMakingManager;

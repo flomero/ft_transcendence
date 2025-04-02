@@ -22,7 +22,8 @@ const matchMakingSocketHandler = async (
   }
 
   connection.on("close", () => {
-    matchMakingManager.removeMemberSocket(userId);
+    if (matchMakingManager.memberExists(userId) === true)
+      matchMakingManager.removeMemberSocket(userId);
   });
 };
 
