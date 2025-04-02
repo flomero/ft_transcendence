@@ -7,17 +7,17 @@ interface PowerUpCapacities {
 }
 
 interface GameModeConfig {
-  ballSpeedWidthPercentS: number;
-  ballRadius: number;
-  paddleCoveragePercent: number;
-  paddleSpeedWidthPercentS: number;
-  powerUpRadius: number;
-  powerUpCapacities: PowerUpCapacities;
+  ballSpeedWidthPercentS?: number;
+  ballRadius?: number;
+  paddleCoveragePercent?: number;
+  paddleSpeedWidthPercentS?: number;
+  powerUpRadius?: number;
+  powerUpCapacities?: PowerUpCapacities;
 }
 
 interface PowerUpSpawner {
-  meanDelayS: number;
-  delaySpanS: number;
+  meanDelayS?: number;
+  delaySpanS?: number;
 }
 
 interface TimedGame {
@@ -45,8 +45,8 @@ interface SpeedBoost {
   spawnWeight?: number;
   selfActivation?: boolean;
   durationS?: number;
-  totalRampUpStrength: number;
-  rampUpFrequencyS: number;
+  totalRampUpStrength?: number;
+  rampUpFrequencyS?: number;
 }
 
 interface PowerUp {
@@ -56,10 +56,10 @@ interface PowerUp {
 interface GameSettings {
   gameName: "pong";
   gameModeName: GameMode;
-  gameModeConfig: GameModeConfig;
+  playerCount: number;
+  gameModeConfig?: GameModeConfig;
   modifierNames?: ModifierNames;
   powerUpNames?: PowerUp;
-  playerCount: number;
 }
 
 export type { GameSettings };
