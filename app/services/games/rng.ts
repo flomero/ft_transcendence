@@ -33,6 +33,14 @@ export class RNG {
     return Math.floor(this.random() * (max - min + 1)) + min;
   }
 
+  randomArray<T>(array: T[]): T[] {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = this.randomInt(0, i);
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+
   // Getters & setters
   setSeed(seed: number) {
     this.seed = seed;

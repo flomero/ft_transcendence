@@ -52,5 +52,11 @@
       "maxVelocityPercent": 60,
       "lastGoalBiasPercent": 75
     }
+  },
+
+  "tournamentBracketGenerator": {
+    "roundRobin": {
+      "className": "RoundRobin"
+    }
   }
 }

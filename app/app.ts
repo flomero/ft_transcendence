@@ -4,6 +4,7 @@ import type { FastifyPluginAsync, FastifyServerOptions } from "fastify";
 import { loadGameRegistry } from "./services/games/gameRegistryLoader";
 import { loadStrategyRegistry } from "./services/strategy/strategyRegistryLoader";
 import fastifyEnv from "@fastify/env";
+import { Tournament } from "./services/tournament/tournament";
 
 const envSchema = {
   type: "object",
@@ -57,6 +58,17 @@ const app: FastifyPluginAsync<AppOptions> = async (
 
   await loadGameRegistry();
   await loadStrategyRegistry();
+
+  const tournament = new Tournament({
+    bracketType: "roundRobin",
+    playerCount: 7,
+    players: ["0", "1", "2", "3", "4", "5", "6", "7"],
+    gameData: {
+      playerCount: 2,
+    },
+  });
+
+  tournament.startTournament();
 
   // Do not touch the following lines
 
