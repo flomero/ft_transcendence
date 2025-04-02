@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Game</title>
+  </head>
+  <body>
+    <h1>Game</h1>
+    <canvas
+      id="game-canvas"
+      width="800"
+      height="400"
+      style="border: 1px solid black"
+    ></canvas>
+    <p id="game-status">Waiting for game updates...</p>
+
+    <script>
+      const GAME_WS_URL = "ws://localhost:3000/games";
+      const urlParams = new URLSearchParams(window.location.search);
+      const gameId = urlParams.get("gameId");
+
+      const canvas = document.getElementById("game-canvas");
+      const ctx = canvas.getContext("2d");
+
+      const gameSocket = new WebSocket(`${GAME_WS_URL}/${gameId}`);
+
+      gameSocket.onopen = () => {
+        console.log("Connected to game WebSocket");
+        document.getElementById("game-status").innerText = "Game started!";
+      };
+
+      gameSocket.onmessage = (event) => {
+        const message = JSON.parse(event.data);
+        console.log("Game message received:", message);
+
+        if (message.type === "gameState") {
+          updateGameCanvas(message.data);
+        }
+      };
+
+      gameSocket.onclose = () => {
+        console.log("Game WebSocket closed");
+        document.getElementById("game-status").innerText = "Game ended.";
+      };
+
+      gameSocket.onerror = (error) => {
+        console.error("Game WebSocket error:", error);
+      };
+
+      function updateGameCanvas(gameState) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Example: Draw players and ball
+        gameState.players.forEach((player) => {
+          ctx.fillStyle = "blue";
+          ctx.fillRect(player.x, player.y, player.width, player.height);
+        });
+
+        ctx.fillStyle = "red";
+        ctx.beginPath();
+        ctx.arc(
+          gameState.ball.x,
+          gameState.ball.y,
+          gameState.ball.radius,
+          0,
+          Math.PI * 2,
+        );
+        ctx.fill();
+      }
+
+      // Example: Send user input
+      document.addEventListener("keydown", (event) => {
+        const input = { type: "userInput", options: { key: event.key } };
+        gameSocket.send(JSON.stringify(input));
+      });
+    </script>
+  </body>
+</html>
