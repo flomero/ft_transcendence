@@ -86,7 +86,7 @@ class GameManager {
   }
 
   public handleAction(data: GameMessage): void {
-    this.game.handleAction(data);
+    this.game.handleAction(data.options);
   }
 }
 
