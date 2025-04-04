@@ -66,7 +66,7 @@ class GameManager {
     }
 
     this.game.startGame();
-    if (this.game.getStatus() !== GameStatus.RUNNING) {
+    if (this.game.getStatus() === GameStatus.RUNNING) {
       gameLoop(this.id);
     }
   }

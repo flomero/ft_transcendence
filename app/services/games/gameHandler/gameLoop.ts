@@ -13,7 +13,7 @@ const gameLoop = async (gameManagerId: string) => {
   while (game.getStatus() === GameStatus.RUNNING) {
     game.update();
 
-    const gameStateMessage = JSON.stringify(game.getStateSnapshot);
+    const gameStateMessage = JSON.stringify(game.getStateSnapshot());
     gameManager.sendMessageToAll("gameState", gameStateMessage);
 
     await sleep(sleepIntervalMs);
