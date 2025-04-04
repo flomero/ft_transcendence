@@ -56,7 +56,13 @@
 
   "tournamentBracketGenerator": {
     "roundRobin": {
-      "className": "RoundRobin"
+      "className": "RoundRobin",
+      "gamesCount": 5
+    },
+
+    "simpleElimination": {
+      "className": "SimpleElimination",
+      "gamesCount": 3
     }
   }
 }

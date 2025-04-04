@@ -1,14 +1,11 @@
 import { ITournamentBracketGenerator } from "../../types/strategy/ITournamentBracketGenerator";
 import { StrategyManager } from "../strategy/strategyManager";
-import { type GameBase, GameStatus } from "../games/gameBase";
-import {
-  RoundMatches,
-  MatchPlayers,
-  MatchResult,
-  PlayerResult,
-  RoundResult,
-} from "../../types/strategy/ITournamentBracketGenerator";
+import { type GameBase } from "../games/gameBase";
 import { RNG } from "../games/rng";
+import {
+  type Match,
+  type Round,
+} from "../../types/strategy/ITournamentBracketGenerator";
 
 export enum TournamentStatus {
   CREATED,
@@ -16,8 +13,23 @@ export enum TournamentStatus {
   FINISHED,
 }
 
-export type SingleMatchResult = [string, number];
-export type TournamentResult = Map<string, SingleMatchResult[]>;
+export type PlayerResults = {
+  [matchID: string]: {
+    won: boolean;
+    results: number[];
+  };
+};
+
+export type TournamentResults = {
+  [playerID: string]: PlayerResults[];
+};
+
+export type CombinedResults = {
+  [playerID: string]: {
+    totalWins: number;
+    totalScore: number;
+  };
+};
 
 export class Tournament {
   // All tournament related data given at creation
@@ -27,18 +39,21 @@ export class Tournament {
     ITournamentBracketGenerator,
     "nextRound"
   >;
-  // Matches the gameID to the Players userID
-  protected currentRound: Map<string, Array<string>> = new Map<
+
+  // Maps matchID to its game instances
+  protected currentGames: Map<string, GameBase[]> = new Map<
     string,
-    Array<string>
-  >();
-  // Matches the gameID to the Game instance
-  protected currentRoundGames: Map<string, GameBase> = new Map<
-    string,
-    GameBase
+    GameBase[]
   >();
 
+  // The current round being played
+  protected currentRound: Round = {};
+
+  // Track which matches have been completed
+  protected completedMatches: Set<string> = new Set<string>();
+
   protected status: TournamentStatus = TournamentStatus.CREATED;
+  protected tournamentResults: TournamentResults = {};
 
   constructor(tournamentData: Record<string, any>) {
     this.tournamentData = tournamentData;
@@ -52,71 +67,108 @@ export class Tournament {
   }
 
   protected canAdvanceRound(): boolean {
-    return Array.from(this.currentRoundGames.values()).every(
-      (game) => game.getStatus() === GameStatus.FINISHED,
+    // Check if all matches in the current round are completed
+    return Object.keys(this.currentRound).every((matchID) =>
+      this.completedMatches.has(matchID),
     );
   }
 
   startTournament(): void {
     this.status = TournamentStatus.ON_GOING;
 
-    // Start with empty results for the first round
-    let lastRoundResults: any[] = [];
-    let roundMatches = this.bracketManager.executeStrategy(lastRoundResults);
+    // Start tournament with no previous round results
+    let currentRound = this.bracketManager.executeStrategy();
     let roundNumber = 1;
 
     // Continue until there are no more matches to play
-    while (roundMatches.length > 0) {
+    while (Object.keys(currentRound).length > 0) {
+      this.currentRound = currentRound;
+      this.completedMatches.clear();
+
       console.log(`\n ---- ROUND ${roundNumber} ----`);
       console.log(`Round ${roundNumber} matches:`);
 
-      roundMatches.forEach((match) => {
+      Object.entries(currentRound).forEach(([matchID, match]) => {
         console.log(
-          `  |->  ${match.reduce((prev, curr) => prev + " vs " + curr)}`,
+          `  |->  ${matchID}: ${Object.keys(match.results).join(" vs ")} (Best of ${match.gamesCount})`,
         );
       });
 
-      // Simulate results for the current round
-      const roundResults = this.simulateRound(roundMatches);
-      console.log(`Round ${roundNumber} results:`);
-      console.dir(roundResults);
+      // Simulate playing all games in this round
+      this.simulateRound(currentRound);
 
       // Get matches for the next round
-      lastRoundResults = roundResults;
-      roundMatches = this.bracketManager.executeStrategy(lastRoundResults);
+      currentRound = this.bracketManager.executeStrategy(this.currentRound);
       roundNumber++;
     }
 
     console.log("\n ---- TOURNAMENT COMPLETED ----");
     this.status = TournamentStatus.FINISHED;
 
-    // You might want to display final standings or tournament statistics here
-    console.log("All rounds completed. Tournament ended.");
+    this.tournamentResults = this.getResults();
   }
 
   /**
-   * Simulates a round by generating a random result for each player in each match.
-   * Uses the RNG class to generate random scores.
+   * Simulates a round by playing all games in each match.
+   * Handles "best of X" logic for each match.
    *
-   * @param roundMatches The matches for the current round.
-   * @returns The simulated results for the round.
+   * @param round The current round with matches to simulate.
    */
-  simulateRound(roundMatches: RoundMatches): RoundResult {
+  simulateRound(round: Round): void {
+    // For each match in the round
+    Object.entries(round).forEach(([matchID, match]) => {
+      console.log(`\nPlaying match ${matchID} (Best of ${match.gamesCount}):`);
+      this.simulateMatch(matchID, match);
+    });
+  }
+
+  simulateMatch(matchID: string, match: Match): void {
     const rng = new RNG();
-    // For each match, shuffle the players and assign ranking from 1 to k.
-    const roundResults: RoundResult = roundMatches.map(
-      (match: MatchPlayers): MatchResult => {
-        // Create a copy of the match array and shuffle it.
-        const shuffledPlayers = rng.randomArray(match.slice());
-        return shuffledPlayers.map(
-          (playerId: string, index: number): PlayerResult => ({
-            id: playerId,
-            result: index + 1, // Ranking: 1st, 2nd, etc.
-          }),
-        );
-      },
-    );
-    return roundResults;
+
+    // Determine how many games to play (best of X)
+    const maxGames = match.gamesCount;
+    const players = Object.keys(match.results);
+
+    // Keep track of wins per player
+    const winCounts: Map<string, number> = new Map();
+    players.forEach((player) => winCounts.set(player, 0));
+
+    // Play games until a player has enough wins or all games are played
+    for (let gameNum = 1; gameNum <= maxGames; gameNum++) {
+      // Create a copy of the players array and shuffle it for finish order
+      const gameResult = rng.randomArray([...players]);
+
+      // Record the position for each player (1-based index)
+      gameResult.forEach((playerID, index) => {
+        // Add the position (1-based) to the player's results
+        const position = index + 1;
+        match.results[playerID].push(position);
+      });
+
+      // Format for console output
+      const resultString = gameResult.join("|");
+      console.log(`  Game ${gameNum}: ${resultString}`);
+
+      // Update win counts (first player in result is the winner)
+      const winner = gameResult[0];
+      match.winner = winner;
+      const currentWins = winCounts.get(winner) || 0;
+      winCounts.set(winner, currentWins + 1);
+
+      // Check if a player has enough wins to clinch the match
+      const requiredWins = Math.ceil(maxGames / 2); // Majority needed to win
+      if (currentWins + 1 >= requiredWins) {
+        console.log(`  ${winner} wins the match in ${gameNum} games!`);
+        break; // No need to play more games
+      }
+    }
+
+    // Mark this match as completed
+    this.completedMatches.add(matchID);
+  }
+
+  endOfMatchCheck(match: Match) {
+    // TODO: Move Best of X check here
   }
 
   // Getters & Setters
@@ -124,33 +176,35 @@ export class Tournament {
     return this.status;
   }
 
-  getResults(): TournamentResult {
+  getResults(): TournamentResults {
     return this.bracketManager.execute("finalResults");
   }
 
-  getOverallResults(): Map<string, number> {
+  getOverallResults(): CombinedResults {
     const finalResults = this.bracketManager.execute("finalResults");
-    const overallResults = new Map<string, number>();
+    const overallResults: CombinedResults = {};
 
-    if (!(finalResults instanceof Map)) {
-      console.error(
-        "Expected finalResults to be a Map, but got:",
-        typeof finalResults,
+    Object.entries(finalResults).forEach((entry: [string, PlayerResults[]]) => {
+      let totalScore = 0;
+      let totalWins = 0;
+
+      Object.entries(entry[1]).forEach(
+        (matchResultEntry: [string, PlayerResults]) => {
+          Object.values(matchResultEntry[1]).forEach(
+            (playerResult: { won: boolean; results: number[] }) => {
+              totalWins += playerResult.won ? 1 : 0;
+              totalScore += playerResult.results.reduce(
+                (prev, curr) => prev + curr,
+              );
+            },
+          );
+        },
       );
-      return overallResults; // Return empty map if finalResults is invalid
-    }
 
-    finalResults.forEach((matches, playerId) => {
-      if (!Array.isArray(matches)) {
-        console.error(`Unexpected data for player ${playerId}:`, matches);
-        return;
-      }
-
-      const overallResult = matches
-        .map((matchResult) => matchResult[1]) // Extract the score
-        .reduce((prev, curr) => prev + curr, 0); // Sum up the values
-
-      overallResults.set(playerId, overallResult);
+      overallResults[entry[0]] = {
+        totalScore: totalScore,
+        totalWins: totalWins,
+      };
     });
 
     return overallResults;

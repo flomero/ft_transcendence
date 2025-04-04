@@ -1,20 +1,32 @@
 import {
-  ITournamentBracketGenerator,
-  RoundMatches,
-  RoundResult,
-} from "../../../types/strategy/ITournamentBracketGenerator";
+  PlayerResults,
+  type TournamentResults,
+} from "../../tournament/tournament";
 import { RNG } from "../../games/rng";
-import { type TournamentResult } from "../../tournament/tournament";
+import { STRATEGY_REGISTRY } from "../strategyRegistryLoader";
+import {
+  type Match,
+  type MatchResults,
+  type Round,
+  type ITournamentBracketGenerator,
+} from "../../../types/strategy/ITournamentBracketGenerator";
+
+export type Results = {
+  [matchID: string]: Match;
+};
 
 export class RoundRobin implements ITournamentBracketGenerator {
   name = "roundRobin";
 
   protected tournamentData: Record<string, any>;
+  protected gamesCount: number;
 
-  protected possibleMatches: string[][][] = [];
-  // Store results as arrays of player IDs in finishing order
-  protected resultGrid: Array<string> = new Array<string>();
+  protected possibleRounds: Round[] = [];
+  // Store results as a map of matchIDs to game results arrays
   protected rng: RNG = new RNG();
+  protected currentRoundIndex: number = 0;
+
+  protected resultMap: Results = {};
 
   constructor(tournamentData: Record<string, any>) {
     this.tournamentData = tournamentData;
@@ -22,36 +34,59 @@ export class RoundRobin implements ITournamentBracketGenerator {
     console.log(`Tournament data:`);
     console.dir(this.tournamentData);
 
+    this.gamesCount =
+      STRATEGY_REGISTRY.tournamentBracketGenerator[this.name].gamesCount;
+
     // Generate match schedule based on number positions (0, 1, 2, ...)
     const numericMatches = this.generateMatchSchedule(
       this.tournamentData.playerCount,
       this.tournamentData.gameData.playerCount,
     );
 
-    // Transform numeric matches to actual player IDs
-    const playerIdMatches = numericMatches.map((round) =>
-      round.map((match) =>
-        match.map((playerIndex) => this.tournamentData.players[playerIndex]),
-      ),
-    );
+    // Transform numeric schedule to actual player IDs and create proper round structure
+    const playerRounds: Round[] = numericMatches.map((round) => {
+      const roundObj: Round = {};
+
+      round.forEach((matchPlayers) => {
+        // Convert numeric player indices to actual player IDs
+        const players = matchPlayers.map(
+          (playerIndex) => this.tournamentData.players[playerIndex],
+        );
+        const matchID = this.getMatchKey(players);
+
+        const results: MatchResults = {};
+        players.forEach((playerID) => (results[playerID] = []));
+
+        roundObj[matchID] = {
+          gamesCount: this.gamesCount,
+          winner: "",
+          results: results,
+        };
+      });
+
+      return roundObj;
+    });
 
     // Randomize the rounds
-    this.possibleMatches = this.rng.randomArray(playerIdMatches);
+    this.possibleRounds = this.rng.randomArray(playerRounds);
 
-    console.log(`All possible matches:`);
-    console.dir(this.possibleMatches);
+    console.log(`Rounds:`);
+    console.dir(this.possibleRounds, { depth: null });
   }
 
-  // lastRoundResults: Array<Array<{id: string, result: number}>>:
-  //   [match1: [p1: [id, result], p2: [id, result]], ...]
-  nextRound(lastRoundResults: RoundResult): RoundMatches {
-    if (lastRoundResults.length !== 0) this.saveResult(lastRoundResults);
-    if (this.possibleMatches.length === 0) return [];
+  nextRound(lastRoundResults?: Round): Round {
+    if (lastRoundResults && Object.keys(lastRoundResults).length > 0) {
+      this.saveResult(lastRoundResults);
+    }
 
-    const nextRound = this.possibleMatches.pop();
+    if (this.possibleRounds.length === 0) {
+      return {};
+    }
+
+    const nextRound = this.possibleRounds.pop();
     if (!nextRound) {
-      console.error(`no more possibleMatches`);
-      return [];
+      console.error(`no more possibleRounds`);
+      return {};
     }
 
     return nextRound;
@@ -246,40 +281,47 @@ export class RoundRobin implements ITournamentBracketGenerator {
     return result;
   }
 
-  protected saveResult(lastRoundResults: RoundResult) {
-    lastRoundResults.forEach((match) => {
-      // Create a unique key for the match by joining all player IDs with a separator.
-      // The order here reflects the match ranking (first place, second place, etc.).
-      this.resultGrid.push(match.map((pr) => pr.id).join("|"));
-    });
-  }
-
-  protected getPlayerResults(playerId: string): Array<[string, number]> {
-    const results: Array<[string, number]> = [];
-
-    // this.resultGrid is an array of composite strings like "0|2|1|3"
-    this.resultGrid.forEach((compositeResult: string) => {
-      const ranking = compositeResult.split("|"); // e.g., ["0", "2", "1", "3"]
-      const index = ranking.indexOf(playerId);
-      if (index !== -1) {
-        // Ranking is determined by the index (first place is index 0, so add 1)
-        results.push([compositeResult, index + 1]);
-      }
-    });
-
-    return results;
+  protected saveResult(roundResults: Round) {
+    for (const matchID in roundResults) {
+      const match = roundResults[matchID];
+      this.resultMap[matchID] = match;
+    }
   }
 
   /**
-   * Generate for each player all their matches results
+   * Generate the final tournament results for each player
    */
-  finalResults(): TournamentResult {
-    const map = new Map<string, Array<[string, number]>>();
+  finalResults(): TournamentResults {
+    const tournamentResults: TournamentResults = {};
 
-    (this.tournamentData.players as string[]).forEach((playerId) =>
-      map.set(playerId, this.getPlayerResults(playerId)),
-    );
+    (this.tournamentData.players as string[]).forEach((playerID) => {
+      const playerResults: PlayerResults[] = [];
 
-    return map;
+      Object.entries(this.resultMap)
+        .filter((entry: [string, Match]) => this.isInMatch(playerID, entry[0]))
+        .forEach((entry: [string, Match]) => {
+          playerResults.push({
+            [entry[0]]: {
+              results: entry[1].results[playerID],
+              won: entry[1].winner === playerID,
+            },
+          } as PlayerResults);
+        });
+
+      tournamentResults[playerID] = playerResults;
+    });
+
+    return tournamentResults;
+  }
+
+  getMatchKey(players: string[]): string {
+    const sortedPlayers = [...players].sort();
+    const matchID = sortedPlayers.join("|");
+    return matchID;
+  }
+
+  isInMatch(playerID: string, matchID: string): boolean {
+    const players = matchID.split("|");
+    return players.includes(playerID);
   }
 }

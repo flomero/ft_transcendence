@@ -61,8 +61,8 @@ const app: FastifyPluginAsync<AppOptions> = async (
 
   const tournament = new Tournament({
     bracketType: "roundRobin",
-    playerCount: 5,
-    players: ["0", "1", "2", "3", "4"], //, "5", "6", "7", "8", "9"],
+    playerCount: 8,
+    players: ["0", "1", "2", "3", "4", "5", "6", "7"], //, "8", "9", "10", "11", "12", "13", "14", "15"],
     gameData: {
       playerCount: 2,
     },
@@ -71,10 +71,10 @@ const app: FastifyPluginAsync<AppOptions> = async (
   tournament.startTournament();
 
   console.log("Final results:");
-  console.dir(tournament.getResults());
+  console.dir(tournament.getResults(), { depth: null });
 
   console.log("Overall results:");
-  console.dir(tournament.getOverallResults());
+  console.dir(tournament.getOverallResults(), { depth: null });
 
   // Do not touch the following lines
 
