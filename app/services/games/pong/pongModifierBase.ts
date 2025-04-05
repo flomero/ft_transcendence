@@ -1,9 +1,10 @@
 import { ModifierBase } from "../modifierBase";
-import type { GameBase } from "../gameBase";
+import { Pong } from "./pong";
 
 export class PongModifierBase extends ModifierBase {
-  onGoal(game: GameBase, args: { playerId: number }): void {}
-  onPaddleBounce(game: GameBase, args: { playerId: number }): void {}
-  onWallBounce(game: GameBase): void {}
-  onPlayerElimination(game: GameBase, args: { playerId: number }): void {}
+  onGoal(game: Pong, args: { playerId: number }): void {}
+  onPaddleBounce(game: Pong, args: { playerId: number }): void {}
+  onWallBounce(game: Pong): void {}
+  onPlayerElimination(game: Pong, args: { playerId: number }): void {}
+  onBallReset(game: Pong): void {}
 }

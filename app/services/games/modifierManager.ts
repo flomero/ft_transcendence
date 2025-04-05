@@ -149,11 +149,11 @@ export class ModifierManager {
   }
 
   getStateSnapshot(): Record<string, any> {
-    return {
+    const state = {
       spawnedPowerUps: this.spawnedPowerUps,
-      // modifiers: this.modifiers.map(modifier => modifier.getState()),
-      // activePowerUps: this.activePowerUps.map(powerUp => powerUp.getState())
     };
+
+    return state;
   }
 
   loadStateSnapshot(snapshot: Record<string, any>): void {
@@ -171,7 +171,9 @@ export class ModifierManager {
     // Loop over the CDF and return the first power-up whose cumulative value exceeds rnd
     for (let i = 0; i < this.cumulativeDensityFunction.length; i++)
       if (rnd < this.cumulativeDensityFunction[i])
-        return this.availablePowerUps[i];
+        return this.availablePowerUps.filter(
+          (name) => !this.unavailablePowerUps.includes(name),
+        )[i];
 
     return null;
   }

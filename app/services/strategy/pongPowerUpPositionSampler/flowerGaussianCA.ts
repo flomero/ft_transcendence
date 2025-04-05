@@ -1,9 +1,13 @@
+import { IPongPlayerSampler } from "../../../types/strategy/IPongPlayerSampler";
 import { IPongPowerUpPositionSampler } from "../../../types/strategy/IPongPowerUpPositionSampler";
 import { Pong } from "../../games/pong/pong";
+import { StrategyManager } from "../strategyManager";
 import { STRATEGY_REGISTRY } from "../strategyRegistryLoader";
 
 export class FlowerGaussianCA implements IPongPowerUpPositionSampler {
   name = "flowerGaussianCA";
+
+  protected playerSampler: StrategyManager<IPongPlayerSampler, "samplePlayer">;
 
   protected stdAngleDeviation: number = 0;
   protected baseRadiusFactor: number = 0;
@@ -11,6 +15,12 @@ export class FlowerGaussianCA implements IPongPowerUpPositionSampler {
   protected stdDistanceDeviationPercent: number = 0;
 
   constructor() {
+    this.playerSampler = new StrategyManager(
+      STRATEGY_REGISTRY.pongPowerUpPositionSampler[this.name].playerSampler,
+      "pongPlayerSampler",
+      "samplePlayer",
+    );
+
     // Controls general distance (angular) from randomly selected direction
     this.stdAngleDeviation =
       (STRATEGY_REGISTRY.pongPowerUpPositionSampler[this.name]
@@ -33,7 +43,8 @@ export class FlowerGaussianCA implements IPongPowerUpPositionSampler {
   }
 
   samplePosition(game: Pong): { x: number; y: number } {
-    const playerCount = game.getExtraGameData().playerCount;
+    const gameState = game.getState();
+    const playerCount = gameState.playerCount;
     const rng = game.getRNG();
 
     const totalOffset =
@@ -42,8 +53,8 @@ export class FlowerGaussianCA implements IPongPowerUpPositionSampler {
       game.getSettings().powerUpRadius;
 
     // Select a random player
-    const rndDirection = rng.randomInt(0, playerCount - 1);
-    const angleCenter = (rndDirection / playerCount) * 2 * Math.PI;
+    const rndPlayer = this.playerSampler.executeStrategy(game);
+    const angleCenter = gameState.paddles[rndPlayer].alpha;
 
     // Angle follows a Gaussian distribution centered around the selected player
     const angle = rng.randomGaussian(angleCenter, this.stdAngleDeviation);

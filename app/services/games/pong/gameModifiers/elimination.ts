@@ -19,23 +19,19 @@ export class Elimination extends PongModifierBase {
   }
 
   onGoal(game: Pong, args: { playerId: number }): void {
-    if (
-      args.playerId < 0 ||
-      args.playerId >= game.getExtraGameData().playerCount
-    ) {
+    if (args.playerId < 0 || args.playerId >= game.getState().playerCount) {
       console.warn(`${args.playerId} out of bounds`);
       return;
     }
 
-    if (game.getExtraGameData().scores[args.playerId] >= this.threshold) {
-      game.getGameObjects().paddles[args.playerId].isVisible = false;
-      game.getExtraGameData().results[args.playerId] =
-        game.getExtraGameData().playerCount - this.eliminatedCounter++;
+    const gameState = game.getState();
+    if (gameState.scores[args.playerId] >= this.threshold) {
+      gameState.paddles[args.playerId].isVisible = false;
+      gameState.results[args.playerId] =
+        gameState.playerCount - this.eliminatedCounter++;
 
       console.log(`Player ${args.playerId} has been eliminated`);
-      console.log(
-        `  |--> it's results: ${game.getExtraGameData().results[args.playerId]}`,
-      );
+      console.log(`  |--> it's results: ${gameState.results[args.playerId]}`);
 
       game.getModifierManager().trigger("onPlayerElimination", args);
     }

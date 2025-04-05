@@ -19,15 +19,13 @@ export class ScoredGame extends PongModifierBase {
   }
 
   onGoal(game: Pong, args: { playerId: number }): void {
-    if (
-      args.playerId < 0 ||
-      args.playerId >= game.getExtraGameData().playerCount
-    ) {
+    if (args.playerId < 0 || args.playerId >= game.getState().playerCount) {
       console.log(`${args.playerId} out of bounds`);
       return;
     }
 
-    if (game.getExtraGameData().scores[args.playerId] >= this.goalObjective) {
+    const gameState = game.getState();
+    if (gameState.scores[args.playerId] >= this.goalObjective) {
       game.setStatus(GameStatus.FINISHED);
       game.getModifierManager().removeModifier(this);
     }

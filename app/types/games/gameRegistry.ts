@@ -30,11 +30,13 @@ export interface CustomizableSettings {
   // Ball Settings
   ballSpeedWidthPercentS: number;
   ballRadius: number;
-  ballResetSamplerStrategyName: string;
+  ballResetSampler: string;
 
   // Paddle Settings
   paddleCoveragePercent: number;
   paddleSpeedWidthPercentS: number;
+  paddleVelocityAngularTransmissionPercent: number;
+  paddleVelocitySpeedTransmissionPercent: number;
 
   // PowerUp Settings
   powerUpRadius: number;

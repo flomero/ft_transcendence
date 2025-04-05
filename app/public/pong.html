@@ -35,13 +35,13 @@
       let ratio = 0.0;
       let playerCount = 2;
 
-      const gameModeName = "multiplayerPong";
+      const gameModeName = "classicPong";
 
       if (gameModeName === "multiplayerPong") {
         canvas.width = 800;
         canvas.height = 800;
         ratio = canvas.width / 100.0;
-        playerCount = 5;
+        playerCount = 7;
       } else if (gameModeName === "classicPong") {
         canvas.width = 800;
         canvas.height = 400;
@@ -62,20 +62,14 @@
               gameName: "pong",
               gameModeName: gameModeName,
               gameModeConfig: {
-                powerUpRadius: 0.17,
-                powerUpCapacities: {
-                  speedBoost: 50000,
-                },
+                powerUpRadius: 2,
               },
               modifierNames: {
-                powerUpSpawner: {
-                  meanDelay: 0.005,
-                  delaySpan: 0.0001,
-                  positionSamplerStrategyName: "biasedGaussianCATester",
-                },
+                powerUpSpawner: {},
               },
               powerUpNames: {
                 speedBoost: {},
+                blinkingBall: {},
               },
               playerCount: playerCount,
             },
@@ -216,8 +210,8 @@
 
         // Draw the powerUps
 
-        if (gameState.modifiersData) {
-          gameState.modifiersData.spawnedPowerUps?.forEach((entry) => {
+        if (gameState.modifiersState) {
+          gameState.modifiersState.spawnedPowerUps?.forEach((entry) => {
             const type = entry[0];
             const powerUp = entry[1];
             if (powerUp.isVisible) {
