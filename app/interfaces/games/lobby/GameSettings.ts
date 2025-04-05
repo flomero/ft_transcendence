@@ -50,16 +50,16 @@ interface SpeedBoost {
 }
 
 interface PowerUp {
-  speedBoost: SpeedBoost;
+  speedBoost?: SpeedBoost;
 }
 
 interface GameSettings {
   gameName: "pong";
   gameModeName: GameMode;
   playerCount: number;
+  modifierNames: ModifierNames;
+  powerUpNames: PowerUp;
   gameModeConfig?: GameModeConfig;
-  modifierNames?: ModifierNames;
-  powerUpNames?: PowerUp;
 }
 
 export type { GameSettings };
