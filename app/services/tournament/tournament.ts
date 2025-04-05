@@ -1,10 +1,10 @@
 import { ITournamentBracketGenerator } from "../../types/strategy/ITournamentBracketGenerator";
 import { StrategyManager } from "../strategy/strategyManager";
 import { type GameBase } from "../games/gameBase";
-import { RNG } from "../games/rng";
 import {
   type Match,
   type Round,
+  type GameResult,
 } from "../../types/strategy/ITournamentBracketGenerator";
 
 export enum TournamentStatus {
@@ -98,7 +98,7 @@ export class Tournament {
       this.simulateRound(currentRound);
 
       // Get matches for the next round
-      currentRound = this.bracketManager.executeStrategy(this.currentRound);
+      currentRound = this.bracketManager.executeStrategy();
       roundNumber++;
     }
 
@@ -110,9 +110,6 @@ export class Tournament {
 
   /**
    * Simulates a round by playing all games in each match.
-   * Handles "best of X" logic for each match.
-   *
-   * @param round The current round with matches to simulate.
    */
   simulateRound(round: Round): void {
     // For each match in the round
@@ -123,52 +120,65 @@ export class Tournament {
   }
 
   simulateMatch(matchID: string, match: Match): void {
-    const rng = new RNG();
-
-    // Determine how many games to play (best of X)
-    const maxGames = match.gamesCount;
     const players = Object.keys(match.results);
 
-    // Keep track of wins per player
-    const winCounts: Map<string, number> = new Map();
-    players.forEach((player) => winCounts.set(player, 0));
+    // Play games until strategy determines the match is complete
+    let gameNum = 1;
+    let isMatchComplete = false;
 
-    // Play games until a player has enough wins or all games are played
-    for (let gameNum = 1; gameNum <= maxGames; gameNum++) {
-      // Create a copy of the players array and shuffle it for finish order
-      const gameResult = rng.randomArray([...players]);
-
-      // Record the position for each player (1-based index)
-      gameResult.forEach((playerID, index) => {
-        // Add the position (1-based) to the player's results
-        const position = index + 1;
-        match.results[playerID].push(position);
-      });
+    while (!isMatchComplete && gameNum <= match.gamesCount) {
+      // Simulate game result (random finish order of players)
+      const gameResult = this.simulateGame(players);
 
       // Format for console output
       const resultString = gameResult.join("|");
       console.log(`  Game ${gameNum}: ${resultString}`);
 
-      // Update win counts (first player in result is the winner)
-      const winner = gameResult[0];
-      match.winner = winner;
-      const currentWins = winCounts.get(winner) || 0;
-      winCounts.set(winner, currentWins + 1);
+      // Notify strategy about completed game and check if match is complete
+      isMatchComplete = this.notifyGameCompleted(matchID, gameResult);
 
-      // Check if a player has enough wins to clinch the match
-      const requiredWins = Math.ceil(maxGames / 2); // Majority needed to win
-      if (currentWins + 1 >= requiredWins) {
-        console.log(`  ${winner} wins the match in ${gameNum} games!`);
-        break; // No need to play more games
+      if (isMatchComplete) {
+        console.log(`  ${match.winner} wins the match in ${gameNum} games!`);
       }
+
+      gameNum++;
     }
 
     // Mark this match as completed
     this.completedMatches.add(matchID);
   }
 
-  endOfMatchCheck(match: Match) {
-    // TODO: Move Best of X check here
+  /**
+   * Simulates a single game and returns the finish order of players
+   */
+  protected simulateGame(players: string[]): string[] {
+    // Create a copy of the players array and generate a random finish order
+    // In a real implementation, this would be the actual game result
+    return [...players].sort(() => Math.random() - 0.5);
+  }
+
+  /**
+   * Notifies the strategy about a completed game and returns whether the match is complete
+   */
+  protected notifyGameCompleted(
+    matchID: string,
+    gameResult: string[],
+  ): boolean {
+    // Convert the player order array into the GameResult format
+    // GameResult maps player IDs to their position (1-based index)
+    const gameData: GameResult = {};
+
+    gameResult.forEach((playerID, index) => {
+      // Position is 1-based (first place = 1, second place = 2, etc.)
+      gameData[playerID] = index + 1;
+    });
+
+    // Pass the match ID and formatted game result to the strategy
+    return this.bracketManager.execute(
+      "notifyGameCompleted",
+      matchID,
+      gameData,
+    );
   }
 
   // Getters & Setters
@@ -188,18 +198,17 @@ export class Tournament {
       let totalScore = 0;
       let totalWins = 0;
 
-      Object.entries(entry[1]).forEach(
-        (matchResultEntry: [string, PlayerResults]) => {
-          Object.values(matchResultEntry[1]).forEach(
-            (playerResult: { won: boolean; results: number[] }) => {
-              totalWins += playerResult.won ? 1 : 0;
-              totalScore += playerResult.results.reduce(
-                (prev, curr) => prev + curr,
-              );
-            },
-          );
-        },
-      );
+      entry[1].forEach((matchResult: PlayerResults) => {
+        Object.values(matchResult).forEach(
+          (playerResult: { won: boolean; results: number[] }) => {
+            totalWins += playerResult.won ? 1 : 0;
+            totalScore += playerResult.results.reduce(
+              (prev, curr) => prev + curr,
+              0,
+            );
+          },
+        );
+      });
 
       overallResults[entry[0]] = {
         totalScore: totalScore,

@@ -1,5 +1,9 @@
 import { type TournamentResults } from "../../services/tournament/tournament";
 
+export type GameResult = {
+  [playerID: string]: number;
+};
+
 export type MatchResults = {
   [playerID: string]: number[];
 };
@@ -17,6 +21,7 @@ export type Round = {
 // Bracket Generators will keep track internally of all the rounds
 // Thus they only need the last round results to keep it up to date
 export interface ITournamentBracketGenerator {
-  nextRound(lastRoundResults?: Round): Round;
+  nextRound(): Round;
+  notifyGameCompleted(matchID: string, gameResult: GameResult): boolean;
   finalResults(): TournamentResults;
 }

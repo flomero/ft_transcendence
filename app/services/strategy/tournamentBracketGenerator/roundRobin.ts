@@ -9,6 +9,7 @@ import {
   type MatchResults,
   type Round,
   type ITournamentBracketGenerator,
+  type GameResult,
 } from "../../../types/strategy/ITournamentBracketGenerator";
 
 export type Results = {
@@ -27,6 +28,12 @@ export class RoundRobin implements ITournamentBracketGenerator {
   protected currentRoundIndex: number = 0;
 
   protected resultMap: Results = {};
+
+  // Track current active matches and their state
+  protected activeMatches: Map<string, Match> = new Map<string, Match>();
+
+  // Track wins per player in each active match
+  protected matchWinCounts: Map<string, Map<string, number>> = new Map();
 
   constructor(tournamentData: Record<string, any>) {
     this.tournamentData = tournamentData;
@@ -74,10 +81,10 @@ export class RoundRobin implements ITournamentBracketGenerator {
     console.dir(this.possibleRounds, { depth: null });
   }
 
-  nextRound(lastRoundResults?: Round): Round {
-    if (lastRoundResults && Object.keys(lastRoundResults).length > 0) {
-      this.saveResult(lastRoundResults);
-    }
+  nextRound(): Round {
+    // Clear active match tracking for the new round
+    this.activeMatches.clear();
+    this.matchWinCounts.clear();
 
     if (this.possibleRounds.length === 0) {
       return {};
@@ -89,7 +96,79 @@ export class RoundRobin implements ITournamentBracketGenerator {
       return {};
     }
 
+    // Set up tracking for the new round's matches
+    Object.entries(nextRound).forEach(([matchID, match]) => {
+      this.activeMatches.set(matchID, match);
+
+      // Initialize win counts for this match
+      const winCounts = new Map<string, number>();
+      Object.keys(match.results).forEach((playerID) => {
+        winCounts.set(playerID, 0);
+      });
+      this.matchWinCounts.set(matchID, winCounts);
+    });
+
     return nextRound;
+  }
+
+  /**
+   * Handles game completion notification from the tournament
+   * @param matchID ID of the match that had a game completed
+   * @param gameResult The result of a completed game mapping players to positions
+   * @returns boolean indicating if the match is now complete
+   */
+  notifyGameCompleted(matchID: string, gameResult: GameResult): boolean {
+    // Get the match from active matches
+    const match = this.activeMatches.get(matchID);
+    if (!match) {
+      console.error(`Match ${matchID} not found in active matches`);
+      return false;
+    }
+
+    // Record positions for each player
+    Object.entries(gameResult).forEach(([playerID, position]) => {
+      match.results[playerID].push(position);
+    });
+
+    // Find the winner (player with position 1)
+    const winner =
+      Object.entries(gameResult).find(([_, position]) => position === 1)?.[0] ||
+      "";
+
+    // Update win counts for the winner
+    const winCounts = this.matchWinCounts.get(matchID)!;
+    const currentWins = winCounts.get(winner)! + 1;
+    winCounts.set(winner, currentWins);
+
+    // Check if we have a match winner (reached majority of wins needed)
+    const requiredWins = Math.ceil(match.gamesCount / 2);
+    if (currentWins >= requiredWins) {
+      match.winner = winner;
+      this.resultMap[matchID] = match;
+      return true; // Match is complete
+    }
+
+    // Check if we've played all games and still need a winner
+    const firstPlayerID = Object.keys(match.results)[0];
+    const gamesPlayed = match.results[firstPlayerID].length;
+    if (gamesPlayed >= match.gamesCount) {
+      // Find player with most wins
+      let maxWins = 0;
+      let matchWinner = "";
+
+      winCounts.forEach((wins, playerID) => {
+        if (wins > maxWins) {
+          maxWins = wins;
+          matchWinner = playerID;
+        }
+      });
+
+      match.winner = matchWinner;
+      this.resultMap[matchID] = match;
+      return true; // Match is complete
+    }
+
+    return false; // Match is not complete yet
   }
 
   /**
