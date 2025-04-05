@@ -33,12 +33,14 @@ const addMatchToDatabase = async (
 ) => {
   const sql = `
   INSERT INTO matches (
-   id,
-   gameName,
-   gameModeName,
-   gameModeConfig,
-   modifierNames)
-  VALUES (?, ?, ?, ?, ?)
+  id,
+  gameName,
+  gameModeName,
+  modifierNames,
+  playerCount,
+  gameModeConfig,
+  powerUpNames)
+  VALUES (?, ?, ?, ?, ?, ?, ?)
   `;
 
   db.run(
@@ -46,8 +48,10 @@ const addMatchToDatabase = async (
     gameManager.getId,
     gameSettings.gameName,
     gameSettings.gameModeName,
-    JSON.stringify(gameSettings.gameModeConfig),
     JSON.stringify(gameSettings.modifierNames),
+    gameSettings.playerCount,
+    JSON.stringify(gameSettings.gameModeConfig),
+    JSON.stringify(gameSettings.powerUpNames),
   );
 };
 export default addGameToDatabase;
