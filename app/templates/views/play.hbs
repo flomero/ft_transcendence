@@ -17,10 +17,10 @@
 		Join with Code
 	{{/components/button}}
   </div>
-  <div class="flex flex-col gap-2 divide-x divide-fg-muted">
+  <div class="flex flex-col gap-2 divide-y divide-fg-muted">
 	 {{#if lobbies.length}}
       {{#each lobbies}}
-        {{> components/game/lobby-item 
+        {{> components/game/lobby
           gameMode=this.gameSettings.gameModeName
           ownerName=this.ownerName 
           lobbyId=this.getLobbyId

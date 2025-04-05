@@ -1,13 +1,13 @@
 <div class="flex items-center justify-between p-4">
   <div class="flex flex-col">
-    <h3 class="font-medium ">{{gameMode}}</h3>
+    <h3 class="font-medium ">{{ hrGameModeName gameMode }}</h3>
     <p class="text-sm text-fg-muted">Created by: {{ownerName}}</p>
   </div>
   <div class="flex items-center gap-3">
     {{#if hasPowerUps}}
       <span class="px-2 py-1 text-xs rounded">PowerUps</span>
     {{/if}}
-    {{#> components/button variant="primary" size="sm"}}
+    {{#> components/button variant="ghost" size="sm"}}
       Join
     {{/components/button}}
   </div>

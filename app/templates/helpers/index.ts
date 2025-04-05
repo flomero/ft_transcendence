@@ -49,5 +49,12 @@ export function registerHelpers(handlebars: typeof Handlebars) {
   handlebars.registerHelper("isEven", (value) => value % 2 === 0);
 
   handlebars.registerHelper("not", (value) => !value);
+
+  handlebars.registerHelper("hrGameModeName", (value) => {
+    const words = value.split(/(?=[A-Z])/);
+    const formattedString = words.join(" ");
+    return formattedString.charAt(0).toUpperCase() + formattedString.slice(1);
+  });
+
   // Add other helpers here as needed
 }

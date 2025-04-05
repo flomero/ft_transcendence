@@ -3,7 +3,7 @@ import getPublicLobbies from "../../services/games/lobby/getters/getPublicLobbys
 
 const page: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.get("/", async (request, reply) => {
-    const lobbies = getPublicLobbies();
+    const lobbies = await getPublicLobbies(fastify);
 
     const data = {
       title: "Play Pong | Inception",
