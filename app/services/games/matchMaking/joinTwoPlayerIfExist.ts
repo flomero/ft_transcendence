@@ -1,11 +1,14 @@
 import { matchMakingManager } from "./join/joinMatchMakingHandler";
-import { createVanillaMatch } from "./creatVanillaMatch";
-const joinTwoPlayerIfExist = async (): Promise<void> => {
+import { createVanillaMatch } from "./createVanillaMatch";
+import { Database } from "sqlite";
+
+const joinTwoPlayerIfExist = async (db: Database): Promise<void> => {
   if (matchMakingManager.memberSize >= 2) {
     const lastMembers = matchMakingManager.getLastTwoMember();
     const matchId = createVanillaMatch(
       lastMembers[0].memberId,
       lastMembers[1].memberId,
+      db,
     );
     sendMatchIdToMembers(
       matchId,
