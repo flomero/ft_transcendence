@@ -1,4 +1,8 @@
 import { ITournamentBracketGenerator } from "../../types/strategy/ITournamentBracketGenerator";
+import {
+  ITournamentMatchWinner,
+  MatchData,
+} from "../../types/strategy/ITournamentMatchWinner";
 import { StrategyManager } from "../strategy/strategyManager";
 import { type GameBase } from "../games/gameBase";
 import {
@@ -6,6 +10,11 @@ import {
   type Round,
   type GameResult,
 } from "../../types/strategy/ITournamentBracketGenerator";
+import {
+  type TournamentResults,
+  type PlayerResults,
+  type CombinedResults,
+} from "../../types/tournament/tournament";
 
 export enum TournamentStatus {
   CREATED,
@@ -13,31 +22,19 @@ export enum TournamentStatus {
   FINISHED,
 }
 
-export type PlayerResults = {
-  [matchID: string]: {
-    won: boolean;
-    results: number[];
-  };
-};
-
-export type TournamentResults = {
-  [playerID: string]: PlayerResults[];
-};
-
-export type CombinedResults = {
-  [playerID: string]: {
-    totalWins: number;
-    totalScore: number;
-  };
-};
-
 export class Tournament {
   // All tournament related data given at creation
   protected tournamentData: Record<string, any>;
 
+  // Strategy managers for bracket generation and match winner determination
   protected bracketManager: StrategyManager<
     ITournamentBracketGenerator,
     "nextRound"
+  >;
+
+  protected matchWinnerManager: StrategyManager<
+    ITournamentMatchWinner,
+    "recordGameResult"
   >;
 
   // Maps matchID to its game instances
@@ -58,11 +55,20 @@ export class Tournament {
   constructor(tournamentData: Record<string, any>) {
     this.tournamentData = tournamentData;
 
+    // Initialize bracket generator strategy
     this.bracketManager = new StrategyManager(
       this.tournamentData.bracketType,
       "tournamentBracketGenerator",
       "nextRound",
       [this.tournamentData],
+    );
+
+    // Initialize match winner strategy
+    this.matchWinnerManager = new StrategyManager(
+      this.tournamentData.matchWinnerType,
+      "tournamentMatchWinner",
+      "recordGameResult",
+      [],
     );
   }
 
@@ -88,9 +94,19 @@ export class Tournament {
       console.log(`\n ---- ROUND ${roundNumber} ----`);
       console.log(`Round ${roundNumber} matches:`);
 
+      // Initialize matches in the match winner strategy
       Object.entries(currentRound).forEach(([matchID, match]) => {
+        const playerIDs = Object.keys(match.results);
+        // Initialize match in the match winner strategy
+        this.matchWinnerManager.execute(
+          "initializeMatch",
+          matchID,
+          playerIDs,
+          match.gamesCount,
+        );
+
         console.log(
-          `  |->  ${matchID}: ${Object.keys(match.results).join(" vs ")} (Best of ${match.gamesCount})`,
+          `  |->  ${matchID}: ${playerIDs.join(" vs ")} (Best of ${match.gamesCount})`,
         );
       });
 
@@ -134,11 +150,23 @@ export class Tournament {
       const resultString = gameResult.join("|");
       console.log(`  Game ${gameNum}: ${resultString}`);
 
-      // Notify strategy about completed game and check if match is complete
+      // Notify strategies about completed game and check if match is complete
       isMatchComplete = this.notifyGameCompleted(matchID, gameResult);
 
       if (isMatchComplete) {
-        console.log(`  ${match.winner} wins the match in ${gameNum} games!`);
+        // Get the winner from the match winner strategy
+        const winner = this.matchWinnerManager.execute(
+          "getMatchWinner",
+          matchID,
+        );
+        // Update the match object with the winner and results
+        match.winner = winner;
+        match.results = this.matchWinnerManager.execute(
+          "getMatchResults",
+          matchID,
+        );
+
+        console.log(`  ${winner} wins the match in ${gameNum} games!`);
       }
 
       gameNum++;
@@ -158,7 +186,8 @@ export class Tournament {
   }
 
   /**
-   * Notifies the strategy about a completed game and returns whether the match is complete
+   * Notifies the match winner strategy about a completed game and
+   * then updates the bracket generator if the match is complete
    */
   protected notifyGameCompleted(
     matchID: string,
@@ -173,12 +202,21 @@ export class Tournament {
       gameData[playerID] = index + 1;
     });
 
-    // Pass the match ID and formatted game result to the strategy
-    return this.bracketManager.execute(
-      "notifyGameCompleted",
+    // First, notify the match winner strategy
+    const isMatchComplete = this.matchWinnerManager.execute(
+      "recordGameResult",
       matchID,
       gameData,
     );
+
+    // If the match is complete, notify the bracket generator
+    if (isMatchComplete) {
+      // The bracket generator still needs to know about completed matches
+      // for tournament progression
+      this.bracketManager.execute("notifyGameCompleted", matchID, gameData);
+    }
+
+    return isMatchComplete;
   }
 
   // Getters & Setters
@@ -187,11 +225,50 @@ export class Tournament {
   }
 
   getResults(): TournamentResults {
-    return this.bracketManager.execute("finalResults");
+    // Now the tournament needs to build results using data from both strategies
+    const results: TournamentResults = {};
+
+    // Get all match data from the match winner strategy
+    const matchResults = new Map<
+      string,
+      { winner: string; results: Record<string, number[]> }
+    >();
+    const matches = this.matchWinnerManager.execute("getMatches");
+
+    matches
+      .entries()
+      .filter((entry: [string, MatchData]) => entry[1].isComplete)
+      .forEach((entry: [string, MatchData]) => {
+        matchResults.set(entry[0], {
+          winner: entry[1].winner,
+          results: entry[1].results,
+        });
+      });
+
+    // Then create player-focused result objects
+    (this.tournamentData.players as string[]).forEach((playerID) => {
+      const playerResults: PlayerResults[] = [];
+
+      // Find all matches this player participated in
+      matchResults.forEach((match, matchID) => {
+        if (match.results[playerID]) {
+          playerResults.push({
+            [matchID]: {
+              results: match.results[playerID],
+              won: match.winner === playerID,
+            },
+          } as PlayerResults);
+        }
+      });
+
+      results[playerID] = playerResults;
+    });
+
+    return results;
   }
 
   getOverallResults(): CombinedResults {
-    const finalResults = this.bracketManager.execute("finalResults");
+    const finalResults = this.getResults();
     const overallResults: CombinedResults = {};
 
     Object.entries(finalResults).forEach((entry: [string, PlayerResults[]]) => {

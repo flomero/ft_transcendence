@@ -30,9 +30,6 @@ export class StrategyManager<T, K extends keyof T> {
     this.strategyTypeName = strategyTypeName;
     this.defaultMethod = defaultMethod;
 
-    console.log("\nRegistry");
-    console.dir(STRATEGY_REGISTRY, { depth: null });
-
     const strategyClass =
       STRATEGY_REGISTRY[strategyTypeName]?.[initialStrategyName].class;
     if (!strategyClass) {

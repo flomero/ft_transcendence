@@ -64,5 +64,11 @@
       "className": "SimpleElimination",
       "gamesCount": 3
     }
+  },
+
+  "tournamentMatchWinner": {
+    "bestOfX": {
+      "className": "BestOfX"
+    }
   }
 }
