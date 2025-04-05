@@ -7,7 +7,7 @@ import addGameToDatabase from "./addGameToDatabase";
 import { getLobby } from "../lobbyWebsocket/getLobby";
 import { canLobbyBeStartedCheck } from "./canLobbyBeStartedCheck";
 
-export const GameManagers = new Map<string, GameManager>();
+export const gameManagers = new Map<string, GameManager>();
 
 async function startLobbyHandler(
   request: FastifyRequest<{ Params: { lobbyId: string } }>,
@@ -22,7 +22,7 @@ async function startLobbyHandler(
     canLobbyBeStartedCheck(lobbyId);
     setLobbyStateToStart(userId, lobbyId);
     const newGameManager = gameManagerCreate(lobbyId);
-    GameManagers.set(newGameManager.getId, newGameManager);
+    gameManagers.set(newGameManager.getId, newGameManager);
     addGameToDatabase(
       newGameManager,
       request.server.sqlite,

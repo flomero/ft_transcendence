@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Matchmaking</title>
+  </head>
+  <body>
+    <h1>Matchmaking</h1>
+    <button id="join-matchmaking">Join Matchmaking</button>
+    <p id="status">Click the button to join matchmaking.</p>
+
+    <script>
+      const MATCHMAKING_WS_URL = "ws://localhost:3000/games/match-making";
+      const MATCHMAKING_JOIN_URL =
+        "http://localhost:3000/games/match-making/join";
+      const GAME_WS_URL = "ws://localhost:3000/games";
+
+      let matchmakingSocket = null;
+
+      document
+        .getElementById("join-matchmaking")
+        .addEventListener("click", async () => {
+          try {
+            // Step 1: Join matchmaking via the REST API
+            const response = await fetch(MATCHMAKING_JOIN_URL, {
+              method: "POST",
+            });
+
+            if (!response.ok) {
+              throw new Error("Failed to join matchmaking");
+            }
+
+            // Step 2: Connect to the matchmaking WebSocket
+            connectToMatchmakingWebSocket();
+          } catch (error) {
+            console.error("Error joining matchmaking:", error);
+            document.getElementById("status").innerText = `Error:`;
+          }
+        });
+
+      function connectToMatchmakingWebSocket() {
+        matchmakingSocket = new WebSocket(MATCHMAKING_WS_URL);
+
+        matchmakingSocket.onopen = () => {
+          console.log("Connected to matchmaking WebSocket");
+          document.getElementById("status").innerText =
+            "Searching for a match...";
+        };
+
+        matchmakingSocket.onmessage = (event) => {
+          try {
+            const message = JSON.parse(event.data); // Parse the WebSocket message
+            console.log("Matchmaking message received:", message);
+
+            if (message.type === "matchFound") {
+              const gameId = message.matchId; // Access matchId directly from the parsed message
+              console.log("Game found! Game ID:", gameId);
+              document.getElementById("status").innerText =
+                "Match found! Connecting to game...";
+              connectToGameWebSocket(gameId);
+            }
+          } catch (error) {
+            console.error("Error processing WebSocket message:", error);
+          }
+        };
+
+        matchmakingSocket.onclose = () => {
+          console.log("Matchmaking WebSocket closed");
+        };
+
+        matchmakingSocket.onerror = (error) => {
+          console.error("Matchmaking WebSocket error:", error);
+        };
+      }
+
+      function connectToGameWebSocket(gameId) {
+        matchmakingSocket.close();
+        window.location.href = `/public/gameFrontend.html?gameId=${gameId}`;
+      }
+    </script>
+  </body>
+</html>
