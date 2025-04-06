@@ -60,7 +60,7 @@ const app: FastifyPluginAsync<AppOptions> = async (
   await loadStrategyRegistry();
 
   const tournament = new Tournament({
-    bracketType: "roundRobin",
+    bracketType: "simpleElimination",
     matchWinnerType: "bestOfX",
     playerCount: 8,
     players: ["0", "1", "2", "3", "4", "5", "6", "7"], //, "8", "9", "10", "11", "12", "13", "14", "15"],
