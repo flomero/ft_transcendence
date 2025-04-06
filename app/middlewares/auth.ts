@@ -18,7 +18,7 @@ export default fp(async (fastify) => {
   fastify.decorateRequest("isAuthenticated", false);
 
   fastify.addHook("onRequest", async (req, reply) => {
-    if (fastify.config.DEV_MODE) {
+    if (fastify.config.NODE_ENV === "development") {
       if (req.cookies.name != null) {
         if (!(await userExists(fastify, req.cookies.name))) {
           await insertUserIfNotExists(fastify, {
