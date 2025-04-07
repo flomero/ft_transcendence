@@ -1,7 +1,7 @@
-import GameManager from "../../gameHandler/GameManager";
-import { Database } from "sqlite";
-import { GameSettings } from "../../../../interfaces/games/lobby/GameSettings";
-import { randomUUID } from "crypto";
+import type GameManager from "../../gameHandler/GameManager";
+import type { Database } from "sqlite";
+import type { GameSettings } from "../../../../interfaces/games/lobby/GameSettings";
+import { randomUUID } from "node:crypto";
 
 const addGameToDatabase = async (
   gameManager: GameManager,

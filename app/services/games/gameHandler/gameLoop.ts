@@ -1,4 +1,4 @@
-import { GameBase, GameStatus } from "../gameBase";
+import { type GameBase, GameStatus } from "../gameBase";
 import { gameManagers } from "../lobby/start/startLobbyHandler";
 
 const gameLoop = async (gameManagerId: string) => {

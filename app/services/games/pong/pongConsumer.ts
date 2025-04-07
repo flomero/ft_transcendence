@@ -86,7 +86,6 @@ export const pongConsumer = async (
           }
 
           currentGame.startGame();
-          ``;
 
           // If game is now running, start the game loop
           if (currentGame.getStatus() === GameStatus.RUNNING) {

@@ -1,4 +1,4 @@
-import { FastifyPluginAsync } from "fastify";
+import type { FastifyPluginAsync } from "fastify";
 import joinMatchMakingHandler from "../../../../services/games/matchMaking/join/joinMatchMakingHandler";
 
 const joinMatchMaking: FastifyPluginAsync = async (fastify): Promise<void> => {

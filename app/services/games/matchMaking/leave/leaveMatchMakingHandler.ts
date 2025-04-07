@@ -1,4 +1,4 @@
-import { FastifyRequest, FastifyReply } from "fastify";
+import type { FastifyRequest, FastifyReply } from "fastify";
 import { matchMakingManager } from "../join/joinMatchMakingHandler";
 
 const leaveMatchMakingHandler = async (

@@ -1,5 +1,5 @@
 import MatchMakingManager from "../MatchMakingManager";
-import { FastifyRequest, FastifyReply } from "fastify";
+import type { FastifyRequest, FastifyReply } from "fastify";
 
 export const matchMakingManager = new MatchMakingManager();
 

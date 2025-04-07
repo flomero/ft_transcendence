@@ -1,5 +1,5 @@
-import MemberMatchMaking from "../../../interfaces/games/matchMaking/MemberMatchMaking";
-import WebSocket from "ws";
+import type MemberMatchMaking from "../../../interfaces/games/matchMaking/MemberMatchMaking";
+import type WebSocket from "ws";
 
 class MatchMakingManager {
   private members: Map<string, MemberMatchMaking> = new Map<

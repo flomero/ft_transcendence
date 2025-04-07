@@ -1,8 +1,8 @@
-import { FastifyRequest, FastifyReply } from "fastify";
+import type { FastifyRequest, FastifyReply } from "fastify";
 import { validConnectionCheck } from "../lobbyVaidation/validConnectionCheck";
 import setLobbyStateToStart from "./setLobbyStateToStart";
 import gameManagerCreate from "./gameManagerCreate";
-import GameManager from "../../gameHandler/GameManager";
+import type GameManager from "../../gameHandler/GameManager";
 import addGameToDatabase from "./addGameToDatabase";
 import { getLobby } from "../lobbyWebsocket/getLobby";
 import { canLobbyBeStartedCheck } from "./canLobbyBeStartedCheck";

@@ -2,8 +2,8 @@ import type { GameSettings } from "../../../interfaces/games/lobby/GameSettings"
 import { GAME_REGISTRY } from "../../../types/games/gameRegistry";
 import { gameManagers } from "../lobby/start/startLobbyHandler";
 import GameManager from "../gameHandler/GameManager";
-import { Database } from "sqlite";
-import { GameBase } from "../gameBase";
+import type { Database } from "sqlite";
+import type { GameBase } from "../gameBase";
 import addGameToDatabase from "../lobby/start/addGameToDatabase";
 
 const createVanillaMatch = (

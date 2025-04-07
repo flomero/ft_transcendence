@@ -1,5 +1,5 @@
-import { FastifyRequest } from "fastify";
-import { WebSocket } from "ws";
+import type { FastifyRequest } from "fastify";
+import type { WebSocket } from "ws";
 import { matchMakingManager } from "./join/joinMatchMakingHandler";
 import joinTwoPlayerIfExist from "./joinTwoPlayerIfExist";
 

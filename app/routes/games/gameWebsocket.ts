@@ -1,4 +1,4 @@
-import { FastifyPluginAsync } from "fastify";
+import type { FastifyPluginAsync } from "fastify";
 import gameWebsocketHandler from "../../services/games/gameHandler/gameWebsocketHandler";
 
 const gameWebsocket: FastifyPluginAsync = async (

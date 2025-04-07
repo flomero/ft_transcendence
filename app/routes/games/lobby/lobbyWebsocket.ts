@@ -1,4 +1,4 @@
-import { FastifyPluginAsync } from "fastify";
+import type { FastifyPluginAsync } from "fastify";
 import lobbyWebsocketHandler from "../../../services/games/lobby/lobbyWebsocket/lobbyWebsocketHandler";
 
 const lobbyWebsocket: FastifyPluginAsync = async (

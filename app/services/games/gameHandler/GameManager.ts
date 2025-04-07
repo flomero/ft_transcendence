@@ -1,9 +1,9 @@
 import { randomUUID } from "node:crypto";
-import { GameBase, GameStatus } from "../gameBase";
-import Player from "../../../interfaces/games/gameHandler/Player";
-import { WebSocket } from "ws";
+import { type GameBase, GameStatus } from "../gameBase";
+import type Player from "../../../interfaces/games/gameHandler/Player";
+import type { WebSocket } from "ws";
 import gameLoop from "./gameLoop";
-import GameMessage from "../../../interfaces/games/gameHandler/GameMessage";
+import type GameMessage from "../../../interfaces/games/gameHandler/GameMessage";
 
 class GameManager {
   private id: string = randomUUID();

@@ -1,6 +1,6 @@
 import { matchMakingManager } from "./join/joinMatchMakingHandler";
 import { createVanillaMatch } from "./createVanillaMatch";
-import { Database } from "sqlite";
+import type { Database } from "sqlite";
 
 const joinTwoPlayerIfExist = async (db: Database): Promise<void> => {
   if (matchMakingManager.memberSize >= 2) {

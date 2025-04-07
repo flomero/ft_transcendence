@@ -1,6 +1,6 @@
 import { gameManagers } from "../lobby/start/startLobbyHandler";
-import { FastifyRequest } from "fastify";
-import { WebSocket } from "ws";
+import type { FastifyRequest } from "fastify";
+import type { WebSocket } from "ws";
 import gameValidationCheck from "./gameValidationCheck";
 import handleGameMessage from "./handleGameMessage";
 
