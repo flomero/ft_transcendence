@@ -24,7 +24,18 @@ const gameModeConfigSchema = S.object()
 
 const powerUpSpawnerSchema = S.object()
   .prop("meanDelayS", S.number())
-  .prop("delaySpanS", S.number());
+  .prop("delaySpanS", S.number())
+  .prop(
+    "positionSamplerStrategyName",
+    S.enum([
+      "biasedGaussianCATester",
+      "biasedQuadrantGaussianRATester",
+      "elipticGaussianRA",
+      "flowerGaussianCA",
+      "uniformCA",
+      "uniformRA",
+    ]).required(),
+  );
 
 const timedGameSchema = S.object().prop("durationS", S.number().minimum(0));
 
@@ -56,9 +67,11 @@ const bodySchema = S.object()
   .additionalProperties(false)
   .prop("gameName", S.enum(Object.values(GAME_NAMES)).required())
   .prop("gameModeName", S.enum(Object.values(GAME_MODES)).required())
-  .prop("gameModeConfig", gameModeConfigSchema)
   .prop("modifierNames", modifierNamesScheama)
-  .prop("powerUpNames", powerupSchema);
+  .required()
+  .prop("powerUpNames", powerupSchema)
+  .required()
+  .prop("gameModeConfig", gameModeConfigSchema);
 
 const newLobbySchema = {
   body: bodySchema,
