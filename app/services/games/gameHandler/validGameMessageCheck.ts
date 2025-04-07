@@ -1,8 +1,8 @@
 import Ajv from "ajv";
-import gameSocketSchema from "../../../schemas/games/gameHandler/gameWebsocketSchema";
+import gameMessageSchema from "../../../schemas/games/gameHandler/gameMessageSchema";
 
 const ajv = new Ajv();
-const validateGameMessage = ajv.compile(gameSocketSchema.valueOf());
+const validateGameMessage = ajv.compile(gameMessageSchema.valueOf());
 
 const validGameMessageCheck = (message: string): void => {
   const messageObject = JSON.parse(message);
