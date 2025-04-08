@@ -50,7 +50,10 @@ export function registerHelpers(handlebars: typeof Handlebars) {
 
   handlebars.registerHelper("not", (value) => !value);
 
+  handlebars.registerHelper("eq", (a, b) => a === b);
+
   handlebars.registerHelper("hrGameModeName", (value) => {
+    if (!value) return value;
     const words = value.split(/(?=[A-Z])/);
     const formattedString = words.join(" ");
     return formattedString.charAt(0).toUpperCase() + formattedString.slice(1);

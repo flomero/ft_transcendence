@@ -1,8 +1,9 @@
-import { FastifyRequest, FastifyReply } from "fastify";
+import type { FastifyRequest, FastifyReply } from "fastify";
 import { isUserInAnyLobby } from "../lobbyVaidation/isUserInAnyLobby";
 import { isLobbyRegistered } from "../lobbyVaidation/isLobbyRegistered";
 import addUserToExistingLobby from "./addUserToExistingLobby";
 import isLobbyOpen from "../lobbyVaidation/isLobbyOpen";
+import getLobbyById from "../getters/getLobbyById";
 
 async function joinLobbyHandler(
   request: FastifyRequest<{ Params: { lobbyId: string } }>,
@@ -12,24 +13,34 @@ async function joinLobbyHandler(
   const lobbyId = request.params.lobbyId;
 
   if (isUserInAnyLobby(userId) === true) {
-    reply.code(400).send({ message: "User is already in a lobby" });
-    return;
-  } else if (isLobbyRegistered(lobbyId) === false) {
-    reply.code(400).send({ message: "Lobby does not exist" });
-    return;
-  } else if (isLobbyOpen(lobbyId) === false) {
-    reply.code(400).send({ message: "Lobby is not open" });
-    return;
+    return reply.badRequest("User is already in a lobby");
+  }
+  if (isLobbyRegistered(lobbyId) === false) {
+    return reply.badRequest("Lobby does not exist");
+  }
+  if (isLobbyOpen(lobbyId) === false) {
+    return reply.badRequest("Lobby is not open");
   }
   try {
     addUserToExistingLobby(lobbyId, userId);
   } catch (error) {
     if (error instanceof Error) {
-      reply.code(400).send({ message: error.message });
-      return;
+      return reply.badRequest(error.message);
     }
   }
-  reply.code(200).send({ message: "User is added to Lobby" });
+  const lobby = await getLobbyById(request.server, lobbyId, true);
+  if (lobby === null) {
+    return reply.notFound("Lobby not found");
+  }
+  const data = {
+    title: "Lobby | Inception",
+    lobby: lobby,
+    lobbyString: JSON.stringify(lobby),
+  };
+
+  reply.header("X-Page-Title", "Lobby | ft_transcendence");
+  const viewOptions = request.isAjax() ? {} : { layout: "layouts/main" };
+  return reply.view("views/lobby/page", data, viewOptions);
 }
 
 export default joinLobbyHandler;

@@ -9,7 +9,7 @@ export const PublicLobbies = new Map<string, Lobby>();
 export const PrivateLobbies = new Map<string, Lobby>();
 
 function initializeSampleLobbies() {
-  const sampleUserIds = ["118122705278884860711", "user456", "user789"];
+  const sampleUserIds = ["1", "user456", "user789"];
 
   const lobbyConfigs: NewLobbyRequestBody[] = [
     {
@@ -145,11 +145,12 @@ function initializeSampleLobbies() {
     const lobby = new Lobby(config, sampleUserIds[index]);
     PublicLobbies.set(lobby.getLobbyId, lobby);
   });
-
-  console.log(`Initialized ${PublicLobbies.size} sample public lobbies`);
 }
 
-initializeSampleLobbies();
+if (process.env.NODE_ENV === "development") {
+  console.log("Initializing sample lobbies...");
+  initializeSampleLobbies();
+}
 
 async function newLobbyHandler(
   request: FastifyRequest<{ Body: NewLobbyRequestBody }>,

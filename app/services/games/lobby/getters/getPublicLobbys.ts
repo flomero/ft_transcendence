@@ -1,7 +1,7 @@
 import { PublicLobbies } from "../new/newLobbyHandler";
-import { Lobby } from "../Lobby";
+import type { Lobby } from "../Lobby";
 import { getUserById } from "../../../database/user";
-import { FastifyInstance } from "fastify";
+import type { FastifyInstance } from "fastify";
 
 async function getPublicLobbies(
   fastify: FastifyInstance,
