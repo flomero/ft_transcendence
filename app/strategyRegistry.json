@@ -63,6 +63,11 @@
     "simpleElimination": {
       "className": "SimpleElimination",
       "gamesCount": 3
+    },
+
+    "doubleElimination": {
+      "className": "DoubleElimination",
+      "gamesCount": 3
     }
   },
 
