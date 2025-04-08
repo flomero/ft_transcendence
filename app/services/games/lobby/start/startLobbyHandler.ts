@@ -28,10 +28,13 @@ async function startLobbyHandler(
       request.server.sqlite,
       lobby.getGameSettings,
     );
-    reply.code(200).send({ gameId: newGameManager.getId }); // game created connect to game websocket
+    lobby.sendMessageToAllMembers(
+      JSON.stringify({ type: "gameStarted", data: newGameManager.getId }),
+    );
+    return reply.code(200).send({ gameId: newGameManager.getId });
   } catch (error) {
     if (error instanceof Error)
-      reply.code(400).send({ message: error.message });
+      return reply.code(400).send({ message: error.message });
   }
 }
 

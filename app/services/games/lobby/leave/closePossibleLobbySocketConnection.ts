@@ -22,6 +22,7 @@ function closePossibleLobbySocketConnection(
 }
 
 function isUserConnectedToLobbySocket(userId: string, lobby: Lobby): boolean {
+  if (lobby.isUserInLobby(userId) === false) return false;
   if (lobby.memberStatus(userId) === "inLobby") {
     return true;
   } else if (lobby.memberStatus(userId) === "inMatch") {

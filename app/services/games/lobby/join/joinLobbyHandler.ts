@@ -4,6 +4,7 @@ import { isLobbyRegistered } from "../lobbyVaidation/isLobbyRegistered";
 import addUserToExistingLobby from "./addUserToExistingLobby";
 import isLobbyOpen from "../lobbyVaidation/isLobbyOpen";
 import getLobbyById from "../getters/getLobbyById";
+import { getLobby } from "../lobbyWebsocket/getLobby";
 
 async function joinLobbyHandler(
   request: FastifyRequest<{ Params: { lobbyId: string } }>,
@@ -20,7 +21,7 @@ async function joinLobbyHandler(
     return reply.badRequest("User is already in a lobby");
   }
   if (isLobbyRegistered(lobbyId) === false) {
-    return reply.badRequest("Lobby does not exist");
+    return reply.badRequest("Lobby does not exist 1");
   }
   if (isLobbyOpen(lobbyId) === false) {
     return reply.badRequest("Lobby is not open");
@@ -38,10 +39,15 @@ async function joinLobbyHandler(
   if (lobby === null) {
     return reply.notFound("Lobby not found");
   }
+  const realLobby = getLobby(lobbyId);
   const data = {
     title: "Lobby | Inception",
     lobby: lobby,
-    lobbyString: JSON.stringify(lobby),
+    isReady: realLobby.getMember(userId)?.isReady || false,
+    isOwner: realLobby.isMemberOwner(userId),
+    allMembersReady:
+      realLobby.allMembersReady() && realLobby.reachedMinPlayers(),
+    // lobbyString: JSON.stringify(lobby),
   };
 
   reply.header("X-Page-Title", "Lobby | ft_transcendence");

@@ -7,7 +7,7 @@ function getLobby(lobbyId: string): Lobby {
   } else if (PrivateLobbies.has(lobbyId)) {
     return PrivateLobbies.get(lobbyId)!;
   }
-  throw new Error("Lobby does not exist");
+  throw new Error("getLobby Lobby does not exist");
 }
 
 export { getLobby };

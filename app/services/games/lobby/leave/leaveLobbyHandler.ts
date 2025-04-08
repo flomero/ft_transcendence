@@ -28,10 +28,9 @@ async function leaveLobbyHandler(
       removeLobby(lobbyId);
     }
 
-    reply.send({ message: "You have left the lobby" });
+    return reply.send({ message: "You have left the lobby" });
   } catch (error) {
-    if (error instanceof Error) reply.code(400).send({ error: error.message });
-    return;
+    if (error instanceof Error) return reply.badRequest(error.message);
   }
 }
 

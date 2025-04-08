@@ -9,7 +9,7 @@ export const PublicLobbies = new Map<string, Lobby>();
 export const PrivateLobbies = new Map<string, Lobby>();
 
 function initializeSampleLobbies() {
-  const sampleUserIds = ["1", "user456", "user789"];
+  const sampleUserIds = ["103562899409920461542", "user456", "user789"];
 
   const lobbyConfigs: NewLobbyRequestBody[] = [
     {
@@ -158,7 +158,7 @@ async function newLobbyHandler(
 ) {
   const body = request.body;
   try {
-    if (isUserInAnyLobby(request.userId) === true)
+    if (isUserInAnyLobby(request.userId) !== null)
       throw new Error("User is already in a lobby");
     validateGameModifierCheck(body);
     const lobby = new Lobby(body, request.userId);

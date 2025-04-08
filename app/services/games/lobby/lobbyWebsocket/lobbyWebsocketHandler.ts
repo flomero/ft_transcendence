@@ -17,7 +17,9 @@ const lobbyWebsocketHandler = async (
     lobby.addSocketToMember(userId, connection);
 
     connection.on("close", () => {
-      closePossibleLobbySocketConnection(userId, lobbyId);
+      try {
+        closePossibleLobbySocketConnection(userId, lobbyId);
+      } catch (_) {}
     });
   } catch (error) {
     if (error instanceof Error)

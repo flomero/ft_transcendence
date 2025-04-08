@@ -12,10 +12,10 @@ async function readyLobbyHandler(
   try {
     validConnectionCheck(userId, lobbyId);
     setReadyState(lobbyId, userId, state);
-    reply.code(200).send({ message: "User is ready" });
+    return reply.code(200).send({ message: "User is ready" });
   } catch (error) {
-    if (error instanceof Error) reply.code(400).send({ error: error.message });
-    return;
+    if (error instanceof Error)
+      return reply.code(400).send({ error: error.message });
   }
 }
 export default readyLobbyHandler;
