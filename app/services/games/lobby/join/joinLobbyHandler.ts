@@ -12,7 +12,11 @@ async function joinLobbyHandler(
   const userId = request.userId;
   const lobbyId = request.params.lobbyId;
 
-  if (isUserInAnyLobby(userId) === true) {
+  const userLobby = isUserInAnyLobby(userId);
+  let newUser = true;
+  if (userLobby === lobbyId) {
+    newUser = false;
+  } else if (userLobby !== null) {
     return reply.badRequest("User is already in a lobby");
   }
   if (isLobbyRegistered(lobbyId) === false) {
@@ -21,11 +25,13 @@ async function joinLobbyHandler(
   if (isLobbyOpen(lobbyId) === false) {
     return reply.badRequest("Lobby is not open");
   }
-  try {
-    addUserToExistingLobby(lobbyId, userId);
-  } catch (error) {
-    if (error instanceof Error) {
-      return reply.badRequest(error.message);
+  if (newUser) {
+    try {
+      addUserToExistingLobby(lobbyId, userId);
+    } catch (error) {
+      if (error instanceof Error) {
+        return reply.badRequest(error.message);
+      }
     }
   }
   const lobby = await getLobbyById(request.server, lobbyId, true);
