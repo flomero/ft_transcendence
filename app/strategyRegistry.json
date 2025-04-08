@@ -70,5 +70,11 @@
     "bestOfX": {
       "className": "BestOfX"
     }
+  },
+
+  "userSampler": {
+    "random": {
+      "className": "Random"
+    }
   }
 }

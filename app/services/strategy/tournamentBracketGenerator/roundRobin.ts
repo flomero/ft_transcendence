@@ -1,18 +1,28 @@
 import {
-  type PlayerResults,
   type TournamentResults,
+  type PlayerResults,
 } from "../../../types/tournament/tournament";
 import { RNG } from "../../games/rng";
 import { STRATEGY_REGISTRY } from "../strategyRegistryLoader";
 import {
   type Match,
   type Round,
+  type TournamentRankings,
   type ITournamentBracketGenerator,
   type GameResult,
 } from "../../../types/strategy/ITournamentBracketGenerator";
 
-export type Results = {
+type Results = {
   [matchID: string]: Match;
+};
+
+type OverallPlayerResults = {
+  totalWins: number;
+  totalScore: number;
+};
+
+type OverallResults = {
+  [playerID: string]: OverallPlayerResults;
 };
 
 export class RoundRobin implements ITournamentBracketGenerator {
@@ -122,13 +132,14 @@ export class RoundRobin implements ITournamentBracketGenerator {
       results: {}, // Results will be provided by the match winner strategy
     };
 
+    console.log(`${matchID} finished, results:`);
+    console.dir(gameResult, { depth: null });
+
     // Remove from active matches when complete
     this.activeMatches.delete(matchID);
 
     return true;
   }
-
-  // The rest of the class can remain mostly the same
 
   /**
    * Generates a schedule where each unique combination of players plays exactly one match,
@@ -171,12 +182,8 @@ export class RoundRobin implements ITournamentBracketGenerator {
       playersPerMatch,
     );
 
-    console.log(`Combinations:`);
-    console.dir(combinations);
-
     // Calculate theoretical maximum number of matches per round
     const maxMatchesPerRound = Math.floor(numPlayers / playersPerMatch);
-    console.log(`${maxMatchesPerRound} matches per round (theoretical max)`);
 
     if (maxMatchesPerRound === 1) {
       return combinations.map((combination) => [combination]);
@@ -319,40 +326,89 @@ export class RoundRobin implements ITournamentBracketGenerator {
     return result;
   }
 
-  /**
-   * NOTE: This method is now a fallback/placeholder since the Tournament class
-   * now handles collecting results from both strategies
-   */
-  finalResults(): TournamentResults {
-    const tournamentResults: TournamentResults = {};
+  computeFinalRankings(
+    allMatchesResults: TournamentResults,
+  ): TournamentRankings {
+    const overallResults: OverallResults = {};
 
-    (this.tournamentData.players as string[]).forEach((playerID) => {
-      const playerResults: PlayerResults[] = [];
+    /**
+     * Breaks ties using totalWins first then totalScore
+     * @param playerAOverallResults
+     * @param playerBOverallResults
+     * @returns tie Winner or {-1, -1} if completely equal.
+     */
+    function tieBreaker(
+      playerAOverallResults: OverallPlayerResults,
+      playerBOverallResults: OverallPlayerResults,
+    ): number {
+      if (playerAOverallResults.totalWins === playerBOverallResults.totalWins) {
+        if (
+          playerAOverallResults.totalScore === playerBOverallResults.totalScore
+        )
+          return 0;
 
-      Object.entries(this.resultMap)
-        .filter((entry: [string, Match]) => this.isInMatch(playerID, entry[0]))
-        .forEach((entry: [string, Match]) => {
-          playerResults.push({
-            [entry[0]]: {
-              results: entry[1].results[playerID] || [],
-              won: entry[1].winner === playerID,
+        return playerAOverallResults.totalScore <
+          playerBOverallResults.totalScore
+          ? -1
+          : 1;
+      }
+
+      return playerAOverallResults.totalWins > playerBOverallResults.totalWins
+        ? -1
+        : 1;
+    }
+
+    function sortPlayers(
+      a: [string, OverallPlayerResults],
+      b: [string, OverallPlayerResults],
+    ): number {
+      return tieBreaker(a[1], b[1]);
+    }
+
+    Object.entries(allMatchesResults).forEach(
+      (entry: [string, PlayerResults[]]) => {
+        let totalScore = 0;
+        let totalWins = 0;
+
+        entry[1].forEach((matchResult: PlayerResults) => {
+          Object.values(matchResult).forEach(
+            (playerResult: { won: boolean; results: number[] }) => {
+              totalWins += playerResult.won ? 1 : 0;
+              totalScore += playerResult.results.reduce(
+                (prev, curr) => prev + curr,
+                0,
+              );
             },
-          } as PlayerResults);
+          );
         });
 
-      tournamentResults[playerID] = playerResults;
-    });
+        overallResults[entry[0]] = {
+          totalScore: totalScore,
+          totalWins: totalWins,
+        };
+      },
+    );
 
-    return tournamentResults;
+    const sortedOverallResults =
+      Object.entries(overallResults).sort(sortPlayers);
+    const tournamentRankings: TournamentRankings = {};
+
+    sortedOverallResults.forEach(
+      (entry: [string, OverallPlayerResults], index) => {
+        tournamentRankings[entry[0]] = index + 1;
+      },
+    );
+
+    return tournamentRankings;
   }
 
-  getMatchKey(players: string[]): string {
+  protected getMatchKey(players: string[]): string {
     const sortedPlayers = [...players].sort();
     const matchID = sortedPlayers.join("|");
     return matchID;
   }
 
-  isInMatch(playerID: string, matchID: string): boolean {
+  protected isInMatch(playerID: string, matchID: string): boolean {
     const players = matchID.split("|");
     return players.includes(playerID);
   }
@@ -360,7 +416,7 @@ export class RoundRobin implements ITournamentBracketGenerator {
   /**
    * Helper method for the Tournament to check if a match is still active
    */
-  isMatchActive(matchID: string): boolean {
+  protected isMatchActive(matchID: string): boolean {
     return this.activeMatches.has(matchID);
   }
 }

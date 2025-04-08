@@ -62,6 +62,7 @@ const app: FastifyPluginAsync<AppOptions> = async (
   const tournament = new Tournament({
     bracketType: "simpleElimination",
     matchWinnerType: "bestOfX",
+    initialSeedingMethod: "random",
     playerCount: 8,
     players: ["0", "1", "2", "3", "4", "5", "6", "7"], //, "8", "9", "10", "11", "12", "13", "14", "15"],
     gameData: {
@@ -74,8 +75,8 @@ const app: FastifyPluginAsync<AppOptions> = async (
   console.log("Final results:");
   console.dir(tournament.getResults(), { depth: null });
 
-  console.log("Overall results:");
-  console.dir(tournament.getOverallResults(), { depth: null });
+  console.log("Final rankings:");
+  console.dir(tournament.getFinalRankings(), { depth: null });
 
   // Do not touch the following lines
 

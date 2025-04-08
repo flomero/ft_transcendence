@@ -8,12 +8,12 @@ import { type GameBase } from "../games/gameBase";
 import {
   type Match,
   type Round,
+  type TournamentRankings,
   type GameResult,
 } from "../../types/strategy/ITournamentBracketGenerator";
 import {
   type TournamentResults,
   type PlayerResults,
-  type CombinedResults,
 } from "../../types/tournament/tournament";
 
 export enum TournamentStatus {
@@ -267,32 +267,10 @@ export class Tournament {
     return results;
   }
 
-  getOverallResults(): CombinedResults {
-    const finalResults = this.getResults();
-    const overallResults: CombinedResults = {};
-
-    Object.entries(finalResults).forEach((entry: [string, PlayerResults[]]) => {
-      let totalScore = 0;
-      let totalWins = 0;
-
-      entry[1].forEach((matchResult: PlayerResults) => {
-        Object.values(matchResult).forEach(
-          (playerResult: { won: boolean; results: number[] }) => {
-            totalWins += playerResult.won ? 1 : 0;
-            totalScore += playerResult.results.reduce(
-              (prev, curr) => prev + curr,
-              0,
-            );
-          },
-        );
-      });
-
-      overallResults[entry[0]] = {
-        totalScore: totalScore,
-        totalWins: totalWins,
-      };
-    });
-
-    return overallResults;
+  getFinalRankings(): TournamentRankings {
+    return this.bracketManager.execute(
+      "computeFinalRankings",
+      this.getResults(),
+    );
   }
 }

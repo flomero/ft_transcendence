@@ -18,10 +18,16 @@ export type Round = {
   [matchID: string]: Match;
 };
 
+export type TournamentRankings = {
+  [playedID: string]: number;
+};
+
 // Bracket Generators will keep track internally of all the rounds
 // Thus they only need the last round results to keep it up to date
 export interface ITournamentBracketGenerator {
   nextRound(): Round;
   notifyGameCompleted(matchID: string, gameResult: GameResult): boolean;
-  finalResults(): TournamentResults;
+  computeFinalRankings(
+    allMatchesResults: TournamentResults,
+  ): TournamentRankings;
 }
