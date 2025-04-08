@@ -1,6 +1,6 @@
 import type { LobbyMember } from "../../../types/games/lobby/LobbyMember";
 import type { GameSettings } from "../../../interfaces/games/lobby/GameSettings";
-import { WebSocket } from "ws";
+import type { WebSocket } from "ws";
 import { randomUUID } from "node:crypto";
 import MinAndMaxPlayers from "../../../types/games/lobby/MinAndMaxPlayers";
 

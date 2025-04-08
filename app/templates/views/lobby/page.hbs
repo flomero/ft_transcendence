@@ -1,0 +1,27 @@
+<div class="mt-8 flex flex-col items-center justify-center gap-4">
+  <p class="text-fg-muted text-sm">
+    {{#if lobby.isPrivate}}
+      Private Lobby
+    {{else}}
+      Public Lobby
+    {{/if}}
+  </p>
+  <h1>{{hrGameModeName lobby.gameSettings.gameModeName}}</h1>
+  <div class="flex flex-wrap justify-center gap-8 mt-8">
+    {{#each lobby.members}}
+      {{#with this}}
+        {{#> components/lobby/user
+          userId=userId
+          imageUrl=(add "/image/" image_id)
+          userName=username
+          ready=isReady
+          owner=(eq id ../lobby.lobbyOwner)
+        }}
+        {{/components/lobby/user}}
+      {{/with}}
+    {{/each}}
+  </div>
+  <pre class="w-full text-wrap break-words">
+    {{lobbyString}}
+  </pre>
+</div>
