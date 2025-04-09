@@ -1,5 +1,5 @@
 import { PrivateLobbies, PublicLobbies } from "./newLobbyHandler";
-import { Lobby } from "../Lobby";
+import type { Lobby } from "../Lobby";
 
 const setLobby = (lobby: Lobby, state: "public" | "private"): void => {
   if (state === "public") {

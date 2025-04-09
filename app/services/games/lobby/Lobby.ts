@@ -1,6 +1,6 @@
 import type { LobbyMember } from "../../../types/games/lobby/LobbyMember";
 import type { GameSettings } from "../../../interfaces/games/lobby/GameSettings";
-import { WebSocket } from "ws";
+import type { WebSocket } from "ws";
 import { randomUUID } from "node:crypto";
 import MinAndMaxPlayers from "../../../types/games/lobby/MinAndMaxPlayers";
 
@@ -38,7 +38,7 @@ class Lobby {
     };
 
     this.lobbyMembers.set(memberId, newMember);
-    this.sendMessateToAllMembers(
+    this.sendMessageToAllMembers(
       JSON.stringify({ type: "memberJoined", data: memberId }),
     );
   }
@@ -52,16 +52,20 @@ class Lobby {
       throw new Error("[removeMember] Member is not in the lobby");
     }
     this.lobbyMembers.delete(memberId);
-    this.sendMessateToAllMembers(
+    this.sendMessageToAllMembers(
       JSON.stringify({ type: "memberLeft", data: memberId }),
     );
   }
 
   public memberStatus(memberId: string): "notInLobby" | "inLobby" | "inMatch" {
     if (this.lobbyMembers.has(memberId) === false) {
-      throw new Error("Member is not in the lobby");
+      throw new Error("[memberStatus] Member is not in the lobby");
     }
     return this.lobbyMembers.get(memberId)!.userState;
+  }
+
+  public getMember(memberId: string): LobbyMember | undefined {
+    return this.lobbyMembers.get(memberId);
   }
 
   public disconnectMember(memberId: string): void {
@@ -80,9 +84,9 @@ class Lobby {
 
   public addSocketToMember(memberId: string, socket: WebSocket): void {
     if (this.lobbyMembers.has(memberId) === false) {
-      throw new Error("Member is not in the lobby");
+      throw new Error("[addSocketToMember] Member is not in the lobby");
     } else if (this.lobbyMembers.get(memberId)!.socket !== undefined) {
-      throw new Error("Member already has a socket");
+      throw new Error("[addSocketToMember] Member already has a socket");
     }
     this.lobbyMembers.get(memberId)!.socket = socket;
     this.lobbyMembers.get(memberId)!.userState = "inLobby";
@@ -119,7 +123,7 @@ class Lobby {
     return true;
   }
 
-  public sendMessateToAllMembers(message: string): void {
+  public sendMessageToAllMembers(message: string): void {
     this.lobbyMembers.forEach((member) => {
       member.socket?.send(message);
     });
@@ -127,16 +131,18 @@ class Lobby {
 
   public setMemberReadyState(memberId: string, isReady: boolean): void {
     if (this.lobbyMembers.has(memberId) === false) {
-      throw new Error("Member is not in the lobby");
+      throw new Error("[setMemberReadyState] Member is not in the lobby");
     } else if (this.isMemberConnectedToSocket(memberId) === false) {
-      throw new Error("Member is not connected to the socket");
+      throw new Error(
+        "[setMemberReadyState] Member is not connected to the socket",
+      );
     }
     this.lobbyMembers.get(memberId)!.isReady = isReady;
-    this.sendMessateToAllMembers(
+    this.sendMessageToAllMembers(
       JSON.stringify({ type: "memberReady", data: { memberId } }),
     );
     if (this.allMembersReady()) {
-      this.sendMessateToMember(
+      this.sendMessageToMember(
         this.lobbyOwner,
         JSON.stringify({ type: "allReady", data: "" }),
       );
@@ -145,14 +151,14 @@ class Lobby {
 
   public isMemberOwner(memberId: string): boolean {
     if (this.lobbyMembers.has(memberId) === false) {
-      throw new Error("Member is not in the lobby");
+      throw new Error("[isMemberOwner] Member is not in the lobby");
     }
     return this.lobbyOwner === memberId;
   }
 
   public disconnectAllMembers(): void {
     for (const member of this.lobbyMembers.values()) {
-      this.sendMessateToMember(member.id, "Lobby is closed");
+      this.sendMessageToMember(member.id, "Lobby is closed");
       if (member.socket !== undefined) {
         member.socket.close();
       }
@@ -161,7 +167,7 @@ class Lobby {
 
   public isUserLastMember(memberId: string): boolean {
     if (this.lobbyMembers.has(memberId) === false) {
-      throw new Error("Member is not in the lobby");
+      throw new Error("[isMemberOwner] Member is not in the lobby");
     } else if (this.lobbyMembers.size === 1) {
       return true;
     }
@@ -172,7 +178,7 @@ class Lobby {
     memberId: string,
   ): "notInLobby" | "inLobby" | "inMatch" {
     if (this.lobbyMembers.has(memberId) === false) {
-      throw new Error("Member is not in the lobby");
+      throw new Error("[isMemberOwner] Member is not in the lobby");
     }
     return this.lobbyMembers.get(memberId)!.userState;
   }
@@ -248,9 +254,12 @@ class Lobby {
     }
   }
 
-  private sendMessateToMember(memberId: string, message: string): void {
+  private sendMessageToMember(memberId: string, message: string): void {
     if (this.lobbyMembers.get(memberId)?.socket === undefined) {
-      throw new Error("Member is not connected to the socket");
+      console.error(
+        `[sendMessageToMember] Member ${memberId} is not connected to the socket`,
+      );
+      return;
     }
     this.lobbyMembers.get(memberId)?.socket?.send(message);
   }

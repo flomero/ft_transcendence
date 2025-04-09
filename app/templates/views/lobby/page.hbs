@@ -1,0 +1,45 @@
+<div class="mt-8 flex flex-col items-center justify-center gap-4" id="lobby-container">
+  <p class="text-fg-muted text-sm">
+    {{#if lobby.isPrivate}}
+      Private Lobby
+    {{else}}
+      Public Lobby
+    {{/if}}
+  </p>
+  <h1>{{hrGameModeName lobby.gameSettings.gameModeName}}</h1>
+  <button class="text-sm text-fg-muted underline italic cursor-pointer" onclick="lobbyHandler.leaveLobby(event)">Leave</button>
+  <div class="flex flex-wrap justify-center gap-8 mt-8">
+    {{#each lobby.members}}
+      {{#with this}}
+        {{#> components/lobby/user
+          userId=userId
+          imageUrl=(add "/image/" image_id)
+          userName=username
+          ready=isReady
+          owner=(eq id ../lobby.lobbyOwner)
+        }}
+        {{/components/lobby/user}}
+      {{/with}}
+    {{/each}}
+  </div>
+  {{#unless isReady}}
+    {{#> components/button onclick="lobbyHandler.setReady"}}
+      I'm ready
+    {{/components/button}}
+  {{/unless}}
+
+  {{#if isOwner}}
+    {{#if allMembersReady}}
+      {{#> components/button onclick="lobbyHandler.startLobby"}}
+        Start Game
+      {{/components/button}}
+    {{/if}}
+  {{/if}}
+  {{#if lobbyString}}
+    <pre class="mt-8 p-1 bg-bg-muted rounded w-full text-wrap break-words">
+      {{lobbyString}}
+    </pre>
+  {{/if}}
+</div>
+
+<script type="module" src="/public/js/lobby.js"></script>
