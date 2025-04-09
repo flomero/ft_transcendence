@@ -148,7 +148,6 @@ class LobbyHandler {
   }
 
   public async leaveLobby(): Promise<void> {
-    console.log("leaving");
     try {
       const response = await fetch(`/games/lobby/leave/${this.getLobbyId()}`, {
         method: "POST",
@@ -162,7 +161,7 @@ class LobbyHandler {
         this.socket.close();
       }
 
-      window.location.href = "/play";
+      window.router.navigateTo("/play");
     } catch (error) {
       console.error("Error leaving lobby:", error);
     }
@@ -177,10 +176,8 @@ function initializeLobbyHandler() {
   const lobbyHandler = new LobbyHandler();
   lobbyHandler.connect();
   window.lobbyHandler = lobbyHandler;
-  console.log("LobbyHandler initialized");
 }
 
-// Observe changes in the DOM
 const observer = new MutationObserver(() => {
   const lobbyContainer = document.getElementById("lobby-container");
   if (lobbyContainer) {
