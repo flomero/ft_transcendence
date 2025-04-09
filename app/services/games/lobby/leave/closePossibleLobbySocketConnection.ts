@@ -1,5 +1,5 @@
 import { PrivateLobbies, PublicLobbies } from "../new/newLobbyHandler";
-import { Lobby } from "../Lobby";
+import type { Lobby } from "../Lobby";
 
 function closePossibleLobbySocketConnection(
   userId: string,
@@ -25,7 +25,8 @@ function isUserConnectedToLobbySocket(userId: string, lobby: Lobby): boolean {
   if (lobby.isUserInLobby(userId) === false) return false;
   if (lobby.memberStatus(userId) === "inLobby") {
     return true;
-  } else if (lobby.memberStatus(userId) === "inMatch") {
+  }
+  if (lobby.memberStatus(userId) === "inMatch") {
     throw new Error("User can't leave lobby while in match");
   }
   return false;

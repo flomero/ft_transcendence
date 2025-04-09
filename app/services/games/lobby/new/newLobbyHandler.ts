@@ -1,6 +1,6 @@
-import { FastifyRequest, FastifyReply } from "fastify";
+import type { FastifyRequest, FastifyReply } from "fastify";
 import { Lobby } from "../Lobby";
-import NewLobbyRequestBody from "../../../../interfaces/games/lobby/NewLobbyRequestBody";
+import type NewLobbyRequestBody from "../../../../interfaces/games/lobby/NewLobbyRequestBody";
 import { isUserInAnyLobby } from "../lobbyVaidation/isUserInAnyLobby";
 import validateGameModifierCheck from "../lobbyVaidation/validateGameModifierCheck";
 import { setLobby } from "./setLobby";

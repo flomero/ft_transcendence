@@ -1,4 +1,4 @@
-import { FastifyRequest, FastifyReply } from "fastify";
+import type { FastifyRequest, FastifyReply } from "fastify";
 import { validConnectionCheck } from "../lobbyVaidation/validConnectionCheck";
 import { removeUserFromLobby } from "./removeUserFromLobby";
 import closePossibleLobbySocketConnection from "./closePossibleLobbySocketConnection";
