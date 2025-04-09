@@ -152,165 +152,50 @@ export class DoubleElimination implements ITournamentBracketGenerator {
     // Remove from active matches
     this.activeMatches.delete(matchID);
 
-    // Get the bracket this match belongs to
-    const matchBracket = this.matchBracket.get(matchID) || "upper";
-
-    // Handle players differently based on which bracket the match is in
-    if (matchBracket === "upper") {
-      // In upper bracket, winners advance in upper bracket, losers go to lower bracket
-      this.handleUpperBracketResults(matchID, rankedPlayers);
-    } else if (matchBracket === "lower") {
-      // In lower bracket, winners advance, losers are eliminated
-      this.handleLowerBracketResults(matchID, rankedPlayers);
-    } else if (matchBracket === "final") {
-      // In final, record results but no next matches
-      this.handleFinalResults(matchID, rankedPlayers);
-    }
+    // Handle players according to match results
+    this.handleMatchResults(matchID, rankedPlayers);
 
     return true;
   }
 
   /**
-   * Handle results from an upper bracket match
+   * Unified handler for all match results using player rankings directly with seeding
    */
-  protected handleUpperBracketResults(
-    matchID: string,
-    rankedPlayers: string[],
-  ): void {
-    const winner = rankedPlayers[0];
-    const losers = rankedPlayers.slice(1);
-
-    // Winners advance to next match in upper bracket
-    // Losers go to lower bracket
+  protected handleMatchResults(matchID: string, rankedPlayers: string[]): void {
+    const matchBracket = this.matchBracket.get(matchID) || "upper";
     const seedingArray = this.nextMatchSeeding.get(matchID) || [];
 
-    if (seedingArray.length >= 2) {
-      const upperNextMatch = seedingArray[0];
-      const lowerNextMatch = seedingArray[1];
-
-      // Push winner to next upper bracket match
-      if (upperNextMatch) {
-        this.pushPlayerToNextMatch(winner, upperNextMatch);
-      } else {
-        // If no next upper match, winner might be going to final
-        console.log(
-          `Upper bracket winner ${winner} has no next match - might be going to final`,
-        );
-        this.playersLastRound[winner] = this.currentRoundIndex + 1;
-      }
-
-      // Process losers to lower bracket
-      if (lowerNextMatch) {
-        losers.forEach((loser) => {
-          // Mark this player as being in lower bracket
-          this.lowerBracketPlayers.add(loser);
-
-          // Instead of immediately pushing to next match, we store in pending
-          // until we have enough players for a match
-          if (!this.pendingLowerBracketPlayers.has(lowerNextMatch)) {
-            this.pendingLowerBracketPlayers.set(lowerNextMatch, []);
-          }
-          this.pendingLowerBracketPlayers.get(lowerNextMatch)?.push(loser);
-
-          // Check if we have enough players to form a complete match
-          this.processPendingLowerBracketPlayers(lowerNextMatch);
-        });
-      } else {
-        losers.forEach((loser) => {
-          console.log(
-            `Upper bracket loser ${loser} has no next match - recording elimination`,
-          );
-          this.playersLastRound[loser] = this.currentRoundIndex;
-        });
-      }
-    } else {
-      console.error(`Match ${matchID} has invalid seeding information`);
-      rankedPlayers.forEach((player) => {
-        this.playersLastRound[player] = this.currentRoundIndex;
-      });
-    }
-  }
-
-  /**
-   * Process pending players for a lower bracket match if we have enough
-   */
-  protected processPendingLowerBracketPlayers(matchID: string): void {
-    const pendingPlayers = this.pendingLowerBracketPlayers.get(matchID) || [];
-
-    // If we have enough players to form a match, push them all
-    if (pendingPlayers.length >= this.playersPerMatch) {
-      const playersToAdd = pendingPlayers.slice(0, this.playersPerMatch);
-
-      // Remove these players from pending
-      this.pendingLowerBracketPlayers.set(
-        matchID,
-        pendingPlayers.slice(this.playersPerMatch),
-      );
-
-      // Push all players to the match
-      playersToAdd.forEach((player) => {
-        this.pushPlayerToNextMatch(player, matchID);
-      });
-
-      console.log(
-        `Formed complete lower bracket match ${matchID} with players: ${playersToAdd.join(", ")}`,
-      );
-    }
-  }
-
-  /**
-   * Handle results from a lower bracket match
-   */
-  protected handleLowerBracketResults(
-    matchID: string,
-    rankedPlayers: string[],
-  ): void {
-    const winner = rankedPlayers[0];
-    const losers = rankedPlayers.slice(1);
-
-    // Winners advance to next match in lower bracket
-    const seedingArray = this.nextMatchSeeding.get(matchID) || [];
-
-    if (seedingArray.length >= 1) {
-      const nextLowerMatch = seedingArray[0];
-
-      // Push winner to next lower bracket match
-      if (nextLowerMatch) {
-        this.pushPlayerToNextMatch(winner, nextLowerMatch);
-      } else {
-        // If no next lower match, winner might be going to final
-        console.log(
-          `Lower bracket winner ${winner} has no next match - might be going to final`,
-        );
-        this.playersLastRound[winner] = this.currentRoundIndex + 1;
-      }
-
-      // Losers are eliminated (already lost twice)
-      losers.forEach((loser) => {
-        this.eliminatedPlayers.add(loser);
-        this.playersLastRound[loser] = this.currentRoundIndex;
-      });
-    } else {
-      console.error(`Match ${matchID} has invalid seeding information`);
-      rankedPlayers.forEach((player) => {
-        this.playersLastRound[player] = this.currentRoundIndex;
-      });
-    }
-  }
-
-  /**
-   * Handle results from the final match
-   */
-  protected handleFinalResults(matchID: string, rankedPlayers: string[]): void {
-    // In finals, just record the final standings
+    // Process each player based on their ranking
     rankedPlayers.forEach((player, index) => {
-      // For the winner, add an extra round to differentiate from others
-      if (index === 0) {
-        this.playersLastRound[player] = this.currentRoundIndex + 1;
-      } else {
+      // If there's a seeding slot for this player's position
+      if (index < seedingArray.length && seedingArray[index]) {
+        const nextMatchID = seedingArray[index];
+
+        // If player is moving to lower bracket, record this
+        if (matchBracket === "upper" && index > 0) {
+          this.lowerBracketPlayers.add(player);
+        }
+
+        // Push player to their next match
+        this.pushPlayerToNextMatch(player, nextMatchID);
+      }
+      // No seeding slot available - player is eliminated
+      else {
+        // If in lower bracket, mark as eliminated
+        if (matchBracket === "lower") {
+          this.eliminatedPlayers.add(player);
+        }
+
+        // Record this as player's last round
         this.playersLastRound[player] = this.currentRoundIndex;
       }
     });
+
+    // Special case for final match
+    if (matchBracket === "final" && rankedPlayers.length > 0) {
+      // Champion gets an extra round in scoring to differentiate
+      this.playersLastRound[rankedPlayers[0]] = this.currentRoundIndex + 1;
+    }
   }
 
   /**
@@ -562,7 +447,7 @@ export class DoubleElimination implements ITournamentBracketGenerator {
 
     // Add the remaining lowerRounds
     for (
-      let roundIndex = this.upperRounds.length;
+      let roundIndex = this.upperRounds.length - 1;
       roundIndex < this.lowerRounds.length;
       ++roundIndex
     )
@@ -592,29 +477,37 @@ export class DoubleElimination implements ITournamentBracketGenerator {
   protected setupUpperBracketSeeding(): void {
     // For each round in upper bracket
     this.upperRounds.forEach((round: Round, roundIndex) => {
+      const isFirstRound = roundIndex === 0;
       const isLastRound = Object.keys(round).length === 1;
-      const lowerBracketMatchCount = Object.keys(round).length / 2;
+      const lowerBracketMatchCount = Object.keys(round).length;
       const firstLowerBracketRound = roundIndex + 1 === 1 ? 1 : 2 * roundIndex;
 
       Object.keys(round).forEach((matchID: string, matchIndex) => {
-        // const targetLowerBracketMatchID = ((roundIndex + 1) === 1)? 1: (2 * (roundIndex + 1));
-        const targetLowerBracketMatch = `L${firstLowerBracketRound}_M${matchIndex % lowerBracketMatchCount}`;
-
         if (isLastRound)
           this.nextMatchSeeding.set(matchID, [
             "FINAL",
-            targetLowerBracketMatch,
+            `L${firstLowerBracketRound}_M${matchIndex % lowerBracketMatchCount}`,
           ]);
-        else {
+        else if (isFirstRound) {
           const nextUpperMatchIndex = Math.floor(matchIndex / 2);
           const nextUpperMatchID = `W${roundIndex + 2}_M${nextUpperMatchIndex}`;
           this.nextMatchSeeding.set(matchID, [
             nextUpperMatchID,
-            targetLowerBracketMatch,
+            `L${firstLowerBracketRound}_M${matchIndex % Math.floor(lowerBracketMatchCount / 2)}`,
+          ]);
+        } else {
+          const nextUpperMatchIndex = Math.floor(matchIndex / 2);
+          const nextUpperMatchID = `W${roundIndex + 2}_M${nextUpperMatchIndex}`;
+          this.nextMatchSeeding.set(matchID, [
+            nextUpperMatchID,
+            `L${firstLowerBracketRound}_M${matchIndex % lowerBracketMatchCount}`,
           ]);
         }
       });
     });
+
+    console.log(`Seeding:`);
+    console.dir(this.nextMatchSeeding, { depth: null });
   }
 
   /**
