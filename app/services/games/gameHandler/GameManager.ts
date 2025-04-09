@@ -4,6 +4,7 @@ import type Player from "../../../interfaces/games/gameHandler/Player";
 import type { WebSocket } from "ws";
 import gameLoop from "./gameLoop";
 import type GameMessage from "../../../interfaces/games/gameHandler/GameMessage";
+import type { Database } from "sqlite";
 
 class GameManager {
   private id: string = randomUUID();
@@ -17,6 +18,7 @@ class GameManager {
   addPlayer(userId: string): void {
     const newPlayer = {
       id: this.players.size,
+      playerUUID: userId,
     };
     this.players.set(userId, newPlayer);
   }
@@ -60,14 +62,14 @@ class GameManager {
     return true;
   }
 
-  public startGame(): void {
+  public startGame(db: Database): void {
     if (this.allPlayersAreConnected() === false) {
       throw new Error("Not all players are connected");
     }
 
     this.game.startGame();
     if (this.game.getStatus() === GameStatus.RUNNING) {
-      gameLoop(this.id);
+      gameLoop(this.id, db);
     }
   }
   public get getId() {
@@ -76,6 +78,10 @@ class GameManager {
 
   public get getGame() {
     return this.game;
+  }
+
+  public get getScores(): number[] {
+    return this.game.getScores();
   }
 
   public getPlayer(playerId: string) {
@@ -87,6 +93,10 @@ class GameManager {
 
   public handleAction(data: GameMessage): void {
     this.game.handleAction(data.options);
+  }
+
+  public get getPlayersAsArray(): Player[] {
+    return Array.from(this.players.values());
   }
 }
 
