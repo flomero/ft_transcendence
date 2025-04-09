@@ -16,7 +16,7 @@ const saveGameResultInDb = async (gameManagerId: string, db: Database) => {
     const score = gameScores[i];
 
     try {
-      db.run(query, [score, player.playerUUID, gameManager.getId]);
+      await db.run(query, [score, player.playerUUID, gameManager.getId]);
     } catch (err) {
       if (err instanceof Error)
         console.error("Error updating score:", err.message);
