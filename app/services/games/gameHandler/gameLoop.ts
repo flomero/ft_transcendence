@@ -21,7 +21,7 @@ const gameLoop = async (gameManagerId: string, db: Database) => {
     await sleep(sleepIntervalMs);
     loopCounter++;
   }
-  saveGameResultInDb(gameManagerId, db);
+  await saveGameResultInDb(gameManagerId, db);
 };
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
