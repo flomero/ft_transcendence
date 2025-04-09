@@ -14,6 +14,7 @@
 
     "flowerGaussianCA": {
       "className": "FlowerGaussianCA",
+      "playerSampler": "highestScoreBiased",
       "stdAngleDeviationDeg": 60,
       "baseRadiusFactor": 0.45,
       "variationStrength": 0.2,
@@ -51,6 +52,39 @@
       "minVelocityPercent": 20,
       "maxVelocityPercent": 60,
       "lastGoalBiasPercent": 75
+    }
+  },
+
+  "pongPaddlePositionSampler": {
+    "random": {
+      "className": "Random"
+    },
+
+    "naive": {
+      "className": "Naive"
+    },
+
+    "improvedNaive": {
+      "className": "ImprovedNaive",
+      "widthPercentFactor": 90
+    }
+  },
+
+  "pongPlayerSampler": {
+    "uniformComplete": {
+      "className": "UniformComplete"
+    },
+
+    "uniformIncomplete": {
+      "className": "UniformIncomplete"
+    },
+
+    "highestScoreBiased": {
+      "className": "HighestScoreBiased"
+    },
+
+    "lowestScoreBiased": {
+      "className": "LowestScoreBiased"
     }
   }
 }
