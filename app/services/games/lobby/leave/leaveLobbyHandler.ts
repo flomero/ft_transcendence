@@ -1,4 +1,4 @@
-import { FastifyRequest, FastifyReply } from "fastify";
+import type { FastifyRequest, FastifyReply } from "fastify";
 import { validConnectionCheck } from "../lobbyVaidation/validConnectionCheck";
 import { removeUserFromLobby } from "./removeUserFromLobby";
 import closePossibleLobbySocketConnection from "./closePossibleLobbySocketConnection";
@@ -28,10 +28,9 @@ async function leaveLobbyHandler(
       removeLobby(lobbyId);
     }
 
-    reply.send({ message: "You have left the lobby" });
+    return reply.send({ message: "You have left the lobby" });
   } catch (error) {
-    if (error instanceof Error) reply.code(400).send({ error: error.message });
-    return;
+    if (error instanceof Error) return reply.badRequest(error.message);
   }
 }
 

@@ -1,4 +1,4 @@
-import { FastifyPluginAsync } from "fastify";
+import type { FastifyPluginAsync } from "fastify";
 import readyLobbyHandler from "../../../../services/games/lobby/ready/readyLobbyHandler";
 import lockLobbySchema from "../../../../schemas/games/lobby/lockLobbySchema";
 
