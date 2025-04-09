@@ -10,9 +10,7 @@ export const STRATEGY_REGISTRY: StrategyRegistry = {};
  * each strategy module, storing both the class and any additional parameters.
  */
 export async function loadStrategyRegistry(): Promise<void> {
-  const jsonPath = path.join(
-    "/workspaces/ft_transcendence/app/strategyRegistry.json",
-  );
+  const jsonPath = path.resolve(__dirname, "../../../strategyRegistry.json");
 
   let jsonData: string;
   try {

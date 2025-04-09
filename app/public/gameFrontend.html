@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Multiplayer Pong</title>
+    <style>
+      canvas {
+        background: black;
+        display: block;
+        margin: auto;
+      }
+      .controls {
+        text-align: center;
+        margin-top: 10px;
+        color: #333;
+        font-family: Arial, sans-serif;
+      }
+      .player-id {
+        font-weight: bold;
+        color: #0066cc;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="gameCanvas"></canvas>
+    <div class="controls">
+      Player: <span class="player-id">0</span> | Use Arrow Keys to move |
+      Left/Right arrows to switch players
+    </div>
+    <script>
+      const canvas = document.getElementById("gameCanvas");
+      const ctx = canvas.getContext("2d");
+
+      let ratio = 0.0;
+      let playerCount = 2;
+
+      const gameModeName = "classicPong";
+
+      if (gameModeName === "multiplayerPong") {
+        canvas.width = 800;
+        canvas.height = 800;
+        ratio = canvas.width / 100.0;
+        playerCount = 5;
+      } else if (gameModeName === "classicPong") {
+        canvas.width = 800;
+        canvas.height = 400;
+        ratio = canvas.width / 200.0;
+      }
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const gameId = urlParams.get("gameId");
+      const GAME_WS_URL = `ws://localhost:3000/games/${gameId}`;
+
+      let gameState = {};
+      const gameSocket = new WebSocket(GAME_WS_URL);
+
+      // Connect to the WebSocket
+
+      gameSocket.onopen = () => {
+        console.log("Connected to game WebSocket");
+      };
+
+      gameSocket.onmessage = (event) => {
+        const message = JSON.parse(event.data);
+        if (message.type === "gameState") {
+          gameState = message.data;
+          // console.log("Received gameState:", gameState);
+        }
+      };
+
+      gameSocket.onclose = () => {
+        console.log("Game WebSocket closed");
+      };
+
+      gameSocket.onerror = (error) => {
+        console.error("WebSocket error:", error);
+      };
+
+      document.addEventListener("keydown", (event) => {
+        let action = {
+          type: "userInput",
+          options: {
+            type: null,
+            timestamp: Date.now(),
+          },
+        };
+
+        if (event.key === "ArrowUp") action.options.type = "UP";
+        if (event.key === "ArrowDown") action.options.type = "DOWN";
+
+        if (action.options.type) {
+          gameSocket.send(JSON.stringify(action));
+        }
+      });
+
+      document.addEventListener("keyup", (event) => {
+        let action = {
+          type: "userInput",
+          options: {
+            type: null,
+            timestamp: Date.now(),
+          },
+        };
+
+        if (event.key === "ArrowUp" || event.key === "ArrowDown")
+          action.options.type = "STOP";
+
+        if (action.options.type) {
+          gameSocket.send(JSON.stringify(action));
+        }
+      });
+
+      let lastUpdateTime = performance.now();
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (!gameState.balls) return;
+
+        // Draw balls
+        gameState.balls?.forEach((ball) => {
+          if (ball.isVisible) {
+            ctx.fillStyle = "white";
+            ctx.beginPath();
+            ctx.arc(
+              ball.x * ratio,
+              ball.y * ratio,
+              ball.radius * ratio,
+              0,
+              Math.PI * 2,
+            );
+            ctx.fill();
+          }
+        });
+
+        // Draw paddles
+        gameState.paddles?.forEach((paddle, index) => {
+          if (paddle.isVisible) {
+            // Highlight the current player's paddle
+            ctx.fillStyle = "white";
+
+            ctx.save(); // Save the current transformation state
+
+            // Move the origin to the paddle's position
+            ctx.translate(paddle.x * ratio, paddle.y * ratio);
+
+            // Rotate using the paddle's direction
+            let angle = Math.atan2(paddle.dy, paddle.dx);
+            ctx.rotate(angle);
+
+            // Draw the paddle (centered at the new origin)
+            ctx.fillRect(
+              -(paddle.width * ratio) / 2, // Center along width
+              -(paddle.height * ratio) / 2, // Center along height
+              paddle.width * ratio,
+              paddle.height * ratio,
+            );
+
+            ctx.restore(); // Restore the previous transformation state
+          }
+        });
+
+        // Draw the walls -> For debugging purposes
+        gameState.walls?.forEach((wall) => {
+          if (wall.isVisible) {
+            ctx.save();
+            ctx.translate(wall.x * ratio, wall.y * ratio);
+            let angle = Math.atan2(wall.dy, wall.dx);
+            ctx.rotate(angle);
+
+            ctx.strokeStyle = "red";
+            ctx.strokeRect(
+              (-wall.width * ratio) / 2,
+              (-wall.height * ratio) / 2,
+              wall.width * ratio,
+              wall.height * ratio,
+            );
+
+            ctx.restore();
+          }
+        });
+
+        // Draw the powerUps
+
+        if (gameState.modifiersData) {
+          gameState.modifiersData.spawnedPowerUps?.forEach((entry) => {
+            const type = entry[0];
+            const powerUp = entry[1];
+            if (powerUp.isVisible) {
+              switch (type) {
+                case "speedBoost":
+                  ctx.fillStyle = "red";
+                  break;
+
+                case "blinkingBall":
+                  ctx.fillStyle = "blue";
+                  break;
+
+                case "multiball_modifier":
+                  ctx.fillStyle = "green";
+                  break;
+
+                case "grasping_vines_debuff_modifier":
+                  ctx.fillStyle = "yellow";
+                  break;
+
+                case "black_hole_debuff_modifier":
+                  ctx.fillStyle = "purple";
+                  break;
+
+                case "carousel_debuff_modifier":
+                  ctx.fillStyle = "lime";
+                  break;
+
+                case "shooting_modifier":
+                  ctx.fillStyle = "yellow";
+                  break;
+
+                default:
+                  ctx.fillStyle = "orange";
+              }
+              ctx.beginPath();
+              ctx.arc(
+                powerUp.x * ratio,
+                powerUp.y * ratio,
+                powerUp.radius * ratio,
+                0,
+                Math.PI * 2,
+              );
+              ctx.fill();
+            }
+          });
+        }
+
+        // Draw scores if available
+        if (gameState.scores) {
+          ctx.fillStyle = "white";
+          ctx.font = "24px Arial";
+          ctx.textAlign = "center";
+
+          // Display scores at the top of the canvas
+          ctx.fillText(
+            `Scores: ${JSON.stringify(gameState.scores)}`,
+            canvas.width / 2,
+            30,
+          );
+        }
+      }
+
+      function gameLoop() {
+        draw();
+        requestAnimationFrame(gameLoop);
+      }
+
+      gameLoop();
+    </script>
+  </body>
+</html>

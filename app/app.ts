@@ -20,6 +20,7 @@ const envSchema = {
     GOOGLE_CLIENT_SECRET: { type: "string" },
     GOOGLE_CLIENT_ID: { type: "string" },
     PUBLIC_URL: { type: "string" },
+    NODE_ENV: { type: "string", default: "production" },
   },
 };
 
@@ -31,6 +32,7 @@ declare module "fastify" {
       GOOGLE_CLIENT_SECRET: string;
       GOOGLE_CLIENT_ID: string;
       PUBLIC_URL: string;
+      NODE_ENV: string;
     };
   }
 }

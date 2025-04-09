@@ -6,9 +6,7 @@ import {
 } from "../../types/games/gameRegistry";
 
 export async function loadGameRegistry(): Promise<void> {
-  const jsonPath = path.join(
-    "/workspaces/ft_transcendence/app/gameRegistry.json",
-  );
+  const jsonPath = path.resolve(__dirname, "../../../gameRegistry.json");
 
   let jsonData: string;
   try {

@@ -18,4 +18,11 @@ const addTransferMemberToGameManager = (
   for (const member of lobbyMember) gameManager.addPlayer(member.id);
 };
 
+// const printLobby = (lobbyId: string) => {
+//   const lobby = getLobby(lobbyId);
+//   lobby.sendMessageToAllMembers(
+//     JSON.stringify("SETTINGS: " + lobby.getGameSettings),
+//   );
+// };
+
 export default gameManagerCreate;
