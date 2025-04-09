@@ -63,27 +63,31 @@ class LobbyHandler {
       case "allReady":
         this.handleAllReady();
         break;
+      case "gameStarted":
+        this.handleGameStart(message.data);
+        break;
       default:
         console.log("Unknown message type:", message.type);
     }
   }
 
   private handleMemberJoined(memberId: string): void {
-    console.log("Member joined:", memberId);
     // Refresh the lobby UI or add the new member to the display
     this.refreshLobby();
   }
 
   private handleMemberLeft(memberId: string): void {
-    console.log("Member left:", memberId);
     // Refresh the lobby UI or remove the member from the display
     this.refreshLobby();
   }
 
   private handleMemberReady(data: { memberId: string }): void {
-    console.log("Member ready status changed:", data.memberId);
     // Update the ready status in the UI
     this.refreshLobby();
+  }
+
+  private handleGameStart(gameId: string): void {
+    window.router.navigateTo(`/play/game/${gameId}`);
   }
 
   private handleAllReady(): void {
@@ -184,5 +188,4 @@ const observer = new MutationObserver(() => {
   }
 });
 
-// Start observing the body for changes
 observer.observe(document.body, { childList: true, subtree: true });
