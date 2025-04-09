@@ -70,5 +70,6 @@ export abstract class GameBase {
   }
 
   abstract getResults(): number[];
+  abstract getScores(): number[];
   abstract getSettings(): Record<string, any>;
 }
