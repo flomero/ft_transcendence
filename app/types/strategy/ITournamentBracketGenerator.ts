@@ -30,4 +30,5 @@ export interface ITournamentBracketGenerator {
   computeFinalRankings(
     allMatchesResults: TournamentResults,
   ): TournamentRankings;
+  getCompleteBracket(): Round[];
 }

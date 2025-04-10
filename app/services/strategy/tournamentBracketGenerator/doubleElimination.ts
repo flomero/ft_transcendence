@@ -674,4 +674,8 @@ export class DoubleElimination implements ITournamentBracketGenerator {
   isMatchActive(matchID: string): boolean {
     return this.activeMatches.has(matchID);
   }
+
+  getCompleteBracket(): Round[] {
+    return this.allRounds;
+  }
 }

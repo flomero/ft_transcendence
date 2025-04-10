@@ -419,4 +419,8 @@ export class RoundRobin implements ITournamentBracketGenerator {
   protected isMatchActive(matchID: string): boolean {
     return this.activeMatches.has(matchID);
   }
+
+  getCompleteBracket(): Round[] {
+    return this.possibleRounds;
+  }
 }
