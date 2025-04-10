@@ -8,8 +8,8 @@ const addGameToDatabase = async (
   db: Database,
   gameSettings: GameSettings,
 ) => {
-  addMatchToDatabase(gameManager, db, gameSettings);
-  addUserMatchesToDB(gameManager, db);
+  await addMatchToDatabase(gameManager, db, gameSettings);
+  await addUserMatchesToDB(gameManager, db);
 };
 
 const addUserMatchesToDB = async (gameManager: GameManager, db: Database) => {
@@ -22,7 +22,7 @@ const addUserMatchesToDB = async (gameManager: GameManager, db: Database) => {
   VALUES (?, ?, ?, ?)
   `;
   for (const userId of gameManager.players.keys()) {
-    db.run(sql, randomUUID(), userId, gameManager.getId, 0);
+    await db.run(sql, randomUUID(), userId, gameManager.getId, 0);
   }
 };
 
@@ -43,7 +43,7 @@ const addMatchToDatabase = async (
   VALUES (?, ?, ?, ?, ?, ?, ?)
   `;
 
-  db.run(
+  await db.run(
     sql,
     gameManager.getId,
     gameSettings.gameName,
