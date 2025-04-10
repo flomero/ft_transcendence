@@ -8,6 +8,8 @@ import {
 import { TournamentResults } from "../../../types/tournament/tournament";
 import { STRATEGY_REGISTRY } from "../strategyRegistryLoader";
 import { RNG } from "../../games/rng";
+import { StrategyManager } from "../strategyManager";
+import { IUserSampler } from "../../../types/strategy/IUserSampler";
 
 type PlayerStats = {
   wins: number;
@@ -28,9 +30,10 @@ export class SwissRound implements ITournamentBracketGenerator {
   protected finalGamesCount: number;
   protected playersPerMatch: number;
   protected rng: RNG = new RNG();
+  protected userSampler: StrategyManager<IUserSampler, "sampleUser">;
 
   // Track current round
-  protected currentRoundIndex: number = 0;
+  protected currentRoundIndex: number = -1;
 
   // Store all players and their stats
   protected playerStats: Map<string, PlayerStats> = new Map();
@@ -41,8 +44,20 @@ export class SwissRound implements ITournamentBracketGenerator {
   // Store results for ranking computation
   protected matchResults: Map<string, Match> = new Map();
 
+  // Track ranked players by match
+  protected matchRankedPlayers: Map<string, string[]> = new Map();
+
   // Store all rounds for final ranking
   protected allRounds: Round[] = [];
+
+  // Track which players should move to which matches
+  protected playersNextMatch: Map<string, string> = new Map();
+
+  // Store players who need to be assigned to matches in future rounds
+  protected pendingPlayers: Map<number, string[]> = new Map();
+
+  // Track all active players (not eliminated or qualified)
+  protected activePlayers: Set<string> = new Set();
 
   constructor(tournamentData: Record<string, any>) {
     this.tournamentData = tournamentData;
@@ -55,8 +70,23 @@ export class SwissRound implements ITournamentBracketGenerator {
     this.finalGamesCount =
       STRATEGY_REGISTRY.tournamentBracketGenerator[this.name].finalGamesCount;
 
+    // Initialize user sampler
+    this.userSampler = new StrategyManager(
+      this.tournamentData.initialSeedingMethod || "random",
+      "userSampler",
+      "sampleUser",
+    );
+
     // Initialize player stats
     this.initializePlayerStats();
+
+    // Initialize active players
+    this.tournamentData.players.forEach((playerId: string) => {
+      this.activePlayers.add(playerId);
+    });
+
+    // Generate the entire bracket structure
+    this.generateEntireBracket();
 
     console.log(
       `Swiss Round Tournament initialized with ${this.tournamentData.players.length} players`,
@@ -64,6 +94,7 @@ export class SwissRound implements ITournamentBracketGenerator {
     console.log(
       `Round count: ${this.roundCount}, Games per match: ${this.gamesCount}, Final games: ${this.finalGamesCount}`,
     );
+    console.log(`Total rounds generated: ${this.allRounds.length}`);
   }
 
   /**
@@ -83,338 +114,382 @@ export class SwissRound implements ITournamentBracketGenerator {
     }
   }
 
-  // ----------  Bracket Generation  ---------- //
+  /**
+   * Generate the entire bracket structure
+   */
+  private generateEntireBracket(): void {
+    console.log(`Generating complete Swiss Round bracket`);
+
+    // Seed players into the first round
+    this.seedPlayersIntoFirstRound();
+
+    // Generate additional rounds with placeholder matches
+    this.generateAdditionalRounds();
+
+    // Log the generated bracket structure
+    console.log(`Generated ${this.allRounds.length} rounds`);
+    this.allRounds.forEach((round, index) => {
+      console.log(`Round ${index + 1}: ${Object.keys(round).length} matches`);
+      console.dir(round, { depth: null });
+    });
+  }
 
   /**
-   * Generate the next round of matches
+   * Seed players into the first round using the userSampler
+   */
+  private seedPlayersIntoFirstRound(): void {
+    const players = [...this.tournamentData.players];
+    let remainingPlayers = [...players];
+
+    // Create the first round
+    const firstRound: Round = {};
+
+    // Calculate how many matches we need in the first round
+    const matchCount = Math.ceil(players.length / this.playersPerMatch);
+
+    // Create matches and seed players
+    for (let i = 0; i < matchCount; i++) {
+      const matchID = `R1_M${i}`;
+      const matchPlayers: string[] = [];
+
+      // Select players for this match using the userSampler
+      for (
+        let j = 0;
+        j < this.playersPerMatch && remainingPlayers.length > 0;
+        j++
+      ) {
+        // Sample a player using the userSampler
+        const selectedPlayer =
+          this.userSampler.executeStrategy(remainingPlayers);
+        matchPlayers.push(selectedPlayer);
+
+        // Remove the selected player from the remaining players
+        remainingPlayers = remainingPlayers.filter((p) => p !== selectedPlayer);
+      }
+
+      // Create the match with the selected players
+      const results: Record<string, number[]> = {};
+      matchPlayers.forEach((playerId) => {
+        results[playerId] = [];
+      });
+
+      firstRound[matchID] = {
+        gamesCount: this.gamesCount,
+        winner: "",
+        results,
+      };
+    }
+
+    // Add the first round to allRounds
+    this.allRounds.push(firstRound);
+  }
+
+  /**
+   * Generate additional rounds with placeholder matches
+   */
+  private generateAdditionalRounds(): void {
+    // We already have the first round, so start from the second
+    for (let roundIndex = 1; roundIndex < this.roundCount * 2; roundIndex++) {
+      const round: Round = {};
+      // Calculate minimum number of matches needed for this round
+      const matchCount = Math.ceil(
+        this.tournamentData.players.length / this.playersPerMatch / 2,
+      );
+
+      // Create placeholder matches for this round
+      for (let i = 0; i < matchCount; i++) {
+        const matchID = `R${roundIndex + 1}_M${i}`;
+
+        // Create placeholder player IDs for this match
+        const placeholderPlayers: string[] = [];
+        for (let j = 0; j < this.playersPerMatch; j++) {
+          placeholderPlayers.push(`TBD_R${roundIndex + 1}_M${i}_P${j}`);
+        }
+
+        // Initialize results for each player
+        const results: Record<string, number[]> = {};
+        placeholderPlayers.forEach((playerId) => {
+          results[playerId] = [];
+        });
+
+        // Add the match to the round
+        const isFinalRound = roundIndex + 1 >= this.roundCount;
+        const gamesForMatch = isFinalRound
+          ? this.finalGamesCount
+          : this.gamesCount;
+
+        round[matchID] = {
+          gamesCount: gamesForMatch,
+          winner: "",
+          results,
+        };
+      }
+
+      // Add the round to allRounds
+      this.allRounds.push(round);
+    }
+
+    // Initialize pendingPlayers for each round
+    for (let i = 0; i <= this.allRounds.length; i++) {
+      this.pendingPlayers.set(i, []);
+    }
+  }
+
+  /**
+   * Returns the next round of matches to be played
    */
   nextRound(): Round {
     // Clear active matches for the new round
     this.activeMatches.clear();
 
-    // Check if all players are either qualified or eliminated
-    if (this.isSwissTournamentComplete()) {
-      console.log(
-        "Tournament complete - all players are qualified or eliminated",
-      );
-      return {};
-    }
-
-    // Increment round index
+    // Move to next round
     this.currentRoundIndex++;
-    console.log(`Generating round ${this.currentRoundIndex}`);
 
-    // Create new round
-    const round: Round = {};
-
-    // Get active players (not qualified, not eliminated)
-    const activePlayers = this.getActivePlayers();
-    console.log(
-      `Active players for round ${this.currentRoundIndex}: ${activePlayers.length}`,
-    );
-
-    if (activePlayers.length === 0) {
+    // If we're out of rounds, return empty round
+    if (this.currentRoundIndex >= this.allRounds.length) {
       return {};
     }
 
-    // Group players by win count
-    const playersByWinCount = this.groupPlayersByWinCount(activePlayers);
+    // Get the current round
+    const currentRound = { ...this.allRounds[this.currentRoundIndex] };
 
-    // Create matches within each win group
-    let matchCounter = 0;
-
-    // Process win groups in order (optional - could be useful for better pairings)
-    const winCounts = Array.from(playersByWinCount.keys()).sort(
-      (a, b) => a - b,
-    );
-
-    for (const winCount of winCounts) {
-      const players = playersByWinCount.get(winCount) || [];
-      console.log(`Win group ${winCount}: ${players.length} players`);
-
-      // Skip if no active players in this group
-      if (players.length === 0) continue;
-
-      // Shuffle players for random pairings within the same win group
-      let shuffledPlayers = this.shufflePlayers(players);
-
-      // If we have an odd number of players and there are other win groups,
-      // we might want to pair with adjacent win groups
-      if (shuffledPlayers.length % this.playersPerMatch !== 0) {
-        console.log(
-          `Odd number of players (${shuffledPlayers.length}) in win group ${winCount}`,
-        );
-
-        // Try to find players from adjacent win groups if needed
-        // This is a basic implementation - could be more sophisticated
-        const adjacentPlayers = this.findAdjacentGroupPlayers(
-          winCount,
-          playersByWinCount,
-        );
-        if (adjacentPlayers.length > 0) {
-          shuffledPlayers = [...shuffledPlayers, ...adjacentPlayers];
-        }
-      }
-
-      // Create matches for this group
-      while (shuffledPlayers.length >= this.playersPerMatch) {
-        const matchPlayers: string[] = [];
-
-        // Try to create valid matches where players haven't faced each other
-        const validPlayersFound = this.findValidMatchPlayers(
-          shuffledPlayers,
-          matchPlayers,
-        );
-
-        // If we couldn't find valid players, just take the first ones
-        if (!validPlayersFound) {
-          for (let i = 0; i < this.playersPerMatch; i++) {
-            if (shuffledPlayers.length > 0) {
-              matchPlayers.push(shuffledPlayers.shift()!);
-            }
-          }
-        }
-
-        // If we have enough players for a match
-        if (matchPlayers.length === this.playersPerMatch) {
-          const matchID = `R${this.currentRoundIndex}_M${matchCounter}`;
-          matchCounter++;
-
-          // Determine if this is a qualification or elimination match for any player
-          const isFinalMatch = matchPlayers.some((playerId) => {
-            const stats = this.playerStats.get(playerId)!;
-            return (
-              stats.wins === this.roundCount - 1 ||
-              stats.losses === this.roundCount - 1
-            );
-          });
-
-          // Create results object for the match
-          const results: Record<string, number[]> = {};
-          matchPlayers.forEach((playerId) => {
-            results[playerId] = [];
-          });
-
-          // Create the match
-          round[matchID] = {
-            gamesCount: isFinalMatch ? this.finalGamesCount : this.gamesCount,
-            winner: "",
-            results,
-          };
-
-          // Track the match as active
-          this.activeMatches.add(matchID);
-
-          // Update opponent records
-          this.updateOpponentRecords(matchPlayers);
-
-          console.log(
-            `Created match ${matchID} with ${matchPlayers.length} players`,
-          );
-        }
-      }
-
-      // Handle remaining players (if any)
-      if (
-        shuffledPlayers.length > 0 &&
-        shuffledPlayers.length < this.playersPerMatch
-      ) {
-        // These players get a bye (no match this round)
-        shuffledPlayers.forEach((playerId) => {
-          console.log(
-            `Player ${playerId} gets a bye in round ${this.currentRoundIndex}`,
-          );
-
-          // Update stats for bye players
-          const stats = this.playerStats.get(playerId)!;
-          stats.lastRoundPlayed = this.currentRoundIndex;
-        });
-      }
+    // If this is not the first round, assign players to matches
+    if (this.currentRoundIndex > 0) {
+      this.assignPlayersToMatches(currentRound);
     }
 
-    // Store this round
-    this.allRounds.push({ ...round });
+    // Set up tracking for the new round's matches
+    Object.keys(currentRound).forEach((matchID) => {
+      // Only add a match if it has real players (not just placeholders)
+      const match = currentRound[matchID];
+      const hasRealPlayers = Object.keys(match.results).some(
+        (playerId) => !playerId.startsWith("TBD_"),
+      );
 
-    return round;
+      if (hasRealPlayers) {
+        this.activeMatches.add(matchID);
+      }
+    });
+
+    // Add the updated round back to the collection
+    this.allRounds[this.currentRoundIndex] = currentRound;
+
+    return currentRound;
   }
 
   /**
-   * Find players who haven't played against each other
+   * Group players by their record (wins-losses)
    */
-  private findValidMatchPlayers(
-    availablePlayers: string[],
-    matchPlayers: string[],
-  ): boolean {
-    if (this.currentRoundIndex <= 1) {
-      // In the first round, just take the first players
-      for (let i = 0; i < this.playersPerMatch; i++) {
-        if (availablePlayers.length > 0) {
-          matchPlayers.push(availablePlayers.shift()!);
-        }
+  private groupPlayersByRecord(): Map<string, string[]> {
+    const recordGroups = new Map<string, string[]>();
+
+    // Group active players by their win-loss record
+    for (const playerId of this.activePlayers) {
+      const stats = this.playerStats.get(playerId)!;
+
+      // Skip eliminated or qualified players
+      if (stats.eliminated || stats.qualified) {
+        continue;
       }
-      return true;
+
+      const record = `${stats.wins}-${stats.losses}`;
+
+      if (!recordGroups.has(record)) {
+        recordGroups.set(record, []);
+      }
+
+      recordGroups.get(record)!.push(playerId);
     }
 
-    // For later rounds, try to find players who haven't played each other
-    for (let i = 0; i < this.playersPerMatch; i++) {
-      if (i === 0) {
-        // First player can be anyone
-        matchPlayers.push(availablePlayers.shift()!);
-      } else {
-        // For subsequent players, find one who hasn't played against all current match players
-        let validPlayerFound = false;
+    return recordGroups;
+  }
 
-        for (let j = 0; j < availablePlayers.length; j++) {
-          const candidatePlayer = availablePlayers[j];
-          const candidateStats = this.playerStats.get(candidatePlayer)!;
+  /**
+   * Assign players to matches for the current round based on their stats
+   */
+  private assignPlayersToMatches(round: Round): void {
+    // Group players by their record
+    const playersByRecord = this.groupPlayersByRecord();
 
-          // Check if this player has played against any current match players
-          let hasPlayedAgainstAny = false;
-          for (const existingPlayer of matchPlayers) {
-            if (candidateStats.opponents.has(existingPlayer)) {
-              hasPlayedAgainstAny = true;
+    // Create a pool of all players that need to be assigned
+    let allPendingPlayers: string[] = [];
+    for (const players of playersByRecord.values()) {
+      allPendingPlayers = allPendingPlayers.concat(players);
+    }
+
+    console.log(
+      `Assigning ${allPendingPlayers.length} players to round ${this.currentRoundIndex + 1}`,
+    );
+
+    // Log players by their records
+    for (const [record, players] of playersByRecord.entries()) {
+      console.log(
+        `Assigning players with ${record}: ${players.length} players`,
+      );
+    }
+
+    // Sort rounds by win count (descending) then loss count (ascending)
+    const sortedRecords = Array.from(playersByRecord.keys()).sort((a, b) => {
+      const [winsA, lossesA] = a.split("-").map(Number);
+      const [winsB, lossesB] = b.split("-").map(Number);
+
+      if (winsA !== winsB) return winsB - winsA;
+      return lossesA - lossesB;
+    });
+
+    // Process each record group
+    let matchIndex = 0;
+    const assignedPlayers = new Set<string>();
+
+    for (const record of sortedRecords) {
+      const players = playersByRecord.get(record) || [];
+      let remainingPlayers = this.shufflePlayers(players);
+
+      // Create matches for this record group
+      while (remainingPlayers.length >= this.playersPerMatch) {
+        // Find or create a match
+        const matchID = `R${this.currentRoundIndex + 1}_M${matchIndex}`;
+        matchIndex++;
+
+        // Find match in the round or create a new one
+        if (!round[matchID]) {
+          // Create a new match if needed
+          const isFinalRound = this.currentRoundIndex >= this.roundCount;
+          const gamesForMatch = isFinalRound
+            ? this.finalGamesCount
+            : this.gamesCount;
+
+          round[matchID] = {
+            gamesCount: gamesForMatch,
+            winner: "",
+            results: {},
+          };
+        }
+
+        // Clear any placeholder players
+        const match = round[matchID];
+        for (const pid of Object.keys(match.results)) {
+          if (pid.startsWith("TBD_")) {
+            delete match.results[pid];
+          }
+        }
+
+        // Add real players to the match
+        const matchPlayers: string[] = [];
+
+        for (
+          let i = 0;
+          i < this.playersPerMatch && remainingPlayers.length > 0;
+          i++
+        ) {
+          // Try to find a player who hasn't played against others in this match
+          let selectedIndex = -1;
+
+          for (let j = 0; j < remainingPlayers.length; j++) {
+            const playerId = remainingPlayers[j];
+            const playerStats = this.playerStats.get(playerId)!;
+
+            // Check if this player has played against any currently selected players
+            const hasPlayedAgainst = matchPlayers.some((opponent) =>
+              playerStats.opponents.has(opponent),
+            );
+
+            if (!hasPlayedAgainst) {
+              selectedIndex = j;
               break;
             }
           }
 
-          if (!hasPlayedAgainstAny) {
-            // Found a valid player
-            matchPlayers.push(candidatePlayer);
-            availablePlayers.splice(j, 1);
-            validPlayerFound = true;
-            break;
+          // If no perfect match found, just take the first available player
+          if (selectedIndex === -1 && remainingPlayers.length > 0) {
+            selectedIndex = 0;
+          }
+
+          // Add player to match if found
+          if (selectedIndex !== -1) {
+            const playerId = remainingPlayers[selectedIndex];
+            matchPlayers.push(playerId);
+            match.results[playerId] = [];
+            assignedPlayers.add(playerId);
+            remainingPlayers.splice(selectedIndex, 1);
           }
         }
 
-        if (!validPlayerFound) {
-          // If no valid player found, return false
-          return false;
+        // Register this as an active match if it has players
+        if (Object.keys(match.results).length > 0) {
+          this.activeMatches.add(matchID);
         }
       }
-    }
 
-    return true;
-  }
-
-  /**
-   * Find players from adjacent win groups for pairing
-   */
-  private findAdjacentGroupPlayers(
-    winCount: number,
-    playersByWinCount: Map<number, string[]>,
-  ): string[] {
-    // Try one win count higher, then one lower
-    const higherWinCount = winCount + 1;
-    const lowerWinCount = winCount - 1;
-
-    // Check higher win count first
-    if (playersByWinCount.has(higherWinCount)) {
-      const players = playersByWinCount.get(higherWinCount)!;
-      if (players.length > 0) {
-        const selectedPlayer = players.shift()!;
-        console.log(
-          `Selected player ${selectedPlayer} from higher win group ${higherWinCount}`,
-        );
-        return [selectedPlayer];
-      }
-    }
-
-    // Then check lower win count
-    if (playersByWinCount.has(lowerWinCount)) {
-      const players = playersByWinCount.get(lowerWinCount)!;
-      if (players.length > 0) {
-        const selectedPlayer = players.shift()!;
-        console.log(
-          `Selected player ${selectedPlayer} from lower win group ${lowerWinCount}`,
-        );
-        return [selectedPlayer];
-      }
-    }
-
-    return [];
-  }
-
-  /**
-   * Get a list of active players (not qualified or eliminated)
-   */
-  private getActivePlayers(): string[] {
-    const activePlayers: string[] = [];
-
-    for (const [playerId, stats] of this.playerStats.entries()) {
-      if (!stats.qualified && !stats.eliminated) {
-        activePlayers.push(playerId);
-      }
-    }
-
-    return activePlayers;
-  }
-
-  /**
-   * Update the opponent records for all players in a match
-   */
-  private updateOpponentRecords(players: string[]): void {
-    for (let i = 0; i < players.length; i++) {
-      const playerStats = this.playerStats.get(players[i])!;
-
-      // Add all other players as opponents
-      for (let j = 0; j < players.length; j++) {
-        if (i !== j) {
-          playerStats.opponents.add(players[j]);
+      // Add any remaining players to the unassigned pool for the next record group
+      remainingPlayers.forEach((playerId) => {
+        if (!assignedPlayers.has(playerId)) {
+          // Will be handled in cleanup pass
+          console.log(
+            `Player ${playerId} couldn't be assigned in their record group`,
+          );
         }
+      });
+    }
+
+    // Handle unassigned players as a final pass
+    const unassignedPlayers = allPendingPlayers.filter(
+      (playerId) => !assignedPlayers.has(playerId),
+    );
+
+    if (unassignedPlayers.length > 0) {
+      console.log(`Handling ${unassignedPlayers.length} unassigned players`);
+
+      let currentPlayers = [...unassignedPlayers];
+
+      while (currentPlayers.length > 0) {
+        // Create a new match for these players
+        const matchID = `R${this.currentRoundIndex + 1}_M${matchIndex}`;
+        matchIndex++;
+
+        // Create the match
+        const isFinalRound = this.currentRoundIndex >= this.roundCount;
+        const gamesForMatch = isFinalRound
+          ? this.finalGamesCount
+          : this.gamesCount;
+
+        const match: Match = {
+          gamesCount: gamesForMatch,
+          winner: "",
+          results: {},
+        };
+
+        // Add players to the match (up to player count or all remaining)
+        const playerCount = Math.min(
+          this.playersPerMatch,
+          currentPlayers.length,
+        );
+        for (let i = 0; i < playerCount; i++) {
+          const playerId = currentPlayers[i];
+          match.results[playerId] = [];
+        }
+
+        // Remove added players from the pool
+        currentPlayers = currentPlayers.slice(playerCount);
+
+        // Add match to round
+        round[matchID] = match;
+        this.activeMatches.add(matchID);
       }
     }
-  }
 
-  /**
-   * Group players by their win count
-   */
-  private groupPlayersByWinCount(
-    activePlayers: string[],
-  ): Map<number, string[]> {
-    const playersByWins = new Map<number, string[]>();
+    // Clean up any matches that still only have placeholder players
+    Object.keys(round).forEach((matchID) => {
+      const match = round[matchID];
+      const hasRealPlayers = Object.keys(match.results).some(
+        (pid) => !pid.startsWith("TBD_"),
+      );
 
-    for (const playerId of activePlayers) {
-      const stats = this.playerStats.get(playerId)!;
-      const winCount = stats.wins;
-
-      if (!playersByWins.has(winCount)) {
-        playersByWins.set(winCount, []);
+      if (!hasRealPlayers) {
+        delete round[matchID];
       }
-
-      playersByWins.get(winCount)!.push(playerId);
-    }
-
-    return playersByWins;
+    });
   }
-
-  /**
-   * Shuffle players for random pairing
-   */
-  private shufflePlayers(players: string[]): string[] {
-    const shuffled = [...players];
-
-    // Fisher-Yates shuffle
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(this.rng.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-
-    return shuffled;
-  }
-
-  /**
-   * Check if Swiss tournament is complete (all players eliminated or qualified)
-   */
-  private isSwissTournamentComplete(): boolean {
-    for (const [_, stats] of this.playerStats.entries()) {
-      if (!stats.eliminated && !stats.qualified) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  // ----------   Result Handling    ---------- //
 
   /**
    * Handle match completion notification
@@ -426,8 +501,7 @@ export class SwissRound implements ITournamentBracketGenerator {
     }
 
     // Find the match in the current round
-    const currentRound = this.allRounds[this.currentRoundIndex - 1];
-    const match = currentRound[matchID];
+    const match = this.allRounds[this.currentRoundIndex][matchID];
 
     if (!match) {
       console.error(`Match ${matchID} not found in current round`);
@@ -439,8 +513,15 @@ export class SwissRound implements ITournamentBracketGenerator {
       .sort((a, b) => a[1] - b[1])
       .map((entry) => entry[0]);
 
+    // Store the ranked players for this match
+    this.matchRankedPlayers.set(matchID, rankedPlayers);
+
     // Store the match for final results
     this.matchResults.set(matchID, match);
+
+    // First player is the winner
+    const winner = rankedPlayers[0];
+    match.winner = winner;
 
     // Update player statistics
     this.updatePlayerStats(rankedPlayers, match);
@@ -455,9 +536,6 @@ export class SwissRound implements ITournamentBracketGenerator {
    * Update player statistics based on match results
    */
   private updatePlayerStats(rankedPlayers: string[], match: Match): void {
-    // First player is the winner
-    // const winner = rankedPlayers[0];
-
     // Update each player's stats
     rankedPlayers.forEach((playerId, index) => {
       const isWinner = index === 0;
@@ -491,6 +569,7 @@ export class SwissRound implements ITournamentBracketGenerator {
       if (stats.wins >= this.roundCount) {
         stats.qualified = true;
         console.log(`Player ${playerId} has QUALIFIED with ${stats.wins} wins`);
+        this.activePlayers.delete(playerId);
       }
 
       if (stats.losses >= this.roundCount) {
@@ -498,11 +577,32 @@ export class SwissRound implements ITournamentBracketGenerator {
         console.log(
           `Player ${playerId} has been ELIMINATED with ${stats.losses} losses`,
         );
+        this.activePlayers.delete(playerId);
       }
+
+      // Update opponent records
+      rankedPlayers.forEach((opponent) => {
+        if (opponent !== playerId) {
+          stats.opponents.add(opponent);
+        }
+      });
     });
   }
 
-  // ---------- Ranking computation  ---------- //
+  /**
+   * Shuffle players for random pairing
+   */
+  private shufflePlayers(players: string[]): string[] {
+    const shuffled = [...players];
+
+    // Fisher-Yates shuffle
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(this.rng.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
+    return shuffled;
+  }
 
   /**
    * Compute the final rankings for all players
