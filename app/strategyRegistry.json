@@ -68,6 +68,13 @@
     "doubleElimination": {
       "className": "DoubleElimination",
       "gamesCount": 3
+    },
+
+    "swissRound": {
+      "className": "SwissRound",
+      "roundCount": 3,
+      "gamesCount": 1,
+      "finalGamesCount": 3
     }
   },
 
