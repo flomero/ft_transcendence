@@ -19,6 +19,8 @@ const gameModeConfigSchema = S.object()
   .prop("ballRadius", S.number())
   .prop("paddleCoveragePercent", S.number())
   .prop("paddleSpeedWidthPercentS", S.number())
+  .prop("paddleVelocityAngularTransmissionPercent", S.number().minimum(0))
+  .prop("paddleVelocitySpeedTransmissionPercent", S.number().minimum(0))
   .prop("powerUpRadius", S.number())
   .prop("powerUpCapacities", powerUpCapacitiesSchema);
 
