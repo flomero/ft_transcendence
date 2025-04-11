@@ -319,4 +319,13 @@ export class ClassicPong extends Pong {
   getSettings(): GameModeCombinedSettings {
     return this.settings;
   }
+
+  public getScores(): number[] {
+    const scores: number[] = [];
+
+    for (let i = 0; i < this.gameObjects.paddles.length; i++) {
+      scores.push(this.extraGameData.scores[i]);
+    }
+    return scores;
+  }
 }

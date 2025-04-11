@@ -20,6 +20,8 @@ class GameManager {
   addPlayer(userId: string): void {
     const playerIdInGame = this.players.size + this.aiOpponentIds.size;
     const newPlayer = {
+      id: this.players.size,
+      playerUUID: userId,
       id: playerIdInGame,
     };
     this.players.set(userId, newPlayer);
@@ -73,7 +75,7 @@ class GameManager {
     return true;
   }
 
-  public startGame(): void {
+  public startGame(db: Database): void {
     if (this.allPlayersAreConnected() === false) {
       throw new Error("Not all players are connected");
     }
@@ -92,6 +94,10 @@ class GameManager {
     return this.game;
   }
 
+  public get getScores(): number[] {
+    return this.game.getScores();
+  }
+
   public get getAiIdsAsArray() {
     return Array.from(this.aiOpponentIds.keys());
   }
@@ -105,6 +111,10 @@ class GameManager {
 
   public handleAction(data: GameMessage): void {
     this.game.handleAction(data.options);
+  }
+
+  public get getPlayersAsArray(): Player[] {
+    return Array.from(this.players.values());
   }
 }
 

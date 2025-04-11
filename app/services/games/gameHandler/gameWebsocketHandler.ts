@@ -17,7 +17,7 @@ const gameWebsocketHandler = async (
     gameManager!.addSocketToPlayer(userId, connection);
 
     if (gameManager!.allPlayersAreConnected() === true) {
-      gameManager!.startGame();
+      gameManager!.startGame(request.server.sqlite);
     }
 
     connection.on("message", (message: string) => {
