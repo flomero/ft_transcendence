@@ -386,7 +386,7 @@ export class MultiplayerPong extends Pong {
     return this.settings;
   }
 
-  getScores(): number[] {
+  public getScores(): number[] {
     return this.gameState.scores;
   }
 }

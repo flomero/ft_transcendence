@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lobby</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 20px auto;
+      }
+      button {
+        padding: 10px 20px;
+        margin: 10px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+      .ai-list {
+        margin-top: 20px;
+      }
+      .ai-list span {
+        display: block;
+        margin: 5px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Lobby</h1>
+      <p id="status">Creating a new lobby...</p>
+      <button id="add-ai-btn" disabled>Add AI Opponent</button>
+      <button id="start-game-btn" disabled>Start Game</button>
+      <div class="ai-list" id="ai-list"></div>
+    </div>
+
+    <script>
+      const BASE_URL = `${window.location.protocol}//${window.location.host}`;
+      const CREATE_LOBBY_URL = `${BASE_URL}/games/lobby/new`;
+      const ADD_AI_URL = `${BASE_URL}/games/lobby/add-ai-opponent`;
+      const START_LOBBY_URL = `${BASE_URL}/games/lobby/start`;
+      const GAME_FRONTEND_URL = `/public/gameFrontend.html`;
+
+      let lobbyId = null;
+      let aiCount = 0;
+
+      const statusElement = document.getElementById("status");
+      const addAiButton = document.getElementById("add-ai-btn");
+      const startGameButton = document.getElementById("start-game-btn");
+      const aiListElement = document.getElementById("ai-list");
+
+      // Create a new lobby
+      async function createLobby() {
+        try {
+          const response = await fetch(CREATE_LOBBY_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              gameName: "pong",
+              gameModeName: "classicPong",
+              modifierNames: {
+                powerUpSpawner: {
+                  meanDelayS: 5,
+                  delaySpanS: 2,
+                  positionSamplerStrategyName: "uniformCA",
+                },
+                survivalGame: [],
+                elimination: {
+                  threshold: 3,
+                },
+                arenaShrink: [],
+              },
+              powerUpNames: {
+                speedBoost: {
+                  spawnWeight: 0.5,
+                  selfActivation: true,
+                  durationS: 10,
+                  totalRampUpStrength: 1.5,
+                  rampUpFrequencyS: 2,
+                },
+              },
+              gameModeConfig: {
+                ballSpeedWidthPercentS: 0.05,
+                ballRadius: 10,
+                paddleCoveragePercent: 20,
+                paddleSpeedWidthPercentS: 0.1,
+                powerUpRadius: 5,
+                paddleVelocityAngularTransmissionPercent: 18,
+                paddleVelocitySpeedTransmissionPercent: 8,
+                powerUpCapacities: {
+                  speedBoost: 3,
+                },
+              },
+              lobbyMode: "public",
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`Failed to create lobby: ${response.statusText}`);
+          }
+
+          const data = await response.json();
+          lobbyId = data.lobbyId;
+          console.log("Lobby created with ID:", lobbyId);
+          statusElement.innerText = `Lobby created with ID: ${lobbyId}`;
+          addAiButton.disabled = false;
+          startGameButton.disabled = false;
+        } catch (error) {
+          console.error("Error creating lobby:", error);
+          statusElement.innerText =
+            "Failed to create lobby. Check the console for details.";
+        }
+      }
+
+      // Add AI Opponent
+      addAiButton.addEventListener("click", async () => {
+        try {
+          const response = await fetch(`${ADD_AI_URL}/${lobbyId}`, {
+            method: "POST",
+          });
+
+          if (!response.ok) {
+            throw new Error(
+              `Failed to add AI opponent: ${response.statusText}`,
+            );
+          }
+
+          const data = await response.json();
+          console.log("AI opponent added:", data);
+          aiCount++;
+          updateAiList();
+        } catch (error) {
+          console.error("Error adding AI opponent:", error);
+        }
+      });
+
+      // Start Game
+      startGameButton.addEventListener("click", async () => {
+        try {
+          const response = await fetch(`${START_LOBBY_URL}/${lobbyId}`, {
+            method: "POST",
+          });
+
+          if (!response.ok) {
+            throw new Error(`Failed to start game: ${response.statusText}`);
+          }
+
+          const data = await response.json();
+          console.log("Game started, game ID:", data.gameId);
+          window.location.href = `${GAME_FRONTEND_URL}?gameId=${data.gameId}`;
+        } catch (error) {
+          console.error("Error starting game:", error);
+        }
+      });
+
+      // Update AI List
+      function updateAiList() {
+        aiListElement.innerHTML = `<h3>AI Opponents (${aiCount})</h3>`;
+        for (let i = 0; i < aiCount; i++) {
+          aiListElement.innerHTML += `<span>AI Opponent ${i + 1}</span>`;
+        }
+      }
+
+      // Initialize the lobby creation process
+      createLobby();
+    </script>
+  </body>
+</html>
