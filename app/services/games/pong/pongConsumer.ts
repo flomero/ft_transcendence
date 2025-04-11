@@ -84,6 +84,7 @@ export const pongConsumer = async (
           aiOpponent = new PongAIOpponent(currentGame, {
             playerId: 1,
             strategyName: "improvedNaive",
+            aiUUID: "1234",
           });
 
           // Send confirmation back to client

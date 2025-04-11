@@ -31,6 +31,7 @@ class GameManager {
     const aiIdInGame = this.aiOpponentIds.size + this.players.size;
     const newAiOpponent = new PongAIOpponent(this.game, {
       playerId: aiIdInGame,
+      aiUUID: aiOpponentId.toString(),
       strategyName: "improvedNaive",
     });
     this.aiOpponentIds.set(aiOpponentId, newAiOpponent);
@@ -50,10 +51,20 @@ class GameManager {
     }
   }
 
-  public sendMessageToAll(type: string, data: string): void {
+  public sendMessageToAll(
+    type: string,
+    data: string,
+    referenceTable: string,
+  ): void {
     for (const player of this.players.values()) {
       if (player.ws !== undefined) {
-        player.ws.send(JSON.stringify({ type: type, data: data }));
+        player.ws.send(
+          JSON.stringify({
+            type: type,
+            data: data,
+            playerIdReferenceTable: referenceTable,
+          }),
+        );
       }
     }
   }
@@ -115,6 +126,10 @@ class GameManager {
 
   public get getPlayersAsArray(): Player[] {
     return Array.from(this.players.values());
+  }
+
+  public get getAiopponent(): Map<number, PongAIOpponent> {
+    return this.aiOpponentIds;
   }
 }
 
