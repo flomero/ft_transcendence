@@ -11,10 +11,13 @@
     <p id="status">Click the button to join matchmaking.</p>
 
     <script>
-      const MATCHMAKING_WS_URL = "ws://localhost:3000/games/match-making";
-      const MATCHMAKING_JOIN_URL =
-        "http://localhost:3000/games/match-making/join";
-      const GAME_WS_URL = "ws://localhost:3000/games";
+      const BASE_URL =
+        window.location.hostname === "localhost"
+          ? `${window.location.protocol}//${window.location.hostname}:3000`
+          : `${window.location.protocol}//${window.location.hostname}:3000`;
+      const MATCHMAKING_WS_URL = `${BASE_URL.replace("http", "ws")}/games/match-making`;
+      const MATCHMAKING_JOIN_URL = `${BASE_URL}/games/match-making/join`;
+      const GAME_WS_URL = `${BASE_URL.replace("http", "ws")}/games`;
 
       let matchmakingSocket = null;
 

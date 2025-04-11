@@ -50,7 +50,9 @@
 
       const urlParams = new URLSearchParams(window.location.search);
       const gameId = urlParams.get("gameId");
-      const GAME_WS_URL = `ws://localhost:3000/games/${gameId}`;
+      const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const wsHost = window.location.host;
+      const GAME_WS_URL = `${wsProtocol}//${wsHost}/games/${gameId}`;
 
       let gameState = {};
       const gameSocket = new WebSocket(GAME_WS_URL);
@@ -64,7 +66,7 @@
       gameSocket.onmessage = (event) => {
         const message = JSON.parse(event.data);
         if (message.type === "gameState") {
-          gameState = message.data;
+          gameState = JSON.parse(message.data);
           // console.log("Received gameState:", gameState);
         }
       };

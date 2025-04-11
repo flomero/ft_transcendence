@@ -46,7 +46,11 @@ const getVanillaGameSettings = (): GameSettings => {
   const gameSettings: GameSettings = {
     gameName: "pong",
     gameModeName: "classicPong",
-    modifierNames: {},
+    modifierNames: {
+      scoredGame: {
+        goalObjective: 11,
+      },
+    },
     powerUpNames: {},
     playerCount: 2,
   };

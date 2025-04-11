@@ -23,7 +23,7 @@ async function startLobbyHandler(
     setLobbyStateToStart(userId, lobbyId);
     const newGameManager = gameManagerCreate(lobbyId);
     gameManagers.set(newGameManager.getId, newGameManager);
-    addGameToDatabase(
+    await addGameToDatabase(
       newGameManager,
       request.server.sqlite,
       lobby.getGameSettings,
