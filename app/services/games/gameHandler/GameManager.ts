@@ -6,6 +6,7 @@ import gameLoop from "./gameLoop";
 import type GameMessage from "../../../interfaces/games/gameHandler/GameMessage";
 import { PongAIOpponent } from "../pong/pongAIOpponent";
 import aiLoop from "./aiLoop";
+import { Database } from "sqlite";
 
 class GameManager {
   private id: string = randomUUID();
@@ -20,9 +21,8 @@ class GameManager {
   addPlayer(userId: string): void {
     const playerIdInGame = this.players.size + this.aiOpponentIds.size;
     const newPlayer = {
-      id: this.players.size,
-      playerUUID: userId,
       id: playerIdInGame,
+      playerUUID: userId,
     };
     this.players.set(userId, newPlayer);
   }
@@ -82,7 +82,7 @@ class GameManager {
 
     this.game.startGame();
     if (this.game.getStatus() === GameStatus.RUNNING) {
-      gameLoop(this.id);
+      gameLoop(this.id, db);
       aiLoop(this.id);
     }
   }
