@@ -124,4 +124,8 @@ export class PongAIOpponent extends AIOpponent {
   getGame(): Pong {
     return this.game;
   }
+
+  public get getAiId(): number {
+    return this.getId();
+  }
 }

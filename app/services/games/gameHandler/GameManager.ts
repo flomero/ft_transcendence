@@ -4,21 +4,34 @@ import type Player from "../../../interfaces/games/gameHandler/Player";
 import type { WebSocket } from "ws";
 import gameLoop from "./gameLoop";
 import type GameMessage from "../../../interfaces/games/gameHandler/GameMessage";
+import { PongAIOpponent } from "../pong/pongAIOpponent";
+import aiLoop from "./aiLoop";
 
 class GameManager {
   private id: string = randomUUID();
   game: GameBase;
   players: Map<string, Player> = new Map();
+  aiOpponentIds: Map<number, PongAIOpponent> = new Map();
 
   constructor(game: GameBase) {
     this.game = game;
   }
 
   addPlayer(userId: string): void {
+    const playerIdInGame = this.players.size + this.aiOpponentIds.size;
     const newPlayer = {
-      id: this.players.size,
+      id: playerIdInGame,
     };
     this.players.set(userId, newPlayer);
+  }
+
+  addAiOpponent(aiOpponentId: number): void {
+    const aiIdInGame = this.aiOpponentIds.size + this.players.size;
+    const newAiOpponent = new PongAIOpponent(this.game, {
+      playerId: aiIdInGame,
+      strategyName: "improvedNaive",
+    });
+    this.aiOpponentIds.set(aiOpponentId, newAiOpponent);
   }
 
   public hasPlayer(userId: string): boolean {
@@ -68,6 +81,7 @@ class GameManager {
     this.game.startGame();
     if (this.game.getStatus() === GameStatus.RUNNING) {
       gameLoop(this.id);
+      aiLoop(this.id);
     }
   }
   public get getId() {
@@ -76,6 +90,10 @@ class GameManager {
 
   public get getGame() {
     return this.game;
+  }
+
+  public get getAiIdsAsArray() {
+    return Array.from(this.aiOpponentIds.keys());
   }
 
   public getPlayer(playerId: string) {
