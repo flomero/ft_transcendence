@@ -120,7 +120,8 @@ class Lobby {
       throw new Error("Only the owner can change the state");
     }
     if (newState === "started") {
-      this.gameSettings.playerCount = this.lobbyMembers.size;
+      this.gameSettings.playerCount =
+        this.lobbyMembers.size + this.aiOpponentIds.length;
     }
     this.stateLobby = newState;
   }
