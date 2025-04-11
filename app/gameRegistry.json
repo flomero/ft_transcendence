@@ -15,7 +15,7 @@
         },
 
         "customizableSettings": {
-          "ballSpeedWidthPercentS": 65,
+          "ballSpeedWidthPercentS": 55,
           "ballRadius": 0.95,
           "ballResetSampler": "biasedQuadrantGaussianRA",
           "paddleCoveragePercent": 25,
@@ -25,7 +25,8 @@
           "powerUpRadius": 20,
           "powerUpCapacities": {
             "speedBoost": 1,
-            "blinkingBall": 1
+            "blinkingBall": 1,
+            "multiBall": 1
           }
         }
       },
@@ -50,7 +51,8 @@
           "powerUpRadius": 10,
           "powerUpCapacities": {
             "speedBoost": 1,
-            "blinkingBall": 1
+            "blinkingBall": 1,
+            "multiBall": 1
           }
         }
       }
@@ -110,6 +112,15 @@
         "durationS": 6,
         "blinkIntervalS": 0.5,
         "blinkDurationPercent": 50
+      },
+
+      "multiBall": {
+        "className": "MultiBall",
+        "spawnWeight": 1.0,
+        "selfActivation": false,
+        "durationS": 6,
+        "ballCount": 4,
+        "totalAngleDeg": 60
       }
     }
   }

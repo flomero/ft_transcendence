@@ -61,16 +61,11 @@
             options: {
               gameName: "pong",
               gameModeName: gameModeName,
-              gameModeConfig: {
-                powerUpRadius: 2,
-              },
+              gameModeConfig: {},
               modifierNames: {
                 powerUpSpawner: {},
               },
-              powerUpNames: {
-                speedBoost: {},
-                blinkingBall: {},
-              },
+              powerUpNames: {},
               playerCount: playerCount,
             },
           }),
@@ -224,7 +219,7 @@
                   ctx.fillStyle = "blue";
                   break;
 
-                case "multiball_modifier":
+                case "multiBall":
                   ctx.fillStyle = "green";
                   break;
 

@@ -1,5 +1,6 @@
 import { ConfigManager } from "./configManager";
 import type { GameBase } from "./gameBase";
+import { Pong } from "./pong/pong";
 
 export enum ModifierStatus {
   INACTIVE,
@@ -71,6 +72,12 @@ export class ModifierBase {
   onPowerUpPickup(game: GameBase): void {}
 
   onCDFComputation(game: GameBase): void {}
+
+  onGoal(game: Pong, args: { playerId: number }): void {}
+  onPaddleBounce(game: Pong, args: { playerId: number }): void {}
+  onWallBounce(game: Pong): void {}
+  onPlayerElimination(game: Pong, args: { playerId: number }): void {}
+  onBallReset(game: Pong): void {}
 
   // Getters & Setters
   getName(): string {
