@@ -3,12 +3,14 @@ import type { GameSettings } from "../../../interfaces/games/lobby/GameSettings"
 import type { WebSocket } from "ws";
 import { randomUUID } from "node:crypto";
 import MinAndMaxPlayers from "../../../types/games/lobby/MinAndMaxPlayers";
+import aiOpponents from "../aiOpponent/aiOpponents";
 
 class Lobby {
   private lobbyId: string = randomUUID();
   private lobbyMembers: Map<string, LobbyMember> = new Map();
   private stateLobby: "open" | "started";
   private locketLobby: boolean = false;
+  private aiOpponentIds: number[] = [];
   gameSettings: GameSettings; //make private later
   lobbyOwner: string; //make private later
   memberLimits: { min: number; max: number }; //make private later
@@ -41,6 +43,27 @@ class Lobby {
     this.sendMessageToAllMembers(
       JSON.stringify({ type: "memberJoined", data: memberId }),
     );
+  }
+
+  public addAiOpponent(memberId: string): void {
+    this.canAIBeAddedCheck(memberId);
+
+    this.aiOpponentIds.push(this.aiOpponentIds.length);
+  }
+
+  private canAIBeAddedCheck(memberId: string): void {
+    if (this.isMemberOwner(memberId) === false) {
+      throw new Error(
+        "[addAiOpponent] Member who wants to add AI got to be the Owner of the lobby",
+      );
+    } else if (this.isLobbyLocked === true) {
+      throw new Error("[addAiOpponent] AI cannot be added to a locked lobby");
+    } else if (this.isLobbyFull() === true) {
+      throw new Error("[addAiOpponent] AI cannot be added to a full lobby");
+    } else if (this.aiOpponentIds.length >= aiOpponents.length)
+      throw new Error(
+        `[addAiOpponent] Only ${aiOpponents.length} AI opponents can be added`,
+      );
   }
 
   public isUserInLobby(memberId: string): boolean {
@@ -110,7 +133,8 @@ class Lobby {
   }
 
   public reachedMinPlayers(): boolean {
-    if (this.lobbyMembers.size >= this.memberLimits.min === true) return true;
+    const memberPlusAiSize = this.lobbyMembers.size + this.aiOpponentIds.length;
+    if (memberPlusAiSize >= this.memberLimits.min === true) return true;
     return false;
   }
 
@@ -208,6 +232,10 @@ class Lobby {
     return this.locketLobby;
   }
 
+  public get getAiOpponentIds(): number[] {
+    return this.aiOpponentIds;
+  }
+
   public getMemberAsArray(): LobbyMember[] {
     return Array.from(this.lobbyMembers.values());
   }
@@ -230,8 +258,9 @@ class Lobby {
     return true;
   }
 
-  private isLobbyFull(): boolean {
-    if (this.lobbyMembers.size >= this.memberLimits.max) {
+  public isLobbyFull(): boolean {
+    const memberPlusAiSize = this.lobbyMembers.size + this.aiOpponentIds.length;
+    if (memberPlusAiSize >= this.memberLimits.max) {
       return true;
     }
     return false;
