@@ -320,12 +320,7 @@ export class ClassicPong extends Pong {
     return this.settings;
   }
 
-  public getScores(): number[] {
-    const scores: number[] = [];
-
-    for (let i = 0; i < this.gameObjects.paddles.length; i++) {
-      scores.push(this.extraGameData.scores[i]);
-    }
-    return scores;
+  getScores(): number[] {
+    return this.gameState.scores;
   }
 }
