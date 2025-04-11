@@ -3,6 +3,7 @@ import { RNG } from "./rng";
 export interface AIData {
   playerId: number;
   strategyName: string;
+  aiUUID: string;
 }
 
 export abstract class AIOpponent {
@@ -27,5 +28,9 @@ export abstract class AIOpponent {
 
   getId(): number {
     return this.data.playerId;
+  }
+
+  getUUID(): string {
+    return this.data.aiUUID;
   }
 }
