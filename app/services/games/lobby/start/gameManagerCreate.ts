@@ -1,6 +1,7 @@
 import GameManager from "../../gameHandler/GameManager";
 import { createNewGameClass } from "./createNewGameClass";
 import { getLobby } from "../lobbyWebsocket/getLobby";
+import { LobbyMember } from "../../../../types/games/lobby/LobbyMember";
 
 const gameManagerCreate = (lobbyId: string) => {
   const game = createNewGameClass(lobbyId);
@@ -15,7 +16,23 @@ const addTransferMemberToGameManager = (
 ) => {
   const lobby = getLobby(lobbyId);
   const lobbyMember = lobby.getMemberAsArray();
+  addPlayerToGameManager(gameManager, lobbyMember);
+  addAiToGameManager(gameManager, lobby.getAiOpponentIds);
+};
+
+const addPlayerToGameManager = (
+  gameManager: GameManager,
+  lobbyMember: LobbyMember[],
+) => {
   for (const member of lobbyMember) gameManager.addPlayer(member.id);
+};
+
+const addAiToGameManager = (
+  gameManager: GameManager,
+  aiOpponentIds: number[],
+) => {
+  for (const aiOpponentId of aiOpponentIds)
+    gameManager.addAiOpponent(aiOpponentId);
 };
 
 // const printLobby = (lobbyId: string) => {
