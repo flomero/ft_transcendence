@@ -6,17 +6,17 @@ import type { Database } from "sqlite";
 import type { GameBase } from "../gameBase";
 import addGameToDatabase from "../lobby/start/addGameToDatabase";
 
-const createVanillaMatch = (
+const createVanillaMatch = async (
   userIdOne: string,
   userIdTwo: string,
   db: Database,
-): string => {
+): Promise<string> => {
   const newGame = createVanillaNewGame();
   const newGameManager = createNewGameManager(newGame, userIdOne, userIdTwo);
 
   gameManagers.set(newGameManager.getId, newGameManager);
 
-  addGameToDatabase(newGameManager, db, getVanillaGameSettings());
+  await addGameToDatabase(newGameManager, db, getVanillaGameSettings());
   return newGameManager.getId;
 };
 
