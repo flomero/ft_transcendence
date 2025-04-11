@@ -24,8 +24,8 @@ type OverallResults = {
   [playerID: string]: OverallPlayerResults;
 };
 
-export class SimpleElimination implements ITournamentBracketGenerator {
-  name = "simpleElimination";
+export class SingleElimination implements ITournamentBracketGenerator {
+  name = "singleElimination";
 
   protected tournamentData: Record<string, any>;
   protected gamesCount: number;
@@ -42,13 +42,12 @@ export class SimpleElimination implements ITournamentBracketGenerator {
   protected matchRankedPlayers: Map<string, string[]> = new Map();
 
   // Store the next matches for each match based on performance ranking
-  // For each match, store an array of next match IDs, one for each position
-  // e.g. [winner_match, loser_match] or [1st_place_match, 2nd_place_match, etc]
   protected nextMatchSeeding: Map<string, string[]> = new Map();
 
   // Track active matches in current round
   protected activeMatches: Set<string> = new Set();
 
+  // Track the last round each player participated in
   protected playersLastRound: { [playerID: string]: number } = {};
 
   constructor(tournamentData: Record<string, any>) {
@@ -59,7 +58,7 @@ export class SimpleElimination implements ITournamentBracketGenerator {
     // Number of players in each match
     this.playersPerMatch = tournamentData.gameData.playerCount;
 
-    // Initialize user sampler (using RandomUserSampler for now)
+    // Initialize user sampler
     this.userSampler = new StrategyManager(
       this.tournamentData.initialSeedingMethod,
       "userSampler",
@@ -69,11 +68,8 @@ export class SimpleElimination implements ITournamentBracketGenerator {
     // Generate the entire bracket with proper seeding
     this.generateEntireBracket();
 
-    console.log(`Generated rounds:`);
-    console.dir(this.rounds, { depth: null });
-
     console.log(
-      `Generated ${this.rounds.length} rounds for elimination bracket`,
+      `Generated ${this.rounds.length} rounds for single elimination bracket`,
     );
     this.rounds.forEach((round, index) => {
       console.log(`Round ${index + 1}: ${Object.keys(round).length} matches`);
@@ -132,100 +128,77 @@ export class SimpleElimination implements ITournamentBracketGenerator {
     // Remove from active matches
     this.activeMatches.delete(matchID);
 
-    // Push players to their next matches based on seeding
-    this.pushPlayersToNextMatches(matchID, rankedPlayers);
+    // Handle match results and push players to their next matches
+    this.handleMatchResults(matchID, rankedPlayers);
 
     return true;
   }
 
   /**
-   * Push players to their next matches based on seeding
+   * Handle match results and push players to their next matches
    */
-  protected pushPlayersToNextMatches(
-    matchID: string,
-    rankedPlayers: string[],
-  ): void {
-    // Check if this match has seeding information
-    const seedingArray = this.nextMatchSeeding.get(matchID);
-    if (!seedingArray || seedingArray.length === 0) {
-      console.log(
-        `No next match seeding for ${matchID} - might be final match or elimination`,
-      );
+  protected handleMatchResults(matchID: string, rankedPlayers: string[]): void {
+    // Get the next match seeding for this match
+    const seedingArray = this.nextMatchSeeding.get(matchID) || [];
 
-      // Record that this was the player's last round
-      rankedPlayers.forEach((playerId) => {
-        // For the final match winner (first in rankedPlayers), add an extra round
-        if (
-          playerId === rankedPlayers[0] &&
-          this.isLastRound(this.currentRoundIndex)
-        ) {
-          this.playersLastRound[playerId] = this.currentRoundIndex + 1;
-        } else {
-          this.playersLastRound[playerId] = this.currentRoundIndex;
-        }
-      });
-
-      return;
-    }
-
-    // Assign players to next matches based on their ranking
-    rankedPlayers.forEach((playerId, rank) => {
-      // Check if there's a next match for this rank
-      if (rank < seedingArray.length && seedingArray[rank]) {
-        const nextMatchId = seedingArray[rank];
-
-        // Find the target round index for the next match
-        let targetRoundIndex = -1;
-        let targetMatch: Match | null = null;
-
-        for (let i = 0; i < this.rounds.length; i++) {
-          if (Object.keys(this.rounds[i]).includes(nextMatchId)) {
-            targetRoundIndex = i;
-            targetMatch = this.rounds[i][nextMatchId];
-            break;
-          }
-        }
-
-        if (targetRoundIndex === -1 || !targetMatch) {
-          console.error(
-            `Could not find match ${nextMatchId} for player ${playerId}`,
-          );
-          // Record this as player's last round since they have nowhere to go
-          this.playersLastRound[playerId] = this.currentRoundIndex;
-          return;
-        }
-
-        // Remove any TBD placeholders in the target match
-        Object.keys(targetMatch.results).forEach((pid) => {
-          if (pid.startsWith("TBD_")) {
-            delete targetMatch.results[pid];
-          }
-        });
-
-        // Add the player to the target match's results
-        if (!targetMatch.results[playerId]) {
-          targetMatch.results[playerId] = [];
-        }
-
-        console.log(
-          `Pushed player ${playerId} (rank ${rank}) from ${matchID} to next match ${nextMatchId}`,
-        );
+    // Process each player based on their ranking
+    rankedPlayers.forEach((player, index) => {
+      // In single elimination, only the winner (index 0) advances
+      if (index === 0 && seedingArray.length > 0) {
+        const nextMatchID = seedingArray[0];
+        // Push the winner to their next match
+        this.pushPlayerToNextMatch(player, nextMatchID);
       } else {
-        console.log(
-          `Player ${playerId} (rank ${rank}) from ${matchID} is eliminated or has no next match`,
-        );
-
-        // Record this player's elimination round
-        this.playersLastRound[playerId] = this.currentRoundIndex;
+        // All other players are eliminated
+        this.playersLastRound[player] = this.currentRoundIndex;
       }
     });
+
+    // Special case for final match (last round)
+    if (this.isLastRound(this.currentRoundIndex) && rankedPlayers.length > 0) {
+      // Champion gets an extra round in scoring to differentiate from runners-up
+      this.playersLastRound[rankedPlayers[0]] = this.currentRoundIndex + 1;
+    }
   }
 
   /**
-   * Checks if the given round index is the last round
+   * Push player to their next match
    */
-  protected isLastRound(roundIndex: number): boolean {
-    return roundIndex === this.rounds.length - 1;
+  protected pushPlayerToNextMatch(playerId: string, nextMatchId: string): void {
+    // Find the target round and match
+    let targetRoundIndex = -1;
+    let targetMatch: Match | null = null;
+
+    for (let i = 0; i < this.rounds.length; i++) {
+      if (Object.keys(this.rounds[i]).includes(nextMatchId)) {
+        targetRoundIndex = i;
+        targetMatch = this.rounds[i][nextMatchId];
+        break;
+      }
+    }
+
+    if (targetRoundIndex === -1 || !targetMatch) {
+      console.error(
+        `Could not find match ${nextMatchId} for player ${playerId}`,
+      );
+      // Record this as player's last round since they have nowhere to go
+      this.playersLastRound[playerId] = this.currentRoundIndex;
+      return;
+    }
+
+    // Remove any TBD placeholders in the target match
+    Object.keys(targetMatch.results).forEach((pid) => {
+      if (pid.startsWith("TBD_")) {
+        delete targetMatch.results[pid];
+      }
+    });
+
+    // Add the player to the target match's results
+    if (!targetMatch.results[playerId]) {
+      targetMatch.results[playerId] = [];
+    }
+
+    console.log(`Pushed player ${playerId} to next match ${nextMatchId}`);
   }
 
   /**
@@ -240,10 +213,13 @@ export class SimpleElimination implements ITournamentBracketGenerator {
     const firstRoundMatches = Math.ceil(totalPlayers / this.playersPerMatch);
 
     // Calculate total rounds needed
-    const totalRounds = Math.ceil(Math.log2(firstRoundMatches)) + 1;
+    const totalRounds = Math.ceil(Math.log2(firstRoundMatches));
 
     // Generate placeholder structure for all rounds
     this.generateRoundStructure(totalRounds, firstRoundMatches);
+
+    // Setup seeding between rounds
+    this.setupBracketSeeding();
 
     // Apply seeding to place players in first round
     this.seedPlayersIntoFirstRound(players);
@@ -297,42 +273,41 @@ export class SimpleElimination implements ITournamentBracketGenerator {
       // Add this round to our rounds array
       this.rounds.push(round);
 
-      // Set up seeding from this round to next round if it's not the final round
-      if (roundIndex < totalRounds - 1) {
-        this.setupRoundSeeding(roundIndex, matchesInThisRound);
-      }
-
       // Update for next iteration
       prevRoundMatchCount = matchesInThisRound;
     }
   }
 
   /**
-   * Setup seeding from one round to the next
+   * Setup seeding between rounds
    */
-  protected setupRoundSeeding(
-    roundIndex: number,
-    matchesInThisRound: number,
-  ): void {
-    const nextRoundIndex = roundIndex + 1;
-    let nextMatchIndex = 0;
+  protected setupBracketSeeding(): void {
+    // For each round (except the final)
+    for (
+      let roundIndex = 0;
+      roundIndex < this.rounds.length - 1;
+      roundIndex++
+    ) {
+      const currentRound = this.rounds[roundIndex];
+      const nextRoundIndex = roundIndex + 1;
 
-    // For each pair of matches in this round, winners go to the same match in next round
-    for (let i = 0; i < matchesInThisRound; i += 2) {
-      const match1ID = `R${roundIndex + 1}_M${i}`;
-      const nextMatchID = `R${nextRoundIndex + 1}_M${nextMatchIndex}`;
+      // For each match in current round
+      Object.keys(currentRound).forEach((matchID, matchIndex) => {
+        // Calculate the next match ID (halving the index for next round)
+        const nextMatchIndex = Math.floor(matchIndex / 2);
+        const nextMatchID = `R${nextRoundIndex + 1}_M${nextMatchIndex}`;
 
-      // For match 1, only the winner (rank 0) advances
-      this.nextMatchSeeding.set(match1ID, [nextMatchID]);
+        // In single elimination, only the winner advances
+        this.nextMatchSeeding.set(matchID, [nextMatchID]);
+      });
+    }
 
-      // If there's a second match in the pair
-      if (i + 1 < matchesInThisRound) {
-        const match2ID = `R${roundIndex + 1}_M${i + 1}`;
-        // For match 2, only the winner (rank 0) advances to the same next match
-        this.nextMatchSeeding.set(match2ID, [nextMatchID]);
-      }
-
-      nextMatchIndex++;
+    // For the final match, there's no next match
+    if (this.rounds.length > 0) {
+      const finalRound = this.rounds[this.rounds.length - 1];
+      Object.keys(finalRound).forEach((matchID) => {
+        this.nextMatchSeeding.set(matchID, []);
+      });
     }
   }
 
@@ -369,6 +344,13 @@ export class SimpleElimination implements ITournamentBracketGenerator {
         match.results[playerID] = [];
       });
     });
+  }
+
+  /**
+   * Checks if the given round index is the last round
+   */
+  protected isLastRound(roundIndex: number): boolean {
+    return roundIndex === this.rounds.length - 1;
   }
 
   computeFinalRankings(
@@ -457,14 +439,6 @@ export class SimpleElimination implements ITournamentBracketGenerator {
     );
 
     return tournamentRankings;
-  }
-
-  /**
-   * Helper function to get a consistent match key for a set of players
-   */
-  getMatchKey(players: string[]): string {
-    const sortedPlayers = [...players].sort();
-    return sortedPlayers.join("|");
   }
 
   /**

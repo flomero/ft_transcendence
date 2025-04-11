@@ -60,8 +60,8 @@
       "gamesCount": 5
     },
 
-    "simpleElimination": {
-      "className": "SimpleElimination",
+    "singleElimination": {
+      "className": "SingleElimination",
       "gamesCount": 3
     },
 

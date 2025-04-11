@@ -4,7 +4,6 @@ import type { FastifyPluginAsync, FastifyServerOptions } from "fastify";
 import { loadGameRegistry } from "./services/games/gameRegistryLoader";
 import { loadStrategyRegistry } from "./services/strategy/strategyRegistryLoader";
 import fastifyEnv from "@fastify/env";
-import { Tournament } from "./services/tournament/tournament";
 
 const envSchema = {
   type: "object",
@@ -58,35 +57,6 @@ const app: FastifyPluginAsync<AppOptions> = async (
 
   await loadGameRegistry();
   await loadStrategyRegistry();
-
-  const tournament = new Tournament({
-    bracketType: "swissRound",
-    matchWinnerType: "bestOfX",
-    initialSeedingMethod: "random",
-    playerCount: 8,
-    players: ["0", "1", "2", "3", "4", "5", "6", "7"],
-    //   ,
-    //   "8",
-    //   "9",
-    //   "10",
-    //   "11",
-    //   "12",
-    //   "13",
-    //   "14",
-    //   "15",
-    // ],
-    gameData: {
-      playerCount: 2,
-    },
-  });
-
-  tournament.startTournament();
-
-  console.log("Final results:");
-  console.dir(tournament.getResults(), { depth: null });
-
-  console.log("Final rankings:");
-  console.dir(tournament.getFinalRankings(), { depth: null });
 
   // Do not touch the following lines
 

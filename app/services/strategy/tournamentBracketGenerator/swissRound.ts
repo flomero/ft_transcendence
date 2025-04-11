@@ -130,7 +130,6 @@ export class SwissRound implements ITournamentBracketGenerator {
     console.log(`Generated ${this.allRounds.length} rounds`);
     this.allRounds.forEach((round, index) => {
       console.log(`Round ${index + 1}: ${Object.keys(round).length} matches`);
-      console.dir(round, { depth: null });
     });
   }
 
