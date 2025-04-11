@@ -8,6 +8,7 @@ export class MultiBall extends TimeLimitedModifierBase {
 
   protected ballCount: number = 0;
   protected totalAngle: number = 0;
+  protected radiusFactor: number = 100;
 
   constructor(customConfig?: Record<string, any>) {
     super();
@@ -58,6 +59,16 @@ export class MultiBall extends TimeLimitedModifierBase {
       undefined,
     );
 
+    this.configManager.registerPropertyConfig(
+      "radiusFactor",
+      (_, context) => {
+        const radiusFactorPercent =
+          context.radiusFactor || defaultRegistry.radiusFactorPercent;
+        return radiusFactorPercent / 100.0;
+      },
+      undefined,
+    );
+
     const mergedConfig = { ...defaultRegistry };
     if (customConfig)
       Object.entries(customConfig).forEach((entry) => {
@@ -86,9 +97,6 @@ export class MultiBall extends TimeLimitedModifierBase {
     // Select which ball will be the real one
     const rndBallID = game.getRNG().randomInt(0, angles.length - 1);
 
-    // ADD TO REGISTRY
-    const radiusFactor = 80 / 100.0;
-
     angles.forEach((angle, index) => {
       if (index === rndBallID) return;
 
@@ -101,7 +109,7 @@ export class MultiBall extends TimeLimitedModifierBase {
         y: mainBall.y,
         dx: ca,
         dy: sa,
-        radius: mainBall.radius * radiusFactor,
+        radius: mainBall.radius * this.radiusFactor,
         speed: mainBall.speed,
         doCollision: true,
         isVisible: true,

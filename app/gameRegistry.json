@@ -120,7 +120,8 @@
         "selfActivation": false,
         "durationS": 6,
         "ballCount": 4,
-        "totalAngleDeg": 60
+        "totalAngleDeg": 60,
+        "radiusFactorPercent": 80
       }
     }
   }
