@@ -1,5 +1,5 @@
-import { FastifyRequest } from "fastify";
-import { WebSocket } from "ws";
+import type { FastifyRequest } from "fastify";
+import type { WebSocket } from "ws";
 import { validConnectionCheck } from "../lobbyVaidation/validConnectionCheck";
 import { getLobby } from "./getLobby";
 import closePossibleLobbySocketConnection from "../leave/closePossibleLobbySocketConnection";
@@ -17,7 +17,9 @@ const lobbyWebsocketHandler = async (
     lobby.addSocketToMember(userId, connection);
 
     connection.on("close", () => {
-      closePossibleLobbySocketConnection(userId, lobbyId);
+      try {
+        closePossibleLobbySocketConnection(userId, lobbyId);
+      } catch (_) {}
     });
   } catch (error) {
     if (error instanceof Error)

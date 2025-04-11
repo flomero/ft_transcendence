@@ -1,15 +1,15 @@
-import GameManager from "../../gameHandler/GameManager";
-import { Database } from "sqlite";
-import { GameSettings } from "../../../../interfaces/games/lobby/GameSettings";
-import { randomUUID } from "crypto";
+import type GameManager from "../../gameHandler/GameManager";
+import type { Database } from "sqlite";
+import type { GameSettings } from "../../../../interfaces/games/lobby/GameSettings";
+import { randomUUID } from "node:crypto";
 
 const addGameToDatabase = async (
   gameManager: GameManager,
   db: Database,
   gameSettings: GameSettings,
 ) => {
-  addMatchToDatabase(gameManager, db, gameSettings);
-  addUserMatchesToDB(gameManager, db);
+  await addMatchToDatabase(gameManager, db, gameSettings);
+  await addUserMatchesToDB(gameManager, db);
 };
 
 const addUserMatchesToDB = async (gameManager: GameManager, db: Database) => {
@@ -22,7 +22,7 @@ const addUserMatchesToDB = async (gameManager: GameManager, db: Database) => {
   VALUES (?, ?, ?, ?)
   `;
   for (const userId of gameManager.players.keys()) {
-    db.run(sql, randomUUID(), userId, gameManager.getId, 0);
+    await db.run(sql, randomUUID(), userId, gameManager.getId, 0);
   }
 };
 
@@ -33,21 +33,25 @@ const addMatchToDatabase = async (
 ) => {
   const sql = `
   INSERT INTO matches (
-   id,
-   gameName,
-   gameModeName,
-   gameModeConfig,
-   modifierNames)
-  VALUES (?, ?, ?, ?, ?)
+  id,
+  gameName,
+  gameModeName,
+  modifierNames,
+  playerCount,
+  gameModeConfig,
+  powerUpNames)
+  VALUES (?, ?, ?, ?, ?, ?, ?)
   `;
 
-  db.run(
+  await db.run(
     sql,
     gameManager.getId,
     gameSettings.gameName,
     gameSettings.gameModeName,
-    JSON.stringify(gameSettings.gameModeConfig),
     JSON.stringify(gameSettings.modifierNames),
+    gameSettings.playerCount,
+    JSON.stringify(gameSettings.gameModeConfig),
+    JSON.stringify(gameSettings.powerUpNames),
   );
 };
 export default addGameToDatabase;

@@ -75,9 +75,9 @@ export class SpeedBoost extends TimeLimitedModifierBase {
   onActivation(game: Pong): void {
     super.onActivation(game);
 
-    const gameObjects = game.getGameObjects();
-    if (gameObjects.balls.length > 0) {
-      this.initialSpeed = gameObjects.balls[0].speed;
+    const gameState = game.getState();
+    if (gameState.balls.length > 0) {
+      this.initialSpeed = gameState.balls[0].speed;
     }
   }
 
@@ -87,15 +87,15 @@ export class SpeedBoost extends TimeLimitedModifierBase {
     if (this.ticks % this.rampUpFrequency == 0) {
       this.strength += this.rampUpStrength;
 
-      const gameObjects = game.getGameObjects();
-      if (!(gameObjects.balls.length > 0)) {
-        console.log(`Can't speed up if there's no balls: ${gameObjects.balls}`);
+      const gameState = game.getState();
+      if (!(gameState.balls.length > 0)) {
+        console.log(`Can't speed up if there's no balls: ${gameState.balls}`);
         return;
       }
 
       const newSpeed = this.initialSpeed * (1 + this.strength);
 
-      game.getGameObjects().balls[0].speed = newSpeed;
+      gameState.balls[0].speed = newSpeed;
     }
   }
 
@@ -103,9 +103,9 @@ export class SpeedBoost extends TimeLimitedModifierBase {
     super.onDeactivation(game);
 
     // Reset ball speed back to initial when deactivating
-    const gameObjects = game.getGameObjects();
-    if (gameObjects.balls.length > 0)
-      game.getGameObjects().balls[0].speed = this.initialSpeed;
+    const gameState = game.getState();
+    if (gameState.balls.length > 0)
+      gameState.balls[0].speed = this.initialSpeed;
 
     game.getModifierManager().deletePowerUp(this);
   }

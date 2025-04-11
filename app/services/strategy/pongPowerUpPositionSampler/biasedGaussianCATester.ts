@@ -39,7 +39,8 @@ export class BiasedGaussianCATester implements IPongPowerUpPositionSampler {
   }
 
   samplePosition(game: Pong): { x: number; y: number } {
-    const playerCount = game.getExtraGameData().playerCount;
+    const gameState = game.getState();
+    const playerCount = gameState.playerCount;
     const halfDeltaAlpha = Math.PI / (2 * playerCount);
 
     const stdAngularVariation =
@@ -48,7 +49,7 @@ export class BiasedGaussianCATester implements IPongPowerUpPositionSampler {
     const rng = game.getRNG();
 
     // -- Select a random player -- //
-    let playerId = game.getExtraGameData().lastGoal;
+    let playerId = gameState.lastGoal;
     if (playerId === -1)
       // If no one took a goal yet (ball out of bounds ?) then randomize the bias
       playerId = rng.randomInt(0, playerCount - 1);
@@ -80,7 +81,7 @@ export class BiasedGaussianCATester implements IPongPowerUpPositionSampler {
     );
     // Create a symmetry
     alpha *= Math.pow(-1, rng.randomInt(0, 1));
-    alpha += game.getGameObjects().paddles[rndPlayer].alpha;
+    alpha += gameState.paddles[rndPlayer].alpha;
 
     // Allows to test w/o hvaing the ball moving
     const tmpBallSpeedWidthPercentS = 100;

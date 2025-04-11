@@ -33,6 +33,32 @@ export class RNG {
     return Math.floor(this.random() * (max - min + 1)) + min;
   }
 
+  randomSign(posBias: number = 0.5): number {
+    return this.random() < posBias ? 1 : -1;
+  }
+
+  randomWeighted(weights: number[]): number {
+    if (weights.length === 0) return 0;
+
+    const totalWeight = weights.reduce((prev, curr) => prev + curr);
+    if (totalWeight === 0) return this.randomInt(0, weights.length - 1);
+    const unitPdf = weights.map((weight) => weight / totalWeight);
+
+    let cumul = 0;
+    const cdf = [];
+    for (const density of unitPdf) {
+      cumul += density;
+      cdf.push(cumul);
+    }
+
+    const rnd = this.random();
+    for (const cumulDensity of cdf)
+      if (rnd < cumulDensity) return cdf.indexOf(cumulDensity);
+
+    // fallback -> any element
+    return this.randomInt(0, weights.length - 1);
+  }
+
   randomArray<T>(array: T[]): T[] {
     for (let i = array.length - 1; i > 0; i--) {
       const j = this.randomInt(0, i);

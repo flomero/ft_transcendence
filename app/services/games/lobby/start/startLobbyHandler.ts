@@ -1,13 +1,13 @@
-import { FastifyRequest, FastifyReply } from "fastify";
+import type { FastifyRequest, FastifyReply } from "fastify";
 import { validConnectionCheck } from "../lobbyVaidation/validConnectionCheck";
 import setLobbyStateToStart from "./setLobbyStateToStart";
 import gameManagerCreate from "./gameManagerCreate";
-import GameManager from "../../gameHandler/GameManager";
+import type GameManager from "../../gameHandler/GameManager";
 import addGameToDatabase from "./addGameToDatabase";
 import { getLobby } from "../lobbyWebsocket/getLobby";
 import { canLobbyBeStartedCheck } from "./canLobbyBeStartedCheck";
 
-export const GameManagers = new Map<string, GameManager>();
+export const gameManagers = new Map<string, GameManager>();
 
 async function startLobbyHandler(
   request: FastifyRequest<{ Params: { lobbyId: string } }>,
@@ -22,16 +22,19 @@ async function startLobbyHandler(
     canLobbyBeStartedCheck(lobbyId);
     setLobbyStateToStart(userId, lobbyId);
     const newGameManager = gameManagerCreate(lobbyId);
-    GameManagers.set(newGameManager.getId, newGameManager);
-    addGameToDatabase(
+    gameManagers.set(newGameManager.getId, newGameManager);
+    await addGameToDatabase(
       newGameManager,
       request.server.sqlite,
       lobby.getGameSettings,
     );
-    reply.code(200).send({ gameId: newGameManager.getId }); // game created connect to game websocket
+    lobby.sendMessageToAllMembers(
+      JSON.stringify({ type: "gameStarted", data: newGameManager.getId }),
+    );
+    return reply.code(200).send({ gameId: newGameManager.getId });
   } catch (error) {
     if (error instanceof Error)
-      reply.code(400).send({ message: error.message });
+      return reply.code(400).send({ message: error.message });
   }
 }
 

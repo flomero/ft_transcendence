@@ -233,4 +233,8 @@
   a.active {
     @apply underline;
   }
+
+  .badge {
+    @apply bg-bg-muted text-fg-muted rounded-full px-2 py-1 text-xs;
+  }
 }

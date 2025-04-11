@@ -1,4 +1,4 @@
-import { GameSettings } from "../../../../interfaces/games/lobby/GameSettings";
+import type { GameSettings } from "../../../../interfaces/games/lobby/GameSettings";
 
 const invalidEliminationOrArenaShrink = (gameSettings: GameSettings) => {
   if (gameSettings.modifierNames?.survivalGame) return false;
