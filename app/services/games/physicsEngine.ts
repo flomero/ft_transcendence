@@ -282,6 +282,14 @@ export class PhysicsEngine {
     obj: Ball,
     objId: number,
   ): Collision | null {
+    // Check if already inside the object
+    const currentDistance = Math.sqrt(
+      (ball.x - obj.x) ** 2 + (ball.y - obj.y) ** 2,
+    );
+    if (currentDistance < ball.radius + obj.radius) {
+      return { distance: 0, objectId: objId };
+    }
+
     const a = ball.dx ** 2 + ball.dy ** 2;
     const b = 2.0 * (ball.dx * (ball.x - obj.x) + ball.dy * (ball.y - obj.y));
     const c =
