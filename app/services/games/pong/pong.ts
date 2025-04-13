@@ -109,7 +109,7 @@ export abstract class Pong extends GameBase {
 
       // Verify that no balls went out of bounds
       this.gameState.balls.forEach((ball, id) => {
-        if (this.isOutOfBounds(ball)) this.resetBall(this.gameState, id, true);
+        if (this.isOutOfBounds(ball)) this.rollbackBallInBounds(id); //this.resetBall(this.gameState, id, true);
       });
 
       // Trigger modifiers
@@ -119,6 +119,16 @@ export abstract class Pong extends GameBase {
     // Save the current state for potential rewinding
     const snapshot = this.getStateSnapshot();
     this.saveStateSnapshot(snapshot);
+  }
+
+  protected rollbackBallInBounds(ballId: number) {
+    for (let k = this.tickData.length - 1; k >= 0; --k) {
+      const ball = (this.tickData[k].balls as Ball[])[ballId];
+      if (!this.isOutOfBounds(ball)) {
+        console.log(`Rolling back ball ${ballId} ${k} ticks`);
+        this.gameState.balls[ballId] = ball;
+      }
+    }
   }
 
   protected updatePaddle(paddle: Paddle, doTriggers: boolean): void {

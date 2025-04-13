@@ -123,18 +123,18 @@
         "durationS": 6,
         "ballCount": 4,
         "totalAngleDeg": 60,
-        "radiusFactorPercent": 80
+        "radiusFactorPercent": 70
       },
 
       "shooter": {
         "className": "Shooter",
         "spawnWeight": 1.0,
         "selfActivation": false,
-        "durationS": 3,
+        "durationS": 4,
         "chargeDurationS": 2,
         "chargeRadius": 10,
-        "shootInitialVelocityPercent": 175,
-        "shootFinalVelocityPercent": 110,
+        "shootInitialVelocityPercent": 180,
+        "shootFinalVelocityPercent": 100,
         "shootDirectionSamplerStrategyName": "biasedQuadrantGaussianRA"
       }
     }

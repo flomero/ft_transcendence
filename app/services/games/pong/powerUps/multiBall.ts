@@ -88,12 +88,6 @@ export class MultiBall extends TimeLimitedModifierBase {
       (_, index) => ogAngle + index * angleStep - this.totalAngle / 2.0,
     );
 
-    console.log(`Angle step: (deg)\n  |- ${(angleStep * 180.0) / Math.PI}`);
-    console.log(`Total angle: ${(this.totalAngle * 180.0) / Math.PI}`);
-
-    console.log(`Computed angles:`);
-    console.dir(angles, { depth: null });
-
     // Select which ball will be the real one
     const rndBallID = game.getRNG().randomInt(0, angles.length - 1);
 
@@ -123,14 +117,14 @@ export class MultiBall extends TimeLimitedModifierBase {
 
   onDeactivation(game: Pong): void {
     game.getModifierManager().deletePowerUp(this);
-    game.resetBall(game.getState(), -1, true);
+    game.getState().balls.splice(1, game.getState().balls.length - 1);
   }
 
-  onGoal(game: Pong, args: { playerId: number }): void {
-    this.deactivate(game);
-  }
+  // onGoal(game: Pong, args: { playerId: number }): void {
+  //   this.deactivate(game);
+  // }
 
-  onPlayerElimination(game: Pong, args: { playerId: number }): void {
-    this.deactivate(game);
-  }
+  // onPlayerElimination(game: Pong, args: { playerId: number }): void {
+  //   this.deactivate(game);
+  // }
 }
