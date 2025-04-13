@@ -26,7 +26,8 @@
           "powerUpCapacities": {
             "speedBoost": 1,
             "blinkingBall": 1,
-            "multiBall": 1
+            "multiBall": 1,
+            "shooter": 1
           }
         }
       },
@@ -52,7 +53,8 @@
           "powerUpCapacities": {
             "speedBoost": 1,
             "blinkingBall": 1,
-            "multiBall": 1
+            "multiBall": 1,
+            "shooter": 1
           }
         }
       }
@@ -122,6 +124,18 @@
         "ballCount": 4,
         "totalAngleDeg": 60,
         "radiusFactorPercent": 80
+      },
+
+      "shooter": {
+        "className": "Shooter",
+        "spawnWeight": 1.0,
+        "selfActivation": false,
+        "durationS": 3,
+        "chargeDurationS": 2,
+        "chargeRadius": 10,
+        "shootInitialVelocityPercent": 175,
+        "shootFinalVelocityPercent": 110,
+        "shootDirectionSamplerStrategyName": "biasedQuadrantGaussianRA"
       }
     }
   }

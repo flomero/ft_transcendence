@@ -38,10 +38,10 @@
     "biasedQuadrantGaussianRA": {
       "className": "BiasedQuadrantGaussianRA",
       "stdAngularVariationDeg": 10,
-      "angularOffsetDeg": 30,
+      "angularOffsetDeg": 20,
       "stdVelocityVariationPercent": 10,
       "maxVelocityPercent": 30,
-      "lastGoalBiasPercent": 65
+      "playerSampler": "lastGoalBiased"
     },
 
     "biasedGaussianCA": {
@@ -85,6 +85,11 @@
 
     "lowestScoreBiased": {
       "className": "LowestScoreBiased"
+    },
+
+    "lastGoalBiased": {
+      "className": "LastGoalBiased",
+      "lastGoalBiasPercent": 65
     }
   }
 }
