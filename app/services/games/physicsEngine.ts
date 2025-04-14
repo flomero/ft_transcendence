@@ -20,7 +20,7 @@ export class PhysicsEngine {
     let closestCollision: Collision | null = null;
 
     for (let i = 0; i < objects.length; i++) {
-      if (!objects[i].doCollision) {
+      if (!objects[i] || !objects[i].doCollision) {
         continue;
       }
 

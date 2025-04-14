@@ -67,6 +67,15 @@
     "improvedNaive": {
       "className": "ImprovedNaive",
       "widthPercentFactor": 90
+    },
+
+    "foresight": {
+      "className": "Foresight",
+      "widthPercentFactor": 85,
+      "lookAheadTimeS": 3,
+      "idleThresholdS": 2,
+      "ballSpeedMultiplier": 1.2,
+      "preparationTimeS": 0.3
     }
   },
 
