@@ -36,7 +36,7 @@ const powerUpSpawnerSchema = S.object()
       "flowerGaussianCA",
       "uniformCA",
       "uniformRA",
-    ]).required(),
+    ]),
   );
 
 const timedGameSchema = S.object().prop("durationS", S.number().minimum(0));
