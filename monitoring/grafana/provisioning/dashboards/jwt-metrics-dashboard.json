@@ -1,0 +1,68 @@
+{
+  "refresh": "5s",
+  "annotations": {
+    "list": []
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Total JWT Verifications",
+      "gridPos": { "x": 0, "y": 0, "w": 8, "h": 4 },
+      "targets": [
+        {
+          "expr": "sum(jwt_verify_total)",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color" : {
+            "mode": "fixed",
+            "fixedColor": "green"
+          }
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Successful JWT Verifications",
+      "gridPos": { "x": 8, "y": 0, "w": 8, "h": 4 },
+      "targets": [
+        {
+          "expr": "jwt_verify_total{status='success'}",
+          "format": "time_series"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Failed JWT Verifications",
+      "gridPos": { "x": 16, "y": 0, "w": 8, "h": 4 },
+      "targets": [
+        {
+          "expr": "jwt_verify_total{status='failure'}",
+          "format": "time_series"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "JWT Verifications per Second",
+      "gridPos": { "x": 0, "y": 5, "w": 24, "h": 8 },
+      "targets": [
+        {
+          "expr": "rate(jwt_verify_total[1m])",
+          "legendFormat": "{{status}}",
+          "format": "time_series"
+        }
+      ],
+      "lines": true,
+      "linewidth": 2,
+      "nullPointMode": "null"
+    }
+  ],
+  "schemaVersion": 30,
+  "style": "dark",
+  "title": "JWT Metrics Overview",
+  "version": 1
+}
