@@ -31,6 +31,9 @@ function initializeSampleLobbies() {
         scoredGame: {
           goalObjective: 5,
         },
+        goalReset: {
+          delayS: 1,
+        },
       },
       powerUpNames: {
         speedBoost: {
