@@ -136,6 +136,7 @@ class Lobby {
   public reachedMinPlayers(): boolean {
     const memberPlusAiSize = this.lobbyMembers.size + this.aiOpponentIds.length;
     if (memberPlusAiSize >= this.memberLimits.min) return true;
+    return false;
   }
 
   public allMembersReady(): boolean {
