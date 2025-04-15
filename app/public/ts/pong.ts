@@ -63,6 +63,7 @@ class PongGame {
   private gameMode: GameMode;
   private gameId: string;
   private isConnected: boolean = false;
+  private debug = false;
   gameSocket: WebSocket;
 
   constructor(canvasId: string) {
@@ -182,11 +183,9 @@ class PongGame {
   }
 
   private draw(): void {
-    // Clear the canvas
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    // Draw debug background - always visible
-    this.drawDebugElements();
+    if (this.debug) this.drawDebugElements();
 
     if (this.gameState.balls) this.drawBalls();
     if (this.gameState.paddles) this.drawPaddles();
@@ -195,21 +194,17 @@ class PongGame {
     if (this.gameState.scores) this.drawScores();
   }
 
-  // New method to draw debug elements and canvas boundaries
   private drawDebugElements(): void {
-    // Draw canvas border to visualize boundaries
     this.ctx.strokeStyle = "blue";
     this.ctx.lineWidth = 2;
     this.ctx.strokeRect(0, 0, this.canvas.width, this.canvas.height);
 
-    // Draw center lines
     this.ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
     this.ctx.beginPath();
     this.ctx.moveTo(this.canvas.width / 2, 0);
     this.ctx.lineTo(this.canvas.width / 2, this.canvas.height);
     this.ctx.stroke();
 
-    // Display debug info on screen
     this.ctx.fillStyle = "white";
     this.ctx.font = "14px ui-sans-serif";
     this.ctx.textAlign = "left";
@@ -252,23 +247,17 @@ class PongGame {
   private drawPaddles(): void {
     if (!this.gameState.paddles) return;
 
-    this.gameState.paddles.forEach((paddle) => {
+    this.gameState.paddles.forEach((paddle, index) => {
       if (paddle.isVisible) {
-        this.ctx.fillStyle = "white";
-        this.ctx.save();
-
-        this.ctx.translate(paddle.x * this.ratio, paddle.y * this.ratio);
         const angle = Math.atan2(paddle.dy, paddle.dx);
-        this.ctx.rotate(angle);
+        const x = paddle.x * this.ratio;
+        const y = paddle.y * this.ratio;
+        const width = paddle.width * this.ratio;
+        const height = paddle.height * this.ratio;
 
-        this.ctx.fillRect(
-          -(paddle.width * this.ratio) / 2,
-          -(paddle.height * this.ratio) / 2,
-          paddle.width * this.ratio,
-          paddle.height * this.ratio,
-        );
+        const paddleColor = index === 0 ? "#ff00ff" : "#00ffff";
 
-        this.ctx.restore();
+        this.drawNeonRectangle(x, y, width, height, paddleColor, angle);
       }
     });
   }
@@ -278,20 +267,13 @@ class PongGame {
 
     this.gameState.walls.forEach((wall) => {
       if (wall.isVisible) {
-        this.ctx.save();
-        this.ctx.translate(wall.x * this.ratio, wall.y * this.ratio);
         const angle = Math.atan2(wall.dy, wall.dx);
-        this.ctx.rotate(angle);
+        const x = wall.x * this.ratio;
+        const y = wall.y * this.ratio;
+        const width = wall.width * this.ratio;
+        const height = wall.height * this.ratio;
 
-        this.ctx.strokeStyle = "red";
-        this.ctx.strokeRect(
-          (-wall.width * this.ratio) / 2,
-          (-wall.height * this.ratio) / 2,
-          wall.width * this.ratio,
-          wall.height * this.ratio,
-        );
-
-        this.ctx.restore();
+        this.drawNeonRectangle(x, y, width, height, "#ffffff", angle);
       }
     });
   }
@@ -322,21 +304,21 @@ class PongGame {
   private getPowerUpColor(type: string): string {
     switch (type) {
       case "speedBoost":
-        return "red";
+        return "#ff0000"; // red
       case "blinkingBall":
-        return "blue";
+        return "#0000ff"; // blue
       case "multiball_modifier":
-        return "green";
+        return "#00ff00"; // green
       case "grasping_vines_debuff_modifier":
-        return "yellow";
+        return "#ffff00"; // yellow
       case "black_hole_debuff_modifier":
-        return "purple";
+        return "#800080"; // purple
       case "carousel_debuff_modifier":
-        return "lime";
+        return "#00ff00"; // lime
       case "shooting_modifier":
-        return "yellow";
+        return "#ffff00"; // yellow
       default:
-        return "orange";
+        return "#ff8800"; // orange
     }
   }
 
@@ -372,6 +354,143 @@ class PongGame {
     if (!this.isConnected) {
       this.gameSocket = this.setupWebSocket();
     }
+  }
+
+  private drawNeonRectangle(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    color: string,
+    angle: number = 0,
+  ): void {
+    let r = 255,
+      g = 255,
+      b = 255;
+
+    if (color && color.startsWith("#")) {
+      if (color.length === 7) {
+        r = parseInt(color.slice(1, 3), 16);
+        g = parseInt(color.slice(3, 5), 16);
+        b = parseInt(color.slice(5, 7), 16);
+      } else if (color.length === 4) {
+        r = parseInt(color.charAt(1) + color.charAt(1), 16);
+        g = parseInt(color.charAt(2) + color.charAt(2), 16);
+        b = parseInt(color.charAt(3) + color.charAt(3), 16);
+      }
+    } else {
+      switch (color.toLowerCase()) {
+        case "red":
+          r = 255;
+          g = 0;
+          b = 0;
+          break;
+        case "green":
+          r = 0;
+          g = 255;
+          b = 0;
+          break;
+        case "blue":
+          r = 0;
+          g = 0;
+          b = 255;
+          break;
+        case "yellow":
+          r = 255;
+          g = 255;
+          b = 0;
+          break;
+        case "purple":
+          r = 128;
+          g = 0;
+          b = 128;
+          break;
+        case "cyan":
+          r = 0;
+          g = 255;
+          b = 255;
+          break;
+        case "orange":
+          r = 255;
+          g = 165;
+          b = 0;
+          break;
+        case "white":
+          r = 255;
+          g = 255;
+          b = 255;
+          break;
+      }
+    }
+
+    r = isNaN(r) ? 255 : Math.max(0, Math.min(255, r));
+    g = isNaN(g) ? 255 : Math.max(0, Math.min(255, g));
+    b = isNaN(b) ? 255 : Math.max(0, Math.min(255, b));
+
+    this.ctx.save();
+
+    this.ctx.translate(x, y);
+    if (angle) this.ctx.rotate(angle);
+
+    this.ctx.lineJoin = "round";
+    this.ctx.globalCompositeOperation = "lighter";
+
+    const border = 1.5;
+    const halfWidth = width / 2;
+    const halfHeight = height / 2;
+
+    const drawGlowingLayer = (lineWidth: number, opacity: number) => {
+      this.ctx.beginPath();
+      this.ctx.moveTo(-halfWidth + border, -halfHeight);
+      this.ctx.lineTo(halfWidth - border, -halfHeight);
+      this.ctx.quadraticCurveTo(
+        halfWidth - border,
+        -halfHeight,
+        halfWidth,
+        -halfHeight + border,
+      );
+      this.ctx.lineTo(halfWidth, halfHeight - border);
+      this.ctx.quadraticCurveTo(
+        halfWidth,
+        halfHeight - border,
+        halfWidth - border,
+        halfHeight,
+      );
+      this.ctx.lineTo(-halfWidth + border, halfHeight);
+      this.ctx.quadraticCurveTo(
+        -halfWidth + border,
+        halfHeight,
+        -halfWidth,
+        halfHeight - border,
+      );
+      this.ctx.lineTo(-halfWidth, -halfHeight + border);
+      this.ctx.quadraticCurveTo(
+        -halfWidth,
+        -halfHeight + border,
+        -halfWidth + border,
+        -halfHeight,
+      );
+      this.ctx.closePath();
+
+      this.ctx.lineWidth = lineWidth;
+      this.ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
+      this.ctx.stroke();
+    };
+
+    this.ctx.shadowColor = `rgb(${r}, ${g}, ${b})`;
+    this.ctx.shadowBlur = 10;
+
+    drawGlowingLayer(7.5, 0.2);
+    drawGlowingLayer(6, 0.2);
+    drawGlowingLayer(4.5, 0.2);
+    drawGlowingLayer(3, 0.2);
+
+    this.ctx.lineWidth = 1.5;
+    this.ctx.strokeStyle = "#fff";
+    this.ctx.shadowBlur = 0;
+    drawGlowingLayer(1.5, 1);
+
+    this.ctx.restore();
   }
 }
 
