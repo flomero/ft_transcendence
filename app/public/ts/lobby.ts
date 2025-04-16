@@ -10,12 +10,11 @@ declare global {
 
 interface LobbyMessage {
   type: string;
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   data: any;
 }
 
 class LobbyHandler {
-  private socket: WebSocket | null = null;
+  public socket: WebSocket | null = null; // Changed to public for access in router's onExit
   private isConnected = false;
 
   private getLobbyId(): string {
@@ -31,6 +30,7 @@ class LobbyHandler {
 
     this.socket.onopen = () => {
       this.isConnected = true;
+      console.log("Lobby WebSocket connected");
     };
 
     this.socket.onmessage = (event) => {
@@ -42,9 +42,12 @@ class LobbyHandler {
 
     this.socket.onclose = () => {
       this.isConnected = false;
+      console.log("Lobby WebSocket closed");
     };
 
-    this.socket.onerror = (error) => {};
+    this.socket.onerror = (error) => {
+      // console.error("Lobby WebSocket error:", error);
+    };
   }
 
   private handleMessage(message: LobbyMessage): void {
@@ -172,17 +175,4 @@ class LobbyHandler {
   }
 }
 
-function initializeLobbyHandler() {
-  const lobbyHandler = new LobbyHandler();
-  lobbyHandler.connect();
-  window.lobbyHandler = lobbyHandler;
-}
-
-const observer = new MutationObserver(() => {
-  const lobbyContainer = document.getElementById("lobby-container");
-  if (lobbyContainer) {
-    initializeLobbyHandler();
-  }
-});
-
-observer.observe(document.body, { childList: true, subtree: true });
+export default LobbyHandler;

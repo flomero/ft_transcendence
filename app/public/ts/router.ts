@@ -1,17 +1,29 @@
 import { TransitionManager } from "./transitions.js";
+import LobbyHandler from "./lobby.js";
+import { initPongGame, PongGame } from "./pong.js";
+
+// Route handler interface with lifecycle hooks
+interface RouteHandler {
+  onEnter?: () => void | Promise<void>; // Called when route is entered
+  onExit?: () => void | Promise<void>; // Called when navigating away
+  contentHandler?: () => Promise<string | null>; // Optional custom content handler
+}
 
 // Type declarations for window extensions
 declare global {
   interface Window {
     Router: typeof Router;
     router: Router;
+    pongGame: PongGame | undefined;
+    LobbyHandler: typeof LobbyHandler;
   }
 }
 
 class Router {
-  private routes: Record<string, () => Promise<string | null>>;
+  private routes: Record<string, RouteHandler>;
   private contentContainer: HTMLElement;
   private transitionManager: TransitionManager;
+  private currentPath: string = "";
 
   constructor() {
     this.routes = {};
@@ -26,19 +38,72 @@ class Router {
     this.contentContainer.classList.add("fade-in");
     this.transitionManager = new TransitionManager("app-content");
 
-    // Handle back/forward browser navigation
     window.addEventListener("popstate", (e) => this.handlePopState(e));
-
-    // Intercept link clicks
     document.addEventListener("click", (e) => this.handleLinkClick(e));
-
-    // Handle form submissions
     document.addEventListener("submit", (e) => this.handleFormSubmit(e));
   }
 
-  addRoute(path: string, handler: () => Promise<string | null>): Router {
-    this.routes[path] = handler;
+  addRoute(
+    path: string,
+    handler: RouteHandler | (() => Promise<string | null>),
+  ): Router {
+    if (typeof handler === "function") {
+      this.routes[path] = { contentHandler: handler };
+    } else {
+      this.routes[path] = handler;
+    }
     return this;
+  }
+
+  private findMatchingRoute(
+    path: string,
+  ): { handler: RouteHandler; params: Record<string, string> } | null {
+    if (this.routes[path]) {
+      return { handler: this.routes[path], params: {} };
+    }
+
+    for (const routePath in this.routes) {
+      if (this.isPathMatch(routePath, path)) {
+        const params = this.extractPathParams(routePath, path);
+        return { handler: this.routes[routePath], params };
+      }
+    }
+
+    return null;
+  }
+
+  private isPathMatch(pattern: string, path: string): boolean {
+    if (!pattern.includes(":")) return false;
+
+    const patternParts = pattern.split("/");
+    const pathParts = path.split("/");
+
+    if (patternParts.length !== pathParts.length) return false;
+
+    for (let i = 0; i < patternParts.length; i++) {
+      if (patternParts[i].startsWith(":")) continue;
+      if (patternParts[i] !== pathParts[i]) return false;
+    }
+
+    return true;
+  }
+
+  private extractPathParams(
+    pattern: string,
+    path: string,
+  ): Record<string, string> {
+    const params: Record<string, string> = {};
+    const patternParts = pattern.split("/");
+    const pathParts = path.split("/");
+
+    for (let i = 0; i < patternParts.length; i++) {
+      if (patternParts[i].startsWith(":")) {
+        const paramName = patternParts[i].substring(1);
+        params[paramName] = pathParts[i];
+      }
+    }
+
+    return params;
   }
 
   handlePopState(e: PopStateEvent): void {
@@ -52,7 +117,6 @@ class Router {
   }
 
   handleLinkClick(e: MouseEvent): void {
-    // Only process links within our app
     const target = e.target as HTMLElement;
     const link = target.closest("a");
 
@@ -105,8 +169,15 @@ class Router {
     this.showLoader();
 
     try {
+      await this.runExitHandler();
+
+      this.currentPath = path;
+
       await this.transitionManager.transition(async () => {
-        const customHandler = this.routes[path];
+        const matchedRoute = this.findMatchingRoute(path);
+        const customHandler =
+          matchedRoute?.handler?.contentHandler ||
+          this.routes[path]?.contentHandler;
         let html: string | null = null;
 
         if (customHandler) {
@@ -120,12 +191,44 @@ class Router {
           this.executeScripts();
           this.updateActiveLinks(path);
           window.scrollTo(0, 0);
+
+          await this.runEnterHandler(path);
+
+          document.dispatchEvent(
+            new CustomEvent("contentLoaded", {
+              detail: { path },
+            }),
+          );
         }
       });
     } catch (error) {
       console.error("Error loading route:", error);
     } finally {
       this.hideLoader();
+    }
+  }
+
+  private async runExitHandler(): Promise<void> {
+    if (!this.currentPath) return;
+
+    const matchedRoute = this.findMatchingRoute(this.currentPath);
+    if (matchedRoute?.handler?.onExit) {
+      try {
+        await matchedRoute.handler.onExit();
+      } catch (error) {
+        console.error("Error in route exit handler:", error);
+      }
+    }
+  }
+
+  private async runEnterHandler(path: string): Promise<void> {
+    const matchedRoute = this.findMatchingRoute(path);
+    if (matchedRoute?.handler?.onEnter) {
+      try {
+        await matchedRoute.handler.onEnter();
+      } catch (error) {
+        console.error("Error in route enter handler:", error);
+      }
     }
   }
 
@@ -223,7 +326,10 @@ class Router {
     const searchParams = new URLSearchParams(
       formData as unknown as URLSearchParams,
     );
-    const path = `${form.action.replace(window.location.origin, "")}?${searchParams.toString()}`;
+    const path = `${form.action.replace(
+      window.location.origin,
+      "",
+    )}?${searchParams.toString()}`;
 
     this.navigateTo(path);
   }
@@ -254,16 +360,36 @@ class Router {
 
 window.Router = Router;
 
-// Initialize router when DOM is fully loaded
 document.addEventListener("DOMContentLoaded", () => {
   window.router = new Router();
 
-  // Add custom routes if needed
-  // window.router.addRoute('/chat', async () => {
-  //   // Custom handling for chat route
-  //   // ...
-  //   return await window.router.fetchContent('/chat');
-  // });
+  window.router.addRoute("/play/game/:id", {
+    onEnter: () => {
+      window.pongGame = initPongGame();
+    },
+    onExit: () => {
+      if (window.pongGame) {
+        if (window.pongGame.gameSocket) {
+          window.pongGame.gameSocket.close();
+        }
+      }
+    },
+  });
+
+  window.router.addRoute("/games/lobby/join/:id", {
+    onEnter: () => {
+      const lobbyHandler = new LobbyHandler();
+      lobbyHandler.connect();
+      window.lobbyHandler = lobbyHandler;
+    },
+    onExit: () => {
+      if (window.lobbyHandler) {
+        if (window.lobbyHandler.socket) {
+          window.lobbyHandler.socket.close();
+        }
+      }
+    },
+  });
 
   window.router.init();
 });
