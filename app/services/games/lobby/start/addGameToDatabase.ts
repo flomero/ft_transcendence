@@ -1,7 +1,6 @@
 import type GameManager from "../../gameHandler/GameManager";
 import type { Database } from "sqlite";
 import type { GameSettings } from "../../../../interfaces/games/lobby/GameSettings";
-import { randomUUID } from "node:crypto";
 
 const addGameToDatabase = async (
   gameManager: GameManager,
@@ -15,14 +14,13 @@ const addGameToDatabase = async (
 const addUserMatchesToDB = async (gameManager: GameManager, db: Database) => {
   const sql = `
   INSERT INTO r_users_matches (
-    id,
     userId,
     matchId,
     score)
-  VALUES (?, ?, ?, ?)
+  VALUES (?, ?, ?)
   `;
   for (const userId of gameManager.players.keys()) {
-    await db.run(sql, randomUUID(), userId, gameManager.getId, 0);
+    await db.run(sql, userId, gameManager.getId, 0);
   }
 };
 
