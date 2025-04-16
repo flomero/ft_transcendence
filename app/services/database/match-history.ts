@@ -8,6 +8,7 @@ export const getMatchHistoryService = async (
   const query = `
       SELECT r1.matchId,
              m.gameName,
+             r2.userId,
              u.username,
              r2.score
       FROM r_users_matches r1
@@ -22,19 +23,19 @@ export const getMatchHistoryService = async (
 
   const rows = await db.all(query, userId);
 
-  // Parse the result into a structured format
   const matches = rows.reduce((acc, row) => {
-    const { matchId, gameName, username, score } = row;
+    const { matchId, gameName, username, score, userId } = row;
 
     if (!acc[matchId]) {
       acc[matchId] = {
         matchId,
         gameName,
         leaderboard: [],
+        result: "loss", // Default result
       };
     }
 
-    acc[matchId].leaderboard.push({ username, score });
+    acc[matchId].leaderboard.push({ userId, username, score });
 
     // Sort the leaderboard by score in descending order
     acc[matchId].leaderboard.sort(
@@ -44,9 +45,23 @@ export const getMatchHistoryService = async (
     return acc;
   }, {});
 
+  // Determine the result for each match
+  Object.values(matches).forEach((match: any) => {
+    const topScore = match.leaderboard[0].score;
+    const topScorers = match.leaderboard.filter(
+      (player: { score: number }) => player.score === topScore,
+    );
+
+    if (topScorers.length > 1) {
+      match.result = "draw"; // Multiple players with the top score
+    } else if (topScorers[0].userId === userId) {
+      match.result = "win"; // User has the highest score
+    }
+  });
+
   fastify.log.debug(
     `Match history for user ${userId}: ${JSON.stringify(matches)}`,
   );
-  // Convert the object to an array
+
   return Object.values(matches);
 };
