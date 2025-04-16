@@ -16,7 +16,7 @@
     </span>
     </div>
     <button
-      class="toggle-leaderboard justify-end flex-1"
+      class="flex toggle-leaderboard justify-end flex-1"
       onclick="profileEditor.toggleLeaderboard(this)"
     >
       ▼
@@ -24,9 +24,9 @@
   </div>
   <div class="leaderboard hidden p-2">
     {{#each leaderboard}}
-      <div class="flex justify-between">
-        <span>{{username}}</span>
-        <span>{{score}}</span>
+      <div class="flex justify-between items-center gap-x-4">
+        <span class="truncate">{{username}}</span>
+        <span class="text-right">{{score}}</span>
       </div>
     {{/each}}
   </div>
