@@ -8,6 +8,7 @@ export const getMatchHistoryService = async (
   const query = `
       SELECT r1.matchId,
              m.gameName,
+             m.matchDate,
              r2.userId,
              u.username,
              r2.score
@@ -24,12 +25,13 @@ export const getMatchHistoryService = async (
   const rows = await db.all(query, userId);
 
   const matches = rows.reduce((acc, row) => {
-    const { matchId, gameName, username, score, userId } = row;
+    const { matchId, gameName, matchDate, username, score, userId } = row;
 
     if (!acc[matchId]) {
       acc[matchId] = {
         matchId,
         gameName,
+        matchDate,
         leaderboard: [],
         result: "loss", // Default result
       };
