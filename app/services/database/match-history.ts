@@ -27,19 +27,19 @@ export const getMatchHistoryService = async (
     }[]
   >(
     `
-        SELECT r1.matchId,
-               m.gameName,
-               m.matchDate,
-               r2.userId,
-               u.username,
-               r2.score
-        FROM r_users_matches r1
-                 JOIN r_users_matches r2 ON r1.matchId = r2.matchId
-                 JOIN users u ON u.id = r2.userId
-                 JOIN matches m ON m.id = r1.matchId
-        WHERE r1.userId = ?
-        ORDER BY m.matchDate DESC, r2.score DESC;
-    `,
+      SELECT r1.matchId,
+             m.gameName,
+             m.matchDate,
+             r2.userId,
+             u.username,
+             r2.score
+      FROM r_users_matches r1
+               JOIN r_users_matches r2 ON r1.matchId = r2.matchId
+               JOIN users u ON u.id = r2.userId
+               JOIN matches m ON m.id = r1.matchId
+      WHERE r1.userId = ?
+      ORDER BY m.matchDate DESC, r2.score DESC;
+  `,
     userId,
   );
 
