@@ -1,69 +1,98 @@
 import { FastifyInstance } from "fastify";
 
+type LeaderboardEntry = { userId: string; username: string; score: number };
+type MatchResult = "win" | "loss" | "draw";
+type MatchInfo = {
+  matchId: string;
+  gameName: string;
+  matchDate: string; // keep as string from DB; parse only for sorting
+  leaderboard: LeaderboardEntry[];
+  result: MatchResult;
+};
+
 export const getMatchHistoryService = async (
   fastify: FastifyInstance,
   userId: string,
 ) => {
   const db = fastify.sqlite;
-  const query = `
-      SELECT r1.matchId,
-             m.gameName,
-             m.matchDate,
-             r2.userId,
-             u.username,
-             r2.score
-      FROM r_users_matches r1
-               JOIN r_users_matches r2
-                    ON r1.matchId = r2.matchId
-               JOIN users u
-                    ON u.id = r2.userId
-               JOIN matches m
-                    ON m.id = r1.matchId
-      WHERE r1.userId = ?;
-  `;
 
-  const rows = await db.all(query, userId);
+  const rows = await db.all<
+    {
+      matchId: string;
+      gameName: string;
+      matchDate: string;
+      userId: string;
+      username: string;
+      score: number;
+    }[]
+  >(
+    `
+        SELECT r1.matchId,
+               m.gameName,
+               m.matchDate,
+               r2.userId,
+               u.username,
+               r2.score
+        FROM r_users_matches r1
+                 JOIN r_users_matches r2 ON r1.matchId = r2.matchId
+                 JOIN users u ON u.id = r2.userId
+                 JOIN matches m ON m.id = r1.matchId
+        WHERE r1.userId = ?
+        ORDER BY m.matchDate DESC, r2.score DESC;
+    `,
+    userId,
+  );
 
-  const matches = rows.reduce((acc, row) => {
-    const { matchId, gameName, matchDate, username, score, userId } = row;
+  // --- build map keyed by matchId ---
+  const matchesMap = new Map<string, MatchInfo>();
 
-    if (!acc[matchId]) {
-      acc[matchId] = {
+  for (const row of rows) {
+    const {
+      matchId,
+      gameName,
+      matchDate,
+      userId: playerId,
+      username,
+      score,
+    } = row;
+
+    if (!matchesMap.has(matchId)) {
+      matchesMap.set(matchId, {
         matchId,
         gameName,
         matchDate,
         leaderboard: [],
-        result: "loss", // Default result
-      };
+        result: "loss",
+      });
     }
 
-    acc[matchId].leaderboard.push({ userId, username, score });
+    matchesMap
+      .get(matchId)!
+      .leaderboard.push({ userId: playerId, username, score });
+  }
 
-    // Sort the leaderboard by score in descending order
-    acc[matchId].leaderboard.sort(
-      (a: { score: number }, b: { score: number }) => b.score - a.score,
-    );
+  // --- final per‑match processing ---
+  for (const match of matchesMap.values()) {
+    // rows are already score‑DESC, but sort once more for safety
+    match.leaderboard.sort((a, b) => b.score - a.score);
 
-    return acc;
-  }, {});
-
-  // Determine the result for each match
-  Object.values(matches).forEach((match: any) => {
     const topScore = match.leaderboard[0].score;
-    const topScorers = match.leaderboard.filter(
-      (player: { score: number }) => player.score === topScore,
-    );
+    const topScorers = match.leaderboard.filter((p) => p.score === topScore);
 
     if (topScorers.length > 1) {
-      match.result = "draw"; // Multiple players with the top score
+      match.result = "draw";
     } else if (topScorers[0].userId === userId) {
-      match.result = "win"; // User has the highest score
+      match.result = "win";
     }
-  });
+  }
 
-  fastify.log.debug(
-    `Match history for user ${userId}: ${JSON.stringify(matches)}`,
+  const result = [...matchesMap.values()].sort(
+    (a, b) => Date.parse(b.matchDate) - Date.parse(a.matchDate),
   );
 
-  return Object.values(matches);
+  fastify.log.debug(
+    `Match history for user ${userId}: ${JSON.stringify(result)}`,
+  );
+
+  return result;
 };
