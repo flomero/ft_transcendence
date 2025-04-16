@@ -1,0 +1,22 @@
+<div class="flex flex-col border-b">
+  <div class="flex flex-row items-center justify-between p-2">
+    <div>
+      <span>Game: {{gameName}}</span>
+      <span>ID: {{matchId}}</span>
+    </div>
+    <button
+      class="toggle-leaderboard"
+      onclick="profileEditor.toggleLeaderboard(this)"
+    >
+      ▼
+    </button>
+  </div>
+  <div class="leaderboard hidden p-2">
+    {{#each leaderboard}}
+      <div class="flex justify-between">
+        <span>{{username}}</span>
+        <span>{{score}}</span>
+      </div>
+    {{/each}}
+  </div>
+</div>

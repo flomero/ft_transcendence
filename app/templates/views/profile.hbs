@@ -84,30 +84,13 @@
         <div class="mt-6">
           <h2 class="text-xl font-bold">Match History</h2>
           <div id="match-history" class="mt-4">
-            {{#each matches}}
-              <div class="flex flex-col border-b">
-                <div class="flex flex-row items-center justify-between p-2">
-                  <div>
-                    <span>Game: {{this.gameName}}</span>
-                    <span>ID: {{this.matchId}}</span>
-                  </div>
-                  <button
-                    class="toggle-leaderboard"
-                    onclick="profileEditor.toggleLeaderboard(this)"
-                  >
-                    ▼
-                  </button>
-                </div>
-                <div class="leaderboard hidden p-2">
-                  {{#each this.leaderboard}}
-                    <div class="flex justify-between">
-                      <span>{{this.username}}</span>
-                      <span>{{this.score}}</span>
-                    </div>
-                  {{/each}}
-                </div>
-              </div>
-            {{/each}}
+            {{#if matches.length}}
+              {{#each matches}}
+                {{> components/match-history/match this}}
+              {{/each}}
+            {{else}}
+              <p>No matches played yet.</p>
+            {{/if}}
           </div>
         </div>
       </div>
