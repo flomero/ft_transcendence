@@ -81,21 +81,10 @@
           <div id="profile-error-message" class="p-3 text-red-500" hidden="hidden"></div>
         </div>
 
-        <div class="mt-6">
-          <h2 class="text-xl font-bold">Match History</h2>
-          <div id="match-history" class="mt-4">
-            {{#if matches.length}}
-              {{#each matches}}
-                {{> components/match-history/match this}}
-              {{/each}}
-            {{else}}
-              <p>No matches played yet.</p>
-            {{/if}}
-          </div>
-        </div>
       </div>
     </div>
   </div>
+  {{> components/match-history/match-history matches=matches}}
 </div>
 
 <script type="module" src="/public/js/profile.js">

@@ -1,21 +1,22 @@
 <div class="flex flex-col border-b">
   <div class="flex flex-row items-center justify-between p-2">
-    <div>
-      <span>Game: {{gameName}}</span>
-      <span>ID: {{matchId}}</span>
-      <span class="ml-4 font-bold">
-        Result:
-        {{#if (eq result "win")}}
-          <span class="text-green-500">Win</span>
-        {{else if (eq result "draw")}}
-          <span class="text-yellow-500">Draw</span>
-        {{else}}
-          <span class="text-red-500">Loss</span>
-        {{/if}}
-      </span>
+    <div class="flex-4">
+      <span>{{gameName}}</span>
+      <span>{{matchId}}</span>
+    </div>
+    <div class="flex justify-end flex-4">
+    <span class="ml-4 font-bold">
+      {{#if (eq result "win")}}
+        <span class="text-green-500">Win</span>
+      {{else if (eq result "draw")}}
+        <span class="text-yellow-500">Draw</span>
+      {{else}}
+        <span class="text-red-500">Loss</span>
+      {{/if}}
+    </span>
     </div>
     <button
-      class="toggle-leaderboard"
+      class="toggle-leaderboard justify-end flex-1"
       onclick="profileEditor.toggleLeaderboard(this)"
     >
       ▼
