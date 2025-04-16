@@ -35,6 +35,12 @@ export const getMatchHistoryService = async (
     }
 
     acc[matchId].leaderboard.push({ username, score });
+
+    // Sort the leaderboard by score in descending order
+    acc[matchId].leaderboard.sort(
+      (a: { score: number }, b: { score: number }) => b.score - a.score,
+    );
+
     return acc;
   }, {});
 
