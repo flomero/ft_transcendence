@@ -113,6 +113,15 @@ class ProfileEditor {
         this.showError(`Error uploading profile picture: ${error}`);
       });
   };
+
+  toggleLeaderboard = (button: HTMLButtonElement) => {
+    const leaderboard = button.closest("div")
+      ?.nextElementSibling as HTMLElement;
+    if (leaderboard) {
+      leaderboard.classList.toggle("hidden");
+      button.textContent = leaderboard.classList.contains("hidden") ? "▼" : "▲";
+    }
+  };
 }
 
 const profileEditor = new ProfileEditor();
