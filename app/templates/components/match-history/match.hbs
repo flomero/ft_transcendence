@@ -25,11 +25,19 @@
 
   <ol class="p-2 space-y-1">
     {{#each leaderboard}}
-      <li class="flex justify-between items-center gap-x-4">
+      <li
+        class="flex items-center justify-between gap-x-4
+             py-1 px-2 rounded-md
+             transition-colors duration-150
+             hover:bg-slate-100 dark:hover:bg-slate-800
+             focus-visible:bg-slate-100 dark:focus-visible:bg-slate-800
+             focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/40
+             cursor-pointer">                           <!-- optional: pointer cursor -->
         <span class="w-8 text-right">{{inc @index}}.</span>
         <span class="flex-1 truncate">{{username}}</span>
         <span class="w-12 text-right">{{score}}</span>
       </li>
     {{/each}}
   </ol>
+
 </details>
