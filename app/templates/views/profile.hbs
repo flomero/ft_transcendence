@@ -76,7 +76,8 @@
           <div id="match-history" class="mt-4">
             {{#each matches}}
               <div class="flex flex-row items-center justify-between p-2 border-b">
-                {{this.result}}
+                <span>Game: {{this.gameName}}</span>
+                <span>ID: {{this.matchId}}</span>
               </div>
             {{/each}}
           </div>

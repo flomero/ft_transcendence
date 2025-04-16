@@ -4,12 +4,41 @@ export const getMatchHistoryService = async (
   fastify: FastifyInstance,
   userId: string,
 ) => {
-  // Simulate fetching match history (replace with actual database query later)
-  const matches = [
-    { date: "2023-10-01", opponent: "Player1", result: "Win" },
-    { date: "2023-09-28", opponent: "Player2", result: "Loss" },
-    { date: "2023-09-25", opponent: "Player3", result: "Win" },
-  ];
+  const db = fastify.sqlite;
 
-  return matches;
+  const query = `
+      SELECT r1.matchId,
+             m.gameName,
+             u.username,
+             r2.score
+      FROM r_users_matches r1
+               JOIN r_users_matches r2
+                    ON r1.matchId = r2.matchId
+               JOIN users u
+                    ON u.id = r2.userId
+               JOIN matches m
+                    ON m.id = r1.matchId
+      WHERE r1.userId = ?;
+  `;
+
+  const rows = await db.all(query, userId);
+
+  // Parse the result into a structured format
+  const matches = rows.reduce((acc, row) => {
+    const { matchId, gameName, username, score } = row;
+
+    if (!acc[matchId]) {
+      acc[matchId] = {
+        matchId,
+        gameName,
+        leaderboard: [],
+      };
+    }
+
+    acc[matchId].leaderboard.push({ username, score });
+    return acc;
+  }, {});
+
+  // Convert the object to an array
+  return Object.values(matches);
 };
