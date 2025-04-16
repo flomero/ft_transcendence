@@ -1,11 +1,13 @@
-<div class="flex flex-col border-b">
-  <div class="flex flex-row items-center justify-between p-2">
-    <div class="flex-4">
-      <span>{{gameName}}</span>
-      <span>{{matchId}}</span>
-    </div>
-    <div class="flex justify-end flex-4">
-    <span class="ml-4 font-bold">
+<details class="border-b group" aria-labelledby="match-{{matchId}}">
+  <summary
+    id="match-{{matchId}}"
+    class="flex items-center justify-between gap-2 p-2 cursor-pointer select-none">
+    <span class="flex-1 min-w-0">
+      <span class="font-medium truncate">{{gameName}}</span>
+      <span class="ml-1 text-sm text-gray-500 truncate">{{matchId}}</span>
+    </span>
+
+    <span class="font-bold">
       {{#if (eq result "win")}}
         <span class="text-green-500">Win</span>
       {{else if (eq result "draw")}}
@@ -14,21 +16,20 @@
         <span class="text-red-500">Loss</span>
       {{/if}}
     </span>
-    </div>
-    <button
-      class="flex toggle-leaderboard justify-end flex-1"
-      onclick="profileEditor.toggleLeaderboard(this)"
-    >
-      ▼
-    </button>
-  </div>
-  <div class="leaderboard hidden p-2">
+
+    <svg class="w-4 h-4 shrink-0 transition-transform group-open:rotate-180"
+         viewBox="0 0 20 20" fill="currentColor">
+      <path fill-rule="evenodd" d="M5 6l5 5 5-5H5z" clip-rule="evenodd"></path>
+    </svg>
+  </summary>
+
+  <ol class="p-2 space-y-1">
     {{#each leaderboard}}
-      <div class="flex justify-between items-center gap-x-4">
-        <span class="w-8">{{inc @index}}.</span>
+      <li class="flex justify-between items-center gap-x-4">
+        <span class="w-8 text-right">{{inc @index}}.</span>
         <span class="flex-1 truncate">{{username}}</span>
         <span class="w-12 text-right">{{score}}</span>
-      </div>
+      </li>
     {{/each}}
-  </div>
-</div>
+  </ol>
+</details>
