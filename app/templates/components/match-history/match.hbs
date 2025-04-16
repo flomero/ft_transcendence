@@ -3,6 +3,16 @@
     <div>
       <span>Game: {{gameName}}</span>
       <span>ID: {{matchId}}</span>
+      <span class="ml-4 font-bold">
+        Result:
+        {{#if (eq result "win")}}
+          <span class="text-green-500">Win</span>
+        {{else if (eq result "draw")}}
+          <span class="text-yellow-500">Draw</span>
+        {{else}}
+          <span class="text-red-500">Loss</span>
+        {{/if}}
+      </span>
     </div>
     <button
       class="toggle-leaderboard"
