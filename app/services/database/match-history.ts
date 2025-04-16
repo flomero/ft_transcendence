@@ -5,7 +5,6 @@ export const getMatchHistoryService = async (
   userId: string,
 ) => {
   const db = fastify.sqlite;
-
   const query = `
       SELECT r1.matchId,
              m.gameName,
@@ -39,6 +38,9 @@ export const getMatchHistoryService = async (
     return acc;
   }, {});
 
+  fastify.log.debug(
+    `Match history for user ${userId}: ${JSON.stringify(matches)}`,
+  );
   // Convert the object to an array
   return Object.values(matches);
 };
