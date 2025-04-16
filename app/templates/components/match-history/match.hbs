@@ -25,8 +25,9 @@
   <div class="leaderboard hidden p-2">
     {{#each leaderboard}}
       <div class="flex justify-between items-center gap-x-4">
-        <span class="truncate">{{username}}</span>
-        <span class="text-right">{{score}}</span>
+        <span class="w-8">{{inc @index}}.</span>
+        <span class="flex-1 truncate">{{username}}</span>
+        <span class="w-12 text-right">{{score}}</span>
       </div>
     {{/each}}
   </div>

@@ -59,5 +59,8 @@ export function registerHelpers(handlebars: typeof Handlebars) {
     return formattedString.charAt(0).toUpperCase() + formattedString.slice(1);
   });
 
+  handlebars.registerHelper("inc", function (value, options) {
+    return parseInt(value) + 1;
+  });
   // Add other helpers here as needed
 }
