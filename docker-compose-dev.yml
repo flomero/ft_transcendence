@@ -1,0 +1,21 @@
+services:
+  app:
+    build:
+      context: ./app
+      dockerfile: DockerfileDev
+    container_name: transcendence_node_app
+    volumes:
+      - ./app:/app  # Mount for development
+      - /app/node_modules  # Prevent overwriting node_modules
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=development
+    command: npm run dev  # Use development mode with hot reload
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
