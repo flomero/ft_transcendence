@@ -30,10 +30,11 @@ const addPlayerToGameManager = (
 const addAiToGameManager = (
   gameManager: GameManager,
   lobbyMember: LobbyMember[],
-) => {};
-for (const aiOpponentId of lobbyMember) {
-  if (aiOpponentId.isAi === true) gameManager.addAiOpponent(aiOpponentId.id);
-}
+) => {
+  for (const aiOpponentId of lobbyMember) {
+    if (aiOpponentId.isAi === true) gameManager.addAiOpponent(aiOpponentId.id);
+  }
+};
 
 // const printLobby = (lobbyId: string) => {
 //   const lobby = getLobby(lobbyId);
