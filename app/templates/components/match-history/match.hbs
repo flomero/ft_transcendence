@@ -6,8 +6,6 @@
     transition-property: block-size, content-visibility;
     transition-duration: 0.5s;
     transition-behavior: allow-discrete;
-    border: thin solid lightgray;
-    border-radius: var(--radius-2xl);
   }
 
   details[open]::details-content {
@@ -16,18 +14,22 @@
 
     /* calc-size() function allows transition to height: auto; */
     block-size: calc-size(auto, size);
-
-    border: thin solid lightgray;
-    border-radius: var(--radius-2xl);
   }
 </style>
 
-<details class="group font-mono" aria-labelledby="match-{{matchId}}" name="match">
+<details class="group font-mono rounded-2xl mb-2
+          border {{#if (eq result 'win')}}border-green-900/50 bg-green-900/10
+          {{else if (eq result 'draw')}}border-yellow-900/50 bg-yellow-900/10
+          {{else}}border-red-900/50 bg-red-900/10
+          {{/if}}"
+         aria-labelledby="match-{{matchId}}"
+         name="match"
+>
   <summary
     id="match-{{matchId}}"
     class="flex items-center justify-between gap-2 p-2 cursor-pointer select-none">
     <span class="flex-1 min-w-0">
-      <span class="flex font-medium truncate">{{formatDate matchDate "do MMMM, HH:mm"}}</span>
+      <span class="flex font-medium truncate">{{formatDate matchDate "do MMMM, HH:mm"}}  {{ hrGameModeName gameModeName }} </span>
       <span class="flex ml-1 text-sm text-gray-500 truncate">{{matchId}}</span>
     </span>
 
@@ -47,7 +49,7 @@
     </svg>
   </summary>
 
-  <ol class="p-2 space-y-1">
+  <ol class="p-2 space-y-1 ">
     {{#each leaderboard}}
       <li>
         <a
