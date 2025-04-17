@@ -13,26 +13,38 @@ class GameManager {
   game: GameBase;
   players: Map<string, Player> = new Map();
   aiOpponent: Map<string, PongAIOpponent> = new Map();
+  playerIdReferenceTable: Array<string> = [];
 
   constructor(game: GameBase) {
     this.game = game;
   }
 
-  addPlayer(userId: string): void {
-    const playerIdInGame = this.players.size + this.aiOpponentIds.size;
+  public addPlayer(userId: string): void {
+    if (this.game.getStatus() === GameStatus.RUNNING) {
+      console.error("Game is already running");
+      return;
+    }
+
     const newPlayer = {
-      id: playerIdInGame,
+      id: -1,
       playerUUID: userId,
     };
     this.players.set(userId, newPlayer);
+    this.playerIdReferenceTable.push(userId);
   }
 
-  addAiOpponent(aiOpponentId: number): void {
-    const aiIdInGame = this.aiOpponentIds.size + this.players.size;
+  public addAiOpponent(aiOpponentId: string): void {
+    if (this.game.getStatus() === GameStatus.RUNNING) {
+      console.error("Game is already running");
+      return;
+    }
+
     const newAiOpponent = new PongAIOpponent(this.game, {
-      playerId: aiIdInGame,
+      playerId: -1,
       strategyName: "improvedNaive",
     });
+    this.aiOpponent.set(aiOpponentId, newAiOpponent);
+    this.playerIdReferenceTable.push(aiOpponentId);
   }
 
   public hasPlayer(userId: string): boolean {
@@ -81,10 +93,28 @@ class GameManager {
 
     this.game.startGame();
     if (this.game.getStatus() === GameStatus.RUNNING) {
+      this.addIngameIdToPlayerAndAiOpponent();
       await gameLoop(this.id, db);
       await aiLoop(this.id);
     }
   }
+
+  private addIngameIdToPlayerAndAiOpponent(): void {
+    for (let i = 0; i < this.playerIdReferenceTable.length; i++) {
+      const playerOrAiId = this.playerIdReferenceTable[i];
+
+      const aiOpponent = this.aiOpponent.get(playerOrAiId);
+      if (aiOpponent) {
+        aiOpponent.setPlayerId(i);
+      }
+
+      const player = this.players.get(playerOrAiId);
+      if (player) {
+        player.id = i;
+      }
+    }
+  }
+
   public get getId() {
     return this.id;
   }
@@ -97,7 +127,9 @@ class GameManager {
     return this.game.getScores();
   }
 
-  public get getAiIdsAsArray() {}
+  public get getAiIdsAsArray() {
+    return Array.from(this.aiOpponent.keys());
+  }
 
   public getPlayer(playerId: string) {
     if (!this.players.has(playerId)) {
