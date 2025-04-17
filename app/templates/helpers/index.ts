@@ -60,7 +60,7 @@ export function registerHelpers(handlebars: typeof Handlebars) {
   });
 
   handlebars.registerHelper("inc", function (value, options) {
-    return parseInt(value) + 1;
+    return parseInt(value, 10) + 1;
   });
   // Add other helpers here as needed
 }
