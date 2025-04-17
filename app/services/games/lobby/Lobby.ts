@@ -10,7 +10,6 @@ class Lobby {
   private lobbyMembers: Map<string, LobbyMember> = new Map();
   private stateLobby: "open" | "started";
   private locketLobby: boolean = false;
-  private aiOpponentIds: number[] = [];
   gameSettings: GameSettings; //make private later
   lobbyOwner: string; //make private later
   memberLimits: { min: number; max: number }; //make private later
@@ -20,6 +19,7 @@ class Lobby {
       id: memberId,
       userState: "notInLobby",
       isReady: true,
+      isAi: false,
     };
 
     this.lobbyMembers.set(memberId, newMember);
@@ -37,6 +37,7 @@ class Lobby {
       id: memberId,
       userState: "notInLobby",
       isReady: false,
+      isAi: false,
     };
 
     this.lobbyMembers.set(memberId, newMember);
@@ -48,7 +49,17 @@ class Lobby {
   public addAiOpponent(memberId: string): void {
     this.canAIBeAddedCheck(memberId);
 
-    this.aiOpponentIds.push(this.aiOpponentIds.length);
+    const newAiOpponent: LobbyMember = {
+      id: memberId,
+      userState: "notInLobby",
+      isReady: true,
+      isAi: true,
+    };
+
+    this.lobbyMembers.set(
+      this.getNumberOfAiOpponents().toString(),
+      newAiOpponent,
+    );
   }
 
   private canAIBeAddedCheck(memberId: string): void {
@@ -60,10 +71,20 @@ class Lobby {
       throw new Error("[addAiOpponent] AI cannot be added to a locked lobby");
     } else if (this.isLobbyFull() === true) {
       throw new Error("[addAiOpponent] AI cannot be added to a full lobby");
-    } else if (this.aiOpponentIds.length >= aiOpponents.length)
+    } else if (this.getNumberOfAiOpponents() >= aiOpponents.length)
       throw new Error(
         `[addAiOpponent] Only ${aiOpponents.length} AI opponents can be added`,
       );
+  }
+
+  private getNumberOfAiOpponents(): number {
+    let numAiOpponents = 0;
+    for (const member of this.lobbyMembers.values()) {
+      if (member.isAi === true) {
+        numAiOpponents++;
+      }
+    }
+    return numAiOpponents;
   }
 
   public isUserInLobby(memberId: string): boolean {
@@ -120,8 +141,7 @@ class Lobby {
       throw new Error("Only the owner can change the state");
     }
     if (newState === "started") {
-      this.gameSettings.playerCount =
-        this.lobbyMembers.size + this.aiOpponentIds.length;
+      this.gameSettings.playerCount = this.lobbyMembers.size;
     }
     this.stateLobby = newState;
   }
@@ -134,7 +154,7 @@ class Lobby {
   }
 
   public reachedMinPlayers(): boolean {
-    const memberPlusAiSize = this.lobbyMembers.size + this.aiOpponentIds.length;
+    const memberPlusAiSize = this.lobbyMembers.size;
     if (memberPlusAiSize >= this.memberLimits.min) return true;
     return false;
   }
@@ -210,7 +230,7 @@ class Lobby {
 
   public allMembersConnectedToSocket(): boolean {
     for (const member of this.lobbyMembers.values()) {
-      if (member.socket === undefined) {
+      if (member.socket === undefined && member.isAi === false) {
         return false;
       }
     }
@@ -231,10 +251,6 @@ class Lobby {
 
   public get isLobbyLocked(): boolean {
     return this.locketLobby;
-  }
-
-  public get getAiOpponentIds(): number[] {
-    return this.aiOpponentIds;
   }
 
   public getMemberAsArray(): LobbyMember[] {
@@ -260,7 +276,7 @@ class Lobby {
   }
 
   public isLobbyFull(): boolean {
-    const memberPlusAiSize = this.lobbyMembers.size + this.aiOpponentIds.length;
+    const memberPlusAiSize = this.lobbyMembers.size;
     if (memberPlusAiSize >= this.memberLimits.max) {
       return true;
     }

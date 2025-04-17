@@ -17,7 +17,7 @@ const addTransferMemberToGameManager = (
   const lobby = getLobby(lobbyId);
   const lobbyMember = lobby.getMemberAsArray();
   addPlayerToGameManager(gameManager, lobbyMember);
-  addAiToGameManager(gameManager, lobby.getAiOpponentIds);
+  addAiToGameManager(gameManager, lobbyMember);
 };
 
 const addPlayerToGameManager = (
@@ -29,8 +29,11 @@ const addPlayerToGameManager = (
 
 const addAiToGameManager = (
   gameManager: GameManager,
-  aiOpponentIds: number[],
+  lobbyMember: LobbyMember[],
 ) => {};
+for (const aiOpponentId of lobbyMember) {
+  if (aiOpponentId.isAi === true) gameManager.addAiOpponent(aiOpponentId.id);
+}
 
 // const printLobby = (lobbyId: string) => {
 //   const lobby = getLobby(lobbyId);
