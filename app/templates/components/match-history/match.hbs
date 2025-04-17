@@ -1,4 +1,28 @@
-<details class="border-b group font-mono" aria-labelledby="match-{{matchId}}">
+<style>
+  details::details-content {
+    display: block;
+    block-size: 0;
+    overflow: hidden;
+    transition-property: block-size, content-visibility;
+    transition-duration: 0.5s;
+    transition-behavior: allow-discrete;
+    border: thin solid lightgray;
+    border-radius: var(--radius-2xl);
+  }
+
+  details[open]::details-content {
+    /* Fallback for browsers that don't support calc-size() function */
+    block-size: auto;
+
+    /* calc-size() function allows transition to height: auto; */
+    block-size: calc-size(auto, size);
+
+    border: thin solid lightgray;
+    border-radius: var(--radius-2xl);
+  }
+</style>
+
+<details class="group font-mono" aria-labelledby="match-{{matchId}}" name="match">
   <summary
     id="match-{{matchId}}"
     class="flex items-center justify-between gap-2 p-2 cursor-pointer select-none">
