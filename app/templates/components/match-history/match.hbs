@@ -1,10 +1,10 @@
-<details class="border-b group" aria-labelledby="match-{{matchId}}">
+<details class="border-b group font-mono" aria-labelledby="match-{{matchId}}">
   <summary
     id="match-{{matchId}}"
     class="flex items-center justify-between gap-2 p-2 cursor-pointer select-none">
     <span class="flex-1 min-w-0">
-      <span class="font-medium truncate">{{formatDate matchDate "MMMM do, HH:mm"}}</span>
-      <span class="ml-1 text-sm text-gray-500 truncate">{{matchId}}</span>
+      <span class="flex font-medium truncate">{{formatDate matchDate "do MMMM, HH:mm"}}</span>
+      <span class="flex ml-1 text-sm text-gray-500 truncate">{{matchId}}</span>
     </span>
 
     <span class="font-bold">
