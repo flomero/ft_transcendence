@@ -28,4 +28,8 @@ export abstract class AIOpponent {
   getId(): number {
     return this.data.playerId;
   }
+
+  setPlayerId(playerId: number): void {
+    this.data.playerId = playerId;
+  }
 }
