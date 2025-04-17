@@ -75,15 +75,15 @@ class GameManager {
     return true;
   }
 
-  public startGame(db: Database): void {
+  public async startGame(db: Database): Promise<void> {
     if (this.allPlayersAreConnected() === false) {
       throw new Error("Not all players are connected");
     }
 
     this.game.startGame();
     if (this.game.getStatus() === GameStatus.RUNNING) {
-      gameLoop(this.id, db);
-      aiLoop(this.id);
+      await gameLoop(this.id, db);
+      await aiLoop(this.id);
     }
   }
   public get getId() {
