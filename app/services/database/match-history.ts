@@ -4,7 +4,7 @@ type LeaderboardEntry = { userId: string; username: string; score: number };
 type MatchResult = "win" | "loss" | "draw";
 type MatchInfo = {
   matchId: string;
-  gameName: string;
+  gameModeName: string;
   matchDate: string; // keep as string from DB; parse only for sorting
   leaderboard: LeaderboardEntry[];
   result: MatchResult;
@@ -19,7 +19,7 @@ export const getMatchHistoryService = async (
   const rows = await db.all<
     {
       matchId: string;
-      gameName: string;
+      gameModeName: string;
       matchDate: string;
       userId: string;
       username: string;
@@ -28,7 +28,7 @@ export const getMatchHistoryService = async (
   >(
     `
       SELECT r1.matchId,
-             m.gameName,
+             m.gameModeName,
              m.matchDate,
              r2.userId,
              u.username,
@@ -49,7 +49,7 @@ export const getMatchHistoryService = async (
   for (const row of rows) {
     const {
       matchId,
-      gameName,
+      gameModeName,
       matchDate,
       userId: playerId,
       username,
@@ -59,7 +59,7 @@ export const getMatchHistoryService = async (
     if (!matchesMap.has(matchId)) {
       matchesMap.set(matchId, {
         matchId,
-        gameName,
+        gameModeName: gameModeName,
         matchDate,
         leaderboard: [],
         result: "loss",
