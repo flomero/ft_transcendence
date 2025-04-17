@@ -30,10 +30,7 @@ const addPlayerToGameManager = (
 const addAiToGameManager = (
   gameManager: GameManager,
   aiOpponentIds: number[],
-) => {
-  for (const aiOpponentId of aiOpponentIds)
-    gameManager.addAiOpponent(aiOpponentId);
-};
+) => {};
 
 // const printLobby = (lobbyId: string) => {
 //   const lobby = getLobby(lobbyId);

@@ -12,7 +12,7 @@ class GameManager {
   private id: string = randomUUID();
   game: GameBase;
   players: Map<string, Player> = new Map();
-  aiOpponentIds: Map<number, PongAIOpponent> = new Map();
+  aiOpponent: Map<string, PongAIOpponent> = new Map();
 
   constructor(game: GameBase) {
     this.game = game;
@@ -33,7 +33,6 @@ class GameManager {
       playerId: aiIdInGame,
       strategyName: "improvedNaive",
     });
-    this.aiOpponentIds.set(aiOpponentId, newAiOpponent);
   }
 
   public hasPlayer(userId: string): boolean {
@@ -98,9 +97,7 @@ class GameManager {
     return this.game.getScores();
   }
 
-  public get getAiIdsAsArray() {
-    return Array.from(this.aiOpponentIds.keys());
-  }
+  public get getAiIdsAsArray() {}
 
   public getPlayer(playerId: string) {
     if (!this.players.has(playerId)) {
