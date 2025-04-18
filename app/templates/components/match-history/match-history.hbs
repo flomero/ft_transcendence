@@ -1,0 +1,12 @@
+<div class="mb-6 rounded-2xl border p-6 shadow-md transition-height overflow-hidden duration-300 ease-in-out">
+  <h2 class="text-xl font-bold">Match History</h2>
+  <div id="match-history" class="mt-4">
+    {{#if matches.length}}
+      {{#each matches}}
+        {{> components/match-history/match this}}
+      {{/each}}
+    {{else}}
+      <p>No matches played yet.</p>
+    {{/if}}
+  </div>
+</div>

@@ -18,39 +18,26 @@ function initializeSampleLobbies() {
       gameModeName: "classicPong",
       playerCount: 2,
       gameModeConfig: {
-        ballSpeedWidthPercentS: 1.5,
-        ballRadius: 10,
-        paddleCoveragePercent: 20,
-        paddleSpeedWidthPercentS: 1.2,
         powerUpRadius: 5,
         powerUpCapacities: {
-          speedBoost: 3,
+          speedBoost: 50000,
         },
       },
       modifierNames: {
         powerUpSpawner: {
-          meanDelayS: 10,
-          delaySpanS: 5,
-        },
-        timedGame: {
-          durationS: 300,
+          meanDelayS: 0.005,
+          delaySpanS: 0.0001,
         },
         scoredGame: {
           goalObjective: 5,
         },
-        survivalGame: [],
-        elimination: {
-          threshold: 3,
+        goalReset: {
+          delayS: 1,
         },
-        arenaShrink: [],
       },
       powerUpNames: {
         speedBoost: {
-          spawnWeight: 1,
-          selfActivation: true,
-          durationS: 5,
-          totalRampUpStrength: 2,
-          rampUpFrequencyS: 1,
+          totalRampUpStrength: 20,
         },
       },
     },

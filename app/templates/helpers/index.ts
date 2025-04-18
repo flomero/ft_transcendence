@@ -1,6 +1,7 @@
 import type Handlebars from "handlebars";
 import { buttonVariants } from "./components/button";
 import { twMerge } from "tailwind-merge";
+import { format } from "date-fns";
 
 export function registerHelpers(handlebars: typeof Handlebars) {
   handlebars.registerHelper("buttonVariants", buttonVariants);
@@ -59,5 +60,20 @@ export function registerHelpers(handlebars: typeof Handlebars) {
     return formattedString.charAt(0).toUpperCase() + formattedString.slice(1);
   });
 
+  handlebars.registerHelper("inc", function (value, options) {
+    return parseInt(value, 10) + 1;
+  });
+
+  handlebars.registerHelper(
+    "formatDate",
+    (date: Date | string, dateFormat: string) => {
+      if (!date) return "";
+      try {
+        return format(new Date(date), dateFormat);
+      } catch (err) {
+        return "";
+      }
+    },
+  );
   // Add other helpers here as needed
 }
