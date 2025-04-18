@@ -7,6 +7,7 @@ import type GameMessage from "../../../interfaces/games/gameHandler/GameMessage"
 import { PongAIOpponent } from "../pong/pongAIOpponent";
 import aiLoop from "./aiLoop";
 import { Database } from "sqlite";
+import { RNG } from "../rng";
 
 class GameManager {
   private id: string = randomUUID();
@@ -94,6 +95,10 @@ class GameManager {
     this.game.startGame();
     if (this.game.getStatus() === GameStatus.RUNNING) {
       this.addIngameIdToPlayerAndAiOpponent();
+      const tmpRng = new RNG();
+      this.playerIdReferenceTable = tmpRng.randomArray(
+        this.playerIdReferenceTable,
+      );
       await gameLoop(this.id, db);
       await aiLoop(this.id);
     }
