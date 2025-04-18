@@ -1,16 +1,10 @@
-import { FastifyPluginAsync } from "fastify";
+import type { FastifyPluginAsync } from "fastify";
+import { redirectTo } from "../../services/routing/redirect";
 
 const login: FastifyPluginAsync = async (fastify): Promise<void> => {
-  fastify.get("/", async function (request, reply) {
+  fastify.get("/", async (request, reply) => {
     if (request.isAuthenticated) {
-      // For AJAX requests, send a special response instead of a redirect
-      if (request.isAjax()) {
-        return reply
-          .header("X-SPA-Redirect", "/")
-          .status(200)
-          .send({ redirectTo: "/" });
-      }
-      return reply.redirect("/");
+      return redirectTo(request, reply, "/");
     }
     const viewOptions = request.isAjax() ? {} : { layout: "layouts/noauth" };
     return reply.view(

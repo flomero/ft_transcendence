@@ -3,12 +3,18 @@ import { getUserById } from "../../services/database/user";
 import { isFriend } from "../../services/database/friend/friends";
 import { hasInvite } from "../../services/database/friend/invites";
 import { getMatchHistoryService } from "../../services/database/match-history";
+import { redirectTo } from "../../services/routing/redirect";
 
 const profile: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.get("/:userId", async (request, reply) => {
     const { userId } = request.params as { userId: string };
     if (!userId) {
       return reply.status(400).send({ message: "User Id required" });
+    }
+    console.log("userId", userId);
+    console.log("request.userId", request.userId);
+    if (userId === request.userId) {
+      return redirectTo(request, reply, "/profile");
     }
     const userData = await getUserById(fastify, userId);
     if (!userData) {
