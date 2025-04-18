@@ -24,7 +24,9 @@ const addPlayerToGameManager = (
   gameManager: GameManager,
   lobbyMember: LobbyMember[],
 ) => {
-  for (const member of lobbyMember) gameManager.addPlayer(member.id);
+  for (const member of lobbyMember) {
+    if (member.isAi === false) gameManager.addPlayer(member.id);
+  }
 };
 
 const addAiToGameManager = (
