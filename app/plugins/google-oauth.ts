@@ -37,6 +37,9 @@ const googleOAuthPlugin: FastifyPluginAsync = async (fastify, opts) => {
         await fastify.googleOAuth2.getAccessTokenFromAuthorizationCodeFlow(
           request,
         );
+      if (!token || !token.token) {
+        throw new Error("Invalid or null token received");
+      }
       const userInfo = await getGoogleProfile(token.token.access_token);
       if (!userInfo.verified_email) {
         throw new Error("Google account not verified");
