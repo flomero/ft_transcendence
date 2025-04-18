@@ -54,7 +54,8 @@ const modifierNamesScheama = S.object()
   .prop("scoredGame", scoredGameSchema)
   .prop("survivalGame", S.array().maxItems(0).minItems(0))
   .prop("elimination", eliminationSchema)
-  .prop("arenaShrink", S.array().maxItems(0).minItems(0));
+  .prop("arenaShrink", S.array().maxItems(0).minItems(0))
+  .prop("goalReset", S.object().prop("delayS", S.number().minimum(0)));
 
 const speedBoostSchema = S.object()
   .prop("spawnWeight", S.number().minimum(0))
