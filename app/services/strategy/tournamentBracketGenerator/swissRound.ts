@@ -1,15 +1,15 @@
-import {
+import type {
   GameResult,
   ITournamentBracketGenerator,
   Match,
   Round,
   TournamentRankings,
 } from "../../../types/strategy/ITournamentBracketGenerator";
-import { TournamentResults } from "../../../types/tournament/tournament";
+import type { TournamentResults } from "../../../types/tournament/tournament";
 import { STRATEGY_REGISTRY } from "../strategyRegistryLoader";
 import { RNG } from "../../games/rng";
 import { StrategyManager } from "../strategyManager";
-import { IUserSampler } from "../../../types/strategy/IUserSampler";
+import type { IUserSampler } from "../../../types/strategy/IUserSampler";
 
 type PlayerStats = {
   wins: number;
@@ -118,7 +118,7 @@ export class SwissRound implements ITournamentBracketGenerator {
    * Generate the entire bracket structure
    */
   private generateEntireBracket(): void {
-    console.log(`Generating complete Swiss Round bracket`);
+    console.log("Generating complete Swiss Round bracket");
 
     // Seed players into the first round
     this.seedPlayersIntoFirstRound();
@@ -342,7 +342,7 @@ export class SwissRound implements ITournamentBracketGenerator {
 
     for (const record of sortedRecords) {
       const players = playersByRecord.get(record) || [];
-      let remainingPlayers = this.shufflePlayers(players);
+      const remainingPlayers = this.shufflePlayers(players);
 
       // Create matches for this record group
       while (remainingPlayers.length >= this.playersPerMatch) {

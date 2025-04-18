@@ -1,15 +1,15 @@
-import {
-  type TournamentResults,
-  type PlayerResults,
+import type {
+  TournamentResults,
+  PlayerResults,
 } from "../../../types/tournament/tournament";
 import { RNG } from "../../games/rng";
 import { STRATEGY_REGISTRY } from "../strategyRegistryLoader";
-import {
-  type Match,
-  type Round,
-  type TournamentRankings,
-  type ITournamentBracketGenerator,
-  type GameResult,
+import type {
+  Match,
+  Round,
+  TournamentRankings,
+  ITournamentBracketGenerator,
+  GameResult,
 } from "../../../types/strategy/ITournamentBracketGenerator";
 
 type Results = {
@@ -40,7 +40,7 @@ export class RoundRobin implements ITournamentBracketGenerator {
   constructor(tournamentData: Record<string, any>) {
     this.tournamentData = tournamentData;
 
-    console.log(`Tournament data:`);
+    console.log("Tournament data:");
     console.dir(this.tournamentData);
 
     this.gamesCount =
@@ -82,7 +82,7 @@ export class RoundRobin implements ITournamentBracketGenerator {
     // Randomize the rounds
     this.possibleRounds = this.rng.randomArray(playerRounds);
 
-    console.log(`Rounds:`);
+    console.log("Rounds:");
     console.dir(this.possibleRounds, { depth: null });
   }
 
@@ -96,7 +96,7 @@ export class RoundRobin implements ITournamentBracketGenerator {
 
     const nextRound = this.possibleRounds.pop();
     if (!nextRound) {
-      console.error(`no more possibleRounds`);
+      console.error("no more possibleRounds");
       return {};
     }
 

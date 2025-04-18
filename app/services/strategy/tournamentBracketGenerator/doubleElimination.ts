@@ -1,18 +1,18 @@
-import {
-  type TournamentResults,
-  type PlayerResults,
+import type {
+  TournamentResults,
+  PlayerResults,
 } from "../../../types/tournament/tournament";
 import { RNG } from "../../games/rng";
-import {
-  type Match,
-  type Round,
-  type TournamentRankings,
-  type ITournamentBracketGenerator,
-  type GameResult,
+import type {
+  Match,
+  Round,
+  TournamentRankings,
+  ITournamentBracketGenerator,
+  GameResult,
 } from "../../../types/strategy/ITournamentBracketGenerator";
 import { STRATEGY_REGISTRY } from "../strategyRegistryLoader";
 import { StrategyManager } from "../strategyManager";
-import { IUserSampler } from "../../../types/strategy/IUserSampler";
+import type { IUserSampler } from "../../../types/strategy/IUserSampler";
 
 type Bracket = "upper" | "lower" | "final";
 
@@ -87,7 +87,7 @@ export class DoubleElimination implements ITournamentBracketGenerator {
     // Generate the entire bracket with proper seeding
     this.generateEntireBracket();
 
-    console.log(`Generated rounds:`);
+    console.log("Generated rounds:");
     console.log(`Upper bracket rounds: ${this.upperRounds.length}`);
     console.log(`Lower bracket rounds: ${this.lowerRounds.length}`);
     console.log(
@@ -242,7 +242,7 @@ export class DoubleElimination implements ITournamentBracketGenerator {
    * Generate the entire bracket with proper seeding
    */
   protected generateEntireBracket(): void {
-    console.log(`Generating complete Bracket`);
+    console.log("Generating complete Bracket");
     // Calculate total players and determine rounds needed
     const players = [...this.tournamentData.players];
     const totalPlayers = players.length;
@@ -335,7 +335,7 @@ export class DoubleElimination implements ITournamentBracketGenerator {
       const firstLowerBracketRound = 2 * roundIndex + 1;
       const secondLowerBracketRound = 2 * (roundIndex + 1);
       const matchesInThisRound =
-        this.tournamentData.playerCount / Math.pow(2, roundIndex + 2);
+        this.tournamentData.playerCount / 2 ** (roundIndex + 2);
 
       // Create placeholder matches for this round
       for (let i = 0; i < matchesInThisRound; i++) {

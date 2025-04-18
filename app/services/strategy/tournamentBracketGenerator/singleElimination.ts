@@ -1,18 +1,18 @@
-import {
-  type TournamentResults,
-  type PlayerResults,
+import type {
+  TournamentResults,
+  PlayerResults,
 } from "../../../types/tournament/tournament";
 import { RNG } from "../../games/rng";
-import {
-  type Match,
-  type Round,
-  type TournamentRankings,
-  type ITournamentBracketGenerator,
-  type GameResult,
+import type {
+  Match,
+  Round,
+  TournamentRankings,
+  ITournamentBracketGenerator,
+  GameResult,
 } from "../../../types/strategy/ITournamentBracketGenerator";
 import { STRATEGY_REGISTRY } from "../strategyRegistryLoader";
 import { StrategyManager } from "../strategyManager";
-import { IUserSampler } from "../../../types/strategy/IUserSampler";
+import type { IUserSampler } from "../../../types/strategy/IUserSampler";
 
 type OverallPlayerResults = {
   lastRoundPlayed: number;

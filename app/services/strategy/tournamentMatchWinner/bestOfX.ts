@@ -1,6 +1,6 @@
-import { type ITournamentMatchWinner } from "../../../types/strategy/ITournamentMatchWinner";
-import { type GameResult } from "../../../types/strategy/ITournamentBracketGenerator";
-import { type MatchData } from "../../../types/strategy/ITournamentMatchWinner";
+import type { ITournamentMatchWinner } from "../../../types/strategy/ITournamentMatchWinner";
+import type { GameResult } from "../../../types/strategy/ITournamentBracketGenerator";
+import type { MatchData } from "../../../types/strategy/ITournamentMatchWinner";
 
 export class BestOfX implements ITournamentMatchWinner {
   name = "bestOfX";
@@ -57,7 +57,7 @@ export class BestOfX implements ITournamentMatchWinner {
 
     // Update win counts for the game winner
     if (gameWinner) {
-      const currentWins = match.winCounts.get(gameWinner)! + 1;
+      const currentWins = (match.winCounts.get(gameWinner) || 0) + 1;
       match.winCounts.set(gameWinner, currentWins);
 
       // Check if we have a match winner (reached majority of wins needed)
