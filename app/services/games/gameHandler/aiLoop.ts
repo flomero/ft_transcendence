@@ -10,7 +10,7 @@ const aiLoop = async (gameManagerId: string) => {
   if (gameManager?.getAiIdsAsArray.length === 0) return;
   const game: GameBase = gameManager.getGame;
 
-  const sleepIntervalMs: number = 1000.0 / game.getServerTickrateS();
+  const sleepIntervalMs: number = 1000.0;
   while (game.getStatus() === GameStatus.RUNNING) {
     updateAllAis(gameManager);
     await sleep(sleepIntervalMs);
