@@ -94,11 +94,11 @@ class GameManager {
 
     this.game.startGame();
     if (this.game.getStatus() === GameStatus.RUNNING) {
-      this.addIngameIdToPlayerAndAiOpponent();
       const tmpRng = new RNG();
       this.playerIdReferenceTable = tmpRng.randomArray(
         this.playerIdReferenceTable,
       );
+      this.addIngameIdToPlayerAndAiOpponent();
       await gameLoop(this.id, db);
       await aiLoop(this.id);
     }
