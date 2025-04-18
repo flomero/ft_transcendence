@@ -49,13 +49,17 @@ class Lobby {
   public addAiOpponent(memberId: string): void {
     this.canAIBeAddedCheck(memberId);
 
+    const aiId = this.getNumberOfAiOpponents();
     const newAiOpponent: LobbyMember = {
-      id: memberId,
+      id: aiId.toString(),
       userState: "notInLobby",
       isReady: true,
       isAi: true,
     };
 
+    this.sendMessageToAllMembers(
+      JSON.stringify({ type: "addedAI", data: aiId.toString() }),
+    );
     this.lobbyMembers.set(
       this.getNumberOfAiOpponents().toString(),
       newAiOpponent,
