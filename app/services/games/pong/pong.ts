@@ -473,7 +473,10 @@ export abstract class Pong extends GameBase {
                 playerId: goalPlayerId,
               });
           } else {
-            if (doTriggers) this.modifierManager.trigger("onWallBounce");
+            if (doTriggers)
+              this.modifierManager.trigger("onWallBounce", {
+                wallID: collision.objectId,
+              });
           }
           break;
 

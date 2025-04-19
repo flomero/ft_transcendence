@@ -27,7 +27,8 @@
             "speedBoost": 1,
             "blinkingBall": 1,
             "multiBall": 1,
-            "shooter": 1
+            "shooter": 1,
+            "bumper": 1
           }
         }
       },
@@ -54,7 +55,8 @@
             "speedBoost": 1,
             "blinkingBall": 1,
             "multiBall": 1,
-            "shooter": 1
+            "shooter": 1,
+            "bumper": 1
           }
         }
       }
@@ -136,6 +138,16 @@
         "shootInitialVelocityPercent": 180,
         "shootFinalVelocityPercent": 100,
         "shootDirectionSamplerStrategyName": "biasedQuadrantGaussianRA"
+      },
+
+      "bumper": {
+        "className": "Bumper",
+        "spawnWeight": 1.0,
+        "selfActivation": false,
+        "durationS": 8,
+        "bumperVelocityPercent": 7,
+        "bumperAngleDeg": 82.5,
+        "bumperJunctionDisanceFromCenterPercent": 13.5
       }
     }
   }
