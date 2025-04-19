@@ -1,37 +1,56 @@
-/* tournament.ts – HARD‑CODED EDGE VERSION
-   compile with:  tsc public/ts/tournament.ts --target es2020 --outDir public/js
+/* tournament.ts
+   ────────────────────────────────────────────────
+   The single line `export {}` turns the file into an
+   ES module, which is *required* for the `declare global`
+   augmentation to be legal (TS2669).
 */
-export {}; // make this file a module (needed for declare global)
+export {};
 
-/* ───── global data injected by Handlebars ───── */
-type Match = { id: string; teamA: string; teamB: string };
+/*  ───── TYPES ───── */
+
+interface Match {
+  id: string;
+  teamA: string;
+  teamB: string;
+}
 type Round = Match[];
 type Rounds = Round[];
 
+/*  ───── GLOBAL AUGMENTATION ─────
+    Now that the file is a module we can safely extend Window.
+*/
 declare global {
   interface Window {
     __ROUNDS__: Rounds;
   }
 }
 
+/*  ───── DOM REFERENCES (safe, typed) ───── */
+
+const rounds: Rounds = window.__ROUNDS__;
+
 const svg = document.querySelector<SVGSVGElement>("#lines")!;
 const bracket = document.querySelector<HTMLElement>("#bracket")!;
 
-/* ───── HARD‑CODED EDGE LIST ─────
-   ids must match the ones rendered into the HTML (r0m0 … r2m0)
-*/
-const edges: [string, string][] = [
-  ["r0m0", "r1m0"],
-  ["r0m1", "r1m0"],
-  ["r0m2", "r1m1"],
-  ["r0m3", "r1m1"],
-  ["r1m0", "r2m0"],
-  ["r1m1", "r2m0"],
-];
+/*  ───── EDGE DISCOVERY ───── */
 
-/* ───── DRAW ROUTINE ───── */
+function collectEdges(): [string, string][] {
+  const edges: [string, string][] = [];
+
+  for (let r = 0; r < rounds.length - 1; r++) {
+    rounds[r].forEach((match, i) => {
+      const target = rounds[r + 1][Math.floor(i / 2)];
+      edges.push([match.id, target.id]);
+    });
+  }
+  return edges;
+}
+
+const edges = collectEdges();
+
+/*  ───── DRAW / REDRAW ───── */
+
 function drawLines(): void {
-  console.log("Drawing lines...");
   const box = bracket.getBoundingClientRect();
 
   svg.setAttribute("width", `${box.width}`);
@@ -39,9 +58,9 @@ function drawLines(): void {
   svg.setAttribute("viewBox", `0 0 ${box.width} ${box.height}`);
   svg.innerHTML = "";
 
-  edges.forEach(([from, to]) => {
-    const a = document.getElementById(from)!.getBoundingClientRect();
-    const b = document.getElementById(to)!.getBoundingClientRect();
+  edges.forEach(([fromId, toId]) => {
+    const a = document.getElementById(fromId)!.getBoundingClientRect();
+    const b = document.getElementById(toId)!.getBoundingClientRect();
 
     const x1 = a.right - box.left;
     const y1 = a.top - box.top + a.height / 2;
@@ -58,6 +77,7 @@ function drawLines(): void {
   });
 }
 
-/* ───── BOOTSTRAP ───── */
+/*  ───── BOOTSTRAP ───── */
+
 window.addEventListener("DOMContentLoaded", drawLines);
 window.addEventListener("resize", drawLines);
