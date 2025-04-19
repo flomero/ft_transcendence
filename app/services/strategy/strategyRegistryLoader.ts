@@ -1,6 +1,6 @@
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
-import { type StrategyRegistry } from "../../types/strategy/strategyRegistry";
+import type { StrategyRegistry } from "../../types/strategy/strategyRegistry";
 
 // Export the global strategy registry
 export const STRATEGY_REGISTRY: StrategyRegistry = {};

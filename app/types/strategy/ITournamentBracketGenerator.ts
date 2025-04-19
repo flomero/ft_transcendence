@@ -1,4 +1,4 @@
-import { type TournamentResults } from "../../types/tournament/tournament";
+import type { TournamentResults } from "../../types/tournament/tournament";
 
 export type GameResult = {
   [playerID: string]: number;
