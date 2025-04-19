@@ -11,6 +11,8 @@ interface GameModeConfig {
   ballRadius?: number;
   paddleCoveragePercent?: number;
   paddleSpeedWidthPercentS?: number;
+  paddleVelocityAngularTransmissionPercent?: number;
+  paddleVelocitySpeedTransmissionPercent?: number;
   powerUpRadius?: number;
   powerUpCapacities?: PowerUpCapacities;
 }
