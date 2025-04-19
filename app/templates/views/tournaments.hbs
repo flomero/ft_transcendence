@@ -1,73 +1,29 @@
-<div id="bracket" class="flex flex-row justify-around border relative p-4 h-100">
-  <!-- round 1 -->
-  <div class="w-80 flex flex-col justify-around">
-    <div class="match border bg-black-200 p-2" id="m1">Match 1</div>
-    <div class="match border bg-black-200 p-2" id="m2">Match 2</div>
-    <div class="match border bg-black-200 p-2" id="m3">Match 3</div>
-    <div class="match border bg-black-200 p-2" id="m4">Match 4</div>
-  </div>
+{{!-- Tailwind classes left in; swap for plain CSS if you like --}}
 
-  <!-- round 2 -->
-  <div class="w-80 flex flex-col justify-around">
-    <div class="match border bg-black-200 p-2" id="m5">Quarter‑final 1</div>
-    <div class="match border bg-black-200 p-2" id="m6">Quarter‑final 2</div>
-  </div>
+<div id="bracket"
+     class="flex flex-row justify-around border relative p-4">
 
-  <!-- final -->
-  <div class="w-80 flex flex-col justify-around">
-    <div class="match border bg-black-200 p-2" id="m7">Grand Final</div>
-  </div>
+  {{!-- ONE column per round --}}
+  {{#each rounds as |round r|}}
+    <div class="w-80 flex flex-col justify-around">
+      {{#each round as |match m|}}
+        <div class="match border bg-black-200 p-2 mb-6"
+             id="{{match.id}}"
+             data-round="{{r}}"
+             data-idx="{{m}}">
+          {{match.teamA}} vs {{match.teamB}}
+        </div>
+      {{/each}}
+    </div>
+  {{/each}}
 
-  <!-- SVG overlay lives *inside* the container so its coordinate space matches -->
   <svg id="lines"
        class="absolute inset-0 pointer-events-none select-none"></svg>
 </div>
+
+{{!-- push the rounds array down to the browser as JSON --}}
 <script>
-  /* 1. Define which cards feed into which.
-        Each pair is [sourceId, targetId]. */
-  const edges = [
-    ["m1", "m5"], ["m2", "m5"],
-    ["m3", "m6"], ["m4", "m6"],
-    ["m5", "m7"], ["m6", "m7"]
-  ];
-
-  const svg = document.getElementById("lines");
-  const bracket = document.getElementById("bracket");
-
-  /* 2. Build / rebuild all paths */
-  function drawLines() {
-    const box = bracket.getBoundingClientRect();
-
-    // resize the svg to exactly cover the bracket
-    svg.setAttribute("width", box.width);
-    svg.setAttribute("height", box.height);
-    svg.setAttribute("viewBox", `0 0 ${box.width} ${box.height}`);
-
-    svg.innerHTML = ""; // clear old paths
-
-    edges.forEach(([fromId, toId]) => {
-      const a = document.getElementById(fromId).getBoundingClientRect();
-      const b = document.getElementById(toId).getBoundingClientRect();
-
-      // convert viewport coords → svg‑relative coords
-      const x1 = a.right - box.left;
-      const y1 = a.top - box.top + a.height / 2;
-      const x2 = b.left - box.left;
-      const y2 = b.top - box.top + b.height / 2;
-
-      const midX = (x1 + x2) / 2;           // elbow in the middle
-
-      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      path.setAttribute("d", `M${x1},${y1} H${midX} V${y2} H${x2}`);
-      path.setAttribute("fill", "none");
-      path.setAttribute("stroke", "#999");
-      path.setAttribute("stroke-width", "2");
-      svg.appendChild(path);
-    });
-  }
-
-  /* 3. Draw once after the DOM is ready and redraw on resize */
-  window.addEventListener("DOMContentLoaded", drawLines);
-  window.addEventListener("resize", drawLines);
+  window.__ROUNDS__ = {{{json rounds}}};
 </script>
 
+<script type="module" src="public/js/tournament.js"></script>

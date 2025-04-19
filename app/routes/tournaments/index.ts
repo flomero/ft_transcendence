@@ -1,27 +1,7 @@
+// routes/profile.ts
 import type { FastifyPluginAsync } from "fastify";
 
-const profile: FastifyPluginAsync = async (fastify): Promise<void> => {
-  const generateStructuredTournament = (rounds: any[][]) => {
-    return rounds.map((round, roundIndex) => {
-      if (roundIndex === 0) {
-        // First round: no spacing
-        return round.map((match) => ({ ...match }));
-      }
-
-      const matchBoxHeight = 60;
-      const matchGap = 40;
-      const matchSpacing = (matchBoxHeight + matchGap) * 2 ** (roundIndex - 1);
-
-      return round.map((match) => {
-        const spacerTop = matchSpacing / 2 - matchBoxHeight / 2;
-        return {
-          ...match,
-          spacerTop,
-        };
-      });
-    });
-  };
-
+const profile: FastifyPluginAsync = async (fastify) => {
   fastify.get("/", async (request, reply) => {
     const rawRounds = [
       [
@@ -37,15 +17,17 @@ const profile: FastifyPluginAsync = async (fastify): Promise<void> => {
       [{ teamA: "Semifinalist A", teamB: "Semifinalist B" }],
     ];
 
-    const structuredRounds = generateStructuredTournament(rawRounds);
+    /* add machine‑friendly IDs that stay stable no matter
+       what the names are */
+    const rounds = rawRounds.map((round, r) =>
+      round.map((m, i) => ({
+        ...m,
+        id: `r${r}m${i}`, //  r = round index, m = match index
+      })),
+    );
 
-    const tournament = {
-      rounds: structuredRounds,
-    };
-
-    console.log(tournament);
     const viewOptions = request.isAjax() ? {} : { layout: "layouts/main" };
-    return reply.view("views/tournaments", { tournament }, viewOptions);
+    return reply.view("views/tournaments", { rounds }, viewOptions);
   });
 };
 

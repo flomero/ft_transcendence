@@ -75,5 +75,7 @@ export function registerHelpers(handlebars: typeof Handlebars) {
       }
     },
   );
+
+  handlebars.registerHelper("json", (v) => JSON.stringify(v));
   // Add other helpers here as needed
 }
