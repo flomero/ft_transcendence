@@ -1,25 +1,63 @@
 import type { Database } from "sqlite";
-import { gameManagers } from "../lobby/start/startLobbyHandler";
+import type GameManager from "./GameManager";
 
-const saveGameResultInDb = async (gameManagerId: string, db: Database) => {
-  const gameManager = gameManagers.get(gameManagerId);
+/**
+ * Main function to save game results to the database
+ */
+const saveGameResultInDb = async (gameManager: GameManager, db: Database) => {
+  await savePlayerScoresToDatabase(gameManager, db);
+  await saveAIScoresToDatabase(gameManager, db);
+};
 
-  if (gameManager === undefined)
-    throw new Error(`Game manager with ID ${gameManagerId} not found`);
-
+/**
+ * Saves player scores to the database
+ * @private Not exported - internal helper function
+ */
+const savePlayerScoresToDatabase = async (
+  gameManager: GameManager,
+  db: Database,
+) => {
   const gameScores = gameManager.getScores;
   const players = gameManager.getPlayersAsArray;
   const query = `UPDATE r_users_matches SET score = ? WHERE userId = ? AND matchId = ?`;
 
-  for (let i = 0; i < players.length; i++) {
-    const player = players[i];
-    const score = gameScores[i];
+  for (const player of players) {
+    const score = gameScores[player.id];
+    console.log(`Saving score for player ${player.playerUUID}: ${score}`);
 
     try {
       await db.run(query, [score, player.playerUUID, gameManager.getId]);
     } catch (err) {
       if (err instanceof Error)
-        console.error("Error updating score:", err.message);
+        console.error("Error updating player score:", err.message);
+    }
+  }
+};
+
+/**
+ * Saves AI opponent scores to the database
+ * @private Not exported - internal helper function
+ */
+const saveAIScoresToDatabase = async (
+  gameManager: GameManager,
+  db: Database,
+) => {
+  const gameScores = gameManager.getScores;
+  const query = `UPDATE r_users_matches SET score = ? WHERE userId = ? AND matchId = ?`;
+
+  if (!gameManager.aiOpponent || gameManager.aiOpponent.size === 0) return;
+
+  for (const [aiUuid, aiOpponent] of gameManager.aiOpponent.entries()) {
+    const playerId = aiOpponent.getId();
+    const score = gameScores[playerId];
+
+    console.log(`Saving score for AI ${aiUuid}: ${score}`);
+
+    try {
+      await db.run(query, [score, aiUuid, gameManager.getId]);
+    } catch (err) {
+      if (err instanceof Error)
+        console.error(`Error updating AI score for ${aiUuid}:`, err.message);
     }
   }
 };
