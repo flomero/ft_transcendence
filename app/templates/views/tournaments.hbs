@@ -1,1 +1,13 @@
-<div>Test</div>
+<div class="grid grid-cols-[repeat(3,_minmax(160px,_1fr))] gap-x-16">
+  {{#each tournament.rounds}}
+    <div class="flex flex-col items-center">
+      {{#each this}}
+        {{#if spacerTop}}<div style="height: {{spacerTop}}px;"></div>{{/if}}
+        <div class="match-box bg-black text-center border rounded shadow w-70 py-2 px-3 mb-4">
+          {{teamA}} vs {{teamB}}
+        </div>
+        {{#if spacerBottom}}<div style="height: {{spacerBottom}}px;"></div>{{/if}}
+      {{/each}}
+    </div>
+  {{/each}}
+</div>
