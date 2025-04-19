@@ -1,4 +1,4 @@
-import { type GameResult } from "./ITournamentBracketGenerator";
+import type { GameResult } from "./ITournamentBracketGenerator";
 
 export type MatchData = {
   playerIDs: string[];

@@ -1,5 +1,5 @@
-import { FastifyPluginAsync } from "fastify";
-import { UUID } from "node:crypto";
+import type { FastifyPluginAsync } from "fastify";
+import type { UUID } from "node:crypto";
 import { getImage } from "../../services/database/image/image";
 
 const image: FastifyPluginAsync = async (fastify): Promise<void> => {

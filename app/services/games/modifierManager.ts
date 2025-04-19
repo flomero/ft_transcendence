@@ -6,7 +6,7 @@ import {
   type ModifierBase,
   ModifierStatus,
 } from "./modifierBase";
-import { RNG } from "./rng";
+import type { RNG } from "./rng";
 
 export class ModifierManager {
   // Arrays that maintain the allowed names and their definitions.

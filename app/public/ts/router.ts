@@ -1,6 +1,6 @@
 import { TransitionManager } from "./transitions.js";
 import LobbyHandler from "./lobby.js";
-import { initPongGame, PongGame } from "./pong.js";
+import { initPongGame, type PongGame } from "./pong.js";
 
 // Route handler interface with lifecycle hooks
 interface RouteHandler {

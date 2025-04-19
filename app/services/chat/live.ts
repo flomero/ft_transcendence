@@ -1,4 +1,4 @@
-import { FastifyInstance, FastifyRequest } from "fastify";
+import type { FastifyInstance, FastifyRequest } from "fastify";
 import { saveMessage } from "../database/chat/message";
 import {
   addUserToChatRoom,
@@ -6,7 +6,7 @@ import {
   deleteChatRoom,
   getChatRoomRead,
   getUserIdsFromDirectChatRooms,
-  RoomType,
+  type RoomType,
   setRoomRead,
   setRoomReadForAllUsersBlacklist,
 } from "../database/chat/room";

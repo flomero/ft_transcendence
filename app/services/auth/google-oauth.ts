@@ -1,5 +1,5 @@
-import { FastifyInstance } from "fastify";
-import { JWTContent, signJWT } from "./jwt";
+import type { FastifyInstance } from "fastify";
+import { type JWTContent, signJWT } from "./jwt";
 
 export async function refreshJWT(
   fastify: FastifyInstance,

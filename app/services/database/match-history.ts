@@ -1,4 +1,4 @@
-import { FastifyInstance } from "fastify";
+import type { FastifyInstance } from "fastify";
 
 type LeaderboardEntry = { userId: string; username: string; score: number };
 type MatchResult = "win" | "loss" | "draw";

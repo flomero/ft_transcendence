@@ -1,5 +1,5 @@
-import { Token } from "@fastify/oauth2";
-import { FastifyInstance } from "fastify";
+import type { Token } from "@fastify/oauth2";
+import type { FastifyInstance } from "fastify";
 
 export interface JWTContent {
   id: string;

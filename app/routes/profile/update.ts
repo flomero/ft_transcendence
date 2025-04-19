@@ -1,4 +1,4 @@
-import { FastifyPluginAsync } from "fastify";
+import type { FastifyPluginAsync } from "fastify";
 import { getUserById, updateUsername } from "../../services/database/user";
 import { signJWT, verifyJWT } from "../../services/auth/jwt";
 import { updateImage } from "../../services/database/image/image";

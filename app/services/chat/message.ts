@@ -1,4 +1,4 @@
-import { FastifyInstance } from "fastify";
+import type { FastifyInstance } from "fastify";
 import { getMessagesWithUserInfo } from "../database/chat/message";
 
 export interface ChatMessage {
