@@ -8,6 +8,7 @@ import { PongAIOpponent } from "../pong/pongAIOpponent";
 import aiLoop from "./aiLoop";
 import { Database } from "sqlite";
 import { RNG } from "../rng";
+import saveGameResultInDb from "./saveGameResultInDb";
 
 class GameManager {
   private id: string = randomUUID();
@@ -92,15 +93,39 @@ class GameManager {
       throw new Error("Not all players are connected");
     }
 
+    this.shuffleReferenceTable();
+    this.addIngameIdToPlayerAndAiOpponent();
     this.game.startGame();
+    this.startGameAndAiLoop(db);
+  }
+
+  private shuffleReferenceTable(): void {
+    const tmpRng = new RNG();
+    this.playerIdReferenceTable = tmpRng.randomArray(
+      this.playerIdReferenceTable,
+    );
+  }
+
+  private async startGameAndAiLoop(db: Database) {
     if (this.game.getStatus() === GameStatus.RUNNING) {
-      const tmpRng = new RNG();
-      this.playerIdReferenceTable = tmpRng.randomArray(
-        this.playerIdReferenceTable,
-      );
-      this.addIngameIdToPlayerAndAiOpponent();
-      await gameLoop(this.id, db);
-      await aiLoop(this.id);
+      aiLoop(this.id);
+      this.startGameLoopWithCompletionHandler(db);
+    }
+  }
+
+  private startGameLoopWithCompletionHandler(db: Database): void {
+    gameLoop(this.id).then(async () => {
+      await this.saveGameResults(db);
+    });
+  }
+
+  private async saveGameResults(db: Database): Promise<void> {
+    if (this.game.getStatus() === GameStatus.FINISHED) {
+      try {
+        await saveGameResultInDb(this, db);
+      } catch (error) {
+        console.error("Failed to save game results:", error);
+      }
     }
   }
 
