@@ -23,7 +23,6 @@ const savePlayerScoresToDatabase = async (
 
   for (const player of players) {
     const score = gameScores[player.id];
-    console.log(`Saving score for player ${player.playerUUID}: ${score}`);
 
     try {
       await db.run(query, [score, player.playerUUID, gameManager.getId]);
@@ -50,8 +49,6 @@ const saveAIScoresToDatabase = async (
   for (const [aiUuid, aiOpponent] of gameManager.aiOpponent.entries()) {
     const playerId = aiOpponent.getId();
     const score = gameScores[playerId];
-
-    console.log(`Saving score for AI ${aiUuid}: ${score}`);
 
     try {
       await db.run(query, [score, aiUuid, gameManager.getId]);
