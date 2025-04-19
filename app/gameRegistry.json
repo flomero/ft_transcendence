@@ -36,8 +36,8 @@
       "multiplayerPong": {
         "className": "MultiplayerPong",
         "fixedSettings": {
-          "arenaWidth": 100,
-          "arenaHeight": 100,
+          "arenaWidth": 200,
+          "arenaHeight": 200,
           "paddleOffset": 2.5,
           "paddleHeight": 1,
           "wallsHeight": 2,
@@ -144,10 +144,12 @@
         "className": "Bumper",
         "spawnWeight": 1.0,
         "selfActivation": false,
-        "durationS": 8,
-        "bumperVelocityPercent": 7,
+        "durationS": 10,
         "bumperAngleDeg": 82.5,
-        "bumperJunctionDisanceFromCenterPercent": 13.5
+        "bumperJunctionDisanceFromCenterPercent": 13.5,
+        "bumperVelocityPercent": 35,
+        "bumperMaxVelocityPercent": 120,
+        "bumperAccelerationPercentS": -50
       }
     }
   }

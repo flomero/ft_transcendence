@@ -8,9 +8,15 @@ export class Bumper extends TimeLimitedModifierBase {
   name = "bumper";
 
   protected bumpers: Rectangle[] = [];
-  protected bumperVelocityFactor: number = 0;
   protected bumperAngle: number = 0;
   protected bumperJunctionDisanceFromCenter: number = 0;
+
+  protected initalVelocity: number = 0;
+  protected velocityFactor: number = 0;
+
+  protected bumperVelocityFactor: number = 0;
+  protected bumperMaxVelocityFactor: number = 0;
+  protected bumperAcceleration: number = 0;
 
   constructor(customConfig?: Record<string, any>) {
     super();
@@ -46,16 +52,6 @@ export class Bumper extends TimeLimitedModifierBase {
     );
 
     this.configManager.registerPropertyConfig(
-      "bumperVelocityFactor",
-      (_, context) => {
-        const bumperVelocityPercent =
-          context.bumperVelocityFactor || defaultRegistry.bumperVelocityPercent;
-        return bumperVelocityPercent / 100.0;
-      },
-      undefined,
-    );
-
-    this.configManager.registerPropertyConfig(
       "bumperAngle",
       (_, context) => {
         const bumperAngleDeg =
@@ -76,6 +72,38 @@ export class Bumper extends TimeLimitedModifierBase {
       undefined,
     );
 
+    this.configManager.registerPropertyConfig(
+      "bumperVelocityFactor",
+      (_, context) => {
+        const bumperVelocityPercent =
+          context.bumperVelocityFactor || defaultRegistry.bumperVelocityPercent;
+        return bumperVelocityPercent / 100.0;
+      },
+      undefined,
+    );
+
+    this.configManager.registerPropertyConfig(
+      "bumperMaxVelocityFactor",
+      (_, context) => {
+        const bumperMaxVelocityPercent =
+          context.bumperMaxVelocityFactor ||
+          defaultRegistry.bumperMaxVelocityPercent;
+        return bumperMaxVelocityPercent / 100.0;
+      },
+      undefined,
+    );
+
+    this.configManager.registerPropertyConfig(
+      "bumperAcceleration",
+      (_, context) => {
+        const bumperAccelerationPercentS =
+          context.bumperAcceleration ||
+          defaultRegistry.bumperAccelerationPercentS;
+        return bumperAccelerationPercentS / (100.0 * serverTickrateS);
+      },
+      undefined,
+    );
+
     const mergedConfig = { ...defaultRegistry };
     if (customConfig)
       Object.entries(customConfig).forEach((entry) => {
@@ -87,6 +115,11 @@ export class Bumper extends TimeLimitedModifierBase {
 
   onActivation(game: Pong): void {
     const gameState = game.getState();
+    if (gameState.balls.length === 0) {
+      this.deactivate(game);
+      return;
+    }
+    this.initalVelocity = gameState.balls[0].speed;
 
     // Width and height for the bumper
     const bumperJunctionDisanceFromCenter =
@@ -185,7 +218,24 @@ export class Bumper extends TimeLimitedModifierBase {
     const isBumper = this.bumpers.includes(game.getState().walls[args.wallID]);
     if (!isBumper) return;
 
-    game.getState().balls[0].speed *= 1.0 + this.bumperVelocityFactor;
+    // Add velocity (clamped to max)
+    this.velocityFactor += Math.min(
+      this.bumperVelocityFactor,
+      this.bumperMaxVelocityFactor,
+    );
+  }
+
+  onUpdate(game: Pong): void {
+    super.onUpdate(game);
+
+    if (game.getState().balls.length === 0) return;
+    game.getState().balls[0].speed =
+      this.initalVelocity * (1.0 + this.velocityFactor);
+
+    this.velocityFactor = Math.max(
+      0.0,
+      this.velocityFactor + this.bumperAcceleration,
+    );
   }
 
   onDeactivation(game: Pong): void {
@@ -195,6 +245,7 @@ export class Bumper extends TimeLimitedModifierBase {
         if (wallID < 0) return;
         game.getState().walls.splice(wallID, 1);
       });
+    game.getState().balls[0].speed = this.initalVelocity;
     game.getModifierManager().deletePowerUp(this);
   }
 }
