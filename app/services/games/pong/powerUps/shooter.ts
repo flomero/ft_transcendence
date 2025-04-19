@@ -14,6 +14,8 @@ enum ShooterStatus {
 export class Shooter extends TimeLimitedModifierBase {
   name = "shooter";
 
+  protected ballInitialSpeed: number = 0;
+
   protected shooterStatus: ShooterStatus = ShooterStatus.CREATED;
   protected chargeDuration: number = 0;
   protected chargeRadius: number = 0;
@@ -134,6 +136,7 @@ export class Shooter extends TimeLimitedModifierBase {
     }
 
     const mainBall = game.getState().balls[0];
+    this.ballInitialSpeed = mainBall.speed;
 
     const arenaCenter = {
       x: game.getSettings().arenaWidth / 2.0,
@@ -296,6 +299,12 @@ export class Shooter extends TimeLimitedModifierBase {
   }
 
   onDeactivation(game: Pong): void {
+    if (game.getState().balls.length > 0)
+      game.getState().balls[0].speed = this.ballInitialSpeed;
     game.getModifierManager().deletePowerUp(this);
+  }
+
+  onGoal(game: Pong, args: { playerId: number }): void {
+    this.deactivate(game);
   }
 }
