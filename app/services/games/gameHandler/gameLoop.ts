@@ -1,9 +1,7 @@
 import { type GameBase, GameStatus } from "../gameBase";
 import { gameManagers } from "../lobby/start/startLobbyHandler";
-import saveGameResultInDb from "./saveGameResultInDb";
-import { Database } from "sqlite";
 
-const gameLoop = async (gameManagerId: string, db: Database) => {
+const gameLoop = async (gameManagerId: string) => {
   const gameManager = gameManagers.get(gameManagerId);
 
   if (gameManager === undefined) throw new Error("Game does not exist");
@@ -21,7 +19,7 @@ const gameLoop = async (gameManagerId: string, db: Database) => {
     await sleep(sleepIntervalMs);
     loopCounter++;
   }
-  await saveGameResultInDb(gameManagerId, db);
+  return;
 };
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
