@@ -10,11 +10,16 @@ const gameLoop = async (gameManagerId: string) => {
   let loopCounter: number = 0;
   const sleepIntervalMs: number = 1000.0 / game.getServerTickrateS();
 
+  const playerIdReferenceTable = gameManager.getReferenceTable();
   while (game.getStatus() === GameStatus.RUNNING) {
     game.update();
 
     const gameStateMessage = JSON.stringify(game.getStateSnapshot());
-    gameManager.sendMessageToAll("gameState", gameStateMessage);
+    gameManager.sendMessageToAll(
+      "gameState",
+      gameStateMessage,
+      playerIdReferenceTable,
+    );
 
     await sleep(sleepIntervalMs);
     loopCounter++;

@@ -63,12 +63,40 @@ class GameManager {
     }
   }
 
-  public sendMessageToAll(type: string, data: string): void {
+  public sendMessageToAll(
+    type: string,
+    data: string,
+    referenceTable: string,
+  ): void {
     for (const player of this.players.values()) {
       if (player.ws !== undefined) {
-        player.ws.send(JSON.stringify({ type: type, data: data }));
+        player.ws.send(
+          JSON.stringify({
+            type: type,
+            data: data,
+            referenceTable: referenceTable,
+          }),
+        );
       }
     }
+  }
+
+  public getReferenceTable(): string {
+    const playerIdReferenceTable: Array<{
+      playerUUID: string;
+      playerGameID: string;
+    }> = [];
+
+    for (let i = 0; i < this.playerIdReferenceTable.length; i++) {
+      const playerUUID = this.playerIdReferenceTable[i];
+      const playerIngameId = i;
+
+      playerIdReferenceTable.push({
+        playerUUID: playerUUID,
+        playerGameID: playerIngameId.toString(),
+      });
+    }
+    return JSON.stringify(playerIdReferenceTable);
   }
 
   public addSocketToPlayer(userId: string, ws: WebSocket): void {
@@ -108,24 +136,10 @@ class GameManager {
 
   private async startGameAndAiLoop(db: Database) {
     if (this.game.getStatus() === GameStatus.RUNNING) {
-      aiLoop(this.id);
-      this.startGameLoopWithCompletionHandler(db);
-    }
-  }
-
-  private startGameLoopWithCompletionHandler(db: Database): void {
-    gameLoop(this.id).then(async () => {
-      await this.saveGameResults(db);
-    });
-  }
-
-  private async saveGameResults(db: Database): Promise<void> {
-    if (this.game.getStatus() === GameStatus.FINISHED) {
-      try {
+      gameLoop(this.id).then(async () => {
         await saveGameResultInDb(this, db);
-      } catch (error) {
-        console.error("Failed to save game results:", error);
-      }
+      });
+      aiLoop(this.id);
     }
   }
 
