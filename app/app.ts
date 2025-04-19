@@ -80,6 +80,11 @@ const app: FastifyPluginAsync<AppOptions> = async (
   // console.log(`Final Ranking:`);
   // console.dir(tournament.getFinalRankings(), {depth: null});
 
+  await fastify.register(require("@fastify/swagger"));
+  await fastify.register(import("@fastify/swagger-ui"), {
+    routePrefix: "/documentation",
+  });
+
   // Do not touch the following lines
 
   // This loads all plugins defined in plugins
