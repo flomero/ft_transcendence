@@ -1,6 +1,8 @@
 import { STRATEGY_REGISTRY } from "../strategyRegistryLoader";
 import { IPongPowerUpPositionSampler } from "../../../types/strategy/IPongPowerUpPositionSampler";
 import { Pong } from "../../games/pong/pong";
+import { StrategyManager } from "../strategyManager";
+import { IPongPlayerSampler } from "../../../types/strategy/IPongPlayerSampler";
 
 export class BiasedQuadrantGaussianRATester
   implements IPongPowerUpPositionSampler
@@ -13,7 +15,7 @@ export class BiasedQuadrantGaussianRATester
   protected stdVelocityVariation: number = 0;
   protected maxVelocity: number = 0;
 
-  protected lastGoalBias: number = 0;
+  protected playerSampler: StrategyManager<IPongPlayerSampler, "samplePlayer">;
 
   constructor() {
     this.stdAngularVariation =
@@ -34,18 +36,18 @@ export class BiasedQuadrantGaussianRATester
       STRATEGY_REGISTRY.pongBallResetSampler["biasedQuadrantGaussianRA"]
         .maxVelocityPercent / 100.0;
 
-    this.lastGoalBias =
-      STRATEGY_REGISTRY.pongBallResetSampler["biasedQuadrantGaussianRA"]
-        .lastGoalBiasPercent / 100.0;
+    this.playerSampler = new StrategyManager(
+      STRATEGY_REGISTRY.pongBallResetSampler[
+        "biasedQuadrantGaussianRA"
+      ].playerSampler,
+      "pongPlayerSampler",
+      "samplePlayer",
+    );
   }
 
   samplePosition(game: Pong): { x: number; y: number } {
-    const gameState = game.getState();
     const rng = game.getRNG();
-    let playerId = gameState.lastGoal;
-    if (playerId === -1)
-      // If no one took a goal yet (ball out of bounds ?) then randomize the bias
-      playerId = rng.randomInt(0, 1);
+    let playerId = this.playerSampler.executeStrategy(game);
 
     // Allows to test w/o hvaing the ball moving
     const tmpBallSpeedWidthPercentS = 150;
@@ -57,12 +59,7 @@ export class BiasedQuadrantGaussianRATester
     const distanceFactor = 10;
 
     // Randomize a coefficient to the x direction, either -1 or 1 (left or right)
-    const rndHorizontalDirection =
-      rng.random() < this.lastGoalBias
-        ? // If yes, go the opposite of playerId
-          playerId === 1
-        : // Else, go towards playerId
-          playerId === 0;
+    const rndHorizontalDirection = playerId === 1;
     // Randomize a coefficient to the y direction, either -1 or 1 (up or down)
     const rndVerticalDirection = rng.randomInt(0, 1) === 1;
 

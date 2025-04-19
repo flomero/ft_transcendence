@@ -1,8 +1,8 @@
-import { PongModifierBase } from "../pongModifierBase";
 import { Pong } from "../pong";
 import { Rectangle } from "../../../../types/games/pong/rectangle";
+import { ModifierBase } from "../../modifierBase";
 
-export class ArenaShrink extends PongModifierBase {
+export class ArenaShrink extends ModifierBase {
   name = "arenaShrink";
 
   shrunkIds: number[] = [];

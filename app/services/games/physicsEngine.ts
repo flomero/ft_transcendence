@@ -112,7 +112,7 @@ export class PhysicsEngine {
       Math.abs(r_bdy) >= EPSILON ? (-br - rh / 2.0 - r_by) / r_bdy : null;
 
     for (const tCandidate of [tx_1, tx_2, ty_1, ty_2]) {
-      if (tCandidate !== null && EPSILON < tCandidate && tCandidate <= bs) {
+      if (tCandidate !== null && 0 < tCandidate && tCandidate <= bs) {
         // Additionally check that the ball's position at time t_candidate is within the extended rectangle bounds
         const new_r_bx = r_bx + tCandidate * r_bdx;
         const new_r_by = r_by + tCandidate * r_bdy;
@@ -160,7 +160,7 @@ export class PhysicsEngine {
       // We choose the smaller positive t
       const tCandidate = (-B - sqrtDisc) / (2 * A);
 
-      if (EPSILON < tCandidate && tCandidate <= bs) {
+      if (0 < tCandidate && tCandidate <= bs) {
         // Check if this candidate is the earliest among corner collisions
         if (tCandidate < cornerCollisionT) {
           cornerCollisionT = tCandidate;
@@ -282,6 +282,14 @@ export class PhysicsEngine {
     obj: Ball,
     objId: number,
   ): Collision | null {
+    // Check if already inside the object
+    const currentDistance = Math.sqrt(
+      (ball.x - obj.x) ** 2 + (ball.y - obj.y) ** 2,
+    );
+    if (currentDistance < ball.radius + obj.radius) {
+      return { distance: 0, objectId: objId };
+    }
+
     const a = ball.dx ** 2 + ball.dy ** 2;
     const b = 2.0 * (ball.dx * (ball.x - obj.x) + ball.dy * (ball.y - obj.y));
     const c =
@@ -299,7 +307,7 @@ export class PhysicsEngine {
     const sqrtDelta = Math.sqrt(delta);
     const t = (-b - sqrtDelta) / (2.0 * a);
 
-    if (EPSILON < t && t <= distance) {
+    if (0 < t && t <= distance) {
       return { distance: t, objectId: objId };
     }
 

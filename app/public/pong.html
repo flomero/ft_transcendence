@@ -35,12 +35,12 @@
       let ratio = 0.0;
       let playerCount = 2;
 
-      const gameModeName = "classicPong";
+      const gameModeName = "multiplayerPong";
 
       if (gameModeName === "multiplayerPong") {
         canvas.width = 800;
         canvas.height = 800;
-        ratio = canvas.width / 100.0;
+        ratio = canvas.width / 200.0;
         playerCount = 7;
       } else if (gameModeName === "classicPong") {
         canvas.width = 800;
@@ -62,14 +62,13 @@
               gameName: "pong",
               gameModeName: gameModeName,
               gameModeConfig: {
-                powerUpRadius: 2,
+                powerUpCapacities: {},
               },
               modifierNames: {
                 powerUpSpawner: {},
               },
               powerUpNames: {
-                speedBoost: {},
-                blinkingBall: {},
+                bumper: {},
               },
               playerCount: playerCount,
             },
@@ -224,15 +223,15 @@
                   ctx.fillStyle = "blue";
                   break;
 
-                case "multiball_modifier":
+                case "multiBall":
                   ctx.fillStyle = "green";
                   break;
 
-                case "grasping_vines_debuff_modifier":
+                case "shooter":
                   ctx.fillStyle = "yellow";
                   break;
 
-                case "black_hole_debuff_modifier":
+                case "bumper":
                   ctx.fillStyle = "purple";
                   break;
 

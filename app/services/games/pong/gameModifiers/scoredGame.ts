@@ -1,9 +1,9 @@
 import { GameStatus } from "../../gameBase";
 import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
 import type { Pong } from "../pong";
-import { PongModifierBase } from "../pongModifierBase";
+import { ModifierBase } from "../../modifierBase";
 
-export class ScoredGame extends PongModifierBase {
+export class ScoredGame extends ModifierBase {
   name = "scoredGame";
 
   protected goalObjective: number;

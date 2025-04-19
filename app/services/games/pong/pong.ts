@@ -74,13 +74,6 @@ export abstract class Pong extends GameBase {
       playerCount: gameData.playerCount,
     };
 
-    // Simulate random scores
-    this.gameState.scores = this.gameState.scores.map(
-      (_, id) => (id === 2 || id === 5 ? 3 * this.gameState.playerCount : 1),
-      // (_, id) => Math.round(Math.pow(3, id)),
-      // this.gameState.rng.randomInt(0, 2 * this.gameState.playerCount),
-    );
-
     // Initialize UserInputManager
     this.inputManager = new UserInputManager();
   }
@@ -109,7 +102,7 @@ export abstract class Pong extends GameBase {
 
       // Verify that no balls went out of bounds
       this.gameState.balls.forEach((ball, id) => {
-        if (this.isOutOfBounds(ball)) this.resetBall(this.gameState, id, true);
+        if (this.isOutOfBounds(ball)) this.rollbackBallInBounds(id);
       });
 
       // Trigger modifiers
@@ -119,6 +112,18 @@ export abstract class Pong extends GameBase {
     // Save the current state for potential rewinding
     const snapshot = this.getStateSnapshot();
     this.saveStateSnapshot(snapshot);
+  }
+
+  protected rollbackBallInBounds(ballId: number) {
+    for (let k = this.tickData.length - 1; k >= 0; --k) {
+      const ball = (this.tickData[k].balls as Ball[])[ballId];
+      if (!this.isOutOfBounds(ball)) {
+        console.log(`Rolling back ball ${ballId} ${k} ticks`);
+        this.gameState.balls[ballId] = ball;
+        this.gameState.balls[ballId].x + EPSILON; // Move the ball a little bit to prevent going back out of bounds
+        break;
+      }
+    }
   }
 
   protected updatePaddle(paddle: Paddle, doTriggers: boolean): void {
@@ -468,7 +473,10 @@ export abstract class Pong extends GameBase {
                 playerId: goalPlayerId,
               });
           } else {
-            if (doTriggers) this.modifierManager.trigger("onWallBounce");
+            if (doTriggers)
+              this.modifierManager.trigger("onWallBounce", {
+                wallID: collision.objectId,
+              });
           }
           break;
 

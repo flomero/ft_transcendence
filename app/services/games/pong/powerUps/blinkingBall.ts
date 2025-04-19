@@ -95,4 +95,8 @@ export class BlinkingBall extends TimeLimitedModifierBase {
     game.getState().balls[0].isVisible = true;
     game.getModifierManager().deletePowerUp(this);
   }
+
+  onGoal(game: Pong, args: { playerId: number }): void {
+    this.deactivate(game);
+  }
 }

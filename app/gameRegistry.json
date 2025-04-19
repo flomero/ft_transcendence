@@ -15,7 +15,7 @@
         },
 
         "customizableSettings": {
-          "ballSpeedWidthPercentS": 65,
+          "ballSpeedWidthPercentS": 55,
           "ballRadius": 0.95,
           "ballResetSampler": "biasedQuadrantGaussianRA",
           "paddleCoveragePercent": 25,
@@ -25,7 +25,10 @@
           "powerUpRadius": 20,
           "powerUpCapacities": {
             "speedBoost": 1,
-            "blinkingBall": 1
+            "blinkingBall": 1,
+            "multiBall": 1,
+            "shooter": 1,
+            "bumper": 1
           }
         }
       },
@@ -33,8 +36,8 @@
       "multiplayerPong": {
         "className": "MultiplayerPong",
         "fixedSettings": {
-          "arenaWidth": 100,
-          "arenaHeight": 100,
+          "arenaWidth": 200,
+          "arenaHeight": 200,
           "paddleOffset": 2.5,
           "paddleHeight": 1,
           "wallsHeight": 2,
@@ -50,7 +53,10 @@
           "powerUpRadius": 10,
           "powerUpCapacities": {
             "speedBoost": 1,
-            "blinkingBall": 1
+            "blinkingBall": 1,
+            "multiBall": 1,
+            "shooter": 1,
+            "bumper": 1
           }
         }
       }
@@ -110,6 +116,40 @@
         "durationS": 6,
         "blinkIntervalS": 0.5,
         "blinkDurationPercent": 50
+      },
+
+      "multiBall": {
+        "className": "MultiBall",
+        "spawnWeight": 1.0,
+        "selfActivation": false,
+        "durationS": 6,
+        "ballCount": 4,
+        "totalAngleDeg": 60,
+        "radiusFactorPercent": 70
+      },
+
+      "shooter": {
+        "className": "Shooter",
+        "spawnWeight": 1.0,
+        "selfActivation": false,
+        "durationS": 4,
+        "chargeDurationS": 2,
+        "chargeRadius": 10,
+        "shootInitialVelocityPercent": 180,
+        "shootFinalVelocityPercent": 100,
+        "shootDirectionSamplerStrategyName": "biasedQuadrantGaussianRA"
+      },
+
+      "bumper": {
+        "className": "Bumper",
+        "spawnWeight": 1.0,
+        "selfActivation": false,
+        "durationS": 10,
+        "bumperAngleDeg": 82.5,
+        "bumperJunctionDisanceFromCenterPercent": 13.5,
+        "bumperVelocityPercent": 35,
+        "bumperMaxVelocityPercent": 120,
+        "bumperAccelerationPercentS": -50
       }
     }
   }

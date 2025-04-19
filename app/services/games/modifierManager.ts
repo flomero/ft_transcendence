@@ -294,7 +294,7 @@ export class ModifierManager {
     return this.spawnedPowerUps.map((value) => value[1]);
   }
 
-  getmodifiers(): ModifierBase[] {
+  getModifiers(): ModifierBase[] {
     return this.modifiers;
   }
 

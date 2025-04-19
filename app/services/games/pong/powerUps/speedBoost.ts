@@ -109,4 +109,8 @@ export class SpeedBoost extends TimeLimitedModifierBase {
 
     game.getModifierManager().deletePowerUp(this);
   }
+
+  onGoal(game: Pong, args: { playerId: number }): void {
+    this.deactivate(game);
+  }
 }
