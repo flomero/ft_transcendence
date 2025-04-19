@@ -11,8 +11,6 @@ const profile: FastifyPluginAsync = async (fastify): Promise<void> => {
     if (!userId) {
       return reply.status(400).send({ message: "User Id required" });
     }
-    console.log("userId", userId);
-    console.log("request.userId", request.userId);
     if (userId === request.userId) {
       return redirectTo(request, reply, "/profile");
     }

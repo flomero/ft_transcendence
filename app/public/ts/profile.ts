@@ -98,7 +98,6 @@ class ProfileEditor {
       .then((response) => response.json())
       .then((data) => {
         if (data.error || data.statusCode >= 400) {
-          console.table(data);
           this.showError(
             `Error uploading profile picture: ${data.message || data.error}`,
           );
