@@ -132,8 +132,4 @@ export class MultiBall extends TimeLimitedModifierBase {
   onGoal(game: Pong, args: { playerId: number }): void {
     this.deactivate(game);
   }
-
-  onPlayerElimination(game: Pong, args: { playerId: number }): void {
-    this.deactivate(game);
-  }
 }
