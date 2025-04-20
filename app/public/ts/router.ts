@@ -1,5 +1,6 @@
 import { TransitionManager } from "./transitions.js";
 import LobbyHandler from "./lobby.js";
+import MatchmakingHandler from "./matchmaking.js";
 import { initPongGame, type PongGame } from "./pong.js";
 
 // Route handler interface with lifecycle hooks
@@ -16,6 +17,9 @@ declare global {
     router: Router;
     pongGame: PongGame | undefined;
     LobbyHandler: typeof LobbyHandler;
+    lobbyHandler: LobbyHandler;
+    MatchmakingHandler: typeof MatchmakingHandler;
+    matchmakingHandler: MatchmakingHandler;
   }
 }
 
@@ -171,6 +175,7 @@ class Router {
       this.isInitialLoad = false;
       this.currentPath = path;
       this.updateActiveLinks(path);
+      await this.runEnterHandler(path);
       return;
     }
 
@@ -394,6 +399,22 @@ document.addEventListener("DOMContentLoaded", () => {
       if (window.lobbyHandler) {
         if (window.lobbyHandler.socket) {
           window.lobbyHandler.socket.close();
+        }
+      }
+    },
+  });
+
+  window.router.addRoute("/games/matchmaking/join/:gamemode", {
+    onEnter: () => {
+      console.log("Matchmaking handler initialized");
+      const matchmakingHandler = new MatchmakingHandler();
+      matchmakingHandler.connect();
+      window.matchmakingHandler = matchmakingHandler;
+    },
+    onExit: () => {
+      if (window.matchmakingHandler) {
+        if (window.matchmakingHandler.socket) {
+          window.matchmakingHandler.socket.close();
         }
       }
     },

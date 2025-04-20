@@ -1,6 +1,18 @@
 <div class="mt-8 flex flex-col items-center justify-center gap-4" id="lobby-container">
-  <h1 class="text-fg-muted">
+  <h1>
     {{hrGameModeName gameMode}}
   </h1>
-  <p>Searching for opponents...</p>
+  <p class="text-fg-muted">Searching for opponents...</p>
+  {{#> components/button variant="ghost" class="text-fg-muted"}}
+  Leave Matchmaking
+  {{/components/button}}
+
+  <div class="my-16 flex space-x-2 justify-center items-center">
+    <div class="size-8 bg-fg-muted rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+    <div class="size-8 bg-fg-muted rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+    <div class="size-8 bg-fg-muted rounded-full animate-bounce"></div>
+  </div>
+
+  <p id="matchmaking-error" class="hidden text-error">
+  </p>
 </div>

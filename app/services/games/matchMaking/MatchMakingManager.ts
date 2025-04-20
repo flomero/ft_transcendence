@@ -10,11 +10,9 @@ class MatchMakingManager {
 
   public getGameMode(gameModeString: string): MatchmakingGameModes | null {
     const gameMode = Object.values(MatchmakingGameModes).find(
-      (mode) => mode === gameModeString,
+      (mode) => mode.toLowerCase() === gameModeString.toLowerCase(),
     );
-    if (gameMode === undefined) {
-      return null;
-    }
+    if (gameMode === undefined) return null;
     return gameMode as MatchmakingGameModes;
   }
 

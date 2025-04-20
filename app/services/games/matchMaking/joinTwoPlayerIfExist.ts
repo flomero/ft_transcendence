@@ -27,11 +27,11 @@ const sendMatchIdToMembers = (
 ) => {
   matchMakingManager.sendMessageToMember(
     firstMember,
-    JSON.stringify({ type: "matchFound", matchId: matchId }),
+    JSON.stringify({ type: "matchFound", data: matchId }),
   );
   matchMakingManager.sendMessageToMember(
     secondMember,
-    JSON.stringify({ type: "matchFound", matchId: matchId }),
+    JSON.stringify({ type: "matchFound", data: matchId }),
   );
 };
 

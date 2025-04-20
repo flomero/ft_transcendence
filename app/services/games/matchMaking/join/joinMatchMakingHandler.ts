@@ -17,7 +17,7 @@ const joinMatchMakingHandler = async (
   matchMakingManager.addMember(userId, gameMode);
 
   const data = {
-    title: "Matchmaking | Inception",
+    title: "Matchmaking | ft_transcendence",
     gameMode: gameMode,
   };
   reply.header("X-Page-Title", "Matchmaking | ft_transcendence");
