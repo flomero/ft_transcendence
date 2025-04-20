@@ -1,13 +1,13 @@
 <div id="bracket"
-     class="flex flex-row justify-around border relative p-4 w-600">
+     class="flex flex-row justify-around border relative p-4 w-200 h-70">
 
   {{!-- one column per round --}}
   {{#each rounds as |round r|}}
-    <div class="w-80 flex flex-col justify-around">
+    <div class="w-40 flex flex-col justify-around">
       {{#each round as |match i|}}
         <div id="{{match.id}}"
              class="match border bg-black-200">
-          {{match.teamA}} vs {{match.teamB}}
+          {{match.teamA}} vs {{match.teamB}}
         </div>
       {{/each}}
     </div>
@@ -21,6 +21,3 @@
   window.__ROUNDS__       = {{{json rounds}}};
   window.__CONNECTIONS__  = {{{json connectionConfig}}};
 </script>
-
-<!-- always load as ES‑module so `export {}` in TS compiles cleanly -->
-<script type="module" src="public/js/tournament.js"></script>

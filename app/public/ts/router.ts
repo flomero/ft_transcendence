@@ -1,6 +1,7 @@
 import { TransitionManager } from "./transitions.js";
 import LobbyHandler from "./lobby.js";
 import { initPongGame, PongGame } from "./pong.js";
+import TournamentBracket from "./tournament.js";
 
 // Route handler interface with lifecycle hooks
 interface RouteHandler {
@@ -16,6 +17,7 @@ declare global {
     router: Router;
     pongGame: PongGame | undefined;
     LobbyHandler: typeof LobbyHandler;
+    // TournamentBracket: TournamentBracket | undefined
   }
 }
 
@@ -171,6 +173,7 @@ class Router {
       this.isInitialLoad = false;
       this.currentPath = path;
       this.updateActiveLinks(path);
+      await this.runEnterHandler(path);
       return;
     }
 
@@ -404,6 +407,18 @@ document.addEventListener("DOMContentLoaded", () => {
     },
   });
 
+  window.router.addRoute("/tournaments?auto=false", {
+    onEnter: () => {
+      console.log("Tournament");
+      window.tournamentBracket = new TournamentBracket();
+    },
+    onExit: () => {
+      if (window.tournamentBracket) {
+        window.tournamentBracket.destroy();
+        delete window.tournamentBracket;
+      }
+    },
+  });
   // window.router.addRoute("/login", {
   //   onEnter: () => {
   //     // Check if the referrer is from Google accounts

@@ -3,6 +3,7 @@ import type { FastifyPluginAsync } from "fastify";
 
 interface BracketQuery {
   auto?: string; // "true" | "false" | (undefined → default)
+  partial?: string; // "true" | "false" | (undefined → default)
 }
 
 const profile: FastifyPluginAsync = async (fastify) => {
@@ -10,24 +11,24 @@ const profile: FastifyPluginAsync = async (fastify) => {
     /* ----- tournament data (whatever size you like) ----- */
     const rawRounds = [
       [
-        { teamA: "Team A", teamB: "Team B" },
-        { teamA: "Team C", teamB: "Team D" },
-        { teamA: "Team E", teamB: "Team F" },
-        { teamA: "Team G", teamB: "Team H" },
-        { teamA: "Team I", teamB: "Team J" },
-        { teamA: "Team K", teamB: "Team L" },
+        { teamA: "Team A", teamB: "Team B" },
+        { teamA: "Team C", teamB: "Team D" },
+        { teamA: "Team E", teamB: "Team F" },
+        { teamA: "Team G", teamB: "Team H" },
+        { teamA: "Team I", teamB: "Team J" },
+        { teamA: "Team K", teamB: "Team L" },
       ],
       [
-        { teamA: "Winner 1", teamB: "Winner 2" },
-        { teamA: "Winner 3", teamB: "Winner 4" },
-        { teamA: "Winner 5", teamB: "Winner 6" },
-        { teamA: "Winner 7", teamB: "Winner 8" },
+        { teamA: "Winner 1", teamB: "Winner 2" },
+        { teamA: "Winner 3", teamB: "Winner 4" },
+        { teamA: "Winner 5", teamB: "Winner 6" },
+        { teamA: "Winner 7", teamB: "Winner 8" },
       ],
       [
-        { teamA: "Winner QF‑1", teamB: "Winner QF‑2" },
-        { teamA: "Winner QF‑3", teamB: "Winner QF‑4" },
+        { teamA: "Winner QF‑1", teamB: "Winner QF‑2" },
+        { teamA: "Winner QF‑3", teamB: "Winner QF‑4" },
       ],
-      [{ teamA: "Winner SF‑1", teamB: "Winner SF‑2" }],
+      [{ teamA: "Winner SF‑1", teamB: "Winner SF‑2" }],
     ];
 
     /* ----- assign stable DOM ids ----- */
