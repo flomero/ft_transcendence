@@ -66,7 +66,7 @@ const speedBoostSchema = S.object()
 
 const powerupSchema = S.object().prop("speedBoost", speedBoostSchema);
 
-const bodySchema = S.object()
+export const gameSettingsSchema = S.object()
   .additionalProperties(false)
   .prop("gameName", S.enum(Object.values(GAME_NAMES)).required())
   .prop("gameModeName", S.enum(Object.values(GAME_MODES)).required())
@@ -77,7 +77,7 @@ const bodySchema = S.object()
   .prop("gameModeConfig", gameModeConfigSchema);
 
 const newLobbySchema = {
-  body: bodySchema,
+  body: gameSettingsSchema,
 };
 
 export default newLobbySchema;
