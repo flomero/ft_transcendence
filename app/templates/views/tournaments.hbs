@@ -6,7 +6,12 @@
       {{#each round as |match i|}}
         <div id="{{match.id}}"
              class="match border bg-black-200 mt-2 mb-2 p-2 rounded-lg">
-          {{match.teamA}} vs {{match.teamB}}
+          {{!-- Display all players in the match --}}
+          {{#each match.players as |player|}}
+            <div class="player">
+              {{player.name}}
+            </div>
+          {{/each}}
         </div>
       {{/each}}
     </div>
