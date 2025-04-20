@@ -419,6 +419,19 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     },
   });
+
+  window.router.addRoute("/tournaments", {
+    onEnter: () => {
+      console.log("Tournament");
+      window.tournamentBracket = new TournamentBracket();
+    },
+    onExit: () => {
+      if (window.tournamentBracket) {
+        window.tournamentBracket.destroy();
+        delete window.tournamentBracket;
+      }
+    },
+  });
   // window.router.addRoute("/login", {
   //   onEnter: () => {
   //     // Check if the referrer is from Google accounts
