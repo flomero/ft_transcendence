@@ -1,19 +1,32 @@
 export {};
 
-type Match = { id: string; teamA: string; teamB: string };
-type Round = Match[];
+type Player = { id: string; name: string };
+
+type Match = {
+  id: string;
+  name?: string;
+  players: Player[];
+};
+
+type Round = {
+  name: string;
+  matches: Match[];
+};
+
 type Rounds = Round[];
+
+type Edge = [string, string] | [string, string, number];
 
 type Connections =
   | { auto: true; edges: never[] }
-  | { auto: false; edges: [string, string][] };
+  | { auto: false; edges: Edge[] };
 
 declare global {
   interface Window {
     __ROUNDS__: Rounds;
     __CONNECTIONS__: Connections;
     tournamentBracket?: TournamentBracket;
-    drawTournamentLines?: () => void; // Marked as optional
+    drawTournamentLines?: () => void;
 
     TournamentBracket: typeof TournamentBracket;
   }
@@ -22,7 +35,7 @@ declare global {
 class TournamentBracket {
   private rounds: Rounds;
   private connections: Connections;
-  private edges: [string, string][];
+  private edges: Edge[];
   private svg: SVGSVGElement;
   private bracket: HTMLElement;
 
@@ -40,13 +53,16 @@ class TournamentBracket {
     this.init();
   }
 
-  private buildAutoEdges(): [string, string][] {
+  private buildAutoEdges(): Edge[] {
     console.log("Building auto edges");
-    const list: [string, string][] = [];
+    const list: Edge[] = [];
     for (let r = 0; r < this.rounds.length - 1; r++) {
-      this.rounds[r].forEach((match, i) => {
-        const target = this.rounds[r + 1][Math.floor(i / 2)];
-        list.push([match.id, target.id]);
+      const currentMatches = this.rounds[r].matches;
+      const nextMatches = this.rounds[r + 1].matches;
+
+      currentMatches.forEach((match, i) => {
+        const target = nextMatches[Math.floor(i / 2)];
+        list.push([match.id, target.id]); // no offset (defaults to 0)
       });
     }
     return list;
@@ -74,7 +90,9 @@ class TournamentBracket {
     this.svg.setAttribute("viewBox", `0 0 ${box.width} ${box.height}`);
     this.svg.innerHTML = "";
 
-    this.edges.forEach(([from, to]) => {
+    this.edges.forEach((edge) => {
+      const [from, to, offset = 0] = edge;
+
       const a = document.getElementById(from)!.getBoundingClientRect();
       const b = document.getElementById(to)!.getBoundingClientRect();
 
@@ -82,7 +100,7 @@ class TournamentBracket {
       const y1 = a.top - box.top + a.height / 2;
       const x2 = b.left - box.left;
       const y2 = b.top - box.top + b.height / 2;
-      const midX = (x1 + x2) / 2;
+      const midX = (x1 + x2) / 2 + offset;
 
       const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
       p.setAttribute("d", `M${x1},${y1} H${midX} V${y2} H${x2}`);
