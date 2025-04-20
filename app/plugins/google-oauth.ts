@@ -56,10 +56,10 @@ const googleOAuthPlugin: FastifyPluginAsync = async (fastify, opts) => {
       reply.cookie("token", jwtToken, {
         path: "/",
       });
-      reply.redirect("/");
+      reply.redirect("/login/reload");
     } catch (error) {
       fastify.log.error(error);
-      reply.status(500).send(error);
+      return reply.status(500).send(error);
     }
   });
 };

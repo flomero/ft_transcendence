@@ -90,12 +90,17 @@ class ProfileEditor {
 
     fetch("/profile/update/image", {
       method: "POST",
+      headers: {
+        Accept: "application/json",
+      },
       body: formData,
     })
       .then((response) => response.json())
       .then((data) => {
-        if (data.error) {
-          this.showError(data.error);
+        if (data.error || data.statusCode >= 400) {
+          this.showError(
+            `Error uploading profile picture: ${data.message || data.error}`,
+          );
           return;
         }
 

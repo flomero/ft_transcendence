@@ -24,6 +24,7 @@ class Router {
   private contentContainer: HTMLElement;
   private transitionManager: TransitionManager;
   private currentPath: string = "";
+  private isInitialLoad: boolean = true;
 
   constructor() {
     this.routes = {};
@@ -166,6 +167,13 @@ class Router {
   }
 
   async loadRoute(path: string): Promise<void> {
+    if (this.isInitialLoad) {
+      this.isInitialLoad = false;
+      this.currentPath = path;
+      this.updateActiveLinks(path);
+      return;
+    }
+
     this.showLoader();
 
     try {
@@ -390,6 +398,18 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     },
   });
+
+  // window.router.addRoute("/login", {
+  //   onEnter: () => {
+  //     // Check if the referrer is from Google accounts
+  //     const referrer = document.referrer;
+  //     if (referrer && referrer.startsWith("https://accounts.google.com/")) {
+  //       console.log("Detected Google OAuth redirect, performing full page reload");
+  //       // Force a full page reload to ensure cookies are properly set
+  //       window.location.reload();
+  //     }
+  //   }
+  // });
 
   window.router.init();
 });
