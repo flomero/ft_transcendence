@@ -1,5 +1,12 @@
 import S from "fluent-json-schema";
 
+const bracketTypeEnum = S.enum([
+  "singleElimination",
+  "doubleElimination",
+  "roundRobin",
+  "swissRound",
+]);
+
 const gameDataSchema = S.object()
   .prop("gameName", S.string().required())
   .prop("gameModeName", S.string().required())
@@ -8,21 +15,15 @@ const gameDataSchema = S.object()
   .prop("powerUpNames", S.object().required())
   .prop("gameModeConfig", S.object().required());
 
+const createTournamentBodySchema = S.object()
+  .prop("name", S.string().required())
+  .prop("bracketType", bracketTypeEnum.required())
+  .prop("matchWinnerType", S.enum(["bestOfX"]).required())
+  .prop("initialSeedingMethod", S.enum(["random"]).required())
+  .prop("gameData", gameDataSchema);
+
 const createTournamentSchema = {
-  body: S.object()
-    .prop("name", S.string().required())
-    .prop(
-      "bracketType",
-      S.enum([
-        "singleElimination",
-        "doubleElimination",
-        "roundRobin",
-        "swissRound",
-      ]).required(),
-    )
-    .prop("matchWinnerType", S.enum(["bestOfX"]).required())
-    .prop("initialSeedingMethod", S.enum(["random"]).required())
-    .prop("gameData", gameDataSchema),
+  body: createTournamentBodySchema,
 };
 
 export default createTournamentSchema;
