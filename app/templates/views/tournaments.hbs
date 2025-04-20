@@ -1,17 +1,13 @@
-{{!-- Tailwind classes left in; swap for plain CSS if you like --}}
-
 <div id="bracket"
-     class="flex flex-row justify-around border relative p-4">
+     class="flex flex-row justify-around border relative p-4 w-600">
 
-  {{!-- ONE column per round --}}
+  {{!-- one column per round --}}
   {{#each rounds as |round r|}}
     <div class="w-80 flex flex-col justify-around">
-      {{#each round as |match m|}}
-        <div class="match border bg-black-200 p-2 mb-6"
-             id="{{match.id}}"
-             data-round="{{r}}"
-             data-idx="{{m}}">
-          {{match.teamA}} vs {{match.teamB}}
+      {{#each round as |match i|}}
+        <div id="{{match.id}}"
+             class="match border bg-black-200">
+          {{match.teamA}} vs {{match.teamB}}
         </div>
       {{/each}}
     </div>
@@ -21,9 +17,10 @@
        class="absolute inset-0 pointer-events-none select-none"></svg>
 </div>
 
-{{!-- push the rounds array down to the browser as JSON --}}
 <script>
-  window.__ROUNDS__ = {{{json rounds}}};
+  window.__ROUNDS__       = {{{json rounds}}};
+  window.__CONNECTIONS__  = {{{json connectionConfig}}};
 </script>
 
+<!-- always load as ES‑module so `export {}` in TS compiles cleanly -->
 <script type="module" src="public/js/tournament.js"></script>

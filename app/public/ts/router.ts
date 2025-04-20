@@ -242,7 +242,12 @@ class Router {
 
   async fetchContent(path: string): Promise<string | null> {
     try {
-      const response = await fetch(`${path}?partial=true`, {
+      const url = new URL(path, window.location.origin);
+
+      /* add or overwrite the “partial” flag */
+      url.searchParams.set("partial", "true");
+
+      const response = await fetch(url.toString(), {
         headers: { "X-Requested-With": "XMLHttpRequest" },
         redirect: "follow",
       });

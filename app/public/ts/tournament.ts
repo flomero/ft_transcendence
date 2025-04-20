@@ -1,66 +1,60 @@
-/* tournament.ts
-   ────────────────────────────────────────────────
-   The single line `export {}` turns the file into an
-   ES module, which is *required* for the `declare global`
-   augmentation to be legal (TS2669).
-*/
-export {};
+export {}; // turn file into a module so global augmentation is legal
 
-/*  ───── TYPES ───── */
-
-interface Match {
-  id: string;
-  teamA: string;
-  teamB: string;
-}
+/* ---------- data types ---------- */
+type Match = { id: string; teamA: string; teamB: string };
 type Round = Match[];
 type Rounds = Round[];
 
-/*  ───── GLOBAL AUGMENTATION ─────
-    Now that the file is a module we can safely extend Window.
-*/
+type Connections =
+  | { auto: true; edges: never[] }
+  | { auto: false; edges: [string, string][] };
+
 declare global {
   interface Window {
     __ROUNDS__: Rounds;
+    __CONNECTIONS__: Connections;
   }
 }
 
-/*  ───── DOM REFERENCES (safe, typed) ───── */
-
-const rounds: Rounds = window.__ROUNDS__;
-
+/* ---------- DOM ---------- */
+const rounds = window.__ROUNDS__;
+const connections = window.__CONNECTIONS__;
 const svg = document.querySelector<SVGSVGElement>("#lines")!;
 const bracket = document.querySelector<HTMLElement>("#bracket")!;
 
-/*  ───── EDGE DISCOVERY ───── */
-
-function collectEdges(): [string, string][] {
-  const edges: [string, string][] = [];
-
+/* ---------- auto‑edge builder ---------- */
+function buildAutoEdges(): [string, string][] {
+  console.log("Building auto edges");
+  const list: [string, string][] = [];
   for (let r = 0; r < rounds.length - 1; r++) {
     rounds[r].forEach((match, i) => {
       const target = rounds[r + 1][Math.floor(i / 2)];
-      edges.push([match.id, target.id]);
+      list.push([match.id, target.id]);
     });
   }
-  return edges;
+  return list;
 }
 
-const edges = collectEdges();
+/* choose strategy */
+const edges: [string, string][] = connections.auto
+  ? buildAutoEdges()
+  : connections.edges;
 
-/*  ───── DRAW / REDRAW ───── */
-
+/* ---------- render ---------- */
 function drawLines(): void {
-  const box = bracket.getBoundingClientRect();
+  console.log("Drawing Lines");
+  console.log("Edges", edges);
+  console.log(connections.auto);
 
+  const box = bracket.getBoundingClientRect();
   svg.setAttribute("width", `${box.width}`);
   svg.setAttribute("height", `${box.height}`);
   svg.setAttribute("viewBox", `0 0 ${box.width} ${box.height}`);
   svg.innerHTML = "";
 
-  edges.forEach(([fromId, toId]) => {
-    const a = document.getElementById(fromId)!.getBoundingClientRect();
-    const b = document.getElementById(toId)!.getBoundingClientRect();
+  edges.forEach(([from, to]) => {
+    const a = document.getElementById(from)!.getBoundingClientRect();
+    const b = document.getElementById(to)!.getBoundingClientRect();
 
     const x1 = a.right - box.left;
     const y1 = a.top - box.top + a.height / 2;
@@ -76,8 +70,6 @@ function drawLines(): void {
     svg.appendChild(p);
   });
 }
-
-/*  ───── BOOTSTRAP ───── */
 
 window.addEventListener("DOMContentLoaded", drawLines);
 window.addEventListener("resize", drawLines);
