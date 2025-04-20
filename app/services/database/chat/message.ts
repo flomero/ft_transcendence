@@ -31,6 +31,6 @@ export async function getMessagesWithUserInfo(
   roomId: number,
 ): Promise<any[]> {
   const sql =
-    "SELECT messages.*, users.username FROM messages JOIN users ON messages.sender_id = users.id WHERE room_id = ?";
+    "SELECT messages.*, users.username FROM messages LEFT JOIN blocked_users ON messages.sender_id = blocked_users.blockedUserId WHERE room_id = ? AND blocked_users.blockedUserId != NULL";
   return await fastify.sqlite.all(sql, [roomId]);
 }
