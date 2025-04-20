@@ -1,3 +1,4 @@
+import { MatchmakingGameModes } from "../../../config";
 import type MemberMatchMaking from "../../../interfaces/games/matchMaking/MemberMatchMaking";
 import type WebSocket from "ws";
 
@@ -7,9 +8,25 @@ class MatchMakingManager {
     MemberMatchMaking
   >();
 
-  public addMember(memberId: string) {
-    const member: MemberMatchMaking = {
+  public getGameMode(gameModeString: string): MatchmakingGameModes | null {
+    const gameMode = Object.values(MatchmakingGameModes).find(
+      (mode) => mode === gameModeString,
+    );
+    if (gameMode === undefined) {
+      return null;
+    }
+    return gameMode as MatchmakingGameModes;
+  }
+
+  public addMember(memberId: string, gameMode: MatchmakingGameModes) {
+    let member = this.members.get(memberId);
+    if (member) {
+      member.gameMode = gameMode;
+      return;
+    }
+    member = {
       memberId: memberId,
+      gameMode: gameMode,
     };
     this.members.set(member.memberId, member);
   }
