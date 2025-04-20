@@ -6,7 +6,7 @@ const page: FastifyPluginAsync = async (fastify): Promise<void> => {
     const lobbies = await getPublicLobbies(fastify);
 
     const data = {
-      title: "Play Pong | Inception",
+      title: "Play Pong | ft_transcendence",
       lobbies: lobbies,
     };
 
