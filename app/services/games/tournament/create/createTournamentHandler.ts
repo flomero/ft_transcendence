@@ -1,7 +1,6 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-//import { randomUUID } from "crypto";
 import { CreateTournamentBody } from "../../../../interfaces/games/tournament/CreateTournamentBody";
-// import { canTournamentBeCreatedCheck } from "../../validationTournament/canTournamentBeCreatedCheck";
+import canTournamentBeCreatedCheck from "./canTournamentBeCreatedCheck";
 import TournamentManager from "../TournamentManager";
 
 // Store active tournaments
@@ -12,9 +11,8 @@ async function createTournamentHandler(
   reply: FastifyReply,
 ) {
   try {
-    //    const userId = request.userId;
-    //    const body = request.body;
-    request.log.info("Creating tournament");
+    const userId = request.userId;
+    canTournamentBeCreatedCheck(userId);
 
     return reply.code(201).send({ message: "Created" });
   } catch (error) {
