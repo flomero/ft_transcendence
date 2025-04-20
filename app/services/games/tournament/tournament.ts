@@ -1,20 +1,20 @@
-import type { ITournamentBracketGenerator } from "../../types/strategy/ITournamentBracketGenerator";
+import type { ITournamentBracketGenerator } from "../../../types/strategy/ITournamentBracketGenerator";
 import type {
   ITournamentMatchWinner,
   MatchData,
-} from "../../types/strategy/ITournamentMatchWinner";
-import { StrategyManager } from "../strategy/strategyManager";
-import type { GameBase } from "../games/gameBase";
+} from "../../../types/strategy/ITournamentMatchWinner";
+import { StrategyManager } from "../../strategy/strategyManager";
+import type { GameBase } from "../../games/gameBase";
 import type {
   Match,
   Round,
   TournamentRankings,
   GameResult,
-} from "../../types/strategy/ITournamentBracketGenerator";
+} from "../../../types/strategy/ITournamentBracketGenerator";
 import type {
   TournamentResults,
   PlayerResults,
-} from "../../types/tournament/tournament";
+} from "../../../types/tournament/tournament";
 
 export enum TournamentStatus {
   CREATED,
