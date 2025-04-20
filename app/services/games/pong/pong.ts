@@ -92,8 +92,12 @@ export abstract class Pong extends GameBase {
       await this.processUserInputs();
 
       // Update paddle positions
-      for (const paddle of this.gameState.paddles)
+      this.gameState.paddles.forEach((paddle, index) => {
+        this.modifierManager.trigger("onPaddleUpdate", {
+          playerId: index,
+        });
         if (paddle.velocity !== 0) this.updatePaddle(paddle, true);
+      });
 
       // Update ball positions
       for (const ball of this.gameState.balls)
@@ -155,13 +159,6 @@ export abstract class Pong extends GameBase {
     paddle.y +=
       direction * (deltaDisplacement / 100.0) * paddle.amplitude * paddle.dy;
     paddle.displacement = newDisplacement;
-
-    // After updating, trigger the modifier
-    const paddleIndex = this.gameState.paddles.indexOf(paddle);
-    if (doTriggers)
-      this.modifierManager.trigger("onPlayerMovement", {
-        playerId: paddleIndex,
-      });
   }
 
   // Process all queued user inputs
@@ -457,6 +454,7 @@ export abstract class Pong extends GameBase {
           ball.dy /= norm;
 
           this.modifierManager.trigger("onPaddleBounce", {
+            ballId: this.gameState.balls.indexOf(ball),
             playerId: collision.objectId,
           });
           break;

@@ -1,3 +1,4 @@
+import { UserInput } from "../../types/games/userInput";
 import { ConfigManager } from "./configManager";
 import type { GameBase } from "./gameBase";
 import { Pong } from "./pong/pong";
@@ -57,6 +58,7 @@ export class ModifierBase {
 
   // Triggered events
   onUpdate(game: GameBase): void {}
+  onPaddleUpdate(game: GameBase, args: { playerId: number }): void {}
 
   onActivation(game: GameBase): void {}
   onDeactivation(game: GameBase): void {}
@@ -65,7 +67,7 @@ export class ModifierBase {
 
   onGameStart(game: GameBase): void {}
 
-  onUserInput(game: GameBase): void {}
+  onUserInput(game: GameBase, args: { input: UserInput }): void {}
 
   onPowerUpSpawn(game: GameBase): void {}
   onFailedPowerUpSpawn(game: GameBase, args: { reason: string }): void {}

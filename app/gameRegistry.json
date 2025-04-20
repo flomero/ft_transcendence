@@ -15,7 +15,7 @@
         },
 
         "customizableSettings": {
-          "ballSpeedWidthPercentS": 55,
+          "ballSpeedWidthPercentS": 50,
           "ballRadius": 0.95,
           "ballResetSampler": "biasedQuadrantGaussianRA",
           "paddleCoveragePercent": 25,
@@ -96,6 +96,14 @@
       "goalReset": {
         "className": "GoalReset",
         "delayS": 2
+      },
+
+      "paddleBoost": {
+        "className": "PaddleBoost",
+        "paddleExtensionLength": 2.5,
+        "paddleExtendedSpeedMultiplierPercent": 30,
+        "paddleExtensionDurationS": 0.08,
+        "extensionVelocityTransmissionFactor": 1.2
       }
     },
 

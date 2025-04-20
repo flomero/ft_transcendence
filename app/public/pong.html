@@ -35,7 +35,7 @@
       let ratio = 0.0;
       let playerCount = 2;
 
-      const gameModeName = "multiplayerPong";
+      const gameModeName = "classicPong";
 
       if (gameModeName === "multiplayerPong") {
         canvas.width = 800;
@@ -65,11 +65,9 @@
                 powerUpCapacities: {},
               },
               modifierNames: {
-                powerUpSpawner: {},
+                paddleBoost: {},
               },
-              powerUpNames: {
-                bumper: {},
-              },
+              powerUpNames: {},
               playerCount: playerCount,
             },
           }),
@@ -97,6 +95,7 @@
 
         if (event.key === "ArrowUp") action.options.type = "UP";
         if (event.key === "ArrowDown") action.options.type = "DOWN";
+        if (event.key === " ") action.options.type = "SPACE";
 
         if (action.options.type) {
           socket.send(JSON.stringify(action));
@@ -115,6 +114,7 @@
 
         if (event.key === "ArrowUp" || event.key === "ArrowDown")
           action.options.type = "STOP";
+        if (event.key === " ") action.options.type = "STOP_SPACE";
 
         if (action.options.type) {
           socket.send(JSON.stringify(action));
