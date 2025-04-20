@@ -16,6 +16,10 @@ const root: FastifyPluginAsync = async (fastify): Promise<void> => {
   });
 
   fastify.get("/health", async () => ({ status: "ok" }));
+
+  fastify.get("/robots.txt", async (request, reply) => {
+    return reply.sendFile("robots.txt");
+  });
 };
 
 export default root;

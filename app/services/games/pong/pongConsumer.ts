@@ -2,6 +2,7 @@ import type { FastifyRequest } from "fastify";
 import type { WebSocket } from "ws";
 import { type GameBase, GameStatus } from "../gameBase";
 import { GAME_REGISTRY } from "../../../types/games/gameRegistry";
+import { PongAIOpponent } from "./pongAIOpponent";
 
 export const pongConsumer = async (
   ws: WebSocket,
@@ -9,6 +10,9 @@ export const pongConsumer = async (
 ): Promise<void> => {
   let currentGame: GameBase | null = null;
   let gameLoopInterval: NodeJS.Timeout | null = null;
+
+  let aiOpponent: PongAIOpponent | null = null;
+  let aiLoopInterval: NodeJS.Timeout | null = null;
 
   // Helper function to sleep
   const sleep = (ms: number) =>
@@ -29,6 +33,8 @@ export const pongConsumer = async (
 
       // Send the updated state to clients
       const gameState = game.getStateSnapshot();
+      // console.log(`State snapshot:`);
+      // console.dir(gameState.modifiersState);
       ws.send(
         JSON.stringify({
           type: "gameState",
@@ -42,6 +48,16 @@ export const pongConsumer = async (
 
       // if (loopCounter >= 1)
       //     break;
+    }
+  };
+
+  const startAILoop = async (game: GameBase, ai: PongAIOpponent) => {
+    if (aiLoopInterval) clearInterval(aiLoopInterval);
+
+    const sleepIntervalMs: number = 1000.0;
+    while (game.getStatus() === GameStatus.RUNNING) {
+      ai.update();
+      await sleep(sleepIntervalMs);
     }
   };
 
@@ -64,6 +80,11 @@ export const pongConsumer = async (
 
           // Create a new game instance using the concrete class
           currentGame = new GameClass(data || {});
+
+          aiOpponent = new PongAIOpponent(currentGame, {
+            playerId: 1,
+            strategyName: "improvedNaive",
+          });
 
           // Send confirmation back to client
           ws.send(
@@ -90,6 +111,8 @@ export const pongConsumer = async (
           // If game is now running, start the game loop
           if (currentGame.getStatus() === GameStatus.RUNNING) {
             startGameLoop(currentGame);
+
+            if (aiOpponent) startAILoop(currentGame, aiOpponent);
           }
 
           break;

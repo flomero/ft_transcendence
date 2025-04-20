@@ -1,4 +1,4 @@
-import { Pong } from "../../services/games/pong/pong";
+import type { Pong } from "../../services/games/pong/pong";
 
 export interface IPongBallResetSampler {
   sampleDirection(game: Pong): {

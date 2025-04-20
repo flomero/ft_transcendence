@@ -62,18 +62,15 @@ export class BlinkingBall extends TimeLimitedModifierBase {
     );
 
     this.configManager.loadComplexConfigIntoContainer(customConfig || {}, this);
-
-    console.log("BlinkingBall:");
-    console.dir(this, { depth: null });
   }
 
   onUpdate(game: Pong): void {
     super.onUpdate(game);
 
-    const gameObjects = game.getGameObjects();
-    if (!(gameObjects.balls.length > 0)) {
+    const gameState = game.getState();
+    if (!(gameState.balls.length > 0)) {
       console.log(
-        `Can't make a ball blink if there's no balls: ${gameObjects.balls}`,
+        `Can't make a ball blink if there's no balls: ${gameState.balls}`,
       );
       return;
     }
@@ -82,12 +79,12 @@ export class BlinkingBall extends TimeLimitedModifierBase {
       !this.isVisible &&
       this.ticks % this.blinkInterval < this.blinkInterval - this.blinkDuration
     ) {
-      gameObjects.balls[0].isVisible = true;
+      gameState.balls[0].isVisible = true;
       this.isVisible = true;
     }
 
     if (this.ticks % this.blinkInterval == 0) {
-      gameObjects.balls[0].isVisible = false;
+      gameState.balls[0].isVisible = false;
       this.isVisible = false;
     }
   }
@@ -95,7 +92,7 @@ export class BlinkingBall extends TimeLimitedModifierBase {
   onDeactivation(game: Pong): void {
     super.onDeactivation(game);
 
-    game.getGameObjects().balls[0].isVisible = true;
+    game.getState().balls[0].isVisible = true;
     game.getModifierManager().deletePowerUp(this);
   }
 }

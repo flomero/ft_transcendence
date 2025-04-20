@@ -1,6 +1,7 @@
 import type Handlebars from "handlebars";
 import { buttonVariants } from "./components/button";
 import { twMerge } from "tailwind-merge";
+import { format } from "date-fns";
 
 export function registerHelpers(handlebars: typeof Handlebars) {
   handlebars.registerHelper("buttonVariants", buttonVariants);
@@ -48,5 +49,31 @@ export function registerHelpers(handlebars: typeof Handlebars) {
 
   handlebars.registerHelper("isEven", (value) => value % 2 === 0);
 
+  handlebars.registerHelper("not", (value) => !value);
+
+  handlebars.registerHelper("eq", (a, b) => a === b);
+
+  handlebars.registerHelper("hrGameModeName", (value) => {
+    if (!value) return value;
+    const words = value.split(/(?=[A-Z])/);
+    const formattedString = words.join(" ");
+    return formattedString.charAt(0).toUpperCase() + formattedString.slice(1);
+  });
+
+  handlebars.registerHelper("inc", function (value, options) {
+    return parseInt(value, 10) + 1;
+  });
+
+  handlebars.registerHelper(
+    "formatDate",
+    (date: Date | string, dateFormat: string) => {
+      if (!date) return "";
+      try {
+        return format(new Date(date), dateFormat);
+      } catch (err) {
+        return "";
+      }
+    },
+  );
   // Add other helpers here as needed
 }

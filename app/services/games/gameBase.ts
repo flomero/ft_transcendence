@@ -1,4 +1,3 @@
-import { RNG } from "./rng";
 import { ModifierManager } from "./modifierManager";
 import { ConfigManager } from "./configManager";
 
@@ -9,24 +8,26 @@ export enum GameStatus {
   FINISHED,
 }
 
-export abstract class GameBase {
-  protected matchId: string = "undefined";
+export interface GameBaseState {
+  startDate: number;
+  lastUpdate: number;
+  status: GameStatus;
+}
 
-  protected lastUpdateTime: number;
-  protected startTimeMs: number;
+export abstract class GameBase {
+  protected gameBaseState: GameBaseState;
   protected serverTickrateS: number = 20;
 
-  protected status: GameStatus = GameStatus.CREATED;
-
-  protected rng: RNG;
   protected modifierManager: ModifierManager;
   protected configManager: ConfigManager;
 
   constructor(public gameData: Record<string, any>) {
-    this.lastUpdateTime = Date.now();
-    this.startTimeMs = Date.now();
+    this.gameBaseState = {
+      startDate: Date.now(),
+      lastUpdate: Date.now(),
+      status: GameStatus.CREATED,
+    };
 
-    this.rng = new RNG();
     this.modifierManager = new ModifierManager(this);
     this.configManager = new ConfigManager();
   }
@@ -36,12 +37,18 @@ export abstract class GameBase {
   startGame(): void {
     this.modifierManager.initializeModifiers();
     this.modifierManager.initializePowerUps();
+    this.gameBaseState.status = GameStatus.RUNNING;
   }
 
   getStateSnapshot(): Record<string, any> {
-    return {
-      timestamp: this.lastUpdateTime,
+    const state = {
+      startDate: this.gameBaseState.startDate,
+      lastUpdate: this.gameBaseState.lastUpdate,
+      status: this.gameBaseState.status,
+      modifiersState: this.modifierManager.getStateSnapshot(),
     };
+
+    return state;
   }
 
   abstract loadStateSnapshot(snapshot: Record<string, any>): void;
@@ -50,11 +57,11 @@ export abstract class GameBase {
 
   // Getters & Setters
   getStatus(): GameStatus {
-    return this.status;
+    return this.gameBaseState.status;
   }
 
   setStatus(status: GameStatus): void {
-    this.status = status;
+    this.gameBaseState.status = status;
   }
 
   getServerTickrateS(): number {
@@ -65,10 +72,7 @@ export abstract class GameBase {
     return this.modifierManager;
   }
 
-  getRNG(): RNG {
-    return this.rng;
-  }
-
   abstract getResults(): number[];
+  abstract getScores(): number[];
   abstract getSettings(): Record<string, any>;
 }

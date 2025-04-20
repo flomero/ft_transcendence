@@ -11,7 +11,7 @@ export class PowerUpSpawner extends TimeLimitedModifierBase {
 
   protected meanDelay: number = 0;
   protected delaySpan: number = 0;
-  protected positionSamplerStrategyManager: StrategyManager<
+  protected positionSampler: StrategyManager<
     IPongPowerUpPositionSampler,
     "samplePosition"
   >;
@@ -39,7 +39,7 @@ export class PowerUpSpawner extends TimeLimitedModifierBase {
       meanDelay: GAME_REGISTRY.pong.gameModifiers[this.name].meanDelayS,
       delaySpan: GAME_REGISTRY.pong.gameModifiers[this.name].delaySpanS,
       positionSamplerStrategyName:
-        GAME_REGISTRY.pong.gameModifiers[this.name].positionSamplerStrategyName,
+        GAME_REGISTRY.pong.gameModifiers[this.name].positionSampler,
     };
     this.configManager.loadSimpleConfigIntoContainer(defaultConfig, this);
 
@@ -47,18 +47,18 @@ export class PowerUpSpawner extends TimeLimitedModifierBase {
     if (customConfig)
       this.configManager.loadSimpleConfigIntoContainer(customConfig, this);
 
-    this.positionSamplerStrategyManager = new StrategyManager(
+    this.positionSampler = new StrategyManager(
       this.positionSamplerStrategyName,
       "pongPowerUpPositionSampler",
       "samplePosition",
     );
   }
 
-  onGameStart(game: GameBase): void {
+  onGameStart(game: Pong): void {
     this.activate(game);
   }
 
-  onActivation(game: GameBase): void {
+  onActivation(game: Pong): void {
     this.duration = game
       .getRNG()
       .randomGaussian(this.meanDelay, this.delaySpan);
@@ -68,7 +68,7 @@ export class PowerUpSpawner extends TimeLimitedModifierBase {
 
   onDeactivation(game: Pong): void {
     const sampledPosition: { x: number; y: number } =
-      this.positionSamplerStrategyManager.executeStrategy(game);
+      this.positionSampler.executeStrategy(game);
 
     const spawned = game
       .getModifierManager()

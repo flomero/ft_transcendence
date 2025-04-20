@@ -1,0 +1,40 @@
+<div class="layout mx-auto max-w-2xl p-8">
+  <div
+    class="transition-height mb-6 overflow-hidden rounded-2xl border p-6 shadow-md duration-300 ease-in-out"
+  >
+    <div class="flex flex-row gap-4">
+      <img
+        src="{{imageUrl}}"
+        alt="User Avatar"
+        class="bg-bg-muted mb-4 h-24 w-24 flex-shrink-0 rounded-full border object-cover"
+      />
+      <div class="flex min-w-0 flex-1 flex-col">
+        <p id="current-username" class="truncate text-2xl">{{userName}}</p>
+        <p class="text-fg-muted truncate text-sm"># {{userId}}</p>
+        <div class="mt-4 space-y-2">
+          {{#if showFriendButton}}
+            {{#unless isBlocked}}
+              {{> components/user/friendbutton userId=userId showText=showText}}
+            {{/unless}}
+            {{> components/user/blockbutton userId=userId showText=showText isBlocked=isBlocked}}
+          {{/if}}
+          {{#if requestSent}}
+            {{> components/user/friendsent}}
+          {{/if}}
+          {{#if showRemoveButton}}
+            {{>  components/user/removefriendbutton userId=userId showText=showText}}
+          {{/if}}
+          {{#if showRequestButtons}}
+            {{> components/user/requestButtons userId=userId showText=showText}}
+          {{/if}}
+        </div>
+      </div>
+    </div>
+  </div>
+  {{> components/match-history/match-history matches=matches}}
+</div>
+
+<script type="module" src="/public/js/profile.js">
+</script>
+<script type="module" src="/public/js/friends.js">
+</script>

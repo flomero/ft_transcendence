@@ -19,22 +19,16 @@ export class StrategyManager<T, K extends keyof T> {
    * @param initialStrategyName The name of the initial strategy (as defined in the registry).
    * @param strategyTypeName The key in STRATEGY_REGISTRY for this strategy type.
    * @param defaultMethod The method name on the strategy that is its primary "purpose" (e.g. "samplePosition").
+   * @param initialStrategyArgs Optional arguments to be passed to the initial strategy's constructor.
    */
   constructor(
     initialStrategyName: string,
     strategyTypeName: string,
     defaultMethod: K,
+    initialStrategyArgs: any[] = [],
   ) {
     this.strategyTypeName = strategyTypeName;
     this.defaultMethod = defaultMethod;
-
-    console.log("StrategyManager received:");
-    console.dir(initialStrategyName, { depth: null });
-    console.dir(strategyTypeName, { depth: null });
-    console.dir(defaultMethod, { depth: null });
-
-    console.log("\nRegistry");
-    console.dir(STRATEGY_REGISTRY, { depth: null });
 
     const strategyClass =
       STRATEGY_REGISTRY[strategyTypeName]?.[initialStrategyName].class;
@@ -44,7 +38,9 @@ export class StrategyManager<T, K extends keyof T> {
       );
     }
 
-    this.loadedStrategies[initialStrategyName] = new strategyClass();
+    this.loadedStrategies[initialStrategyName] = new strategyClass(
+      ...initialStrategyArgs,
+    );
     this.currentStrategy = initialStrategyName;
   }
 
@@ -61,8 +57,9 @@ export class StrategyManager<T, K extends keyof T> {
    * instantiates it, and replaces the current strategy.
    *
    * @param strategyName The name of the strategy (as defined in the registry).
+   * @param args Optional arguments to be passed to the strategy's constructor if a new instance is created.
    */
-  public setStrategy(strategyName: string): void {
+  public setStrategy(strategyName: string, args: any[] = []): void {
     const strategy = this.loadedStrategies[strategyName];
     if (strategy) {
       this.currentStrategy = strategyName;
@@ -82,7 +79,7 @@ export class StrategyManager<T, K extends keyof T> {
       );
     }
 
-    this.loadedStrategies[strategyName] = new strategyClass();
+    this.loadedStrategies[strategyName] = new strategyClass(...args);
     this.currentStrategy = strategyName;
   }
 
@@ -103,6 +100,27 @@ export class StrategyManager<T, K extends keyof T> {
     if (typeof method !== "function") {
       throw new Error(
         `The default method ${String(this.defaultMethod)} is not a function`,
+      );
+    }
+    return method.apply(this.loadedStrategies[this.currentStrategy], args);
+  }
+
+  /**
+   * Executes a specified method on the current strategy.
+   *
+   * @template M - The key of T that represents the method to be executed.
+   * @param methodName - The name of the method to execute.
+   * @param args - Arguments required by the specified method.
+   * @returns The result of calling the specified method.
+   */
+  public execute<M extends keyof T>(
+    methodName: M,
+    ...args: T[M] extends (...args: infer A) => any ? A : never
+  ): T[M] extends (...args: any[]) => infer R ? R : never {
+    const method = this.loadedStrategies[this.currentStrategy][methodName];
+    if (typeof method !== "function") {
+      throw new Error(
+        `The method ${String(methodName)} is not a function on the current strategy`,
       );
     }
     return method.apply(this.loadedStrategies[this.currentStrategy], args);

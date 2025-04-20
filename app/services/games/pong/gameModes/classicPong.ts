@@ -39,15 +39,21 @@ export class ClassicPong extends Pong {
         registry.customizableSettings.ballSpeedWidthPercentS,
       ballRadius:
         customConfig.ballRadius || registry.customizableSettings.ballRadius,
-      ballResetSamplerStrategyName:
-        customConfig.ballResetSamplerStrategyName ||
-        registry.customizableSettings.ballResetSamplerStrategyName,
+      ballResetSampler:
+        customConfig.ballResetSampler ||
+        registry.customizableSettings.ballResetSampler,
       paddleCoveragePercent:
         customConfig.paddleCoveragePercent ||
         registry.customizableSettings.paddleCoveragePercent,
       paddleSpeedWidthPercentS:
         customConfig.paddleSpeedWidthPercentS ||
         registry.customizableSettings.paddleSpeedWidthPercentS,
+      paddleVelocityAngularTransmissionPercent:
+        customConfig.paddleVelocityAngularTransmissionPercent ||
+        registry.customizableSettings.paddleVelocityAngularTransmissionPercent,
+      paddleVelocitySpeedTransmissionPercent:
+        customConfig.paddleVelocitySpeedTransmissionPercent ||
+        registry.customizableSettings.paddleVelocitySpeedTransmissionPercent,
       powerUpRadius:
         customConfig.powerUpRadius ||
         registry.customizableSettings.powerUpRadius,
@@ -68,7 +74,7 @@ export class ClassicPong extends Pong {
     console.dir(this.settings, { depth: null });
 
     this.ballResetSampler = new StrategyManager(
-      this.settings.ballResetSamplerStrategyName,
+      this.settings.ballResetSampler,
       "pongBallResetSampler",
       "sampleDirection",
     );
@@ -76,7 +82,8 @@ export class ClassicPong extends Pong {
     // Initializing GameObjects
     this.initPaddles();
     this.initWalls();
-    this.resetBall();
+
+    this.resetBall(this.gameState, -1, true);
   }
 
   startGame(): void {
@@ -84,9 +91,9 @@ export class ClassicPong extends Pong {
     super.startGame();
     console.log("Game Started");
 
-    console.log(`Balls: ${this.gameObjects.balls.length}`);
-    console.log(`Paddles: ${this.gameObjects.paddles.length}`);
-    console.log(`Walls: ${this.gameObjects.walls.length}`);
+    console.log(`Balls: ${this.gameState.balls.length}`);
+    console.log(`Paddles: ${this.gameState.paddles.length}`);
+    console.log(`Walls: ${this.gameState.walls.length}`);
   }
 
   initPaddles(): void {
@@ -95,6 +102,7 @@ export class ClassicPong extends Pong {
 
     // Calculate the coverage percentage (0 to 1)
     const coverage = this.settings.paddleCoveragePercent / 100.0;
+    const maxDisplacement = (100 - this.settings.paddleCoveragePercent) / 2.0;
 
     // Calculate actual paddle width based on amplitude and coverage
     const paddleWidth = paddleAmplitude * coverage;
@@ -102,7 +110,7 @@ export class ClassicPong extends Pong {
     // paddleSpeed is percentage of width per second (independent of tickrate)
     const paddleSpeedPercent = this.settings.paddleSpeedWidthPercentS / 100.0;
 
-    this.gameObjects.paddles = [
+    this.gameState.paddles = [
       // LEFT PADDLE
       {
         doCollision: true,
@@ -125,6 +133,7 @@ export class ClassicPong extends Pong {
         displacement: 0.0,
         doMove: true,
         isVisible: true,
+        maxDisplacement: maxDisplacement,
       } as Paddle,
 
       // RIGHT PADDLE
@@ -155,12 +164,13 @@ export class ClassicPong extends Pong {
         displacement: 0.0,
         doMove: true,
         isVisible: true,
+        maxDisplacement: maxDisplacement,
       } as Paddle,
     ];
   }
 
   initWalls(): void {
-    this.gameObjects.walls = [
+    this.gameState.walls = [
       // LEFT WALL
       {
         doCollision: true,
@@ -239,7 +249,11 @@ export class ClassicPong extends Pong {
     ];
   }
 
-  resetBall(ballId: number = -1): void {
+  resetBall(
+    gameState: Record<string, any>,
+    ballId: number,
+    doTriggers: boolean,
+  ): void {
     const sampledDirection = this.ballResetSampler.executeStrategy(this);
 
     const ca = Math.cos(sampledDirection.angularDirection);
@@ -250,7 +264,7 @@ export class ClassicPong extends Pong {
 
     if (ballId < 0) {
       // Reset all balls
-      this.gameObjects.balls = [
+      gameState.balls = [
         {
           id: 0,
           x: x,
@@ -266,7 +280,7 @@ export class ClassicPong extends Pong {
       ];
     } else {
       // Find the ball by ID and update it
-      this.gameObjects.balls[ballId] = {
+      gameState.balls[ballId] = {
         id: ballId,
         x: x,
         y: y,
@@ -279,11 +293,12 @@ export class ClassicPong extends Pong {
         doGoal: true,
       };
     }
+
+    if (doTriggers) this.modifierManager.trigger("onBallReset");
   }
 
   isOutOfBounds(ball: Ball): boolean {
-    const tolerance: number =
-      this.settings.wallsHeight + this.settings.paddleOffset;
+    const tolerance: number = -this.settings.wallsHeight / 3.0;
 
     return (
       ball.x <= -tolerance ||
@@ -294,8 +309,8 @@ export class ClassicPong extends Pong {
   }
 
   getResults(): number[] {
-    const p1result: number =
-      this.extraGameData.scores[0] > this.extraGameData.scores[1] ? 1 : 2;
+    const scores = this.gameState.scores;
+    const p1result: number = scores[0] > scores[1] ? 1 : 2;
     const p2result: number = (p1result % 2) + 1;
 
     return [p1result, p2result];
@@ -303,5 +318,9 @@ export class ClassicPong extends Pong {
 
   getSettings(): GameModeCombinedSettings {
     return this.settings;
+  }
+
+  getScores(): number[] {
+    return this.gameState.scores;
   }
 }
