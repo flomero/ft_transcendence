@@ -1,5 +1,6 @@
 export enum MatchmakingGameModes {
   ClassicPong = "classicPong",
+  SpeedBoostClassicPong = "speedBoostClassicPong",
 }
 
 export enum LobbyGameModes {
@@ -20,6 +21,20 @@ export const GAMEMODE_REGISTRY = {
       scoredGame: {},
     },
     powerUpNames: {},
+    playerCount: 2,
+  },
+  speedBoostClassicPong: {
+    gameName: "pong",
+    gameModeName: "classicPong",
+    gameModeConfig: {},
+    modifierNames: {
+      scoredGame: {},
+      timedGame: {},
+      powerUpSpawner: {},
+    },
+    powerUpNames: {
+      speedBoost: {},
+    },
     playerCount: 2,
   },
 };
