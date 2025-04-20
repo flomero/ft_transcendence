@@ -6,7 +6,7 @@ import TournamentManager from "../TournamentManager";
 // Store active tournaments
 export const tournaments = new Map<string, TournamentManager>();
 
-async function createTournamentHandler(
+async function newTournamentHandler(
   request: FastifyRequest<{ Body: CreateTournamentBody }>,
   reply: FastifyReply,
 ) {
@@ -23,4 +23,4 @@ async function createTournamentHandler(
   }
 }
 
-export default createTournamentHandler;
+export default newTournamentHandler;
