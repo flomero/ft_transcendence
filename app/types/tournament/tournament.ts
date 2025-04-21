@@ -12,6 +12,8 @@ export type TournamentResults = {
 export interface Player {
   id: string;
   name: string;
+  score?: number; // Optional score for the player
+  results?: number[]; // Optional results for the player
 }
 
 export interface Match {

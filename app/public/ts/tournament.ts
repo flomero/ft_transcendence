@@ -49,7 +49,11 @@ class TournamentBracket {
 
       currentMatches.forEach((match, i) => {
         const target = nextMatches[Math.floor(i / 2)];
-        list.push([match.id, target.id]); // no offset (defaults to 0)
+        if (match.id && target.id) {
+          list.push([match.id, target.id]); // no offset (defaults to 0)
+        } else {
+          console.error("Match or target ID is undefined", { match, target });
+        }
       });
     }
     return list;

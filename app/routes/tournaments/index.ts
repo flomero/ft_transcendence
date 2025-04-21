@@ -17,67 +17,29 @@ const profile: FastifyPluginAsync = async (fastify) => {
           {
             name: "Match 1",
             players: [
-              { id: "1", name: "Player A" },
-              { id: "2", name: "Player B" },
+              { id: "1", name: "Alice", score: 15 },
+              { id: "2", name: "Bob", score: 10 },
             ],
           },
           {
+            name: "Match 2",
             players: [
-              { id: "3", name: "Player C" },
-              { id: "4", name: "Player D" },
+              { id: "3", name: "Charlie", score: 20 },
+              { id: "4", name: "David", score: 5 },
             ],
           },
           {
+            name: "Match 3",
             players: [
-              { id: "5", name: "Player E" },
-              { id: "6", name: "Player F" },
+              { id: "5", name: "Eve", score: 18 },
+              { id: "6", name: "Frank", score: 12 },
             ],
           },
           {
+            name: "Match 4",
             players: [
-              { id: "7", name: "Player G" },
-              { id: "8", name: "Player H" },
-            ],
-          },
-          {
-            players: [
-              { id: "7", name: "Player G" },
-              { id: "8", name: "Player H" },
-            ],
-          },
-          {
-            players: [
-              { id: "7", name: "Player G" },
-              { id: "8", name: "Player H" },
-            ],
-          },
-        ],
-      },
-      {
-        name: "Quarterfinals",
-        matches: [
-          {
-            players: [
-              { id: "9", name: "Winner 1" },
-              { id: "10", name: "Winner 2" },
-            ],
-          },
-          {
-            players: [
-              { id: "11", name: "Winner 3" },
-              { id: "12", name: "Winner 4" },
-            ],
-          },
-          {
-            players: [
-              { id: "11", name: "Winner 3" },
-              { id: "12", name: "Winner 4" },
-            ],
-          },
-          {
-            players: [
-              { id: "11", name: "Winner 3" },
-              { id: "12", name: "Winner 4" },
+              { id: "7", name: "Grace", score: 25 },
+              { id: "8", name: "Hank", score: 8 },
             ],
           },
         ],
@@ -86,15 +48,29 @@ const profile: FastifyPluginAsync = async (fastify) => {
         name: "Semifinals",
         matches: [
           {
+            name: "Match 1",
             players: [
-              { id: "13", name: "Winner QF‑1" },
-              { id: "14", name: "Winner QF‑2" },
+              { id: "1", name: "Alice", score: 22 },
+              { id: "3", name: "Charlie", score: 18 },
             ],
           },
           {
+            name: "Match 2",
             players: [
-              { id: "13", name: "Winner QF‑1" },
-              { id: "14", name: "Winner QF‑2" },
+              { id: "5", name: "Eve", score: 20 },
+              { id: "7", name: "Grace", score: 15 },
+            ],
+          },
+        ],
+      },
+      {
+        name: "Finals",
+        matches: [
+          {
+            name: "Match 1",
+            players: [
+              { id: "1", name: "Alice", score: 30 },
+              { id: "5", name: "Eve", score: 25 },
             ],
           },
         ],
