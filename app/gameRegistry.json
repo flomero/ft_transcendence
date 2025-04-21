@@ -103,7 +103,8 @@
         "paddleExtensionLength": 2.5,
         "paddleExtendedSpeedMultiplierPercent": 30,
         "paddleExtensionDurationS": 0.08,
-        "extensionVelocityTransmissionFactor": 1.2
+        "paddleRetractionDurationS": 0.12,
+        "extensionVelocityTransmissionFactor": 1.1
       }
     },
 

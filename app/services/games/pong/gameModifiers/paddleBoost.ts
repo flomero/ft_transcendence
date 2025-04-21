@@ -30,6 +30,7 @@ export class PaddleBoost extends PongModifierBase {
   protected paddlesInfos: PaddleInfos[] = [];
   protected paddleExtensionLength: number = 0;
   protected paddleExtensionVelocity: number = 0;
+  protected paddleRetractionVelocity: number = 0;
   protected extensionVelocityTransmissionFactor: number = 0;
 
   constructor(customConfig?: Record<string, any>) {
@@ -59,7 +60,7 @@ export class PaddleBoost extends PongModifierBase {
       "paddleExtensionVelocity",
       (_, context) => {
         // 100 % displacement -> paddleExtensionLength
-        //   -> In paddleExtensionDuration ticks
+        //   -> In paddleExtensionDurationS ticks
         // -----------
         // In 1 tick -> paddleExtensionVelocity displacement
         const paddleExtensionDurationS =
@@ -67,6 +68,23 @@ export class PaddleBoost extends PongModifierBase {
           defaultRegistry.paddleExtensionDurationS;
 
         return serverTickrateS / (paddleExtensionDurationS * 100);
+      },
+      undefined,
+      ["paddleExtensionLength"],
+    );
+
+    this.configManager.registerPropertyConfig(
+      "paddleRetractionVelocity",
+      (_, context) => {
+        // 100 % displacement -> paddleExtensionLength
+        //   -> In paddleRetractionDurationS ticks
+        // -----------
+        // In 1 tick -> paddleRetractionVelocity displacement
+        const paddleRetractionDurationS =
+          context.paddleRetractionVelocity ||
+          defaultRegistry.paddleRetractionDurationS;
+
+        return serverTickrateS / (paddleRetractionDurationS * 100);
       },
       undefined,
       ["paddleExtensionLength"],
@@ -195,7 +213,7 @@ export class PaddleBoost extends PongModifierBase {
         // Block normal movement during extension
         paddle.speed = paddleInfos.initialVelocity;
         paddle.velocity = 0; // Force stop regular movement
-        this.movePaddle(paddle, paddleInfos, 1);
+        this.movePaddle(paddle, paddleInfos, 1, this.paddleExtensionVelocity);
 
         if (paddleInfos.displacement === this.maxDisplacement) {
           this.transitionAnimation(paddleInfos, AnimationStatus.EXTENDED);
@@ -211,7 +229,7 @@ export class PaddleBoost extends PongModifierBase {
         // Block normal movement during retraction
         paddle.speed = paddleInfos.initialVelocity;
         paddle.velocity = 0; // Force stop regular movement
-        this.movePaddle(paddle, paddleInfos, -1);
+        this.movePaddle(paddle, paddleInfos, -1, this.paddleRetractionVelocity);
 
         if (paddleInfos.displacement === -this.maxDisplacement) {
           this.transitionAnimation(paddleInfos, AnimationStatus.IDLE);
@@ -312,9 +330,9 @@ export class PaddleBoost extends PongModifierBase {
     paddle: Paddle,
     paddleInfos: PaddleInfos,
     direction: number,
+    velocity: number,
   ) {
-    let newDisplacement =
-      paddleInfos.displacement + direction * this.paddleExtensionVelocity;
+    let newDisplacement = paddleInfos.displacement + direction * velocity;
     newDisplacement = Math.max(
       -this.maxDisplacement,
       Math.min(newDisplacement, this.maxDisplacement),
