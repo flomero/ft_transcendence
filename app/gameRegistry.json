@@ -36,8 +36,8 @@
       "multiplayerPong": {
         "className": "MultiplayerPong",
         "fixedSettings": {
-          "arenaWidth": 200,
-          "arenaHeight": 200,
+          "arenaWidth": 150,
+          "arenaHeight": 150,
           "paddleOffset": 2.5,
           "paddleHeight": 1,
           "wallsHeight": 2,
@@ -50,6 +50,8 @@
           "ballResetSampler": "biasedGaussianCA",
           "paddleCoveragePercent": 20,
           "paddleSpeedWidthPercentS": 150,
+          "paddleVelocityAngularTransmissionPercent": 18,
+          "paddleVelocitySpeedTransmissionPercent": 8,
           "powerUpRadius": 10,
           "powerUpCapacities": {
             "speedBoost": 1,
@@ -86,7 +88,7 @@
 
       "elimination": {
         "className": "Elimination",
-        "threshold": 1
+        "threshold": 3
       },
 
       "arenaShrink": {

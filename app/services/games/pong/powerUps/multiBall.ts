@@ -7,11 +7,11 @@ import type { Ball } from "../../../../types/games/pong/ball";
 export class MultiBall extends TimeLimitedModifierBase {
   name = "multiBall";
 
-  protected spawnedBall: Ball[] = [];
+  protected spawnedBall: number[] = [];
 
   protected ballCount: number = 0;
   protected totalAngle: number = 0;
-  protected radiusFactor: number = 100;
+  protected radiusFactor: number = 0;
 
   constructor(customConfig?: Record<string, any>) {
     super();
@@ -97,10 +97,11 @@ export class MultiBall extends TimeLimitedModifierBase {
     angles.forEach((angle, index) => {
       if (index === rndBallID) return;
 
+      const ballID = game.getState().balls.length;
       const ca = Math.cos(angle);
       const sa = Math.sin(angle);
       const ball: Ball = {
-        id: game.getState().balls.length,
+        id: ballID,
         x: mainBall.x,
         y: mainBall.y,
         dx: ca,
@@ -112,8 +113,8 @@ export class MultiBall extends TimeLimitedModifierBase {
         doGoal: false,
       };
 
+      this.spawnedBall.push(ballID);
       game.getState().balls.push(ball);
-      this.spawnedBall.push(ball);
     });
 
     game.getState().balls[0].dx = Math.cos(angles[rndBallID]);
@@ -121,12 +122,13 @@ export class MultiBall extends TimeLimitedModifierBase {
   }
 
   onDeactivation(game: Pong): void {
-    game.getModifierManager().deletePowerUp(this);
-    this.spawnedBall.forEach((ball) => {
-      const ballID = game.getState().balls.indexOf(ball);
-      if (ballID < 0) return;
-      game.getState().balls.splice(ballID, 1);
+    this.spawnedBall.forEach((ballID) => {
+      const arrayID = game
+        .getState()
+        .balls.findIndex((ball) => ball.id === ballID);
+      if (arrayID >= 0) game.getState().balls.splice(arrayID, 1);
     });
+    game.getModifierManager().deletePowerUp(this);
   }
 
   onGoal(game: Pong, args: { playerId: number }): void {
