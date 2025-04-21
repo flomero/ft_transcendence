@@ -1,0 +1,9 @@
+<div class="flex flex-col divide-y divide-bg-muted mt-4">
+	{{#each blockedUsers}}
+		{{> components/user/card userId=userId userName=userName imageUrl=imageUrl showBlockButton="true" showText="true" isBlocked="true"}}
+	{{else}}
+		<div class="gap-2 flex flex-col justify-center items-center">
+			<p>You did not block any users.</p>
+		</div>
+	{{/each}}
+</div>
