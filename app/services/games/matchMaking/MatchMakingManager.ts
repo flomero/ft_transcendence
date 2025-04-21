@@ -1,3 +1,4 @@
+import { MatchmakingGameModes } from "../../../config";
 import type MemberMatchMaking from "../../../interfaces/games/matchMaking/MemberMatchMaking";
 import type WebSocket from "ws";
 
@@ -7,20 +8,22 @@ class MatchMakingManager {
     MemberMatchMaking
   >();
 
-  public addMember(memberId: string) {
-    const member: MemberMatchMaking = {
+  public addMember(memberId: string, gameMode: MatchmakingGameModes) {
+    let member = this.members.get(memberId);
+    if (member) {
+      member.gameMode = gameMode;
+      return;
+    }
+    member = {
       memberId: memberId,
+      gameMode: gameMode,
     };
     this.members.set(member.memberId, member);
   }
 
   public removeMemberSocket(memberId: string) {
     const member = this.members.get(memberId);
-    if (member === undefined) {
-      throw new Error(
-        `[ removeMemberSocket ] Member with id ${memberId} not found`,
-      );
-    }
+    if (member === undefined) return;
     member.socket?.close();
     member.socket = undefined;
   }
@@ -29,51 +32,15 @@ class MatchMakingManager {
     return this.members.has(memberId);
   }
 
-  public getLastTwoMember(): MemberMatchMaking[] {
-    if (this.members.size <= 1)
-      throw new Error(
-        "[ getLastTwoMember ] Less than two members in the match making",
-      );
-    const members = Array.from(this.members.values());
-    return members.slice(-2);
-  }
-
   public sendMessageToMember(memberId: string, message: string): void {
     const member = this.members.get(memberId);
-    if (member === undefined) {
-      throw new Error(
-        `[ sendMessageToMember ] Member with id ${memberId} not found`,
-      );
-    }
-    if (member.socket === undefined) {
-      throw new Error(
-        `[ sendMessageToMember ] Member with id ${memberId} has no socket`,
-      );
-    }
+    if (!member) return;
+    if (!member.socket) return;
     member.socket.send(message);
   }
 
-  public closeSocketConnectionOfLastTwoMembers(): void {
-    if (this.members.size <= 1)
-      throw new Error(
-        "[ closeSocketConnectionOfLastTwoMembers ] Less than two members in the match making",
-      );
-    const members = Array.from(this.members.values()).slice(-2);
-    if (members[0].socket !== undefined) members[0].socket.close();
-    if (members[1].socket !== undefined) members[1].socket.close();
-  }
-
-  public removeLastTwoMembers(): void {
-    if (this.members.size <= 1)
-      throw new Error(
-        "[ removeLastTwoMembers ] Less than two members in the match making",
-      );
-    const members = Array.from(this.members.values()).slice(-2);
-    this.members.delete(members[0].memberId);
-    this.members.delete(members[1].memberId);
-  }
-
   public removeMember(memberId: string) {
+    this.removeMemberSocket(memberId);
     if (this.members.has(memberId) === false) {
       throw new Error(`[ removeMember ] Member with id ${memberId} not found`);
     }
@@ -93,6 +60,29 @@ class MatchMakingManager {
     }
     member.socket = socket;
   }
+
+  public getAllMembers(): MemberMatchMaking[] {
+    return Array.from(this.members.values());
+  }
 }
 
 export default MatchMakingManager;
+
+export const matchMakingManager = new MatchMakingManager();
+
+/**
+ * Check if a user is in match making
+ * @param userId
+ * @returns {MatchmakingGameModes | null} The game mode if the user is in match making, null otherwise
+ */
+export const isUserInMatchMaking = (
+  userId: string,
+): MatchmakingGameModes | null => {
+  const member = matchMakingManager
+    .getAllMembers()
+    .find((member) => member.memberId === userId);
+  if (member) {
+    return member.gameMode;
+  }
+  return null;
+};

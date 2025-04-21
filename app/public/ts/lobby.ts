@@ -46,7 +46,7 @@ class LobbyHandler {
     };
 
     this.socket.onerror = (error) => {
-      // console.error("Lobby WebSocket error:", error);
+      window.router.refresh();
     };
   }
 
@@ -115,6 +115,9 @@ class LobbyHandler {
       }
       return true;
     } catch (error) {
+      if (error instanceof Error) {
+        this.handleError(error);
+      }
       return false;
     }
   }
@@ -141,12 +144,15 @@ class LobbyHandler {
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to start lobby: ${response.statusText}`);
+        throw new Error(`Failed to start game: ${response.statusText}`);
       }
+
       const data = await response.json();
       console.log("Lobby started, game ID:", data.gameId);
     } catch (error) {
-      console.error("Error starting lobby:", error);
+      this.handleError(
+        new Error("Failed to start game. Please try again later."),
+      );
     }
   }
 
@@ -166,12 +172,22 @@ class LobbyHandler {
 
       window.router.navigateTo("/play");
     } catch (error) {
-      console.error("Error leaving lobby:", error);
+      this.handleError(
+        new Error("Failed to leave lobby. Please try again later."),
+      );
     }
   }
 
   private refreshLobby(): void {
     window.router.refresh(); // TODO: maybe make better
+  }
+
+  private handleError(error: Error): void {
+    const errorEl = document.getElementById("lobby-error");
+    if (errorEl) {
+      errorEl.textContent = error.message;
+      errorEl.style.display = "block";
+    }
   }
 }
 
