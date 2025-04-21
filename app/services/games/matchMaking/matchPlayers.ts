@@ -1,4 +1,4 @@
-import { matchMakingManager } from "./join/joinMatchMakingHandler";
+import { matchMakingManager } from "./MatchMakingManager";
 import { createMatch } from "./createMatch";
 import type { Database } from "sqlite";
 import { GAMEMODE_REGISTRY, MatchmakingGameModes } from "../../../config";

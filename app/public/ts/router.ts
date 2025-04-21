@@ -171,19 +171,14 @@ class Router {
   }
 
   async loadRoute(path: string): Promise<void> {
-    if (this.isInitialLoad) {
-      this.isInitialLoad = false;
-      this.currentPath = path;
-      this.updateActiveLinks(path);
-      await this.runEnterHandler(path);
-      return;
-    }
-
     this.showLoader();
 
     try {
-      await this.runExitHandler();
+      if (!this.isInitialLoad) {
+        await this.runExitHandler();
+      }
 
+      // Set current path initially
       this.currentPath = path;
 
       await this.transitionManager.transition(async () => {
@@ -202,18 +197,24 @@ class Router {
         if (html) {
           this.contentContainer.innerHTML = html;
           this.executeScripts();
-          this.updateActiveLinks(path);
+          this.updateActiveLinks(this.currentPath); // Use this.currentPath which may have been updated during redirection
           window.scrollTo(0, 0);
 
-          await this.runEnterHandler(path);
+          // Get the updated route handler for the possibly changed path
+          const finalMatchedRoute = this.findMatchingRoute(this.currentPath);
+          if (finalMatchedRoute?.handler?.onEnter) {
+            await finalMatchedRoute.handler.onEnter();
+          }
 
           document.dispatchEvent(
             new CustomEvent("contentLoaded", {
-              detail: { path },
+              detail: { path: this.currentPath }, // Use updated path
             }),
           );
         }
       });
+
+      this.isInitialLoad = false;
     } catch (error) {
       console.error("Error loading route:", error);
     } finally {
@@ -234,16 +235,16 @@ class Router {
     }
   }
 
-  private async runEnterHandler(path: string): Promise<void> {
-    const matchedRoute = this.findMatchingRoute(path);
-    if (matchedRoute?.handler?.onEnter) {
-      try {
-        await matchedRoute.handler.onEnter();
-      } catch (error) {
-        console.error("Error in route enter handler:", error);
-      }
-    }
-  }
+  // private async runEnterHandler(path: string): Promise<void> {
+  //   const matchedRoute = this.findMatchingRoute(path);
+  //   if (matchedRoute?.handler?.onEnter) {
+  //     try {
+  //       await matchedRoute.handler.onEnter();
+  //     } catch (error) {
+  //       console.error("Error in route enter handler:", error);
+  //     }
+  //   }
+  // }
 
   async fetchContent(path: string): Promise<string | null> {
     try {
@@ -263,20 +264,25 @@ class Router {
         document.title = pageTitle;
       }
 
+      let redirectedPath = path;
+      let needsRedirect = false;
+
       const redirectPath = response.headers.get("X-SPA-Redirect");
       if (redirectPath) {
         console.log("Custom redirect to:", redirectPath);
         window.history.replaceState({}, "", redirectPath);
         this.updateActiveLinks(redirectPath);
-        return await this.fetchContent(redirectPath);
+        redirectedPath = redirectPath;
+        needsRedirect = true;
       }
 
       if (response.redirected) {
         const redirectUrl = new URL(response.url);
-        const redirectPath = redirectUrl.pathname;
-        console.log("Redirected to:", redirectPath);
-        window.history.replaceState({}, "", redirectPath);
-        this.updateActiveLinks(redirectPath);
+        redirectedPath = redirectUrl.pathname;
+        console.log("Redirected to:", redirectedPath);
+        window.history.replaceState({}, "", redirectedPath);
+        this.updateActiveLinks(redirectedPath);
+        needsRedirect = true;
       }
 
       const contentType = response.headers.get("content-type");
@@ -286,11 +292,16 @@ class Router {
           console.log("JSON redirect to:", data.redirectTo);
           window.history.replaceState({}, "", data.redirectTo);
           this.updateActiveLinks(data.redirectTo);
-          // Instead of returning the JSON response content, fetch the new route's content
-          return await this.fetchContent(data.redirectTo);
+          redirectedPath = data.redirectTo;
+          needsRedirect = true;
+        } else {
+          return `<pre>${JSON.stringify(data, null, 2)}</pre>`;
         }
-        // Only for JSON responses that are actually meant to be displayed
-        return `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+      }
+
+      if (needsRedirect) {
+        this.currentPath = redirectedPath;
+        return await this.fetchContent(redirectedPath);
       }
 
       return await response.text();

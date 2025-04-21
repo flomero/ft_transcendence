@@ -67,3 +67,22 @@ class MatchMakingManager {
 }
 
 export default MatchMakingManager;
+
+export const matchMakingManager = new MatchMakingManager();
+
+/**
+ * Check if a user is in match making
+ * @param userId
+ * @returns {MatchmakingGameModes | null} The game mode if the user is in match making, null otherwise
+ */
+export const isUserInMatchMaking = (
+  userId: string,
+): MatchmakingGameModes | null => {
+  const member = matchMakingManager
+    .getAllMembers()
+    .find((member) => member.memberId === userId);
+  if (member) {
+    return member.gameMode;
+  }
+  return null;
+};

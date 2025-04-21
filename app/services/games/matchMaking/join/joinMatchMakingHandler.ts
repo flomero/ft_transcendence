@@ -1,8 +1,6 @@
 import { gameModeFromString } from "../../../config/gameModes";
-import MatchMakingManager from "../MatchMakingManager";
+import { matchMakingManager } from "../MatchMakingManager";
 import type { FastifyRequest, FastifyReply } from "fastify";
-
-export const matchMakingManager = new MatchMakingManager();
 
 const joinMatchMakingHandler = async (
   request: FastifyRequest<{ Params: { gameMode: string } }>,

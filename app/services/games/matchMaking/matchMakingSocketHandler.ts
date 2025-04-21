@@ -1,6 +1,6 @@
 import type { FastifyRequest } from "fastify";
 import type { WebSocket } from "ws";
-import { matchMakingManager } from "./join/joinMatchMakingHandler";
+import { matchMakingManager } from "./MatchMakingManager";
 import matchPlayers from "./matchPlayers";
 
 const matchMakingSocketHandler = async (
