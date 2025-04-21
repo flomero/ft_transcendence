@@ -1,28 +1,11 @@
 // routes/profile.ts
 import type { FastifyPluginAsync } from "fastify";
+import { Edge, Round } from "../../types/tournament/tournament";
 
 interface BracketQuery {
   auto?: string; // "true" | "false" | (undefined → default)
   partial?: string; // "true" | "false" | (undefined → default)
 }
-
-interface Player {
-  id: string;
-  name: string;
-}
-
-interface Match {
-  players: Player[];
-  id?: string; // Assigned dynamically
-  name?: string; // Optional name for the match
-}
-
-interface Round {
-  name: string;
-  matches: Match[];
-}
-
-type Edge = [string, string] | [string, string, number];
 
 const profile: FastifyPluginAsync = async (fastify) => {
   fastify.get<{ Querystring: BracketQuery }>("/", async (request, reply) => {

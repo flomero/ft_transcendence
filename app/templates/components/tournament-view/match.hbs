@@ -5,9 +5,5 @@
     <div class="player">
       {{player.name}}
     </div>
-    {{!-- Add "vs" only if it's not the last player --}}
-    {{#if (lt index (dec (length ../players)))}}
-      <div class="vs text-center">vs</div>
-    {{/if}}
   {{/each}}
 </div>

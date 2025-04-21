@@ -1,21 +1,8 @@
+import { Edge, Round } from "../../types/tournament/tournament";
+
 export {};
 
-type Player = { id: string; name: string };
-
-type Match = {
-  id: string;
-  name?: string;
-  players: Player[];
-};
-
-type Round = {
-  name: string;
-  matches: Match[];
-};
-
 type Rounds = Round[];
-
-type Edge = [string, string] | [string, string, number];
 
 type Connections =
   | { auto: true; edges: never[] }
