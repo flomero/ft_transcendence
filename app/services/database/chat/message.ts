@@ -6,8 +6,15 @@ export async function saveMessage(
   roomId: number,
   userId: string,
   message: string,
-  type: ChatMessageType = ChatMessageType.text,
+  type: ChatMessageType,
 ): Promise<void> {
+  fastify.log.info(
+    "Saving message %s from user %s in room %s with type %s",
+    message,
+    userId,
+    roomId,
+    type,
+  );
   const sql =
     "INSERT INTO messages (room_id, sender_id, message, type) VALUES (?, ?, ?, ?)";
   await fastify.sqlite.run(sql, [roomId, userId, message, type]);

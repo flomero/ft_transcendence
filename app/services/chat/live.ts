@@ -49,7 +49,7 @@ async function updateOnlineStatus(fastify: FastifyInstance, userId: string) {
 
 interface ChatWebSocketResponse {
   type: "message" | "room";
-  id: number;
+  id: string;
   html: string;
 }
 
@@ -66,7 +66,7 @@ async function createChatRoomWebSocketResponse(
 
   const response: ChatWebSocketResponse = {
     type: "room",
-    id: roomId,
+    id: roomId.toString(),
     html: html,
   };
 
@@ -111,6 +111,59 @@ export async function setCurrentRoomId(
   sendRoomUpdate(fastify, roomId, userId);
 }
 
+async function updateRoomAndSendMessage(
+  fastify: FastifyInstance,
+  userName: string,
+  userId: string,
+  message: string,
+  roomId: number,
+  type: ChatMessageType,
+) {
+  for (const client of chatClients) {
+    if (client.currentRoomId != roomId) {
+      let room = client.roomIds.find((id) => id == roomId);
+      if (!room) {
+        continue;
+      }
+
+      const dbRoom = await getChatRoomRead(fastify, roomId, client.userId);
+
+      const html = await fastify.view("components/chat/room", {
+        room: dbRoom,
+      });
+
+      const response: ChatWebSocketResponse = {
+        type: "room",
+        id: roomId.toString(),
+        html: html,
+      };
+
+      client.socket.send(JSON.stringify(response));
+      continue;
+    }
+
+    const html = await fastify.view("components/chat/message", {
+      message: {
+        userName: userName,
+        message: message,
+        timestamp: new Date().toLocaleString(),
+        isOwnMessage: client.userId === userId,
+        type: type,
+      },
+    });
+
+    const response: ChatWebSocketResponse = {
+      type: "message",
+      id: roomId.toString(),
+      html: html,
+    };
+
+    client.socket.send(JSON.stringify(response));
+  }
+
+  saveMessage(fastify, roomId, userId, message, type);
+}
+
 export async function sendMessage(
   fastify: FastifyInstance,
   request: FastifyRequest,
@@ -129,50 +182,46 @@ export async function sendMessage(
     userIdsBlacklist,
   );
 
-  for (const client of chatClients) {
-    if (client.currentRoomId !== roomId) {
-      let room = client.roomIds.find((id) => id == roomId);
-      if (!room) {
-        continue;
-      }
+  await updateRoomAndSendMessage(
+    fastify,
+    request.userName,
+    request.userId,
+    message,
+    roomId,
+    type,
+  );
+}
 
-      const dbRoom = await getChatRoomRead(fastify, roomId, client.userId);
+export async function sendSystemMessage(
+  fastify: FastifyInstance,
+  roomId: number,
+  message: string,
+) {
+  await updateRoomAndSendMessage(
+    fastify,
+    "System",
+    "system",
+    message,
+    roomId,
+    ChatMessageType.system,
+  );
+}
 
-      const html = await fastify.view("components/chat/room", {
-        room: dbRoom,
-      });
+export async function sendGameInvite(
+  fastify: FastifyInstance,
+  roomId: number,
+  gameId: number,
+) {
+  const message: string = "/games/lobby/join/" + gameId;
 
-      const response: ChatWebSocketResponse = {
-        type: "room",
-        id: roomId,
-        html: html,
-      };
-
-      client.socket.send(JSON.stringify(response));
-
-      continue;
-    }
-
-    const html = await fastify.view("components/chat/message", {
-      message: {
-        userName: request.userName,
-        message: message,
-        timestamp: new Date().toLocaleString(),
-        isOwnMessage: client.userId === request.userId,
-        type: type,
-      },
-    });
-
-    const response: ChatWebSocketResponse = {
-      type: "message",
-      id: roomId,
-      html: html,
-    };
-
-    client.socket.send(JSON.stringify(response));
-  }
-
-  await saveMessage(fastify, roomId, request.userId, message);
+  await updateRoomAndSendMessage(
+    fastify,
+    "System",
+    "system",
+    message,
+    roomId,
+    ChatMessageType.invite,
+  );
 }
 
 export async function addRoom(
@@ -216,7 +265,7 @@ export function deleteRoom(fastify: FastifyInstance, roomId: number) {
 
     const response: ChatWebSocketResponse = {
       type: "room",
-      id: roomId,
+      id: roomId.toString(),
       html: "",
     };
 
