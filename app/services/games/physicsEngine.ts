@@ -8,6 +8,7 @@ export interface Collision {
   objectId: number;
   normal?: [number, number];
   type?: string;
+  outOfBounds?: boolean; // New flag to indicate out-of-bounds correction
 }
 
 export class PhysicsEngine {
@@ -46,11 +47,18 @@ export class PhysicsEngine {
 
       if (
         collision &&
-        (!closestCollision || collision.distance < closestCollision.distance)
+        (!closestCollision ||
+          collision.distance < closestCollision.distance ||
+          collision.outOfBounds)
       ) {
         collision.objectId = i;
         collision.type = objectType;
         closestCollision = collision;
+
+        // If we found an out-of-bounds situation, return it immediately
+        if (collision.outOfBounds) {
+          return closestCollision;
+        }
       }
     }
 
@@ -91,15 +99,55 @@ export class PhysicsEngine {
     const r_bdx = bdx * ca + bdy * sa;
     const r_bdy = -bdx * sa + bdy * ca;
 
-    // Deactivate collision from inside the Rectangle
+    // Check if the ball is inside the Rectangle (out of bounds)
     if (
-      r_bx >= -rw / 2.0 &&
-      r_bx <= rw / 2.0 &&
-      r_by >= -rh / 2.0 &&
-      r_by <= rh / 2.0
-    )
-      return null;
+      r_bx >= -rw / 2.0 - EPSILON &&
+      r_bx <= rw / 2.0 + EPSILON &&
+      r_by >= -rh / 2.0 - EPSILON &&
+      r_by <= rh / 2.0 + EPSILON
+    ) {
+      // Calculate the minimum distance to push the ball out of the rectangle
+      const distToRight = rw / 2.0 - r_bx;
+      const distToLeft = r_bx + rw / 2.0;
+      const distToTop = rh / 2.0 - r_by;
+      const distToBottom = r_by + rh / 2.0;
 
+      // Find the shortest way out
+      const minDist = Math.min(
+        distToRight,
+        distToLeft,
+        distToTop,
+        distToBottom,
+      );
+
+      let normalLocal: [number, number];
+
+      if (minDist === distToRight) {
+        normalLocal = [1, 0]; // Local right direction
+      } else if (minDist === distToLeft) {
+        normalLocal = [-1, 0]; // Local left direction
+      } else if (minDist === distToTop) {
+        normalLocal = [0, 1]; // Local top direction
+      } else {
+        normalLocal = [0, -1]; // Local bottom direction
+      }
+
+      // Transform normal back to global coordinates
+      const normalGlobal: [number, number] = [
+        normalLocal[0] * ca - normalLocal[1] * sa,
+        normalLocal[0] * sa + normalLocal[1] * ca,
+      ];
+
+      // Return collision with out-of-bounds flag set
+      return {
+        distance: minDist + EPSILON,
+        objectId: objId,
+        normal: normalGlobal,
+        outOfBounds: true,
+      };
+    }
+
+    // Original collision logic continues...
     // First, check for side collisions
     const potentialTs: Array<[number, null]> = [];
     const tx_1 =

@@ -106,7 +106,7 @@ export abstract class Pong extends GameBase {
 
       // Verify that no balls went out of bounds
       this.gameState.balls.forEach((ball, id) => {
-        if (this.isOutOfBounds(ball)) this.rollbackBallInBounds(id);
+        if (this.isOutOfBounds(ball)) this.resetBall(this.gameState, id, false);
       });
 
       // Trigger modifiers
@@ -116,18 +116,6 @@ export abstract class Pong extends GameBase {
     // Save the current state for potential rewinding
     const snapshot = this.getStateSnapshot();
     this.saveStateSnapshot(snapshot);
-  }
-
-  protected rollbackBallInBounds(ballId: number) {
-    for (let k = this.tickData.length - 1; k >= 0; --k) {
-      const ball = (this.tickData[k].balls as Ball[])[ballId];
-      if (!this.isOutOfBounds(ball)) {
-        console.log(`Rolling back ball ${ballId} ${k} ticks`);
-        this.gameState.balls[ballId] = ball;
-        this.gameState.balls[ballId].x + EPSILON; // Move the ball a little bit to prevent going back out of bounds
-        break;
-      }
-    }
   }
 
   protected updatePaddle(paddle: Paddle, doTriggers: boolean): void {
@@ -360,6 +348,12 @@ export abstract class Pong extends GameBase {
     const getClosestCollision = (
       collisions: Array<Collision | null>,
     ): Collision | null => {
+      // Priority 1: Out-of-bounds collisions
+      for (let k = 0; k < collisions.length; k++) {
+        if (collisions[k]?.outOfBounds) return collisions[k];
+      }
+
+      // Priority 2: Normal collisions by distance
       let minIndex = -1;
       let minValue = Infinity;
       for (let k = 0; k < collisions.length; k++) {
@@ -407,6 +401,17 @@ export abstract class Pong extends GameBase {
       }
 
       const collision: Collision = tmpCollision;
+
+      // Handle out-of-bounds case
+      if (collision.outOfBounds && collision.normal) {
+        // Move the ball back in bounds using the collision normal
+        ball.x += collision.normal[0] * (collision.distance + EPSILON * 10);
+        ball.y += collision.normal[1] * (collision.distance + EPSILON * 10);
+
+        // Don't reduce remainingDistance since this isn't a normal movement
+        continue;
+      }
+
       const travelDistance = collision.distance;
       ball.x +=
         Math.round(ball.dx * travelDistance * (100 - 2 * EPSILON)) / 100;
