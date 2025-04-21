@@ -62,7 +62,6 @@ const chat: FastifyPluginAsync = async (fastify): Promise<void> => {
     }
 
     await sendMessage(fastify, request, message, roomId);
-    // await addRoom(fastify, "Room " + roomId, [request.userId]);
 
     return reply.status(200).send({ message: "Message sent" });
   });

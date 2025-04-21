@@ -6,6 +6,13 @@ export interface ChatMessage {
   message: string;
   timestamp: string;
   isOwnMessage: boolean;
+  type: ChatMessageType;
+}
+
+export enum ChatMessageType {
+  text = "TEXT",
+  invite = "INVITE",
+  system = "SYSTEM",
 }
 
 export async function getChatMessagesForRoom(
@@ -20,5 +27,6 @@ export async function getChatMessagesForRoom(
     message: message["message"],
     timestamp: message["timestamp"],
     isOwnMessage: userId === message["sender_id"],
+    type: message["type"] as ChatMessageType,
   }));
 }

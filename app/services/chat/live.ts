@@ -10,6 +10,7 @@ import {
   setRoomRead,
   setRoomReadForAllUsersBlacklist,
 } from "../database/chat/room";
+import { ChatMessageType } from "./message";
 
 interface ChatClient {
   socket: any;
@@ -115,6 +116,7 @@ export async function sendMessage(
   request: FastifyRequest,
   message: string,
   roomId: number,
+  type: ChatMessageType = ChatMessageType.text,
 ) {
   const userIdsBlacklist = chatClients
     .filter((client) => client.currentRoomId === roomId)
@@ -157,6 +159,7 @@ export async function sendMessage(
         message: message,
         timestamp: new Date().toLocaleString(),
         isOwnMessage: client.userId === request.userId,
+        type: type,
       },
     });
 
