@@ -4,7 +4,6 @@ import type { FastifyPluginAsync, FastifyServerOptions } from "fastify";
 import { loadGameRegistry } from "./services/games/gameRegistryLoader";
 import { loadStrategyRegistry } from "./services/strategy/strategyRegistryLoader";
 import fastifyEnv from "@fastify/env";
-// import { Tournament } from "./services/tournament/tournament";
 
 const envSchema = {
   type: "object",
