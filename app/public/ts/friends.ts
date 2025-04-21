@@ -110,14 +110,24 @@ class FriendsManager {
       return;
     }
     this.blockUser(userID);
-    // TODO: maybe add animation
     window.router.refresh();
   }
 
   unblockUser(userID: string) {
-    fetch(`/friend/unblock/${userID}`, {
-      method: "POST",
+    fetch(`/friend/block/${userID}`, {
+      method: "DELETE",
     });
+  }
+
+  unblockUserWithAnimation(event: Event) {
+    const element = event.target as HTMLElement;
+    const userID = element.getAttribute("data-id");
+
+    if (!userID) {
+      console.error("No user ID found on element");
+      return;
+    }
+    this.unblockUser(userID);
     window.router.refresh();
   }
 
