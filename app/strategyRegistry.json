@@ -91,5 +91,34 @@
       "className": "LastGoalBiased",
       "lastGoalBiasPercent": 65
     }
+  },
+
+  "pong7segmentMaker": {
+    "verticalStrip": {
+      "className": "VerticalStrip",
+      "stripHeight": 20,
+      "stripWidth": 3.5
+    },
+
+    "horizontalStrip": {
+      "className": "HorizontalStrip",
+      "stripHeight": 3.5,
+      "stripWidth": 20
+    },
+
+    "one": {
+      "className": "One",
+      "padding": 2.5
+    },
+
+    "two": {
+      "className": "Two",
+      "padding": 2.5
+    },
+
+    "three": {
+      "className": "Three",
+      "padding": 2.5
+    }
   }
 }

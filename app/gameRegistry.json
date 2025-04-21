@@ -105,6 +105,10 @@
         "paddleExtensionDurationS": 0.08,
         "paddleRetractionDurationS": 0.12,
         "extensionVelocityTransmissionFactor": 1.1
+      },
+
+      "timedStart": {
+        "className": "TimedStart"
       }
     },
 
