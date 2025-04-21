@@ -209,6 +209,7 @@ export async function sendSystemMessage(
 
 export async function sendGameInvite(
   fastify: FastifyInstance,
+  request: FastifyRequest,
   roomId: number,
   gameId: number,
 ) {
@@ -216,8 +217,8 @@ export async function sendGameInvite(
 
   await updateRoomAndSendMessage(
     fastify,
-    "System",
-    "system",
+    request.userName,
+    request.userId,
     message,
     roomId,
     ChatMessageType.invite,
