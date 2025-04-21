@@ -1,0 +1,13 @@
+<div id="{{match.id}}"
+     class="match border bg-black-200 mt-2 mb-2 p-2 rounded-lg">
+  {{!-- Display all players in the match --}}
+  {{#each match.players as |player index|}}
+    <div class="player">
+      {{player.name}}
+    </div>
+    {{!-- Add "vs" only if it's not the last player --}}
+    {{#if (lt index (dec (length ../players)))}}
+      <div class="vs text-center">vs</div>
+    {{/if}}
+  {{/each}}
+</div>

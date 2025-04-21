@@ -56,6 +56,18 @@ const profile: FastifyPluginAsync = async (fastify) => {
               { id: "8", name: "Player H" },
             ],
           },
+          {
+            players: [
+              { id: "7", name: "Player G" },
+              { id: "8", name: "Player H" },
+            ],
+          },
+          {
+            players: [
+              { id: "7", name: "Player G" },
+              { id: "8", name: "Player H" },
+            ],
+          },
         ],
       },
       {

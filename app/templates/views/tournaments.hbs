@@ -7,15 +7,7 @@
       <div class="flex flex-col justify-around h-full">
         {{!-- iterate over round.matches instead of round --}}
         {{#each round.matches as |match i|}}
-          <div id="{{match.id}}"
-               class="match border bg-black-200 mt-2 mb-2 p-2 rounded-lg">
-            {{!-- Display all players in the match --}}
-            {{#each match.players as |player|}}
-              <div class="player">
-                {{player.name}}
-              </div>
-            {{/each}}
-          </div>
+          {{> components/tournament-view/match match=match}}
         {{/each}}
       </div>
     </div>
