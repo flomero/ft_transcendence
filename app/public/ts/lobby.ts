@@ -115,7 +115,9 @@ class LobbyHandler {
       }
       return true;
     } catch (error) {
-      this.handleError(error);
+      if (error instanceof Error) {
+        this.handleError(error);
+      }
       return false;
     }
   }
