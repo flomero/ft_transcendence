@@ -18,4 +18,4 @@ RUN npm run build:ts && npm run build:client && npm run build:tailwind
 EXPOSE 3000
 
 # Start the application
-CMD ["npm", "start"]
+CMD ["npm", "run", "dev"]
