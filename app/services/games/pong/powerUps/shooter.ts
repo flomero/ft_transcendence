@@ -299,7 +299,7 @@ export class Shooter extends TimeLimitedModifierBase {
   }
 
   onDeactivation(game: Pong): void {
-    if (game.getState().balls.length > 0)
+    if (game.getState().balls.length > 0 && this.ticks === 0)
       game.getState().balls[0].speed = this.ballInitialSpeed;
     game.getModifierManager().deletePowerUp(this);
   }

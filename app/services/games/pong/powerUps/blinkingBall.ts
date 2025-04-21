@@ -1,6 +1,6 @@
 import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
 import { TimeLimitedModifierBase } from "../../timeLimitedModifierBase";
-import { ModifierActivationMode } from "../../modifierBase";
+import { ModifierActivationMode, ModifierStatus } from "../../modifierBase";
 import { type Pong } from "../pong";
 
 export class BlinkingBall extends TimeLimitedModifierBase {
@@ -65,6 +65,7 @@ export class BlinkingBall extends TimeLimitedModifierBase {
   }
 
   onUpdate(game: Pong): void {
+    if (this.status !== ModifierStatus.ACTIVE) return;
     super.onUpdate(game);
 
     const gameState = game.getState();

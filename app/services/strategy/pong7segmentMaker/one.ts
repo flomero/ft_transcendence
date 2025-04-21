@@ -26,7 +26,7 @@ export class One implements IPong7segmentMaker {
       STRATEGY_REGISTRY.pong7segmentMaker["verticalStrip"].stripWidth;
     this.totalVerticalLength = verticalStripHeight + verticalStripWidth;
 
-    this.padding = STRATEGY_REGISTRY.pong7segmentMaker[this.name].padding; // + verticalStripHeight / 2.0 + verticalStripWidth / 2.0;
+    this.padding = STRATEGY_REGISTRY.pong7segmentMaker[this.name].padding;
   }
 
   sampleRectangles(center: [number, number]): Rectangle[] {
@@ -36,14 +36,14 @@ export class One implements IPong7segmentMaker {
     rectangles.push(
       ...this.verticalStripMaker.executeStrategy([
         center[0],
-        center[1] - this.totalVerticalLength / 2.0 - this.padding / 2.0,
+        center[1] - this.totalVerticalLength / 2.0 - this.padding,
       ]),
     );
     // BOTTOM STRIP
     rectangles.push(
       ...this.verticalStripMaker.executeStrategy([
         center[0],
-        center[1] + this.totalVerticalLength / 2.0 + this.padding / 2.0,
+        center[1] + this.totalVerticalLength / 2.0 + this.padding,
       ]),
     );
 

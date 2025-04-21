@@ -20,9 +20,9 @@
           "ballResetSampler": "biasedQuadrantGaussianRA",
           "paddleCoveragePercent": 25,
           "paddleSpeedWidthPercentS": 150,
-          "paddleVelocityAngularTransmissionPercent": 18,
-          "paddleVelocitySpeedTransmissionPercent": 8,
-          "powerUpRadius": 20,
+          "paddleVelocityAngularTransmissionPercent": 22.5,
+          "paddleVelocitySpeedTransmissionPercent": 10,
+          "powerUpRadius": 4,
           "powerUpCapacities": {
             "speedBoost": 1,
             "blinkingBall": 1,
@@ -36,8 +36,8 @@
       "multiplayerPong": {
         "className": "MultiplayerPong",
         "fixedSettings": {
-          "arenaWidth": 150,
-          "arenaHeight": 150,
+          "arenaWidth": 100,
+          "arenaHeight": 100,
           "paddleOffset": 2.5,
           "paddleHeight": 1,
           "wallsHeight": 2,
@@ -48,11 +48,11 @@
           "ballSpeedWidthPercentS": 60,
           "ballRadius": 0.85,
           "ballResetSampler": "biasedGaussianCA",
-          "paddleCoveragePercent": 20,
+          "paddleCoveragePercent": 25,
           "paddleSpeedWidthPercentS": 150,
-          "paddleVelocityAngularTransmissionPercent": 18,
-          "paddleVelocitySpeedTransmissionPercent": 8,
-          "powerUpRadius": 10,
+          "paddleVelocityAngularTransmissionPercent": 22.5,
+          "paddleVelocitySpeedTransmissionPercent": 10,
+          "powerUpRadius": 3,
           "powerUpCapacities": {
             "speedBoost": 1,
             "blinkingBall": 1,
@@ -67,19 +67,19 @@
     "gameModifiers": {
       "powerUpSpawner": {
         "className": "PowerUpSpawner",
-        "meanDelayS": 5,
+        "meanDelayS": 10,
         "delaySpanS": 2,
         "positionSampler": "elipticGaussianRA"
       },
 
       "timedGame": {
         "className": "TimedGame",
-        "durationS": 60
+        "durationS": 600
       },
 
       "scoredGame": {
         "className": "ScoredGame",
-        "goalObjective": 10
+        "goalObjective": 7
       },
 
       "survivalGame": {
@@ -97,7 +97,7 @@
 
       "goalReset": {
         "className": "GoalReset",
-        "delayS": 2
+        "delayS": 1.5
       },
 
       "paddleBoost": {
@@ -117,35 +117,35 @@
     "powerUps": {
       "speedBoost": {
         "className": "SpeedBoost",
-        "spawnWeight": 1.0,
+        "spawnWeight": 2.0,
         "selfActivation": false,
         "durationS": 5,
-        "totalRampUpStrength": 1.25,
+        "totalRampUpStrength": 1.35,
         "rampUpFrequencyS": 0.25
       },
 
       "blinkingBall": {
         "className": "BlinkingBall",
-        "spawnWeight": 1.0,
+        "spawnWeight": 1.5,
         "selfActivation": false,
         "durationS": 6,
         "blinkIntervalS": 0.5,
-        "blinkDurationPercent": 50
+        "blinkDurationPercent": 66
       },
 
       "multiBall": {
         "className": "MultiBall",
-        "spawnWeight": 1.0,
+        "spawnWeight": 1.5,
         "selfActivation": false,
         "durationS": 6,
-        "ballCount": 4,
-        "totalAngleDeg": 60,
-        "radiusFactorPercent": 70
+        "ballCount": 8,
+        "totalAngleDeg": 80,
+        "radiusFactorPercent": 60
       },
 
       "shooter": {
         "className": "Shooter",
-        "spawnWeight": 1.0,
+        "spawnWeight": 2.0,
         "selfActivation": false,
         "durationS": 4,
         "chargeDurationS": 2,

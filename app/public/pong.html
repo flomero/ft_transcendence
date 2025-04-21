@@ -40,7 +40,7 @@
       if (gameModeName === "multiplayerPong") {
         canvas.width = 800;
         canvas.height = 800;
-        ratio = canvas.width / 150.0;
+        ratio = canvas.width / 100.0;
         playerCount = 7;
       } else if (gameModeName === "classicPong") {
         canvas.width = 800;
@@ -67,17 +67,16 @@
                 paddleBoost: {},
                 powerUpSpawner: {},
                 survivalGame: {},
+                timedGamed: {},
                 arenaShrink: {},
                 elimination: {},
+                goalReset: {},
               },
               powerUpNames: {
                 speedBoost: {},
                 blinkingBall: {},
                 shooter: {},
-                multiBall: {
-                  ballCount: 180,
-                  totalAngle: 360,
-                },
+                multiBall: {},
               },
               playerCount: playerCount,
             },
