@@ -10,6 +10,7 @@ import {
   setRoomRead,
   setRoomReadForAllUsersBlacklist,
 } from "../database/chat/room";
+import { isBlocked } from "../database/friend/block";
 
 interface ChatClient {
   socket: any;
@@ -148,6 +149,10 @@ export async function sendMessage(
 
       client.socket.send(JSON.stringify(response));
 
+      continue;
+    }
+
+    if (await isBlocked(fastify, client.userId, request.userId)) {
       continue;
     }
 
