@@ -4,6 +4,10 @@ import type { FastifyRequest, FastifyReply } from "fastify";
 import { isUserInMatchMaking } from "../../services/games/matchMaking/MatchMakingManager";
 import { isUserInAnyLobby } from "../../services/games/lobby/lobbyVaidation/isUserInAnyLobby";
 import isUserInGame from "../../services/games/gameHandler/isUserInGame";
+import {
+  getMatchmakingGameModes,
+  gameModeArrToString,
+} from "../../services/config/gameModes";
 
 const checkRedirects = async (
   request: FastifyRequest,
@@ -39,11 +43,14 @@ const page: FastifyPluginAsync = async (fastify): Promise<void> => {
     if (await checkRedirects(request, reply)) return;
 
     const lobbies = await getPublicLobbies(fastify);
-
+    const gamemodes = gameModeArrToString(getMatchmakingGameModes());
     const data = {
       title: "Play Pong | ft_transcendence",
       lobbies: lobbies,
+      matchmakingmodes: gamemodes,
     };
+
+    console.log(data.matchmakingmodes);
 
     reply.header("X-Page-Title", "Play Pong | ft_transcendence");
     const viewOptions = request.isAjax() ? {} : { layout: "layouts/main" };

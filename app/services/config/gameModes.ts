@@ -25,3 +25,9 @@ export const getTournamentGameModes = (): TournamentGameModes[] => {
 export const getLobbyGameModes = (): LobbyGameModes[] => {
   return Object.values(LobbyGameModes);
 };
+
+export const gameModeArrToString = (
+  gameMode: MatchmakingGameModes[] | TournamentGameModes[] | LobbyGameModes[],
+): string[] => {
+  return gameMode.map((mode) => mode.toString());
+};
