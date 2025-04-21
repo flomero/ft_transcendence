@@ -1,6 +1,6 @@
 import type { FastifyPluginAsync } from "fastify";
-import { blockUser } from "../../services/friends/block";
-import { deleteBlockedUser } from "../../services/database/friend/block";
+import { blockUser } from "../../../services/friends/block";
+import { deleteBlockedUser } from "../../../services/database/friend/block";
 
 const blockUserRoutes: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.post("/:userId", async (request, reply) => {
