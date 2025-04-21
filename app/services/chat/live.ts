@@ -119,6 +119,17 @@ async function updateRoomAndSendMessage(
   roomId: number,
   type: ChatMessageType,
 ) {
+  const userIdsBlacklist = chatClients
+    .filter((client) => client.currentRoomId === roomId)
+    .map((client) => client.userId);
+
+  await setRoomReadForAllUsersBlacklist(
+    fastify,
+    false,
+    roomId,
+    userIdsBlacklist,
+  );
+
   for (const client of chatClients) {
     if (client.currentRoomId != roomId) {
       let room = client.roomIds.find((id) => id == roomId);
@@ -171,17 +182,6 @@ export async function sendMessage(
   roomId: number,
   type: ChatMessageType = ChatMessageType.text,
 ) {
-  const userIdsBlacklist = chatClients
-    .filter((client) => client.currentRoomId === roomId)
-    .map((client) => client.userId);
-
-  await setRoomReadForAllUsersBlacklist(
-    fastify,
-    false,
-    roomId,
-    userIdsBlacklist,
-  );
-
   await updateRoomAndSendMessage(
     fastify,
     request.userName,
