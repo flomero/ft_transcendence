@@ -9,13 +9,17 @@ const blockUserRoutes: FastifyPluginAsync = async (fastify): Promise<void> => {
       return reply.status(400).send({ message: "User ID required" });
     }
 
+    if (userId === request.userId) {
+      return reply.status(400).send({ message: "Cannot block yourself" });
+    }
+
     try {
       await blockUser(fastify, request.userId, userId);
     } catch (error) {
-      reply.status(400).send({ message: "Error blocking user" });
+      return reply.status(400).send({ message: error });
     }
 
-    reply.status(200).send({ message: "User blocked" });
+    return reply.status(200).send({ message: "User blocked" });
   });
 
   fastify.delete("/:userId", async (request, reply) => {
@@ -27,10 +31,10 @@ const blockUserRoutes: FastifyPluginAsync = async (fastify): Promise<void> => {
     try {
       await deleteBlockedUser(fastify, request.userId, userId);
     } catch (error) {
-      reply.status(400).send({ message: "Error unblocking user" });
+      return reply.status(400).send({ message: "Error unblocking user" });
     }
 
-    reply.status(200).send({ message: "User unblocked" });
+    return reply.status(200).send({ message: "User unblocked" });
   });
 };
 

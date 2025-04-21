@@ -2,6 +2,8 @@ import { FastifyInstance } from "fastify";
 import { deleteFriendOrInvite } from "../database/friend/friends";
 import { getBlockedUsers, saveBlockedUser } from "../database/friend/block";
 import { usersToUserWithImages } from "../database/user";
+import { getChatRoomTwoUsers } from "../database/chat/room";
+import { deleteRoom } from "../chat/live";
 
 export async function getBlockedUsersWithUserInfo(
   fastify: FastifyInstance,
@@ -17,6 +19,14 @@ export async function blockUser(
   userId: string,
   blockedUserId: string,
 ) {
-  await deleteFriendOrInvite(fastify, userId, blockedUserId);
-  await saveBlockedUser(fastify, userId, blockedUserId);
+  const roomId = await getChatRoomTwoUsers(fastify, userId, blockedUserId);
+  if (roomId) {
+    deleteRoom(fastify, roomId);
+  }
+  deleteFriendOrInvite(fastify, userId, blockedUserId);
+  try {
+    await saveBlockedUser(fastify, userId, blockedUserId);
+  } catch (error) {
+    throw new Error("User already blocked");
+  }
 }

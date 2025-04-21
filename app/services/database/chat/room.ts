@@ -68,7 +68,7 @@ export async function deleteChatRoom(fastify: FastifyInstance, roomId: number) {
   try {
     await fastify.sqlite.run("DELETE FROM chat_rooms WHERE id = ?;", [roomId]);
   } catch (error) {
-    fastify.log.error(error);
+    fastify.log.error("Error deleting chat room", error);
   }
 }
 
@@ -145,7 +145,6 @@ HAVING COUNT(DISTINCT user_id) = 2;`;
 
   const result = await fastify.sqlite.get(sql, [userId1, userId2]);
 
-  fastify.log.info(`Result: ${JSON.stringify(result)}`);
   return result?.room_id;
 }
 
