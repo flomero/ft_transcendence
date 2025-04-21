@@ -6,7 +6,7 @@ const page: FastifyPluginAsync = async (fastify): Promise<void> => {
     if (!gameId) return reply.notFound();
 
     const data = {
-      title: "Game | Inception",
+      title: "Game | ft_transcendence",
       gameId: gameId,
     };
 

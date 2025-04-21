@@ -53,12 +53,14 @@ export function registerHelpers(handlebars: typeof Handlebars) {
 
   handlebars.registerHelper("eq", (a, b) => a === b);
 
-  handlebars.registerHelper("hrGameModeName", (value) => {
-    if (!value) return value;
-    const words = value.split(/(?=[A-Z])/);
-    const formattedString = words.join(" ");
-    return formattedString.charAt(0).toUpperCase() + formattedString.slice(1);
-  });
+  handlebars.registerHelper("hrGameModeName", (value) =>
+    !value
+      ? value
+      : String(value)
+          .split(/(?=[A-Z])/)
+          .join(" ")
+          .replace(/^\w/, (c) => c.toUpperCase()),
+  );
 
   handlebars.registerHelper("inc", function (value, options) {
     return parseInt(value, 10) + 1;

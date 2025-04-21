@@ -13,7 +13,7 @@ const profile: FastifyPluginAsync = async (fastify): Promise<void> => {
     const matches = await getMatchHistoryService(fastify, request.userId);
 
     const data = {
-      title: "Profile | Inception",
+      title: "Profile | ft_transcendence",
       userId: request.userId,
       userName: request.userName,
       imageUrl: `/image/${userData.image_id}`,
