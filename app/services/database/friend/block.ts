@@ -18,7 +18,7 @@ export async function saveBlockedUser(
 ) {
   const sql = "INSERT INTO users_blocked (userId, blockedUserId) VALUES (?, ?)";
 
-  return fastify.sqlite.run(sql, [userId, blockedUserId]);
+  return await fastify.sqlite.run(sql, [userId, blockedUserId]);
 }
 
 export async function deleteBlockedUser(
@@ -29,7 +29,7 @@ export async function deleteBlockedUser(
   const sql =
     "DELETE FROM users_blocked WHERE userId = ? AND blockedUserId = ?";
 
-  return fastify.sqlite.run(sql, [userId, blockedUserId]);
+  return await fastify.sqlite.run(sql, [userId, blockedUserId]);
 }
 
 export async function isBlocked(

@@ -29,7 +29,11 @@ const blockUserRoutes: FastifyPluginAsync = async (fastify): Promise<void> => {
     }
 
     try {
-      await deleteBlockedUser(fastify, request.userId, userId);
+      const changes = (await deleteBlockedUser(fastify, request.userId, userId))
+        .changes;
+      if (changes === 0) {
+        return reply.status(400).send({ message: "User not blocked" });
+      }
     } catch (error) {
       return reply.status(400).send({ message: "Error unblocking user" });
     }
