@@ -8,14 +8,6 @@ class MatchMakingManager {
     MemberMatchMaking
   >();
 
-  public getGameMode(gameModeString: string): MatchmakingGameModes | null {
-    const gameMode = Object.values(MatchmakingGameModes).find(
-      (mode) => mode.toLowerCase() === gameModeString.toLowerCase(),
-    );
-    if (gameMode === undefined) return null;
-    return gameMode as MatchmakingGameModes;
-  }
-
   public addMember(memberId: string, gameMode: MatchmakingGameModes) {
     let member = this.members.get(memberId);
     if (member) {
