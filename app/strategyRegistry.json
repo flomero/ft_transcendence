@@ -86,5 +86,41 @@
     "lowestScoreBiased": {
       "className": "LowestScoreBiased"
     }
+  },
+
+  "tournamentBracketGenerator": {
+    "roundRobin": {
+      "className": "RoundRobin",
+      "gamesCount": 5
+    },
+
+    "singleElimination": {
+      "className": "SingleElimination",
+      "gamesCount": 3
+    },
+
+    "doubleElimination": {
+      "className": "DoubleElimination",
+      "gamesCount": 3
+    },
+
+    "swissRound": {
+      "className": "SwissRound",
+      "roundCount": 3,
+      "gamesCount": 1,
+      "finalGamesCount": 3
+    }
+  },
+
+  "tournamentMatchWinner": {
+    "bestOfX": {
+      "className": "BestOfX"
+    }
+  },
+
+  "userSampler": {
+    "random": {
+      "className": "Random"
+    }
   }
 }

@@ -1,23 +1,27 @@
-import MatchMakingManager from "../MatchMakingManager";
+import { gameModeFromString } from "../../../config/gameModes";
+import { matchMakingManager } from "../MatchMakingManager";
 import type { FastifyRequest, FastifyReply } from "fastify";
 
-export const matchMakingManager = new MatchMakingManager();
-
 const joinMatchMakingHandler = async (
-  request: FastifyRequest,
+  request: FastifyRequest<{ Params: { gameMode: string } }>,
   reply: FastifyReply,
 ) => {
-  const userId = request.userId;
-  try {
-    if (matchMakingManager.memberExists(userId) === true) {
-      throw new Error("User already in MatchMaking");
-    }
-    matchMakingManager.addMember(userId);
-  } catch (error) {
-    if (error instanceof Error)
-      return reply.status(400).send({ message: error.message });
+  const gameModeString = request.params.gameMode;
+  const gameMode = gameModeFromString(gameModeString);
+  if (gameMode === null) {
+    return reply.notFound("Game mode does not exist");
   }
-  return reply.status(200).send({ message: "joined MatchMaking" });
+
+  const userId = request.userId;
+  matchMakingManager.addMember(userId, gameMode);
+
+  const data = {
+    title: "Matchmaking | ft_transcendence",
+    gameMode: gameMode,
+  };
+  reply.header("X-Page-Title", "Matchmaking | ft_transcendence");
+  const viewOptions = request.isAjax() ? {} : { layout: "layouts/main" };
+  return reply.view("views/matchmaking/page", data, viewOptions);
 };
 
 export default joinMatchMakingHandler;
