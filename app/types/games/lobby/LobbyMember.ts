@@ -5,4 +5,5 @@ export type LobbyMember = {
   userState: "notInLobby" | "inLobby" | "inMatch";
   isReady: boolean;
   socket?: WebSocket;
+  isAi: boolean;
 };

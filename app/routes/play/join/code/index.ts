@@ -3,7 +3,7 @@ import type { FastifyPluginAsync } from "fastify";
 const page: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.get("/", async (request, reply) => {
     const data = {
-      title: "Enter Code | Inception",
+      title: "Enter Code | ft_transcendence",
     };
 
     reply.header("X-Page-Title", "Enter Code | ft_transcendence");

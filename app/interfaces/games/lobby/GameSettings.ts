@@ -11,6 +11,8 @@ interface GameModeConfig {
   ballRadius?: number;
   paddleCoveragePercent?: number;
   paddleSpeedWidthPercentS?: number;
+  paddleVelocityAngularTransmissionPercent?: number;
+  paddleVelocitySpeedTransmissionPercent?: number;
   powerUpRadius?: number;
   powerUpCapacities?: PowerUpCapacities;
 }
@@ -32,6 +34,10 @@ interface Elimination {
   threshold: number;
 }
 
+interface GoalReset {
+  delayS: number;
+}
+
 interface ModifierNames {
   powerUpSpawner?: PowerUpSpawner;
   timedGame?: TimedGame;
@@ -39,6 +45,7 @@ interface ModifierNames {
   survivalGame?: {};
   elimination?: Elimination;
   arenaShrink?: {};
+  goalReset?: GoalReset;
 }
 
 interface SpeedBoost {
