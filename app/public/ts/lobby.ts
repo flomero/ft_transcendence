@@ -14,7 +14,7 @@ interface LobbyMessage {
 }
 
 class LobbyHandler {
-  public socket: WebSocket | null = null; // Changed to public for access in router's onExit
+  public socket: WebSocket | null = null;
   private isConnected = false;
 
   private getLobbyId(): string {
@@ -68,6 +68,9 @@ class LobbyHandler {
         break;
       case "gameStarted":
         this.handleGameStart(message.data);
+        break;
+      case "addedAI":
+        this.handleMemberJoined(message.data);
         break;
       default:
         console.log("Unknown message type:", message.type);
@@ -131,6 +134,33 @@ class LobbyHandler {
     }
 
     return success;
+  }
+
+  public async addAiOpponent(): Promise<void> {
+    try {
+      const response = await fetch(
+        `/games/lobby/add-ai-opponent/${this.getLobbyId()}`,
+        {
+          method: "POST",
+        },
+      );
+
+      if (!response.ok) {
+        const msg = await response.text();
+        const data = JSON.parse(msg);
+        throw new Error(
+          data?.message || `Failed to add AI opponent: ${response.statusText}`,
+        );
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        this.handleError(error);
+      } else {
+        this.handleError(
+          new Error("Failed to add AI opponent. Please try again later."),
+        );
+      }
+    }
   }
 
   public async unsetReady(): Promise<void> {
