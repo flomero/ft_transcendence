@@ -7,7 +7,7 @@ services:
     volumes:
       - db-data:/app/database # Mount for development
     ports:
-      - "3000:3000"
+      - 3000
     env_file:
       - .env
     healthcheck:
