@@ -1,8 +1,8 @@
-import { PongModifierBase } from "../pongModifierBase";
 import { Pong } from "../pong";
 import { GameStatus } from "../../gameBase";
+import { ModifierBase } from "../../modifierBase";
 
-export class SurvivalGame extends PongModifierBase {
+export class SurvivalGame extends ModifierBase {
   name = "survivalGame";
 
   onPlayerElimination(game: Pong, args: { playerId: number }): void {

@@ -74,13 +74,6 @@ export abstract class Pong extends GameBase {
       playerCount: gameData.playerCount,
     };
 
-    // Simulate random scores
-    this.gameState.scores = this.gameState.scores.map(
-      (_, id) => (id === 2 || id === 5 ? 3 * this.gameState.playerCount : 1),
-      // (_, id) => Math.round(Math.pow(3, id)),
-      // this.gameState.rng.randomInt(0, 2 * this.gameState.playerCount),
-    );
-
     // Initialize UserInputManager
     this.inputManager = new UserInputManager();
   }
@@ -99,8 +92,12 @@ export abstract class Pong extends GameBase {
       await this.processUserInputs();
 
       // Update paddle positions
-      for (const paddle of this.gameState.paddles)
+      this.gameState.paddles.forEach((paddle, index) => {
+        this.modifierManager.trigger("onPaddleUpdate", {
+          playerId: index,
+        });
         if (paddle.velocity !== 0) this.updatePaddle(paddle, true);
+      });
 
       // Update ball positions
       for (const ball of this.gameState.balls)
@@ -109,7 +106,7 @@ export abstract class Pong extends GameBase {
 
       // Verify that no balls went out of bounds
       this.gameState.balls.forEach((ball, id) => {
-        if (this.isOutOfBounds(ball)) this.resetBall(this.gameState, id, true);
+        if (this.isOutOfBounds(ball)) this.resetBall(this.gameState, id, false);
       });
 
       // Trigger modifiers
@@ -150,13 +147,6 @@ export abstract class Pong extends GameBase {
     paddle.y +=
       direction * (deltaDisplacement / 100.0) * paddle.amplitude * paddle.dy;
     paddle.displacement = newDisplacement;
-
-    // After updating, trigger the modifier
-    const paddleIndex = this.gameState.paddles.indexOf(paddle);
-    if (doTriggers)
-      this.modifierManager.trigger("onPlayerMovement", {
-        playerId: paddleIndex,
-      });
   }
 
   // Process all queued user inputs
@@ -358,6 +348,12 @@ export abstract class Pong extends GameBase {
     const getClosestCollision = (
       collisions: Array<Collision | null>,
     ): Collision | null => {
+      // Priority 1: Out-of-bounds collisions
+      for (let k = 0; k < collisions.length; k++) {
+        if (collisions[k]?.outOfBounds) return collisions[k];
+      }
+
+      // Priority 2: Normal collisions by distance
       let minIndex = -1;
       let minValue = Infinity;
       for (let k = 0; k < collisions.length; k++) {
@@ -405,6 +401,17 @@ export abstract class Pong extends GameBase {
       }
 
       const collision: Collision = tmpCollision;
+
+      // Handle out-of-bounds case
+      if (collision.outOfBounds && collision.normal) {
+        // Move the ball back in bounds using the collision normal
+        ball.x += collision.normal[0] * (collision.distance + EPSILON * 10);
+        ball.y += collision.normal[1] * (collision.distance + EPSILON * 10);
+
+        // Don't reduce remainingDistance since this isn't a normal movement
+        continue;
+      }
+
       const travelDistance = collision.distance;
       ball.x +=
         Math.round(ball.dx * travelDistance * (100 - 2 * EPSILON)) / 100;
@@ -452,6 +459,7 @@ export abstract class Pong extends GameBase {
           ball.dy /= norm;
 
           this.modifierManager.trigger("onPaddleBounce", {
+            ballId: this.gameState.balls.indexOf(ball),
             playerId: collision.objectId,
           });
           break;
@@ -468,7 +476,10 @@ export abstract class Pong extends GameBase {
                 playerId: goalPlayerId,
               });
           } else {
-            if (doTriggers) this.modifierManager.trigger("onWallBounce");
+            if (doTriggers)
+              this.modifierManager.trigger("onWallBounce", {
+                wallID: collision.objectId,
+              });
           }
           break;
 

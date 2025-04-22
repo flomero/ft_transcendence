@@ -38,7 +38,7 @@ export async function loadStrategyRegistry(): Promise<void> {
       const modulePath = path.join(
         __dirname,
         strategyType,
-        className.toLowerCase() + ".js",
+        strategyName + ".js",
       );
 
       try {
