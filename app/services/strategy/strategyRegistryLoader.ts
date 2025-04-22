@@ -35,7 +35,11 @@ export async function loadStrategyRegistry(): Promise<void> {
       const { className, ...configParams } = strategyData; // Separate className from config params
 
       // Construct module path
-      const modulePath = path.join(__dirname, strategyType, className + ".js");
+      const modulePath = path.join(
+        __dirname,
+        strategyType,
+        strategyName + ".js",
+      );
 
       try {
         // Import the module dynamically

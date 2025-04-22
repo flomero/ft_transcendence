@@ -1,9 +1,8 @@
 import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
-import { ModifierStatus } from "../../modifierBase";
+import { ModifierBase, ModifierStatus } from "../../modifierBase";
 import { Pong } from "../pong";
-import { PongModifierBase } from "../pongModifierBase";
 
-export class GoalReset extends PongModifierBase {
+export class GoalReset extends ModifierBase {
   name = "goalReset";
 
   private ticks: number = 0;

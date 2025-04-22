@@ -1,8 +1,8 @@
-import { PongModifierBase } from "../pongModifierBase";
 import { Pong } from "../pong";
 import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
+import { ModifierBase } from "../../modifierBase";
 
-export class Elimination extends PongModifierBase {
+export class Elimination extends ModifierBase {
   name = "elimination";
 
   protected threshold: number;
