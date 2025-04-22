@@ -8,10 +8,10 @@ export class Bumper extends TimeLimitedModifierBase {
   name = "bumper";
 
   protected bumpers: Rectangle[] = [];
-  protected bumperJunctionDisanceFromCenter: number = 0;
+  protected bumperJunctionDistanceFromCenter: number = 0;
   protected bumperWallJunctionDistance: number = 0;
 
-  protected initalVelocity: number = 0;
+  protected initialVelocity: number = 0;
   protected velocityFactor: number = 0;
 
   protected bumperVelocityFactor: number = 0;
@@ -52,12 +52,12 @@ export class Bumper extends TimeLimitedModifierBase {
     );
 
     this.configManager.registerPropertyConfig(
-      "bumperJunctionDisanceFromCenter",
+      "bumperJunctionDistanceFromCenter",
       (_, context) => {
-        const bumperJunctionDisanceFromCenterPercent =
-          context.bumperJunctionDisanceFromCenter ||
-          defaultRegistry.bumperJunctionDisanceFromCenterPercent;
-        return bumperJunctionDisanceFromCenterPercent / 100.0;
+        const bumperJunctionDistanceFromCenterPercent =
+          context.bumperJunctionDistanceFromCenter ||
+          defaultRegistry.bumperJunctionDistanceFromCenterPercent;
+        return bumperJunctionDistanceFromCenterPercent / 100.0;
       },
       undefined,
     );
@@ -120,11 +120,11 @@ export class Bumper extends TimeLimitedModifierBase {
       this.deactivate(game);
       return;
     }
-    this.initalVelocity = gameState.balls[0].speed;
+    this.initialVelocity = gameState.balls[0].speed;
 
     // Convert percentages to actual distances based on arena dimensions
     const junctionDistanceFromCenter =
-      (this.bumperJunctionDisanceFromCenter * game.getSettings().arenaHeight) /
+      (this.bumperJunctionDistanceFromCenter * game.getSettings().arenaHeight) /
       2.0;
     const wallJunctionDistance =
       this.bumperWallJunctionDistance * game.getState().walls[1].width;
@@ -243,7 +243,7 @@ export class Bumper extends TimeLimitedModifierBase {
 
     if (game.getState().balls.length === 0) return;
     game.getState().balls[0].speed =
-      this.initalVelocity * (1.0 + this.velocityFactor);
+      this.initialVelocity * (1.0 + this.velocityFactor);
 
     this.velocityFactor = Math.max(
       0.0,
@@ -258,7 +258,7 @@ export class Bumper extends TimeLimitedModifierBase {
         if (wallID < 0) return;
         game.getState().walls.splice(wallID, 1);
       });
-    game.getState().balls[0].speed = this.initalVelocity;
+    game.getState().balls[0].speed = this.initialVelocity;
     game.getModifierManager().deletePowerUp(this);
   }
 }
