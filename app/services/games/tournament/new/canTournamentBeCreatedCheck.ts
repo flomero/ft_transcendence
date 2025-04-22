@@ -1,5 +1,5 @@
 import { isUserInAnyLobby } from "../../lobby/lobbyVaidation/isUserInAnyLobby";
-import { tournaments } from "../create/createTournamentHandler";
+import { tournaments } from "./newTournamentHandler";
 import { matchMakingManager } from "../../matchMaking/join/joinMatchMakingHandler";
 
 const canTournamentBeCreatedCheck = (memberId: string): void => {
