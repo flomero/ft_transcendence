@@ -7,7 +7,7 @@ services:
     volumes:
       - db-data:/app/database # Mount for development
     ports:
-      - 3000
+      - 80
     env_file:
       - .env
     healthcheck:
@@ -15,8 +15,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-    environment:
-      - SERVICE_FQDN_APP_3000
 
 volumes:
   db-data:
