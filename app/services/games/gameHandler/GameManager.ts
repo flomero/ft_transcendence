@@ -119,6 +119,8 @@ class GameManager {
   public async startGame(db: Database): Promise<void> {
     if (this.allPlayersAreConnected() === false) {
       throw new Error("Not all players are connected");
+    } else if (this.game.getStatus() !== GameStatus.CREATED) {
+      return;
     }
 
     this.shuffleReferenceTable();
