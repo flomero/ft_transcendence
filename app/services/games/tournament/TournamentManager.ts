@@ -45,6 +45,18 @@ class TournamentManager {
   public isMemberInTournament(memberId: string): boolean {
     return this.tournamentMembers.has(memberId);
   }
+
+  public removeMemberSave(memberId: string): void {
+    if (this.tournamentMembers.has(memberId) === false) {
+      console.warn(
+        `Member: ${memberId} does not exist in tournament: ${this.tournamentId}`,
+      );
+      return;
+    }
+    const member = this.tournamentMembers.get(memberId);
+    member?.webSocket?.close();
+    this.tournamentMembers.delete(memberId);
+  }
 }
 
 export default TournamentManager;
