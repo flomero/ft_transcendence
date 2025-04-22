@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.ts",
   "scripts": {
-    "start": "npm run build:ts && npm run build:client && npm run build:tailwind && fastify start -l info dist/app.js",
+    "start": "npm run build:ts && npm run build:client && npm run build:tailwind && fastify start -l info -p 80 dist/app.js",
     "build:ts": "tsc",
     "watch:ts": "tsc -w",
     "build:client": "tsc -p tsconfig.client.json",
