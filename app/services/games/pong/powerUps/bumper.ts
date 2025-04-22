@@ -8,8 +8,8 @@ export class Bumper extends TimeLimitedModifierBase {
   name = "bumper";
 
   protected bumpers: Rectangle[] = [];
-  protected bumperAngle: number = 0;
   protected bumperJunctionDisanceFromCenter: number = 0;
+  protected bumperWallJunctionDistance: number = 0;
 
   protected initalVelocity: number = 0;
   protected velocityFactor: number = 0;
@@ -52,22 +52,23 @@ export class Bumper extends TimeLimitedModifierBase {
     );
 
     this.configManager.registerPropertyConfig(
-      "bumperAngle",
-      (_, context) => {
-        const bumperAngleDeg =
-          context.bumperAngle || defaultRegistry.bumperAngleDeg;
-        return (bumperAngleDeg * Math.PI) / 180.0;
-      },
-      undefined,
-    );
-
-    this.configManager.registerPropertyConfig(
       "bumperJunctionDisanceFromCenter",
       (_, context) => {
         const bumperJunctionDisanceFromCenterPercent =
           context.bumperJunctionDisanceFromCenter ||
           defaultRegistry.bumperJunctionDisanceFromCenterPercent;
         return bumperJunctionDisanceFromCenterPercent / 100.0;
+      },
+      undefined,
+    );
+
+    this.configManager.registerPropertyConfig(
+      "bumperWallJunctionDistance",
+      (_, context) => {
+        const bumperWallJunctionDistancePercent =
+          context.bumperWallJunctionDistance ||
+          defaultRegistry.bumperWallJunctionDistancePercent;
+        return bumperWallJunctionDistancePercent / 100.0;
       },
       undefined,
     );
@@ -121,12 +122,12 @@ export class Bumper extends TimeLimitedModifierBase {
     }
     this.initalVelocity = gameState.balls[0].speed;
 
-    // Width and height for the bumper
-    const bumperJunctionDisanceFromCenter =
+    // Convert percentages to actual distances based on arena dimensions
+    const junctionDistanceFromCenter =
       (this.bumperJunctionDisanceFromCenter * game.getSettings().arenaHeight) /
       2.0;
-    const bumpLength =
-      bumperJunctionDisanceFromCenter / Math.cos(this.bumperAngle);
+    const wallJunctionDistance =
+      this.bumperWallJunctionDistance * game.getState().walls[1].width;
 
     Array.from({ length: gameState.playerCount }).forEach((_, index) => {
       const wallID = 2 * index + 1;
@@ -135,25 +136,37 @@ export class Bumper extends TimeLimitedModifierBase {
       const sa = parseFloat(Math.sin(wall.alpha).toFixed(3));
 
       // Calculate junction point for the bumpers
-      const junctionX = wall.x - bumperJunctionDisanceFromCenter * sa;
-      const junctionY = wall.y + bumperJunctionDisanceFromCenter * ca;
+      const junctionX = wall.x - junctionDistanceFromCenter * ca;
+      const junctionY = wall.y - junctionDistanceFromCenter * sa;
 
-      // 'LEFT' BUMPER
-      const leftAngle = Math.PI / 2.0 - (wall.alpha + this.bumperAngle);
+      // Calculate the bumper length based on the wall junction distance
+      const bumperLength = Math.sqrt(
+        junctionDistanceFromCenter ** 2 + wallJunctionDistance ** 2 / 4.0,
+      );
+
+      // Calculate the angle for the bumpers based on distances
+      // Note: Changed the order of arguments in atan2 to get the correct angle
+      const bumperAngle = Math.atan2(
+        wallJunctionDistance / 2.0,
+        junctionDistanceFromCenter,
+      );
+
+      // 'LEFT' BUMPER - Fixed the angle calculation
+      const leftAngle = wall.alpha - bumperAngle;
       const leftCa = parseFloat(Math.cos(leftAngle).toFixed(3));
       const leftSa = parseFloat(Math.sin(leftAngle).toFixed(3));
 
       // Normal vector for left bumper (pointing outward from arena)
-      const leftNx = leftSa;
+      const leftNx = -leftSa;
       const leftNy = leftCa;
 
       // Direction vector (perpendicular to normal, defines the "length" direction)
       const leftDx = leftCa;
-      const leftDy = -leftSa;
+      const leftDy = leftSa;
 
       // Calculate center of left bumper (halfway along its length from junction)
-      const leftCenterX = junctionX + (bumpLength / 2) * leftDx;
-      const leftCenterY = junctionY + (bumpLength / 2) * leftDy;
+      const leftCenterX = junctionX + (bumperLength / 2) * leftDx;
+      const leftCenterY = junctionY + (bumperLength / 2) * leftDy;
 
       const leftBumper: Rectangle = {
         doCollision: true,
@@ -166,28 +179,28 @@ export class Bumper extends TimeLimitedModifierBase {
         ny: leftNy,
         dx: leftDx, // Direction vector
         dy: leftDy,
-        width: bumpLength,
+        width: bumperLength,
         height: wall.height, // Same height as the original wall
         alpha: leftAngle,
         isVisible: true,
       };
 
-      // 'RIGHT' BUMPER
-      const rightAngle = Math.PI / 2.0 - (wall.alpha - this.bumperAngle);
+      // 'RIGHT' BUMPER - Fixed the angle calculation
+      const rightAngle = wall.alpha + bumperAngle;
       const rightCa = parseFloat(Math.cos(rightAngle).toFixed(3));
       const rightSa = parseFloat(Math.sin(rightAngle).toFixed(3));
 
       // Normal vector for right bumper
-      const rightNx = rightSa;
+      const rightNx = -rightSa;
       const rightNy = rightCa;
 
       // Direction vector
       const rightDx = rightCa;
-      const rightDy = -rightSa;
+      const rightDy = rightSa;
 
       // Calculate center of right bumper (halfway along its length from junction)
-      const rightCenterX = junctionX + (bumpLength / 2) * rightDx;
-      const rightCenterY = junctionY + (bumpLength / 2) * rightDy;
+      const rightCenterX = junctionX + (bumperLength / 2) * rightDx;
+      const rightCenterY = junctionY + (bumperLength / 2) * rightDy;
 
       const rightBumper: Rectangle = {
         doCollision: true,
@@ -200,7 +213,7 @@ export class Bumper extends TimeLimitedModifierBase {
         ny: rightNy,
         dx: rightDx, // Direction vector
         dy: rightDy,
-        width: bumpLength,
+        width: bumperLength,
         height: wall.height, // Same height as the original wall
         alpha: rightAngle,
         isVisible: true,

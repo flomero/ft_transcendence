@@ -162,6 +162,7 @@
         "durationS": 10,
         "bumperAngleDeg": 82.5,
         "bumperJunctionDisanceFromCenterPercent": 13.5,
+        "bumperWallJunctionDistancePercent": 80,
         "bumperVelocityPercent": 35,
         "bumperMaxVelocityPercent": 120,
         "bumperAccelerationPercentS": -50
