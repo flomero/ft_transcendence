@@ -15,6 +15,8 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    environment:
+      - SERVICE_FQDN_APP_3000
 
 volumes:
   db-data:
