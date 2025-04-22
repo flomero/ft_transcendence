@@ -1,12 +1,12 @@
 import { isUserInAnyLobby } from "../../lobby/lobbyVaidation/isUserInAnyLobby";
-import { tournaments } from "./newTournamentHandler";
 import { matchMakingManager } from "../../matchMaking/join/joinMatchMakingHandler";
+import isMemberInAnyTournament from "../tournamentValidation/isMemberInAnyTournament";
 
 const canTournamentBeCreatedCheck = (memberId: string): void => {
   if (isUserInAnyLobby(memberId) !== null) {
     throw new Error("User is already in a lobby");
   }
-  if (tournaments.has(memberId) === true) {
+  if (isMemberInAnyTournament(memberId) !== null) {
     throw new Error("User is already in a tournament");
   }
   if (matchMakingManager.memberExists(memberId) === true) {
