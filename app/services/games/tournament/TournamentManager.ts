@@ -27,6 +27,24 @@ class TournamentManager {
     }
     this.tournamentMembers.get(memberId)!.webSocket = socket;
   }
+
+  public addMember(memberId: string): void {
+    if (this.tournamentMembers.has(memberId) === true) {
+      console.warn(
+        `Member: ${memberId} already exists in tournament: ${this.tournamentId}`,
+      );
+      return;
+    }
+    const newMember: TournamentMember = {
+      id: memberId,
+      status: "joined",
+    };
+    this.tournamentMembers.set(memberId, newMember);
+  }
+
+  public isMemberInTournament(memberId: string): boolean {
+    return this.tournamentMembers.has(memberId);
+  }
 }
 
 export default TournamentManager;

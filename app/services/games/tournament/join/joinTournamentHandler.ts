@@ -1,15 +1,19 @@
 import { FastifyRequest, FastifyReply } from "fastify";
+import canMemberJoinTournamentCheck from "./canMemberJoinTournamentCheck";
+import { tournaments } from "../new/newTournamentHandler";
 
 async function joinTournamentHandler(
-  request: FastifyRequest<{ Params: { tournamentId: string } }>,
+  request: FastifyRequest<{ Params: { lobbyId: string } }>,
   reply: FastifyReply,
 ) {
   try {
-    //    const { tournamentId } = request.params;
-    //    const userId = request.userId;
+    const memberId = request.userId;
+    const tournamentId = request.params.lobbyId;
 
-    request.log.info("Joining tournament");
-    return reply.code(200).send({ message: "Tournament joined successfully" });
+    canMemberJoinTournamentCheck(memberId, tournamentId);
+    tournaments.get(tournamentId)?.addMember(memberId);
+
+    return reply.code(200).send({ tournamentId: tournamentId });
   } catch (error) {
     if (error instanceof Error) {
       return reply.code(400).send({ message: error.message });
