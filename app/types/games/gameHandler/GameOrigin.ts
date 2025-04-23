@@ -1,5 +1,5 @@
 import { Lobby } from "../../../services/games/lobby/Lobby";
-//import { TournamentManager } from "../../../services/tournament/tournament";
+import { TournamentManager } from "../../../services/tournament/tournament";
 
 export type GameOrigin = {} & (
   | {
@@ -11,6 +11,6 @@ export type GameOrigin = {} & (
     }
   | {
       type: "tournament";
-      // tournament: TournamentManager;
+      tournament: TournamentManager;
     }
 );
