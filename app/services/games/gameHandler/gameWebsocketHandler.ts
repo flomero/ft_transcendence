@@ -29,7 +29,7 @@ const gameWebsocketHandler = async (
         JSON.stringify({ type: "error", data: { message: error.message } }),
       );
       if (connection.readyState === WebSocket.OPEN) {
-        connection.close(1000, error.message);
+        connection.close(1008, error.message);
       }
     }
   }
