@@ -1,18 +1,16 @@
 import S from "fluent-json-schema";
 import { gameSettingsSchema } from "../lobby/newLobbySchema";
+import {
+  TOURNAMENT_CONFIGS_REGISTRY,
+  TournamentGameModes,
+} from "../../../config";
 
-const bracketTypeEnum = S.enum([
-  "singleElimination",
-  "doubleElimination",
-  "roundRobin",
-  "swissRound",
-]);
+const tournamentConfigs = S.enum(Object.keys(TOURNAMENT_CONFIGS_REGISTRY));
+const gamemodeNames = S.enum(Object.values(TournamentGameModes));
 
 const newTournamentBodySchema = S.object()
-  .prop("bracketType", bracketTypeEnum.required())
-  .prop("matchWinnerType", S.enum(["bestOfX"]).required())
-  .prop("initialSeedingMethod", S.enum(["random"]).required())
-  .prop("gameData", gameSettingsSchema.required());
+  .prop("tournamentConfigName", tournamentConfigs.required())
+  .prop("gamemodeName", gamemodeNames.required());
 
 const newTournamentSchema = {
   body: newTournamentBodySchema,
