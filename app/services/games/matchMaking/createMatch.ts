@@ -5,7 +5,6 @@ import GameManager from "../gameHandler/GameManager";
 import type { Database } from "sqlite";
 import addGameToDatabase from "../lobby/start/addGameToDatabase";
 import { GAMEMODE_REGISTRY } from "../../../config";
-import { GameOrigin } from "../../../types/games/gameHandler/GameOrigin";
 
 /**
  * Creates a match based on the specified game mode and player ids
@@ -28,9 +27,8 @@ export const createMatch = async (
     ].class;
   if (gameClass === null) throw new Error("Game class not found");
   const game = new gameClass(gameModeSettings);
-  const gameOrigin = createGameOrigin();
 
-  const gameManager = new GameManager(game, gameOrigin);
+  const gameManager = new GameManager(game);
 
   playerIds.forEach((playerId) => {
     gameManager.addPlayer(playerId);
@@ -41,12 +39,4 @@ export const createMatch = async (
   await addGameToDatabase(gameManager, db, gameModeSettings);
 
   return gameManager.getId;
-};
-
-const createGameOrigin = () => {
-  const gameOrigin: GameOrigin = {
-    type: "matchMaking",
-  };
-
-  return gameOrigin;
 };

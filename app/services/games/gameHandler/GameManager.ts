@@ -13,13 +13,13 @@ import type { GameOrigin } from "../../../types/games/gameHandler/GameOrigin";
 
 class GameManager {
   private id: string = randomUUID();
-  private gameOrigin: GameOrigin;
+  private gameOrigin: GameOrigin | undefined;
   game: GameBase;
   players: Map<string, Player> = new Map();
   aiOpponent: Map<string, PongAIOpponent> = new Map();
   playerIdReferenceTable: Array<string> = [];
 
-  constructor(game: GameBase, gameOrigin: GameOrigin) {
+  constructor(game: GameBase, gameOrigin?: GameOrigin) {
     this.game = game;
     this.gameOrigin = gameOrigin;
   }
@@ -164,7 +164,7 @@ class GameManager {
   }
 
   private handleGameCompletion(): void {
-    if (this.gameOrigin.type === "lobby") {
+    if (this.gameOrigin?.type === "lobby") {
       this.gameOrigin.lobby.setStateLobby = "open";
     }
     // Call tournament function later
