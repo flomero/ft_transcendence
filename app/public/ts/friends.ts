@@ -9,13 +9,13 @@ declare global {
 }
 
 class FriendsManager {
-  sendFriendRequest(userID: string) {
-    fetch(`/friend/request/${userID}`, {
+  async sendFriendRequest(userID: string) {
+    await fetch(`/friend/request/${userID}`, {
       method: "POST",
     });
   }
 
-  sendFriendRequestWithAnimation(event: Event) {
+  async sendFriendRequestWithAnimation(event: Event) {
     const element = event.target as HTMLElement;
     const userID = element.getAttribute("data-id");
 
@@ -23,7 +23,7 @@ class FriendsManager {
       console.error("No user ID found on element");
       return;
     }
-    this.sendFriendRequest(userID);
+    await this.sendFriendRequest(userID);
     const btnElement = element;
     const msgElement = element.nextElementSibling as HTMLElement;
     if (!msgElement || !msgElement.classList.contains("request-sent")) {
@@ -41,13 +41,13 @@ class FriendsManager {
     }, 300);
   }
 
-  acceptFriendRequest(userID: string) {
-    fetch(`/friend/accept/${userID}`, {
+  async acceptFriendRequest(userID: string) {
+    await fetch(`/friend/accept/${userID}`, {
       method: "POST",
     });
   }
 
-  acceptFriendRequestButton(event: Event) {
+  async acceptFriendRequestButton(event: Event) {
     const element = event.target as HTMLElement;
     const userID = element.getAttribute("data-id");
 
@@ -55,17 +55,17 @@ class FriendsManager {
       console.error("No user ID found on element");
       return;
     }
-    this.acceptFriendRequest(userID);
+    await this.acceptFriendRequest(userID);
     window.router.refresh(); // TODO: maybe solve this more efficient
   }
 
-  declineFriendRequest(userID: string) {
-    fetch(`/friend/delete/${userID}`, {
+  async declineFriendRequest(userID: string) {
+    await fetch(`/friend/delete/${userID}`, {
       method: "POST",
     });
   }
 
-  declineFriendRequestButton(event: Event) {
+  async declineFriendRequestButton(event: Event) {
     const element = event.target as HTMLElement;
     const userID = element.getAttribute("data-id");
 
@@ -73,17 +73,17 @@ class FriendsManager {
       console.error("No user ID found on element");
       return;
     }
-    this.declineFriendRequest(userID);
+    await this.declineFriendRequest(userID);
     window.router.refresh(); // TODO: maybe solve this more efficient
   }
 
-  removeFriend(userID: string) {
-    fetch(`/friend/delete/${userID}`, {
+  async removeFriend(userID: string) {
+    await fetch(`/friend/delete/${userID}`, {
       method: "POST",
     });
   }
 
-  removeFriendButton(event: Event) {
+  async removeFriendButton(event: Event) {
     const element = event.target as HTMLElement;
     const userID = element.getAttribute("data-id");
 
@@ -91,17 +91,17 @@ class FriendsManager {
       console.error("No user ID found on element");
       return;
     }
-    this.removeFriend(userID);
+    await this.removeFriend(userID);
     window.router.refresh(); // TODO: maybe solve this more efficient
   }
 
-  blockUser(userID: string) {
-    fetch(`/friend/block/${userID}`, {
+  async blockUser(userID: string) {
+    await fetch(`/friend/block/${userID}`, {
       method: "POST",
     });
   }
 
-  blockUserWithAnimation(event: Event) {
+  async blockUserWithAnimation(event: Event) {
     const element = event.target as HTMLElement;
     const userID = element.getAttribute("data-id");
 
@@ -109,15 +109,25 @@ class FriendsManager {
       console.error("No user ID found on element");
       return;
     }
-    this.blockUser(userID);
-    // TODO: maybe add animation
+    await this.blockUser(userID);
     window.router.refresh();
   }
 
-  unblockUser(userID: string) {
-    fetch(`/friend/unblock/${userID}`, {
-      method: "POST",
+  async unblockUser(userID: string) {
+    await fetch(`/friend/block/${userID}`, {
+      method: "DELETE",
     });
+  }
+
+  async unblockUserWithAnimation(event: Event) {
+    const element = event.target as HTMLElement;
+    const userID = element.getAttribute("data-id");
+
+    if (!userID) {
+      console.error("No user ID found on element");
+      return;
+    }
+    await this.unblockUser(userID);
     window.router.refresh();
   }
 

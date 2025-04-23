@@ -31,6 +31,7 @@ async function startLobbyHandler(
     lobby.sendMessageToAllMembers(
       JSON.stringify({ type: "gameStarted", data: newGameManager.getId }),
     );
+    lobby.disconnectMembersFromSockets();
     return reply.code(200).send({ gameId: newGameManager.getId });
   } catch (error) {
     if (error instanceof Error)

@@ -10,6 +10,7 @@ import { Database } from "sqlite";
 import { RNG } from "../rng";
 import saveGameResultInDb from "./saveGameResultInDb";
 import type { GameOrigin } from "../../../types/games/gameHandler/GameOrigin";
+import terminateGame from "./terminateGame";
 
 class GameManager {
   private id: string = randomUUID();
@@ -101,7 +102,6 @@ class GameManager {
     }
     return JSON.stringify(playerIdReferenceTable);
   }
-
   public addSocketToPlayer(userId: string, ws: WebSocket): void {
     const player = this.players.get(userId);
     if (player === undefined) {
@@ -119,9 +119,21 @@ class GameManager {
     return true;
   }
 
+  public removeAllPlayers(): void {
+    for (const player of this.players.values()) {
+      if (player.ws !== undefined) {
+        player.ws.close();
+      }
+    }
+    this.players.clear();
+    this.playerIdReferenceTable = [];
+  }
+
   public async startGame(db: Database): Promise<void> {
     if (this.allPlayersAreConnected() === false) {
       throw new Error("Not all players are connected");
+    } else if (this.game.getStatus() !== GameStatus.CREATED) {
+      return;
     }
 
     this.shuffleReferenceTable();
@@ -142,6 +154,7 @@ class GameManager {
       gameLoop(this.id).then(async () => {
         await saveGameResultInDb(this, db);
         this.handleGameCompletion();
+        terminateGame(this);
       });
       aiLoop(this.id);
     }
