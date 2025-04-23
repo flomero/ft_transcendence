@@ -9,17 +9,20 @@ import aiLoop from "./aiLoop";
 import { Database } from "sqlite";
 import { RNG } from "../rng";
 import saveGameResultInDb from "./saveGameResultInDb";
+import type { GameOrigin } from "../../../types/games/gameHandler/GameOrigin";
 import terminateGame from "./terminateGame";
 
 class GameManager {
   private id: string = randomUUID();
+  private gameOrigin: GameOrigin | undefined;
   game: GameBase;
   players: Map<string, Player> = new Map();
   aiOpponent: Map<string, PongAIOpponent> = new Map();
   playerIdReferenceTable: Array<string> = [];
 
-  constructor(game: GameBase) {
+  constructor(game: GameBase, gameOrigin?: GameOrigin) {
     this.game = game;
+    this.gameOrigin = gameOrigin;
   }
 
   public addPlayer(userId: string): void {
@@ -150,6 +153,7 @@ class GameManager {
     if (this.game.getStatus() === GameStatus.RUNNING) {
       gameLoop(this.id).then(async () => {
         await saveGameResultInDb(this, db);
+        this.handleGameCompletion();
         terminateGame(this);
       });
       aiLoop(this.id);
@@ -170,6 +174,13 @@ class GameManager {
         player.id = i;
       }
     }
+  }
+
+  private handleGameCompletion(): void {
+    if (this.gameOrigin?.type === "lobby") {
+      this.gameOrigin.lobby.setStateLobby = "open";
+    }
+    // Call tournament function later
   }
 
   public get getId() {
