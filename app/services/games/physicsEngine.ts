@@ -320,8 +320,8 @@ export class PhysicsEngine {
     ball.dy /= speed;
 
     // Move the ball slightly outside the collision surface to prevent sticking
-    ball.x += normal[0] * EPSILON;
-    ball.y += normal[1] * EPSILON;
+    ball.x += normal[0] * EPSILON * 10;
+    ball.y += normal[1] * EPSILON * 10;
   }
 
   static ballCircleCollision(
