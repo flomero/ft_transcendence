@@ -1,6 +1,6 @@
 export enum MatchmakingGameModes {
   ClassicPong = "classicPong",
-  SpeedBoostClassicPong = "speedBoostClassicPong",
+  BasicPowerUp1v1 = "basicPowerUp1v1",
 }
 
 export enum LobbyGameModes {
@@ -19,21 +19,37 @@ export const GAMEMODE_REGISTRY = {
     modifierNames: {
       timedGame: {},
       scoredGame: {},
+      survivalGame: {},
     },
     powerUpNames: {},
     playerCount: 2,
   },
-  speedBoostClassicPong: {
+
+  basicPowerUp1v1: {
     gameName: "pong",
     gameModeName: "classicPong",
     gameModeConfig: {},
     modifierNames: {
-      scoredGame: {},
-      timedGame: {},
-      powerUpSpawner: {},
+      timedStart: {},
+      timedGame: {
+        duration: 360,
+      },
+      scoredGame: {
+        threshold: 7,
+      },
+      survivalGame: {},
+      goalReset: {},
+      powerUpSpawner: {
+        meanDelay: 10,
+        delaySpan: 2.5,
+      },
     },
     powerUpNames: {
       speedBoost: {},
+      blinkingBall: {},
+      multiBall: {},
+      bumper: {},
+      shooter: {},
     },
     playerCount: 2,
   },
