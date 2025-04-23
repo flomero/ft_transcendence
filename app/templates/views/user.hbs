@@ -13,10 +13,7 @@
         <p class="text-fg-muted truncate text-sm"># {{userId}}</p>
         <div class="mt-4 space-y-2">
           {{#if showFriendButton}}
-            {{#unless isBlocked}}
-              {{> components/user/friendbutton userId=userId showText=showText}}
-            {{/unless}}
-            {{> components/user/blockbutton userId=userId showText=showText isBlocked=isBlocked}}
+            {{> components/user/friendbutton userId=userId showText=showText}}
           {{/if}}
           {{#if requestSent}}
             {{> components/user/friendsent}}
@@ -27,6 +24,7 @@
           {{#if showRequestButtons}}
             {{> components/user/requestButtons userId=userId showText=showText}}
           {{/if}}
+          {{> components/user/blockbutton userId=userId showText=showText isBlocked=isBlocked}}
         </div>
       </div>
     </div>

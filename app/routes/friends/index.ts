@@ -3,6 +3,7 @@ import { getFriendsWithUserInfo } from "../../services/database/friend/friends";
 import { usersToUserWithImages } from "../../services/database/user";
 import { getInvitesWithUserInfo } from "../../services/database/friend/invites";
 import { searchUsers } from "../../services/friends/search";
+import { getBlockedUsersWithUserInfo } from "../../services/friends/block";
 
 function getPartnerId(
   relationship: { senderId: string; receiverId: string },
@@ -59,6 +60,17 @@ const friends: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       activeView: "new",
     };
     reply.header("X-Page-Title", "Add Friends | ft_transcendence");
+    const viewOptions = request.isAjax() ? {} : { layout: "layouts/main" };
+    return reply.view("views/friends/index", data, viewOptions);
+  });
+
+  fastify.get("/blocked", async (request, reply) => {
+    const data = {
+      title: "Blocked Users | ft_transcendence",
+      activeView: "blocked",
+      blockedUsers: await getBlockedUsersWithUserInfo(fastify, request.userId),
+    };
+    reply.header("X-Page-Title", "Blocked Users | ft_transcendence");
     const viewOptions = request.isAjax() ? {} : { layout: "layouts/main" };
     return reply.view("views/friends/index", data, viewOptions);
   });
