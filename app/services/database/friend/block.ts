@@ -1,5 +1,5 @@
-import { FastifyInstance } from "fastify";
-import { User } from "../user";
+import type { FastifyInstance } from "fastify";
+import type { User } from "../user";
 
 export async function getBlockedUsers(
   fastify: FastifyInstance,

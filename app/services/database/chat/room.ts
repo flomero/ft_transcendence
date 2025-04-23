@@ -1,5 +1,5 @@
-import { FastifyInstance } from "fastify";
-import { userToUserWithImage, UserWithImage } from "../user";
+import type { FastifyInstance } from "fastify";
+import { userToUserWithImage, type UserWithImage } from "../user";
 
 export interface ChatRoom {
   id: number;

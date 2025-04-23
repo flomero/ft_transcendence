@@ -1,4 +1,4 @@
-import { FastifyInstance } from "fastify";
+import type { FastifyInstance } from "fastify";
 import { deleteFriendOrInvite } from "../database/friend/friends";
 import { getBlockedUsers, saveBlockedUser } from "../database/friend/block";
 import { usersToUserWithImages } from "../database/user";

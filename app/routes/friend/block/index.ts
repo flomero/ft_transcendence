@@ -6,17 +6,17 @@ const blockUserRoutes: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.post("/:userId", async (request, reply) => {
     const { userId } = request.params as { userId: string };
     if (!userId) {
-      return reply.status(400).send({ message: "User ID required" });
+      return reply.badRequest("User ID required");
     }
 
     if (userId === request.userId) {
-      return reply.status(400).send({ message: "Cannot block yourself" });
+      return reply.badRequest("Cannot block yourself");
     }
 
     try {
       await blockUser(fastify, request.userId, userId);
     } catch (error) {
-      return reply.status(400).send({ message: error });
+      return reply.badRequest("Error blocking user");
     }
 
     return reply.status(200).send({ message: "User blocked" });
@@ -25,17 +25,17 @@ const blockUserRoutes: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.delete("/:userId", async (request, reply) => {
     const { userId } = request.params as { userId: string };
     if (!userId) {
-      return reply.status(400).send({ message: "User ID required" });
+      return reply.badRequest("User ID required");
     }
 
     try {
       const changes = (await deleteBlockedUser(fastify, request.userId, userId))
         .changes;
       if (changes === 0) {
-        return reply.status(400).send({ message: "User not blocked" });
+        return reply.badRequest("User not blocked");
       }
     } catch (error) {
-      return reply.status(400).send({ message: "Error unblocking user" });
+      return reply.badRequest("Error unblocking user");
     }
 
     return reply.status(200).send({ message: "User unblocked" });

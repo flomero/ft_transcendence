@@ -5,7 +5,6 @@ import { hasInvite } from "../../services/database/friend/invites";
 import { getMatchHistoryService } from "../../services/database/match-history";
 import { redirectTo } from "../../services/routing/redirect";
 import { isBlocked } from "../../services/database/friend/block";
-import { is } from "date-fns/locale";
 
 const profile: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.get("/:userId", async (request, reply) => {
