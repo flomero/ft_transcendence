@@ -5,6 +5,7 @@ import { WebSocket } from "ws";
 
 class TournamentManager {
   public tournamentId: string = randomUUID();
+  public ownerId: string; // Make private
   private tournamentMembers: Map<string, TournamentMember> = new Map();
   public tournamentSettings: TournamentSettings; // Make private
   public tournamentState: "created" | "running"; // Make private
@@ -18,6 +19,7 @@ class TournamentManager {
       status: "joined",
     };
     this.tournamentMembers.set(userId, newMember);
+    this.ownerId = userId;
   }
 
   public setMemberSocket(memberId: string, socket: WebSocket): void {
@@ -56,7 +58,10 @@ class TournamentManager {
     const member = this.tournamentMembers.get(memberId);
     member?.webSocket?.close();
     this.tournamentMembers.delete(memberId);
+    //    if (memberId === this.ownerId)
   }
+
+  private changeOwner() {}
 }
 
 export default TournamentManager;
