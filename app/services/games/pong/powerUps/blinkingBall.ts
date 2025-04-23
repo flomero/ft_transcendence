@@ -65,7 +65,10 @@ export class BlinkingBall extends TimeLimitedModifierBase {
   }
 
   onUpdate(game: Pong): void {
-    if (this.status !== ModifierStatus.ACTIVE) return;
+    if (this.status !== ModifierStatus.ACTIVE) {
+      this.deactivate(game);
+      return;
+    }
     super.onUpdate(game);
 
     const gameState = game.getState();
