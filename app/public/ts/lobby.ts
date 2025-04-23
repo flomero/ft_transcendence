@@ -14,7 +14,7 @@ interface LobbyMessage {
 }
 
 class LobbyHandler {
-  public socket: WebSocket | null = null; // Changed to public for access in router's onExit
+  public socket: WebSocket | null = null;
   private isConnected = false;
 
   private getLobbyId(): string {
@@ -46,7 +46,7 @@ class LobbyHandler {
     };
 
     this.socket.onerror = (error) => {
-      // console.error("Lobby WebSocket error:", error);
+      window.router.refresh();
     };
   }
 
@@ -68,6 +68,9 @@ class LobbyHandler {
         break;
       case "gameStarted":
         this.handleGameStart(message.data);
+        break;
+      case "addedAI":
+        this.handleMemberJoined(message.data);
         break;
       default:
         console.log("Unknown message type:", message.type);
@@ -115,6 +118,9 @@ class LobbyHandler {
       }
       return true;
     } catch (error) {
+      if (error instanceof Error) {
+        this.handleError(error);
+      }
       return false;
     }
   }
@@ -130,6 +136,33 @@ class LobbyHandler {
     return success;
   }
 
+  public async addAiOpponent(): Promise<void> {
+    try {
+      const response = await fetch(
+        `/games/lobby/add-ai-opponent/${this.getLobbyId()}`,
+        {
+          method: "POST",
+        },
+      );
+
+      if (!response.ok) {
+        const msg = await response.text();
+        const data = JSON.parse(msg);
+        throw new Error(
+          data?.message || `Failed to add AI opponent: ${response.statusText}`,
+        );
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        this.handleError(error);
+      } else {
+        this.handleError(
+          new Error("Failed to add AI opponent. Please try again later."),
+        );
+      }
+    }
+  }
+
   public async unsetReady(): Promise<void> {
     this.toggleReadyState(false);
   }
@@ -141,12 +174,15 @@ class LobbyHandler {
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to start lobby: ${response.statusText}`);
+        throw new Error(`Failed to start game: ${response.statusText}`);
       }
+
       const data = await response.json();
       console.log("Lobby started, game ID:", data.gameId);
     } catch (error) {
-      console.error("Error starting lobby:", error);
+      this.handleError(
+        new Error("Failed to start game. Please try again later."),
+      );
     }
   }
 
@@ -166,12 +202,22 @@ class LobbyHandler {
 
       window.router.navigateTo("/play");
     } catch (error) {
-      console.error("Error leaving lobby:", error);
+      this.handleError(
+        new Error("Failed to leave lobby. Please try again later."),
+      );
     }
   }
 
   private refreshLobby(): void {
     window.router.refresh(); // TODO: maybe make better
+  }
+
+  private handleError(error: Error): void {
+    const errorEl = document.getElementById("lobby-error");
+    if (errorEl) {
+      errorEl.textContent = error.message;
+      errorEl.style.display = "block";
+    }
   }
 }
 
