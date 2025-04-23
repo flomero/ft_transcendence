@@ -1,6 +1,4 @@
-import { GameSettings } from "../lobby/GameSettings";
-
-type bracketTypeSettings =
+export type bracketTypeSettings =
   | "singleElimination"
   | "doubleElimination"
   | "roundRobin"
@@ -9,6 +7,9 @@ type bracketTypeSettings =
 export interface TournamentSettings {
   bracketType: bracketTypeSettings;
   matchWinner: string;
-  players: string[];
-  gameData: GameSettings;
+  players?: string[];
+  playerCount?: number;
+  gameData: {
+    playerCount: number;
+  };
 }
