@@ -150,6 +150,10 @@ class Lobby {
     this.stateLobby = newState;
   }
 
+  public set setStateLobby(newState: "open" | "started") {
+    this.stateLobby = newState;
+  }
+
   public changeLockState(memberId: string, state: boolean): void {
     if (this.lobbyOwner !== memberId) {
       throw new Error("Only the owner can lock the lobby");
