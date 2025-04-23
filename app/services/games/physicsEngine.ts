@@ -123,13 +123,13 @@ export class PhysicsEngine {
       let normalLocal: [number, number];
 
       if (minDist === distToRight) {
-        normalLocal = [1, 0]; // Local right direction
+        normalLocal = [1, 0]; // Push out to the right
       } else if (minDist === distToLeft) {
-        normalLocal = [-1, 0]; // Local left direction
+        normalLocal = [-1, 0]; // Push out to the left
       } else if (minDist === distToTop) {
-        normalLocal = [0, 1]; // Local top direction
+        normalLocal = [0, 1]; // Push out downward (in local space)
       } else {
-        normalLocal = [0, -1]; // Local bottom direction
+        normalLocal = [0, -1]; // Push out upward (in local space)
       }
 
       // Transform normal back to global coordinates
@@ -320,8 +320,8 @@ export class PhysicsEngine {
     ball.dy /= speed;
 
     // Move the ball slightly outside the collision surface to prevent sticking
-    ball.x += normal[0] * EPSILON * 10;
-    ball.y += normal[1] * EPSILON * 10;
+    ball.x += normal[0] * EPSILON;
+    ball.y += normal[1] * EPSILON;
   }
 
   static ballCircleCollision(
