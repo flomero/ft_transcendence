@@ -10,6 +10,7 @@ type TournamentMemberStatus =
 
 export interface TournamentMember {
   id: string;
+  //  isAI: boolean;
   status: TournamentMemberStatus;
   webSocket?: WebSocket;
 }
