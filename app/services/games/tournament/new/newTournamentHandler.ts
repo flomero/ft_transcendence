@@ -9,13 +9,14 @@ export const tournaments = new Map<string, TournamentManager>();
 
 async function newTournamentHandler(
   request: FastifyRequest<{ Body: TournamentSettings }>,
+  request: FastifyRequest<{
+    Params: { gameMode: string; tournamentMode: string };
+  }>,
   reply: FastifyReply,
 ) {
   try {
     const userId = request.userId;
-    const tournamentSettings = request.body;
     canTournamentBeCreatedCheck(userId);
-    validateGameModifierCheck(tournamentSettings.gameData);
     const newTournament = new TournamentManager(tournamentSettings, userId);
     tournaments.set(newTournament.tournamentId, newTournament);
     return reply.code(201).send({ tournamentId: newTournament.tournamentId });
