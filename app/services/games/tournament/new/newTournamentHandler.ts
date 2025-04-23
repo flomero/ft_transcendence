@@ -8,7 +8,6 @@ import validateGameModifierCheck from "../../lobby/lobbyVaidation/validateGameMo
 export const tournaments = new Map<string, TournamentManager>();
 
 async function newTournamentHandler(
-  request: FastifyRequest<{ Body: TournamentSettings }>,
   request: FastifyRequest<{
     Params: { gameMode: string; tournamentMode: string };
   }>,
