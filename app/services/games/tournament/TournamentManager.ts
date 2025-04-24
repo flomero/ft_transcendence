@@ -3,24 +3,24 @@ import { randomUUID } from "node:crypto";
 import { WebSocket } from "ws";
 import { GameModeType } from "../../config/gameModes";
 import { TournamentConfigKey } from "../../config/tournamentConfig";
+import { Tournament, TournamentStatus } from "./tournament";
 
 class TournamentManager {
   public tournamentId: string = randomUUID();
-  public ownerId: string; // Make private
+  public ownerId: string | undefined; // Make private
   private tournamentMembers: Map<string, TournamentMember> = new Map();
   public tournamentConfigKey: TournamentConfigKey; // Make private
-  public tournamentState: "created" | "running"; // Make private
-  public gameMode: GameModeType;
+  public gameModeType: GameModeType;
+  public tournament: Tournament | undefined;
 
   constructor(
     tournamentConfigKey: TournamentConfigKey,
     userId: string,
-    gameMode: GameModeType,
+    gameModeType: GameModeType,
     tournamenttSize: number,
   ) {
-    this.tournamentState = "created";
     this.ownerId = userId;
-    this.gameMode = gameMode;
+    this.gameModeType = gameModeType;
     this.tournamentConfigKey = tournamentConfigKey;
 
     const newMember: TournamentMember = {
@@ -69,7 +69,34 @@ class TournamentManager {
     //    if (memberId === this.ownerId)
   }
 
-  //  private changeOwner() {}
+  public changeOwner() {
+    if (this.tournamentMembers.size > 0) {
+      const memberIds = Array.from(this.tournamentMembers.keys());
+      this.ownerId = memberIds[0];
+      return;
+    }
+    this.ownerId = undefined;
+  }
+
+  public getTournamentConfigKey(): TournamentConfigKey {
+    return this.tournamentConfigKey;
+  }
+
+  public getPlayersUUIDs(): string[] {
+    return Array.from(this.tournamentMembers.keys());
+  }
+
+  public getGameModeType(): GameModeType {
+    return this.gameModeType;
+  }
+
+  public getTournamentStatus(): TournamentStatus | undefined {
+    return this.tournament?.getStatus();
+  }
+
+  public getId(): string {
+    return this.tournamentId;
+  }
 }
 
 export default TournamentManager;
