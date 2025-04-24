@@ -68,7 +68,12 @@ class TournamentManager {
     const member = this.tournamentMembers.get(memberId);
     member?.webSocket?.close();
     this.tournamentMembers.delete(memberId);
-    //    if (memberId === this.ownerId)
+    if (
+      memberId === this.ownerId &&
+      this.tournament?.getStatus() === TournamentStatus.CREATED
+    ) {
+      this.changeOwner();
+    }
   }
 
   public changeOwner() {

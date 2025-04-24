@@ -13,7 +13,6 @@ async function leaveTournamentHandler(
     canTournamentBeLeftCheck(userId, tournamentId);
     const tournamentManager = tournaments.get(tournamentId);
     tournamentManager?.removeMemberSave(userId);
-    // handle more cases here once tournament is running
     return reply.code(201).send({ tournamentId: tournamentId });
   } catch (error) {
     if (error instanceof Error) {
