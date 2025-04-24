@@ -12,16 +12,18 @@ class TournamentManager {
   public tournamentConfigKey: TournamentConfigKey; // Make private
   public gameModeType: GameModeType;
   public tournament: Tournament | undefined;
+  public tournamentSize: number;
 
   constructor(
     tournamentConfigKey: TournamentConfigKey,
     userId: string,
     gameModeType: GameModeType,
-    tournamenttSize: number,
+    tournamentSize: number,
   ) {
     this.ownerId = userId;
     this.gameModeType = gameModeType;
     this.tournamentConfigKey = tournamentConfigKey;
+    this.tournamentSize = tournamentSize;
 
     const newMember: TournamentMember = {
       id: userId,
