@@ -20,9 +20,9 @@
           "ballResetSampler": "biasedQuadrantGaussianRA",
           "paddleCoveragePercent": 25,
           "paddleSpeedWidthPercentS": 150,
-          "paddleVelocityAngularTransmissionPercent": 22.5,
+          "paddleVelocityAngularTransmissionPercent": 45,
           "paddleVelocitySpeedTransmissionPercent": 10,
-          "powerUpRadius": 4,
+          "powerUpRadius": 4.5,
           "powerUpCapacities": {
             "speedBoost": 1,
             "blinkingBall": 1,
@@ -50,7 +50,7 @@
           "ballResetSampler": "biasedGaussianCA",
           "paddleCoveragePercent": 25,
           "paddleSpeedWidthPercentS": 150,
-          "paddleVelocityAngularTransmissionPercent": 22.5,
+          "paddleVelocityAngularTransmissionPercent": 45,
           "paddleVelocitySpeedTransmissionPercent": 10,
           "powerUpRadius": 3,
           "powerUpCapacities": {
@@ -106,7 +106,7 @@
         "paddleExtendedSpeedMultiplierPercent": 30,
         "paddleExtensionDurationS": 0.08,
         "paddleRetractionDurationS": 0.12,
-        "extensionVelocityTransmissionFactor": 1.1
+        "extensionVelocityTransmissionPercent": 10
       },
 
       "timedStart": {
@@ -147,11 +147,11 @@
         "className": "Shooter",
         "spawnWeight": 2.0,
         "selfActivation": false,
-        "durationS": 4,
+        "durationS": 5,
         "chargeDurationS": 2,
-        "chargeRadius": 10,
-        "shootInitialVelocityPercent": 180,
-        "shootFinalVelocityPercent": 100,
+        "chargeRadius": 5,
+        "shootInitialVelocityPercent": 225,
+        "shootFinalVelocityPercent": 105,
         "shootDirectionSamplerStrategyName": "biasedQuadrantGaussianRA"
       },
 
@@ -160,12 +160,11 @@
         "spawnWeight": 1.0,
         "selfActivation": false,
         "durationS": 10,
-        "bumperAngleDeg": 82.5,
         "bumperJunctionDistanceFromCenterPercent": 13.5,
         "bumperWallJunctionDistancePercent": 80,
-        "bumperVelocityPercent": 35,
+        "bumperVelocityPercent": 80,
         "bumperMaxVelocityPercent": 120,
-        "bumperAccelerationPercentS": -50
+        "bumperAccelerationPercentS": -60
       }
     }
   }
