@@ -239,6 +239,10 @@ export class Bumper extends TimeLimitedModifierBase {
   }
 
   onUpdate(game: Pong): void {
+    if (this.ticks <= 0) {
+      this.deactivate(game);
+      return;
+    }
     super.onUpdate(game);
 
     if (game.getState().balls.length === 0) return;

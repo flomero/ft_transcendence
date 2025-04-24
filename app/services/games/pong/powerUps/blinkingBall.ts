@@ -65,11 +65,8 @@ export class BlinkingBall extends TimeLimitedModifierBase {
   }
 
   onUpdate(game: Pong): void {
-    if (this.status !== ModifierStatus.ACTIVE) {
-      this.deactivate(game);
-      return;
-    }
     super.onUpdate(game);
+    if (this.status !== ModifierStatus.ACTIVE) return;
 
     const gameState = game.getState();
     if (!(gameState.balls.length > 0)) {
@@ -85,9 +82,7 @@ export class BlinkingBall extends TimeLimitedModifierBase {
     ) {
       gameState.balls[0].isVisible = true;
       this.isVisible = true;
-    }
-
-    if (this.ticks % this.blinkInterval == 0) {
+    } else if (this.ticks % this.blinkInterval == 0) {
       gameState.balls[0].isVisible = false;
       this.isVisible = false;
     }

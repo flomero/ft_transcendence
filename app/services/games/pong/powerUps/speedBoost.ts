@@ -104,7 +104,7 @@ export class SpeedBoost extends TimeLimitedModifierBase {
 
     // Reset ball speed back to initial when deactivating
     const gameState = game.getState();
-    if (gameState.balls.length > 0 && this.ticks === 0)
+    if (gameState.balls.length > 0 && this.ticks <= 0)
       gameState.balls[0].speed = this.initialSpeed;
 
     game.getModifierManager().deletePowerUp(this);
