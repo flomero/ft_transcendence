@@ -41,7 +41,7 @@ async function joinLobbyHandler(
   }
   const realLobby = getLobby(lobbyId);
   const data = {
-    title: "Lobby | Inception",
+    title: "Lobby | ft_transcendence",
     lobby: lobby,
     isReady: realLobby.getMember(userId)?.isReady || false,
     isOwner: realLobby.isMemberOwner(userId),

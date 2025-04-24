@@ -1,5 +1,5 @@
-import { FastifyInstance } from "fastify";
-import { ChatRoom, getChatRoomsForUser } from "../database/chat/room";
+import type { FastifyInstance } from "fastify";
+import { type ChatRoom, getChatRoomsForUser } from "../database/chat/room";
 
 export async function getChatRoomsForUserView(
   fastify: FastifyInstance,

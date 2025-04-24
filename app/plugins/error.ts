@@ -3,7 +3,9 @@ import fp from "fastify-plugin";
 export default fp(async (fastify, _opts) => {
   fastify.setErrorHandler(async (error, request, reply) => {
     const isFetchRequest =
-      request.headers.accept?.includes("application/json") && !request.isAjax();
+      (request.headers.accept?.includes("application/json") &&
+        !request.isAjax()) ||
+      request.method === "POST";
 
     if (isFetchRequest) {
       reply.code(error.statusCode ?? 500);
@@ -36,7 +38,9 @@ export default fp(async (fastify, _opts) => {
 
   fastify.setNotFoundHandler(async (request, reply) => {
     const isFetchRequest =
-      request.headers.accept?.includes("application/json") && !request.isAjax();
+      (request.headers.accept?.includes("application/json") &&
+        !request.isAjax()) ||
+      request.method === "POST";
 
     if (isFetchRequest) {
       reply.code(404);

@@ -1,4 +1,4 @@
-import { FastifyInstance, FastifyRequest } from "fastify";
+import type { FastifyInstance, FastifyRequest } from "fastify";
 import { saveMessage } from "../database/chat/message";
 import {
   addUserToChatRoom,
@@ -6,10 +6,11 @@ import {
   deleteChatRoom,
   getChatRoomRead,
   getUserIdsFromDirectChatRooms,
-  RoomType,
+  type RoomType,
   setRoomRead,
   setRoomReadForAllUsersBlacklist,
 } from "../database/chat/room";
+import { isBlocked } from "../database/friend/block";
 
 interface ChatClient {
   socket: any;
@@ -148,6 +149,10 @@ export async function sendMessage(
 
       client.socket.send(JSON.stringify(response));
 
+      continue;
+    }
+
+    if (await isBlocked(fastify, client.userId, request.userId)) {
       continue;
     }
 

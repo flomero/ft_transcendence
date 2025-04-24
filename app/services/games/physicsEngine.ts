@@ -8,6 +8,7 @@ export interface Collision {
   objectId: number;
   normal?: [number, number];
   type?: string;
+  outOfBounds?: boolean; // New flag to indicate out-of-bounds correction
 }
 
 export class PhysicsEngine {
@@ -46,11 +47,18 @@ export class PhysicsEngine {
 
       if (
         collision &&
-        (!closestCollision || collision.distance < closestCollision.distance)
+        (!closestCollision ||
+          collision.distance < closestCollision.distance ||
+          collision.outOfBounds)
       ) {
         collision.objectId = i;
         collision.type = objectType;
         closestCollision = collision;
+
+        // If we found an out-of-bounds situation, return it immediately
+        if (collision.outOfBounds) {
+          return closestCollision;
+        }
       }
     }
 
@@ -91,15 +99,55 @@ export class PhysicsEngine {
     const r_bdx = bdx * ca + bdy * sa;
     const r_bdy = -bdx * sa + bdy * ca;
 
-    // Deactivate collision from inside the Rectangle
+    // Check if the ball is inside the Rectangle (out of bounds)
     if (
-      r_bx >= -rw / 2.0 &&
-      r_bx <= rw / 2.0 &&
-      r_by >= -rh / 2.0 &&
-      r_by <= rh / 2.0
-    )
-      return null;
+      r_bx >= -rw / 2.0 - EPSILON &&
+      r_bx <= rw / 2.0 + EPSILON &&
+      r_by >= -rh / 2.0 - EPSILON &&
+      r_by <= rh / 2.0 + EPSILON
+    ) {
+      // Calculate the minimum distance to push the ball out of the rectangle
+      const distToRight = rw / 2.0 - r_bx;
+      const distToLeft = r_bx + rw / 2.0;
+      const distToTop = rh / 2.0 - r_by;
+      const distToBottom = r_by + rh / 2.0;
 
+      // Find the shortest way out
+      const minDist = Math.min(
+        distToRight,
+        distToLeft,
+        distToTop,
+        distToBottom,
+      );
+
+      let normalLocal: [number, number];
+
+      if (minDist === distToRight) {
+        normalLocal = [1, 0]; // Push out to the right
+      } else if (minDist === distToLeft) {
+        normalLocal = [-1, 0]; // Push out to the left
+      } else if (minDist === distToTop) {
+        normalLocal = [0, 1]; // Push out downward (in local space)
+      } else {
+        normalLocal = [0, -1]; // Push out upward (in local space)
+      }
+
+      // Transform normal back to global coordinates
+      const normalGlobal: [number, number] = [
+        normalLocal[0] * ca - normalLocal[1] * sa,
+        normalLocal[0] * sa + normalLocal[1] * ca,
+      ];
+
+      // Return collision with out-of-bounds flag set
+      return {
+        distance: minDist + EPSILON,
+        objectId: objId,
+        normal: normalGlobal,
+        outOfBounds: true,
+      };
+    }
+
+    // Original collision logic continues...
     // First, check for side collisions
     const potentialTs: Array<[number, null]> = [];
     const tx_1 =
@@ -112,7 +160,7 @@ export class PhysicsEngine {
       Math.abs(r_bdy) >= EPSILON ? (-br - rh / 2.0 - r_by) / r_bdy : null;
 
     for (const tCandidate of [tx_1, tx_2, ty_1, ty_2]) {
-      if (tCandidate !== null && EPSILON < tCandidate && tCandidate <= bs) {
+      if (tCandidate !== null && 0 < tCandidate && tCandidate <= bs) {
         // Additionally check that the ball's position at time t_candidate is within the extended rectangle bounds
         const new_r_bx = r_bx + tCandidate * r_bdx;
         const new_r_by = r_by + tCandidate * r_bdy;
@@ -160,7 +208,7 @@ export class PhysicsEngine {
       // We choose the smaller positive t
       const tCandidate = (-B - sqrtDisc) / (2 * A);
 
-      if (EPSILON < tCandidate && tCandidate <= bs) {
+      if (0 < tCandidate && tCandidate <= bs) {
         // Check if this candidate is the earliest among corner collisions
         if (tCandidate < cornerCollisionT) {
           cornerCollisionT = tCandidate;
@@ -282,6 +330,14 @@ export class PhysicsEngine {
     obj: Ball,
     objId: number,
   ): Collision | null {
+    // Check if already inside the object
+    const currentDistance = Math.sqrt(
+      (ball.x - obj.x) ** 2 + (ball.y - obj.y) ** 2,
+    );
+    if (currentDistance < ball.radius + obj.radius) {
+      return { distance: 0, objectId: objId };
+    }
+
     const a = ball.dx ** 2 + ball.dy ** 2;
     const b = 2.0 * (ball.dx * (ball.x - obj.x) + ball.dy * (ball.y - obj.y));
     const c =
@@ -299,7 +355,7 @@ export class PhysicsEngine {
     const sqrtDelta = Math.sqrt(delta);
     const t = (-b - sqrtDelta) / (2.0 * a);
 
-    if (EPSILON < t && t <= distance) {
+    if (0 < t && t <= distance) {
       return { distance: t, objectId: objId };
     }
 

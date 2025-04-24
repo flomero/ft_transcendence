@@ -1,7 +1,7 @@
 import { downloadImageAsBase64 } from "../images/downloadImage";
 import { insertUserIfNotExists, userExists } from "../database/user";
-import { GoogleUserInfo } from "./google-api";
-import { FastifyInstance } from "fastify";
+import type { GoogleUserInfo } from "./google-api";
+import type { FastifyInstance } from "fastify";
 import { saveImage } from "../database/image/image";
 
 export async function insertUser(

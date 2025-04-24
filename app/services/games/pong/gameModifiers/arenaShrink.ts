@@ -1,8 +1,15 @@
-import { PongModifierBase } from "../pongModifierBase";
 import { Pong } from "../pong";
 import { Rectangle } from "../../../../types/games/pong/rectangle";
+import { ModifierBase } from "../../modifierBase";
 
-export class ArenaShrink extends PongModifierBase {
+const coefficients: { [playerCount: number]: number } = {
+  5: 3.1,
+  6: 2.4,
+  7: 1.5,
+  8: 1.31,
+};
+
+export class ArenaShrink extends ModifierBase {
   name = "arenaShrink";
 
   shrunkIds: number[] = [];
@@ -49,10 +56,6 @@ export class ArenaShrink extends PongModifierBase {
     shrunkWall["absY"] = (leftmost["absY"] + rightmost["absY"]) / 2.0;
     shrunkWall["isGoal"] = false;
 
-    gameState.walls[wallIds[0]].width /= 1.05;
-    gameState.walls[wallIds[1]] = shrunkWall;
-    gameState.walls[wallIds[2]].width /= 1.05;
-
     // If a non-goal wall is surrounded by 2 players that got eliminated, hide it.
     // Check whether adjacent players are eliminated
     const adjacentPlayerStatus = [-1, 1].filter((offset) => {
@@ -62,12 +65,72 @@ export class ArenaShrink extends PongModifierBase {
       return gameState.results[index] !== 0;
     });
 
-    // Hide the corresponding wall
+    if (!this.shrunkIds.includes(wallIds[0])) {
+      gameState.walls[wallIds[0]].width /= 2.0;
+      gameState.walls[wallIds[0]].x +=
+        (gameState.walls[wallIds[0]].dx * gameState.walls[wallIds[0]].width) /
+        2.0;
+      gameState.walls[wallIds[0]].y +=
+        (gameState.walls[wallIds[0]].dy * gameState.walls[wallIds[0]].width) /
+        2.0;
+      this.shrunkIds.push(wallIds[0]);
+    }
+
+    gameState.walls[wallIds[1]] = shrunkWall;
+
+    if (!this.shrunkIds.includes(wallIds[2])) {
+      gameState.walls[wallIds[2]].width /= 2.0;
+      gameState.walls[wallIds[2]].x -=
+        (gameState.walls[wallIds[2]].dx * gameState.walls[wallIds[2]].width) /
+        2.0;
+      gameState.walls[wallIds[2]].y -=
+        (gameState.walls[wallIds[2]].dy * gameState.walls[wallIds[2]].width) /
+        2.0;
+      this.shrunkIds.push(wallIds[2]);
+    }
+
+    // Process walls when adjacent players are eliminated
     for (const adjacent of adjacentPlayerStatus) {
-      const adjacentWallId =
+      // Get the adjacent player's ID
+      const adjacentPlayerId =
+        (args.playerId + adjacent + gameState.playerCount) %
+        gameState.playerCount;
+
+      // Get the main walls (even IDs) of the current player and adjacent player
+      const currentMainWallId = args.playerId * 2;
+      const adjacentMainWallId = adjacentPlayerId * 2;
+
+      // Get the wall between them (odd ID)
+      const connectingWallId =
         (2 * args.playerId + adjacent + 2 * gameState.playerCount) %
         (2 * gameState.playerCount);
-      gameState.walls[adjacentWallId].isVisible = false;
+
+      const currentMainWall = gameState.walls[currentMainWallId];
+      const adjacentMainWall = gameState.walls[adjacentMainWallId];
+      const connectingWall = gameState.walls[connectingWallId];
+
+      const angleDiff = Math.abs(currentMainWall.alpha - connectingWall.alpha);
+
+      const widthDiff = (Math.cos(angleDiff) * connectingWall.width) / 2.0;
+      const normalDiff = connectingWall.height / Math.cos(angleDiff);
+
+      currentMainWall.width -=
+        (widthDiff * coefficients[gameState.playerCount]) / 2.0;
+      currentMainWall.x -= (adjacent * currentMainWall.dx * widthDiff) / 2.0;
+      currentMainWall.y -= (adjacent * currentMainWall.dy * widthDiff) / 2.0;
+
+      adjacentMainWall.width -=
+        (widthDiff * coefficients[gameState.playerCount]) / 2.0;
+      adjacentMainWall.x += (adjacent * adjacentMainWall.dx * widthDiff) / 2.0;
+      adjacentMainWall.y += (adjacent * adjacentMainWall.dy * widthDiff) / 2.0;
+
+      // Adjust the connecting wall position to create a continuous barrier
+      connectingWall.x +=
+        adjacent * ((connectingWall.dx * connectingWall.width) / 2.0) +
+        connectingWall.nx * coefficients[gameState.playerCount] * normalDiff;
+      connectingWall.y +=
+        adjacent * ((connectingWall.dy * connectingWall.width) / 2.0) +
+        connectingWall.ny * coefficients[gameState.playerCount] * normalDiff;
     }
   }
 }

@@ -2,12 +2,24 @@ import GameManager from "../../gameHandler/GameManager";
 import { createNewGameClass } from "./createNewGameClass";
 import { getLobby } from "../lobbyWebsocket/getLobby";
 import { LobbyMember } from "../../../../types/games/lobby/LobbyMember";
+import { GameOrigin } from "../../../../types/games/gameHandler/GameOrigin";
 
 const gameManagerCreate = (lobbyId: string) => {
   const game = createNewGameClass(lobbyId);
-  const gameManager = new GameManager(game);
+  const gameOrigin = createGameOrigin(lobbyId);
+  const gameManager = new GameManager(game, gameOrigin);
   addTransferMemberToGameManager(gameManager, lobbyId);
   return gameManager;
+};
+
+const createGameOrigin = (lobbyId: string) => {
+  const lobbyClass = getLobby(lobbyId);
+
+  const gameOrigin: GameOrigin = {
+    type: "lobby",
+    lobby: lobbyClass,
+  };
+  return gameOrigin;
 };
 
 const addTransferMemberToGameManager = (
@@ -37,12 +49,5 @@ const addAiToGameManager = (
     if (aiOpponentId.isAi === true) gameManager.addAiOpponent(aiOpponentId.id);
   }
 };
-
-// const printLobby = (lobbyId: string) => {
-//   const lobby = getLobby(lobbyId);
-//   lobby.sendMessageToAllMembers(
-//     JSON.stringify("SETTINGS: " + lobby.getGameSettings),
-//   );
-// };
 
 export default gameManagerCreate;

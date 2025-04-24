@@ -1,4 +1,4 @@
-import { UserInput } from "../../types/games/userInput";
+import type { UserInput } from "../../types/games/userInput";
 
 export class UserInputManager {
   private inputQueue: UserInput[] = [];

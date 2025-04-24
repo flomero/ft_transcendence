@@ -42,7 +42,7 @@ interface GameState {
   paddles?: Paddle[];
   walls?: Wall[];
   scores?: Record<string, number>;
-  modifiersData?: ModifiersData;
+  modifiersState?: ModifiersData;
 }
 
 interface UserInputAction {
@@ -190,7 +190,7 @@ class PongGame {
     if (this.gameState.balls) this.drawBalls();
     if (this.gameState.paddles) this.drawPaddles();
     if (this.gameState.walls) this.drawWalls();
-    if (this.gameState.modifiersData?.spawnedPowerUps) this.drawPowerUps();
+    if (this.gameState.modifiersState?.spawnedPowerUps) this.drawPowerUps();
     if (this.gameState.scores) this.drawScores();
   }
 
@@ -279,24 +279,38 @@ class PongGame {
   }
 
   private drawPowerUps(): void {
-    if (!this.gameState.modifiersData?.spawnedPowerUps) return;
+    if (!this.gameState.modifiersState?.spawnedPowerUps) return;
 
-    this.gameState.modifiersData.spawnedPowerUps.forEach((entry) => {
-      const type = entry[0];
-      const powerUp = entry[1];
+    this.gameState.modifiersState.spawnedPowerUps.forEach((entry) => {
+      const [type, powerUp] = entry;
 
       if (powerUp.isVisible) {
-        this.ctx.fillStyle = this.getPowerUpColor(type);
+        const color = this.getPowerUpColor(type);
+        const x = powerUp.x * this.ratio;
+        const y = powerUp.y * this.ratio;
+        const radius = powerUp.radius * this.ratio;
+
+        this.ctx.save();
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, radius, 0, Math.PI * 2);
+        this.ctx.fillStyle = color;
+        this.ctx.shadowColor = color;
+        this.ctx.shadowBlur = 8;
+        this.ctx.fill();
 
         this.ctx.beginPath();
-        this.ctx.arc(
-          powerUp.x * this.ratio,
-          powerUp.y * this.ratio,
-          powerUp.radius * this.ratio,
-          0,
-          Math.PI * 2,
-        );
+        this.ctx.arc(x, y - radius * 0.3, radius * 0.4, 0, Math.PI * 2);
+        this.ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
+        this.ctx.shadowBlur = 0;
         this.ctx.fill();
+        this.ctx.restore();
+
+        if (this.debug) {
+          this.ctx.fillStyle = "white";
+          this.ctx.font = "10px ui-sans-serif";
+          this.ctx.textAlign = "center";
+          this.ctx.fillText(type, x, y - radius - 5);
+        }
       }
     });
   }

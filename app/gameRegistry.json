@@ -15,17 +15,20 @@
         },
 
         "customizableSettings": {
-          "ballSpeedWidthPercentS": 65,
+          "ballSpeedWidthPercentS": 50,
           "ballRadius": 0.95,
           "ballResetSampler": "biasedQuadrantGaussianRA",
           "paddleCoveragePercent": 25,
           "paddleSpeedWidthPercentS": 150,
-          "paddleVelocityAngularTransmissionPercent": 18,
-          "paddleVelocitySpeedTransmissionPercent": 8,
-          "powerUpRadius": 20,
+          "paddleVelocityAngularTransmissionPercent": 45,
+          "paddleVelocitySpeedTransmissionPercent": 10,
+          "powerUpRadius": 4.5,
           "powerUpCapacities": {
             "speedBoost": 1,
-            "blinkingBall": 1
+            "blinkingBall": 1,
+            "multiBall": 1,
+            "shooter": 1,
+            "bumper": 1
           }
         }
       },
@@ -45,12 +48,17 @@
           "ballSpeedWidthPercentS": 60,
           "ballRadius": 0.85,
           "ballResetSampler": "biasedGaussianCA",
-          "paddleCoveragePercent": 20,
+          "paddleCoveragePercent": 25,
           "paddleSpeedWidthPercentS": 150,
-          "powerUpRadius": 10,
+          "paddleVelocityAngularTransmissionPercent": 45,
+          "paddleVelocitySpeedTransmissionPercent": 10,
+          "powerUpRadius": 3,
           "powerUpCapacities": {
             "speedBoost": 1,
-            "blinkingBall": 1
+            "blinkingBall": 1,
+            "multiBall": 1,
+            "shooter": 1,
+            "bumper": 1
           }
         }
       }
@@ -59,19 +67,19 @@
     "gameModifiers": {
       "powerUpSpawner": {
         "className": "PowerUpSpawner",
-        "meanDelayS": 5,
+        "meanDelayS": 10,
         "delaySpanS": 2,
         "positionSampler": "elipticGaussianRA"
       },
 
       "timedGame": {
         "className": "TimedGame",
-        "durationS": 60
+        "durationS": 600
       },
 
       "scoredGame": {
         "className": "ScoredGame",
-        "goalObjective": 10
+        "goalObjective": 7
       },
 
       "survivalGame": {
@@ -80,7 +88,7 @@
 
       "elimination": {
         "className": "Elimination",
-        "threshold": 1
+        "threshold": 3
       },
 
       "arenaShrink": {
@@ -89,27 +97,74 @@
 
       "goalReset": {
         "className": "GoalReset",
-        "delayS": 2
+        "delayS": 1.5
+      },
+
+      "paddleBoost": {
+        "className": "PaddleBoost",
+        "paddleExtensionLength": 2.5,
+        "paddleExtendedSpeedMultiplierPercent": 30,
+        "paddleExtensionDurationS": 0.08,
+        "paddleRetractionDurationS": 0.12,
+        "extensionVelocityTransmissionPercent": 10
+      },
+
+      "timedStart": {
+        "className": "TimedStart"
       }
     },
 
     "powerUps": {
       "speedBoost": {
         "className": "SpeedBoost",
-        "spawnWeight": 1.0,
+        "spawnWeight": 2.0,
         "selfActivation": false,
         "durationS": 5,
-        "totalRampUpStrength": 1.25,
+        "totalRampUpStrength": 1.35,
         "rampUpFrequencyS": 0.25
       },
 
       "blinkingBall": {
         "className": "BlinkingBall",
-        "spawnWeight": 1.0,
+        "spawnWeight": 1.5,
         "selfActivation": false,
         "durationS": 6,
         "blinkIntervalS": 0.5,
-        "blinkDurationPercent": 50
+        "blinkDurationPercent": 66
+      },
+
+      "multiBall": {
+        "className": "MultiBall",
+        "spawnWeight": 1.5,
+        "selfActivation": false,
+        "durationS": 6,
+        "ballCount": 8,
+        "totalAngleDeg": 80,
+        "radiusFactorPercent": 60
+      },
+
+      "shooter": {
+        "className": "Shooter",
+        "spawnWeight": 2.0,
+        "selfActivation": false,
+        "durationS": 5,
+        "chargeDurationS": 2,
+        "chargeRadius": 5,
+        "shootInitialVelocityPercent": 225,
+        "shootFinalVelocityPercent": 105,
+        "shootDirectionSamplerStrategyName": "biasedQuadrantGaussianRA"
+      },
+
+      "bumper": {
+        "className": "Bumper",
+        "spawnWeight": 1.0,
+        "selfActivation": false,
+        "durationS": 10,
+        "bumperJunctionDistanceFromCenterPercent": 13.5,
+        "bumperWallJunctionDistancePercent": 80,
+        "bumperVelocityPercent": 80,
+        "bumperMaxVelocityPercent": 120,
+        "bumperAccelerationPercentS": -60
       }
     }
   }

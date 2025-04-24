@@ -1,4 +1,4 @@
-import { FastifyInstance } from "fastify";
+import type { FastifyInstance } from "fastify";
 import { getMessagesWithUserInfo } from "../database/chat/message";
 
 export interface ChatMessage {
@@ -13,7 +13,7 @@ export async function getChatMessagesForRoom(
   roomId: number,
   userId: string,
 ): Promise<ChatMessage[]> {
-  const db_messages = await getMessagesWithUserInfo(fastify, roomId);
+  const db_messages = await getMessagesWithUserInfo(fastify, userId, roomId);
 
   return db_messages.map((message) => ({
     userName: message["username"],
