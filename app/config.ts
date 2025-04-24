@@ -11,7 +11,29 @@ export enum LobbyGameModes {
 
 export enum TournamentGameModes {
   ClassicPong = "classicPong",
+  BasicPowerUp1v1 = "basicPowerUp1v1",
 }
+
+export const TournamentGameModesPerBracketType: {
+  [bracketType: string]: TournamentGameModes[];
+} = {
+  roundRobin: [
+    TournamentGameModes.ClassicPong,
+    TournamentGameModes.BasicPowerUp1v1,
+  ],
+  singleElimination: [
+    TournamentGameModes.ClassicPong,
+    TournamentGameModes.BasicPowerUp1v1,
+  ],
+  doubleElimination: [
+    TournamentGameModes.ClassicPong,
+    TournamentGameModes.BasicPowerUp1v1,
+  ],
+  swissRound: [
+    TournamentGameModes.ClassicPong,
+    TournamentGameModes.BasicPowerUp1v1,
+  ],
+};
 
 export type GAMEMODE_REGISTRY_TYPE = {
   [gamemodeConfigName: string]: GameSettings;
@@ -127,9 +149,24 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
   },
 };
 
-export const TOURNAMENT_CONFIGS_REGISTRY = {
+export type TOURNAMENT_CONFIGS_REGISTRY_TYPE = {
+  [tournamentConfigName: string]: {
+    bracketType: string;
+    matchWinner: string;
+    possiblePlayerCount: number[];
+  };
+};
+
+export const TOURNAMENT_CONFIGS_REGISTRY: TOURNAMENT_CONFIGS_REGISTRY_TYPE = {
   roundRobin: {
     bracketType: "roundRobin",
     matchWinner: "bestOfX",
+    possiblePlayerCount: [3, 4, 5, 6],
+  },
+
+  singleElimination: {
+    bracketType: "singleElimination",
+    matchWinner: "bestOfX",
+    possiblePlayerCount: [4, 8, 16, 32],
   },
 };
