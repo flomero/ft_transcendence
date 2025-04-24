@@ -1,5 +1,7 @@
+import { UserInput } from "../../types/games/userInput";
 import { ConfigManager } from "./configManager";
 import type { GameBase } from "./gameBase";
+import { Pong } from "./pong/pong";
 
 export enum ModifierStatus {
   INACTIVE,
@@ -56,6 +58,7 @@ export class ModifierBase {
 
   // Triggered events
   onUpdate(game: GameBase): void {}
+  onPaddleUpdate(game: GameBase, args: { playerId: number }): void {}
 
   onActivation(game: GameBase): void {}
   onDeactivation(game: GameBase): void {}
@@ -64,13 +67,19 @@ export class ModifierBase {
 
   onGameStart(game: GameBase): void {}
 
-  onUserInput(game: GameBase): void {}
+  onUserInput(game: GameBase, args: { input: UserInput }): void {}
 
   onPowerUpSpawn(game: GameBase): void {}
   onFailedPowerUpSpawn(game: GameBase, args: { reason: string }): void {}
   onPowerUpPickup(game: GameBase): void {}
 
   onCDFComputation(game: GameBase): void {}
+
+  onGoal(game: Pong, args: { playerId: number }): void {}
+  onPaddleBounce(game: Pong, args: { playerId: number }): void {}
+  onWallBounce(game: Pong, args: { wallID: number }): void {}
+  onPlayerElimination(game: Pong, args: { playerId: number }): void {}
+  onBallReset(game: Pong): void {}
 
   // Getters & Setters
   getName(): string {

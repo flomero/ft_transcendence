@@ -196,7 +196,7 @@ export class ClassicPong extends Pong {
         id: 1,
         x: this.settings.arenaWidth / 2.0,
         y: 0.0,
-        alpha: Math.PI / 4.0,
+        alpha: (3.0 * Math.PI) / 2.0,
         dx: 1.0,
         dy: 0.0,
         nx: 0.0,
@@ -234,7 +234,7 @@ export class ClassicPong extends Pong {
         id: 3,
         x: this.settings.arenaWidth / 2.0,
         y: this.settings.arenaHeight,
-        alpha: -Math.PI / 4.0,
+        alpha: Math.PI / 2.0,
         dx: -1.0,
         dy: 0.0,
         nx: 0.0,
@@ -298,7 +298,7 @@ export class ClassicPong extends Pong {
   }
 
   isOutOfBounds(ball: Ball): boolean {
-    const tolerance: number = -this.settings.wallsHeight / 3.0;
+    const tolerance: number = this.settings.wallsHeight / 2.0;
 
     return (
       ball.x <= -tolerance ||

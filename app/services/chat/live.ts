@@ -11,6 +11,7 @@ import {
   setRoomReadForAllUsersBlacklist,
 } from "../database/chat/room";
 import { ChatMessageType } from "./message";
+import { isBlocked } from "../database/friend/block";
 
 interface ChatClient {
   socket: any;
@@ -150,6 +151,10 @@ async function updateRoomAndSendMessage(
       };
 
       client.socket.send(JSON.stringify(response));
+      continue;
+    }
+
+    if (await isBlocked(fastify, client.userId, request.userId)) {
       continue;
     }
 
