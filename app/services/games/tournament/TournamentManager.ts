@@ -1,25 +1,33 @@
 import { TournamentMember } from "../../../interfaces/games/tournament/TournamentMember";
-import { TournamentSettings } from "../../../interfaces/games/tournament/TournamentSettings";
 import { randomUUID } from "node:crypto";
 import { WebSocket } from "ws";
+import { GameModeType } from "../../config/gameModes";
+import { TournamentConfigKey } from "../../config/tournamentConfig";
 
 class TournamentManager {
   public tournamentId: string = randomUUID();
   public ownerId: string; // Make private
   private tournamentMembers: Map<string, TournamentMember> = new Map();
-  public tournamentSettings: TournamentSettings; // Make private
+  public tournamentConfigKey: TournamentConfigKey; // Make private
   public tournamentState: "created" | "running"; // Make private
+  public gameMode: GameModeType;
 
-  constructor(tournamentSettings: TournamentSettings, userId: string) {
-    this.tournamentSettings = tournamentSettings;
+  constructor(
+    tournamentConfigKey: TournamentConfigKey,
+    userId: string,
+    gameMode: GameModeType,
+    tournamenttSize: number,
+  ) {
     this.tournamentState = "created";
+    this.ownerId = userId;
+    this.gameMode = gameMode;
+    this.tournamentConfigKey = tournamentConfigKey;
 
     const newMember: TournamentMember = {
       id: userId,
       status: "joined",
     };
     this.tournamentMembers.set(userId, newMember);
-    this.ownerId = userId;
   }
 
   public setMemberSocket(memberId: string, socket: WebSocket): void {
