@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import canTournamentBeLeftCheck from "../../../../routes/games/tournament/leave/canTournamentBeLeftCheck";
+import canTournamentBeLeftCheck from "../../lobby/leave/canTournamentBeLeftCheck";
 import { tournaments } from "../new/newTournamentHandler";
 
 async function leaveTournamentHandler(
