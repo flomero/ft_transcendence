@@ -1,4 +1,4 @@
-import { Database } from "sqlite3";
+import { Database } from "sqlite";
 import { Tournament } from "../tournament";
 import TournamentManager from "../TournamentManager";
 import {
@@ -30,7 +30,7 @@ const createTournament = async (
   };
 
   const newTournament = new Tournament(tournamentSettings);
-  addTournamentToDB(db, tournamentManager);
+  await addTournamentToDB(db, tournamentManager);
 
   return newTournament;
 };

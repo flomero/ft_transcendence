@@ -4,6 +4,8 @@ import { WebSocket } from "ws";
 import { GameModeType } from "../../config/gameModes";
 import { TournamentConfigKey } from "../../config/tournamentConfig";
 import { Tournament, TournamentStatus } from "./tournament";
+import createTournament from "./websocket/createTournament";
+import { Database } from "sqlite";
 
 class TournamentManager {
   public tournamentId: string = randomUUID();
@@ -83,6 +85,27 @@ class TournamentManager {
       return;
     }
     this.ownerId = undefined;
+  }
+
+  public async startTournament(db: Database): Promise<void> {
+    if (this.canTournamentBeStarted() === false) {
+      throw new Error("[start Tournamen] Tournament cannot be started");
+    }
+
+    this.tournament = await createTournament(db, this);
+  }
+
+  public canTournamentBeStarted(): boolean {
+    if (this.isTournamentFull() === false) return false;
+    if (this.tournament?.getStatus() === TournamentStatus.ON_GOING)
+      return false;
+    if (this.tournament?.getStatus() === TournamentStatus.FINISHED)
+      return false;
+    return true;
+  }
+
+  public isTournamentFull(): boolean {
+    return this.tournamentMembers.size === this.tournamentSize;
   }
 
   public getTournamentConfigKey(): TournamentConfigKey {
