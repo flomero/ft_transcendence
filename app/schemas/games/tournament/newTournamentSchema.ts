@@ -1,5 +1,4 @@
 import S from "fluent-json-schema";
-import { gameSettingsSchema } from "../lobby/newLobbySchema";
 import {
   TOURNAMENT_CONFIGS_REGISTRY,
   TournamentGameModes,

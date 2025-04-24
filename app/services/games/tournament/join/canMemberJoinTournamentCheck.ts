@@ -1,5 +1,5 @@
 import { isUserInAnyLobby } from "../../lobby/lobbyVaidation/isUserInAnyLobby";
-import { matchMakingManager } from "../../matchMaking/join/joinMatchMakingHandler";
+import { tournaments } from "../new/newTournamentHandler";
 import isMemberInAnyTournament from "../tournamentValidation/isMemberInAnyTournament";
 
 const canMemberJoinTournamentCheck = (
@@ -13,7 +13,8 @@ const canMemberJoinTournamentCheck = (
   if (userTournamentId !== null && userTournamentId !== tournamentId) {
     throw new Error("User is already in a tournament: " + userTournamentId);
   }
-  if (matchMakingManager.memberExists(memberId) === true) {
+  const tournament = tournaments.get(tournamentId);
+  if (tournament?.isMemberInTournament(memberId) === true) {
     throw new Error("User is already in match making");
   }
 };

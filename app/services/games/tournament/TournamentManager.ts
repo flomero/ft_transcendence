@@ -1,4 +1,4 @@
-import { TournamentMember } from "../../../schemas/games/tournament/TournamentMember";
+import { TournamentMember } from "../../../interfaces/games/tournament/TournamentMember";
 import { TournamentSettings } from "../../../interfaces/games/tournament/TournamentSettings";
 import { randomUUID } from "node:crypto";
 import { WebSocket } from "ws";
@@ -61,7 +61,7 @@ class TournamentManager {
     //    if (memberId === this.ownerId)
   }
 
-  private changeOwner() {}
+  //  private changeOwner() {}
 }
 
 export default TournamentManager;
