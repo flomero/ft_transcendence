@@ -242,8 +242,9 @@ export class Bumper extends TimeLimitedModifierBase {
     super.onUpdate(game);
 
     if (game.getState().balls.length === 0) return;
-    game.getState().balls[0].speed =
-      this.initialVelocity * (1.0 + this.velocityFactor);
+    if (this.velocityFactor !== 0.0)
+      game.getState().balls[0].speed =
+        this.initialVelocity * (1.0 + this.velocityFactor);
 
     this.velocityFactor = Math.max(
       0.0,
@@ -260,5 +261,10 @@ export class Bumper extends TimeLimitedModifierBase {
       });
     game.getState().balls[0].speed = this.initialVelocity;
     game.getModifierManager().deletePowerUp(this);
+  }
+
+  onGoal(game: Pong, args: { playerId: number }): void {
+    // On goal reset the currently stored velocityFactor
+    this.velocityFactor = 0.0;
   }
 }
