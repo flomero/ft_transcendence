@@ -13,6 +13,12 @@ export async function requestFriend(
   if (userId === friendId) {
     return "Cannot send request to yourself";
   }
+  if (await isBlocked(fastify, friendId, userId)) {
+    return "User blocked you";
+  }
+  if (await isBlocked(fastify, userId, friendId)) {
+    return "Can not send request to blocked user";
+  }
   if (await hasInvite(fastify, userId, friendId)) {
     return "Request already sent";
   }
