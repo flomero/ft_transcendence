@@ -5,7 +5,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    padding: 0.25rem 0.5rem;
+    padding: 0 0 0 0.5rem;
     width: 100%;
     border-radius: 0.375rem; /* rounded-md */
     transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
@@ -24,7 +24,7 @@
 
 <div id="{{match.id}}"
      class="match border bg-black-200 mt-2 mb-2 p-2 rounded-lg">
-  <h3 class="match-name font-bold text-lg">{{match.name}}</h3>
+<!--  <h3 class="match-name font-bold text-lg">{{match.name}}</h3>-->
   <ul class="players-list mt-2">
     {{#each match.players as |player|}}
       <li>
@@ -34,9 +34,10 @@
           style="--hover-bg-color: #e2e8f0; /* Custom hover color */
            --focus-bg-color: #e2e8f0; /* Custom focus color */
            --focus-ring-color: rgba(148, 163, 184, 0.4);">
+          <span class="w-2 text-right">{{inc @index}}.</span>
           <span class="player-name">{{player.name}}</span>
           {{#if player.score}}
-            <span class="player-score  text-sm text-gray-500">{{player.score}}</span>
+            <span class="player-score text-gray-500">{{player.score}}</span>
           {{/if}}
         </a>
       </li>
