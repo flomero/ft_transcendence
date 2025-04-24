@@ -5,6 +5,7 @@ import {
   createChatRoom,
   deleteChatRoom,
   getChatRoomRead,
+  getChatRoomTwoUsers,
   getUserIdsFromDirectChatRooms,
   type RoomType,
   setRoomRead,
@@ -228,6 +229,16 @@ export async function sendGameInvite(
     roomId,
     ChatMessageType.invite,
   );
+}
+
+export async function sendGameInviteToUser(
+  fastify: FastifyInstance,
+  request: FastifyRequest,
+  friendId: string,
+  gameId: number,
+) {
+  const roomId = await getChatRoomTwoUsers(fastify, request.userId, friendId);
+  await sendGameInvite(fastify, request, roomId, gameId);
 }
 
 export async function addRoom(
