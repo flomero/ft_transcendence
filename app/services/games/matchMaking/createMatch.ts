@@ -5,13 +5,14 @@ import GameManager from "../gameHandler/GameManager";
 import type { Database } from "sqlite";
 import addGameToDatabase from "../lobby/start/addGameToDatabase";
 import { GAMEMODE_REGISTRY } from "../../../config";
+import { GameModeType } from "../../config/gameModes";
 
 /**
  * Creates a match based on the specified game mode and player ids
  */
 export const createMatch = async (
   playerIds: string[],
-  gameMode: string,
+  gameMode: GameModeType,
   db: Database,
 ): Promise<string> => {
   const gameModeSettings = GAMEMODE_REGISTRY[

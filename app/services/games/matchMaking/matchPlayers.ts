@@ -2,10 +2,11 @@ import { matchMakingManager } from "./MatchMakingManager";
 import { createMatch } from "./createMatch";
 import type { Database } from "sqlite";
 import { GAMEMODE_REGISTRY, MatchmakingGameModes } from "../../../config";
+import { GameModeType } from "../../config/gameModes";
 
 const matchPlayers = async (db: Database): Promise<void> => {
   // Group members by game mode
-  const gameModeGroups = new Map<string, string[]>();
+  const gameModeGroups = new Map<GameModeType, string[]>();
 
   // Populate game mode groups
   matchMakingManager.getAllMembers().forEach((member) => {
@@ -31,7 +32,7 @@ const matchPlayers = async (db: Database): Promise<void> => {
 
 const matchPlayersForGame = async (
   playerIds: string[],
-  gameMode: string,
+  gameMode: GameModeType,
   db: Database,
 ): Promise<void> => {
   const matchId = await createMatch(playerIds, gameMode, db);
