@@ -9,7 +9,7 @@ export const PublicLobbies = new Map<string, Lobby>();
 export const PrivateLobbies = new Map<string, Lobby>();
 
 function initializeSampleLobbies() {
-  const sampleUserIds = ["103562899409920461542", "user456", "user789"];
+  const sampleUserIds = ["abc", "103562899409920461542", "user789"];
 
   const lobbyConfigs: NewLobbyRequestBody[] = [
     {
@@ -47,10 +47,6 @@ function initializeSampleLobbies() {
       gameModeName: "multiplayerPong",
       playerCount: 4,
       gameModeConfig: {
-        ballSpeedWidthPercentS: 2.0,
-        ballRadius: 12,
-        paddleCoveragePercent: 25,
-        paddleSpeedWidthPercentS: 1.5,
         powerUpRadius: 6,
         powerUpCapacities: {
           speedBoost: 5,

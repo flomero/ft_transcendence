@@ -1,36 +1,31 @@
-interface Ball {
+interface GameObject {
   x: number;
   y: number;
-  radius: number;
   isVisible: boolean;
 }
 
-interface Paddle {
-  x: number;
-  y: number;
+interface CircularGameObject extends GameObject {
+  radius: number;
+}
+
+interface RectangularGameObject extends GameObject {
   width: number;
   height: number;
+}
+
+interface MovableGameObject extends GameObject {
   dx: number;
   dy: number;
-  isVisible: boolean;
+}
+
+interface Ball extends CircularGameObject {}
+
+interface PowerUp extends CircularGameObject {}
+
+interface Wall extends RectangularGameObject, MovableGameObject {}
+
+interface Paddle extends RectangularGameObject, MovableGameObject {
   alpha: number;
-}
-
-interface Wall {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  dx: number;
-  dy: number;
-  isVisible: boolean;
-}
-
-interface PowerUp {
-  x: number;
-  y: number;
-  radius: number;
-  isVisible: boolean;
 }
 
 interface ModifiersData {
@@ -80,19 +75,13 @@ class PongGame {
     if (!context) throw new Error("Failed to get 2D context from canvas");
     this.ctx = context;
 
-    this.setupCanvasDimensions();
-
-    this.gameSocket = this.setupWebSocket();
-
-    this.setupEventListeners();
-
-    this.startGameLoop();
-  }
-
-  private setupCanvasDimensions(): void {
     this.canvas.width = 800;
     this.canvas.height = 800;
     this.ratio = this.canvas.width / 100.0;
+
+    this.gameSocket = this.setupWebSocket();
+    this.setupEventListeners();
+    this.startGameLoop();
   }
 
   private setupWebSocket(): WebSocket {
