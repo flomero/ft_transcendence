@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { type GameBase, GameStatus } from "../gameBase";
 import type Player from "../../../interfaces/games/gameHandler/Player";
-import type { WebSocket } from "ws";
+import { WebSocket } from "ws";
 import gameLoop from "./gameLoop";
 import type GameMessage from "../../../interfaces/games/gameHandler/GameMessage";
 import { PongAIOpponent } from "../pong/pongAIOpponent";
@@ -183,6 +183,22 @@ class GameManager {
     // Call tournament function later
   }
 
+  public removeNotConnectedPlayers(): void {
+    for (const player of this.players.values()) {
+      if (player.ws === undefined || player.ws.readyState !== WebSocket.OPEN) {
+        this.players.delete(player.playerUUID);
+      }
+    }
+  }
+
+  public disconnectAllPlayers(): void {
+    for (const player of this.players.values()) {
+      if (player.ws !== undefined) {
+        player.ws.close(1001, "Game terminated");
+      }
+    }
+  }
+
   public get getId() {
     return this.id;
   }
@@ -204,6 +220,10 @@ class GameManager {
       throw new Error("Player not found");
     }
     return this.players.get(playerId);
+  }
+
+  public get gameStatus(): GameStatus {
+    return this.game.getStatus();
   }
 
   public handleAction(data: GameMessage): void {
