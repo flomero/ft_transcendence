@@ -154,7 +154,7 @@ async function updateRoomAndSendMessage(
       continue;
     }
 
-    if (await isBlocked(fastify, client.userId, request.userId)) {
+    if (await isBlocked(fastify, client.userId, userId)) {
       continue;
     }
 
