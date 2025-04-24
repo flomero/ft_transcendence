@@ -150,6 +150,10 @@ class Lobby {
     this.stateLobby = newState;
   }
 
+  public set setStateLobby(newState: "open" | "started") {
+    this.stateLobby = newState;
+  }
+
   public changeLockState(memberId: string, state: boolean): void {
     if (this.lobbyOwner !== memberId) {
       throw new Error("Only the owner can lock the lobby");
@@ -230,6 +234,15 @@ class Lobby {
       throw new Error("[isMemberOwner] Member is not in the lobby");
     }
     return this.lobbyMembers.get(memberId)!.userState;
+  }
+
+  public disconnectMembersFromSockets(): void {
+    for (const member of this.lobbyMembers.values()) {
+      if (member.socket !== undefined) {
+        member.socket.close();
+        member.socket = undefined;
+      }
+    }
   }
 
   public allMembersConnectedToSocket(): boolean {
