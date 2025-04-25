@@ -135,7 +135,7 @@
         "selfActivation": false,
         "durationS": 6,
         "blinkIntervalS": 0.5,
-        "blinkDurationPercent": 66
+        "blinkDurationPercent": 50
       },
 
       "multiBall": {
