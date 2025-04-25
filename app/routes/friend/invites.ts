@@ -5,9 +5,7 @@ import { acceptFriendRequest } from "../../services/friends/accept";
 const friendInvites: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.post("/request/:friendId", async (request, reply) => {
     const { friendId } = request.params as { friendId: string };
-    if (!friendId) {
-      return reply.status(400).send({ message: "FriendId ID required" });
-    }
+    if (!friendId) return reply.badRequest("FriendId ID required");
 
     try {
       const error = await requestFriend(
@@ -15,36 +13,25 @@ const friendInvites: FastifyPluginAsync = async (fastify): Promise<void> => {
         request.userId,
         friendId,
       );
-      if (error) {
-        reply.status(400).send({ message: error });
-        return;
-      }
+      if (error) return reply.badRequest(error);
 
       reply.status(200).send({ message: "Request sent" });
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        reply.status(400).send({ message: error.message });
-      } else {
-        reply.status(400).send({ message: "Unknown error" });
-      }
+    } catch (error) {
+      if (error instanceof Error) return reply.badRequest(error.message);
+      return reply.internalServerError();
     }
   });
 
   fastify.post("/accept/:friendId", async (request, reply) => {
     const { friendId } = request.params as { friendId: string };
-    if (!friendId) {
-      return reply.status(400).send({ message: "FriendId ID required" });
-    }
+    if (!friendId) return reply.badRequest("FriendId ID required");
 
     const error = await acceptFriendRequest(
       request.server,
       request.userId,
       friendId,
     );
-    if (error) {
-      reply.status(400).send({ message: error });
-      return;
-    }
+    if (error) return reply.badRequest(error);
 
     reply.status(200).send({ message: "Request accepted" });
   });

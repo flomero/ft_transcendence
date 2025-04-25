@@ -9,16 +9,11 @@ import { isBlocked } from "../../services/database/friend/block";
 const profile: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.get("/:userId", async (request, reply) => {
     const { userId } = request.params as { userId: string };
-    if (!userId) {
-      return reply.status(400).send({ message: "User Id required" });
-    }
-    if (userId === request.userId) {
+    if (!userId) return reply.badRequest("User Id required");
+    if (userId === request.userId)
       return redirectTo(request, reply, "/profile");
-    }
     const userData = await getUserById(fastify, userId);
-    if (!userData) {
-      return reply.status(404).send({ message: "User not found" });
-    }
+    if (!userData) return reply.notFound("User not found");
 
     const isFriendOfCurrentUser = await isFriend(
       fastify,

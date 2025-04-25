@@ -47,7 +47,8 @@ async function newLobbyHandler(
     setLobby(lobby, body.lobbyMode);
     reply.send({ lobbyId: lobby.getLobbyId });
   } catch (error) {
-    if (error instanceof Error) reply.code(400).send({ error: error.message });
+    if (error instanceof Error) return reply.badRequest(error.message);
+    return reply.badRequest("Error creating lobby");
   }
 }
 

@@ -29,8 +29,8 @@ class Router {
   private routes: Record<string, RouteHandler>;
   private contentContainer: HTMLElement;
   private transitionManager: TransitionManager;
-  private currentPath: string = "";
-  private isInitialLoad: boolean = true;
+  private currentPath = "";
+  private isInitialLoad = true;
 
   constructor() {
     this.routes = {};
@@ -430,7 +430,7 @@ document.addEventListener("DOMContentLoaded", () => {
     onExit: () => {
       if (window.tournamentBracket) {
         window.tournamentBracket.destroy();
-        delete window.tournamentBracket;
+        window.tournamentBracket = undefined;
       }
     },
   });
@@ -443,7 +443,7 @@ document.addEventListener("DOMContentLoaded", () => {
     onExit: () => {
       if (window.tournamentBracket) {
         window.tournamentBracket.destroy();
-        delete window.tournamentBracket;
+        window.tournamentBracket = undefined;
       }
     },
   });
