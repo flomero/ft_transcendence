@@ -1,16 +1,25 @@
 import type { FastifyInstance } from "fastify";
+import { ChatMessageType } from "../../chat/message";
 
 export async function saveMessage(
   fastify: FastifyInstance,
   roomId: number,
   userId: string,
   message: string,
+  type: ChatMessageType,
 ): Promise<void> {
+  fastify.log.info(
+    "Saving message %s from user %s in room %s with type %s",
+    message,
+    userId,
+    roomId,
+    type,
+  );
   const sql =
-    "INSERT INTO messages (room_id, sender_id, message) VALUES (?, ?, ?)";
-  await fastify.sqlite.run(sql, [roomId, userId, message]);
+    "INSERT INTO messages (room_id, sender_id, message, type) VALUES (?, ?, ?, ?)";
+  await fastify.sqlite.run(sql, [roomId, userId, message, type]);
   fastify.log.trace(
-    "Inserted message %s from user %s in room %s",
+    "Inserted message %s from user %s in room %s with type %s",
     message,
     userId,
     roomId,

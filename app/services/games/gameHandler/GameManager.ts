@@ -70,7 +70,7 @@ class GameManager {
   public sendMessageToAll(
     type: string,
     data: string,
-    referenceTable: string,
+    referenceTable: string[],
   ): void {
     for (const player of this.players.values()) {
       if (player.ws !== undefined) {
@@ -85,22 +85,8 @@ class GameManager {
     }
   }
 
-  public getReferenceTable(): string {
-    const playerIdReferenceTable: Array<{
-      playerUUID: string;
-      playerGameID: string;
-    }> = [];
-
-    for (let i = 0; i < this.playerIdReferenceTable.length; i++) {
-      const playerUUID = this.playerIdReferenceTable[i];
-      const playerIngameId = i;
-
-      playerIdReferenceTable.push({
-        playerUUID: playerUUID,
-        playerGameID: playerIngameId.toString(),
-      });
-    }
-    return JSON.stringify(playerIdReferenceTable);
+  public getReferenceTable(): string[] {
+    return this.playerIdReferenceTable;
   }
   public addSocketToPlayer(userId: string, ws: WebSocket): void {
     const player = this.players.get(userId);
