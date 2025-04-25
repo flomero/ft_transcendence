@@ -99,4 +99,10 @@ export class ModifierBase {
   getActivationMode(): ModifierActivationMode {
     return this.activationMode;
   }
+
+  getState(): Record<string, any> {
+    return {
+      status: this.status.toString(),
+    };
+  }
 }

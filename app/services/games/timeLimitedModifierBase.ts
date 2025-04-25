@@ -26,4 +26,12 @@ export abstract class TimeLimitedModifierBase extends ModifierBase {
   setDuration(duration: number): void {
     this.duration = duration;
   }
+
+  getState(): Record<string, any> {
+    return {
+      ...super.getState(),
+      ticks: this.ticks,
+      duration: this.duration,
+    };
+  }
 }
