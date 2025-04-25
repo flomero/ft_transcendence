@@ -19,6 +19,8 @@ const gameModeConfigSchema = S.object()
   .prop("ballRadius", S.number())
   .prop("paddleCoveragePercent", S.number())
   .prop("paddleSpeedWidthPercentS", S.number())
+  .prop("paddleVelocityAngularTransmissionPercent", S.number().minimum(0))
+  .prop("paddleVelocitySpeedTransmissionPercent", S.number().minimum(0))
   .prop("powerUpRadius", S.number())
   .prop("powerUpCapacities", powerUpCapacitiesSchema);
 
@@ -34,7 +36,7 @@ const powerUpSpawnerSchema = S.object()
       "flowerGaussianCA",
       "uniformCA",
       "uniformRA",
-    ]).required(),
+    ]),
   );
 
 const timedGameSchema = S.object().prop("durationS", S.number().minimum(0));
@@ -52,7 +54,8 @@ const modifierNamesScheama = S.object()
   .prop("scoredGame", scoredGameSchema)
   .prop("survivalGame", S.array().maxItems(0).minItems(0))
   .prop("elimination", eliminationSchema)
-  .prop("arenaShrink", S.array().maxItems(0).minItems(0));
+  .prop("arenaShrink", S.array().maxItems(0).minItems(0))
+  .prop("goalReset", S.object().prop("delayS", S.number().minimum(0)));
 
 const speedBoostSchema = S.object()
   .prop("spawnWeight", S.number().minimum(0))

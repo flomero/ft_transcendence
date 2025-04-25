@@ -1,15 +1,18 @@
-import { FastifyInstance, FastifyRequest } from "fastify";
+import type { FastifyInstance, FastifyRequest } from "fastify";
 import { saveMessage } from "../database/chat/message";
 import {
   addUserToChatRoom,
   createChatRoom,
   deleteChatRoom,
   getChatRoomRead,
+  getChatRoomTwoUsers,
   getUserIdsFromDirectChatRooms,
-  RoomType,
+  type RoomType,
   setRoomRead,
   setRoomReadForAllUsersBlacklist,
 } from "../database/chat/room";
+import { ChatMessageType } from "./message";
+import { isBlocked } from "../database/friend/block";
 
 interface ChatClient {
   socket: any;
@@ -48,7 +51,7 @@ async function updateOnlineStatus(fastify: FastifyInstance, userId: string) {
 
 interface ChatWebSocketResponse {
   type: "message" | "room";
-  id: number;
+  id: string;
   html: string;
 }
 
@@ -65,7 +68,7 @@ async function createChatRoomWebSocketResponse(
 
   const response: ChatWebSocketResponse = {
     type: "room",
-    id: roomId,
+    id: roomId.toString(),
     html: html,
   };
 
@@ -110,11 +113,13 @@ export async function setCurrentRoomId(
   sendRoomUpdate(fastify, roomId, userId);
 }
 
-export async function sendMessage(
+async function updateRoomAndSendMessage(
   fastify: FastifyInstance,
-  request: FastifyRequest,
+  userName: string,
+  userId: string,
   message: string,
   roomId: number,
+  type: ChatMessageType,
 ) {
   const userIdsBlacklist = chatClients
     .filter((client) => client.currentRoomId === roomId)
@@ -128,7 +133,7 @@ export async function sendMessage(
   );
 
   for (const client of chatClients) {
-    if (client.currentRoomId !== roomId) {
+    if (client.currentRoomId != roomId) {
       let room = client.roomIds.find((id) => id == roomId);
       if (!room) {
         continue;
@@ -142,34 +147,98 @@ export async function sendMessage(
 
       const response: ChatWebSocketResponse = {
         type: "room",
-        id: roomId,
+        id: roomId.toString(),
         html: html,
       };
 
       client.socket.send(JSON.stringify(response));
+      continue;
+    }
 
+    if (await isBlocked(fastify, client.userId, userId)) {
       continue;
     }
 
     const html = await fastify.view("components/chat/message", {
       message: {
-        userName: request.userName,
+        userName: userName,
         message: message,
         timestamp: new Date().toLocaleString(),
-        isOwnMessage: client.userId === request.userId,
+        isOwnMessage: client.userId === userId,
+        type: type,
       },
     });
 
     const response: ChatWebSocketResponse = {
       type: "message",
-      id: roomId,
+      id: roomId.toString(),
       html: html,
     };
 
     client.socket.send(JSON.stringify(response));
   }
 
-  await saveMessage(fastify, roomId, request.userId, message);
+  saveMessage(fastify, roomId, userId, message, type);
+}
+
+export async function sendMessage(
+  fastify: FastifyInstance,
+  request: FastifyRequest,
+  message: string,
+  roomId: number,
+  type: ChatMessageType = ChatMessageType.text,
+) {
+  await updateRoomAndSendMessage(
+    fastify,
+    request.userName,
+    request.userId,
+    message,
+    roomId,
+    type,
+  );
+}
+
+export async function sendSystemMessage(
+  fastify: FastifyInstance,
+  roomId: number,
+  message: string,
+) {
+  await updateRoomAndSendMessage(
+    fastify,
+    "System",
+    "system",
+    message,
+    roomId,
+    ChatMessageType.system,
+  );
+}
+
+export async function sendGameInvite(
+  fastify: FastifyInstance,
+  request: FastifyRequest,
+  roomId: number,
+  gameId: number,
+) {
+  const message: string = "/games/lobby/join/" + gameId;
+
+  await updateRoomAndSendMessage(
+    fastify,
+    request.userName,
+    request.userId,
+    message,
+    roomId,
+    ChatMessageType.invite,
+  );
+}
+
+export async function sendGameInviteToUser(
+  fastify: FastifyInstance,
+  request: FastifyRequest,
+  friendId: string,
+  gameId: number,
+) {
+  const roomId = await getChatRoomTwoUsers(fastify, request.userId, friendId);
+  await sendGameInvite(fastify, request, roomId, gameId);
 }
 
 export async function addRoom(
@@ -213,7 +282,7 @@ export function deleteRoom(fastify: FastifyInstance, roomId: number) {
 
     const response: ChatWebSocketResponse = {
       type: "room",
-      id: roomId,
+      id: roomId.toString(),
       html: "",
     };
 

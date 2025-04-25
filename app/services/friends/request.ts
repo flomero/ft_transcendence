@@ -3,6 +3,7 @@ import { createInvite, hasInvite } from "../database/friend/invites";
 import { acceptFriendRequestAndAddRoom } from "./accept";
 import { isFriend } from "../database/friend/friends";
 import { userExists } from "../database/user";
+import { isBlocked } from "../database/friend/block";
 
 export async function requestFriend(
   fastify: FastifyInstance,
@@ -11,6 +12,12 @@ export async function requestFriend(
 ): Promise<string | undefined> {
   if (userId === friendId) {
     return "Cannot send request to yourself";
+  }
+  if (await isBlocked(fastify, friendId, userId)) {
+    return "User blocked you";
+  }
+  if (await isBlocked(fastify, userId, friendId)) {
+    return "Can not send request to blocked user";
   }
   if (await hasInvite(fastify, userId, friendId)) {
     return "Request already sent";
@@ -24,6 +31,9 @@ export async function requestFriend(
   }
   if (!(await userExists(fastify, friendId))) {
     return "User does not exist";
+  }
+  if (await isBlocked(fastify, friendId, userId)) {
+    return "User blocked you";
   }
 
   await createInvite(fastify, userId, friendId);

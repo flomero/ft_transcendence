@@ -1,6 +1,7 @@
 import type Handlebars from "handlebars";
 import { buttonVariants } from "./components/button";
 import { twMerge } from "tailwind-merge";
+import { format } from "date-fns";
 
 export function registerHelpers(handlebars: typeof Handlebars) {
   handlebars.registerHelper("buttonVariants", buttonVariants);
@@ -52,12 +53,49 @@ export function registerHelpers(handlebars: typeof Handlebars) {
 
   handlebars.registerHelper("eq", (a, b) => a === b);
 
-  handlebars.registerHelper("hrGameModeName", (value) => {
-    if (!value) return value;
-    const words = value.split(/(?=[A-Z])/);
-    const formattedString = words.join(" ");
-    return formattedString.charAt(0).toUpperCase() + formattedString.slice(1);
+  handlebars.registerHelper("hrGameModeName", (value) =>
+    !value
+      ? value
+      : String(value)
+          .split(/(?=[A-Z])/)
+          .join(" ")
+          .replace(/^\w/, (c) => c.toUpperCase()),
+  );
+
+  handlebars.registerHelper("inc", function (value, options) {
+    return parseInt(value, 10) + 1;
   });
 
+  handlebars.registerHelper(
+    "formatDate",
+    (date: Date | string, dateFormat: string) => {
+      if (!date) return "";
+      try {
+        return format(new Date(date), dateFormat);
+      } catch (err) {
+        return "";
+      }
+    },
+  );
+
+  handlebars.registerHelper("length", (value) => {
+    if (Array.isArray(value) || typeof value === "string") {
+      return value.length;
+    }
+    return 0;
+  });
+
+  handlebars.registerHelper("dec", (value) => {
+    if (typeof value === "number") {
+      return value - 1;
+    }
+    return value;
+  });
+
+  handlebars.registerHelper("lt", (a, b) => {
+    return a < b;
+  });
+
+  handlebars.registerHelper("json", (v) => JSON.stringify(v));
   // Add other helpers here as needed
 }

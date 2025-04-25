@@ -1,0 +1,71 @@
+<style>
+  details::details-content {
+    display: block;
+    block-size: 0;
+    overflow: hidden;
+    transition-property: block-size, content-visibility;
+    transition-duration: 0.5s;
+    transition-behavior: allow-discrete;
+  }
+
+  details[open]::details-content {
+    /* Fallback for browsers that don't support calc-size() function */
+    block-size: auto;
+
+    /* calc-size() function allows transition to height: auto; */
+    block-size: calc-size(auto, size);
+  }
+</style>
+
+<details class="group font-mono rounded-2xl mb-2
+          border {{#if (eq result 'win')}}border-green-900/50 bg-green-900/10
+          {{else if (eq result 'draw')}}border-yellow-900/50 bg-yellow-900/10
+          {{else}}border-red-900/50 bg-red-900/10
+          {{/if}}"
+         aria-labelledby="match-{{matchId}}"
+         name="match"
+>
+  <summary
+    id="match-{{matchId}}"
+    class="flex items-center justify-between gap-2 p-2 cursor-pointer select-none">
+    <span class="flex-1 min-w-0">
+      <span class="flex font-medium truncate">{{formatDate matchDate "do MMMM, HH:mm"}}  {{ hrGameModeName gameModeName }} </span>
+      <span class="flex ml-1 text-sm text-gray-500 truncate">{{matchId}}</span>
+    </span>
+
+    <span class="font-bold">
+      {{#if (eq result "win")}}
+        <span class="text-green-500">Win</span>
+      {{else if (eq result "draw")}}
+        <span class="text-yellow-500">Draw</span>
+      {{else}}
+        <span class="text-red-500">Loss</span>
+      {{/if}}
+    </span>
+
+    <svg class="w-4 h-4 shrink-0 transition-transform group-open:rotate-180"
+         viewBox="0 0 20 20" fill="currentColor">
+      <path fill-rule="evenodd" d="M5 6l5 5 5-5H5z" clip-rule="evenodd"></path>
+    </svg>
+  </summary>
+
+  <ol class="p-2 space-y-1 ">
+    {{#each leaderboard}}
+      <li>
+        <a
+          href="/users/{{userId}}"
+          class="flex items-center justify-between gap-x-4
+           py-1 px-2 w-full rounded-md           <!-- soft corners -->
+           transition-colors duration-150        <!-- smooth fade -->
+           hover:bg-slate-100 dark:hover:bg-slate-800
+           focus-visible:bg-slate-100 dark:focus-visible:bg-slate-800
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/40">
+          <span class="w-8 text-right">{{inc @index}}.</span>
+          <span class="flex-1 truncate">{{username}}</span>
+          <span class="w-12 text-right">{{score}}</span>
+        </a>
+      </li>
+    {{/each}}
+  </ol>
+
+</details>

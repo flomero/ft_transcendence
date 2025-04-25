@@ -1,6 +1,6 @@
 import { gameManagers } from "../lobby/start/startLobbyHandler";
 import type { FastifyRequest } from "fastify";
-import type { WebSocket } from "ws";
+import { WebSocket } from "ws";
 import gameValidationCheck from "./gameValidationCheck";
 import handleGameMessage from "./handleGameMessage";
 
@@ -17,7 +17,7 @@ const gameWebsocketHandler = async (
     gameManager!.addSocketToPlayer(userId, connection);
 
     if (gameManager!.allPlayersAreConnected() === true) {
-      gameManager!.startGame(request.server.sqlite);
+      await gameManager!.startGame(request.server.sqlite);
     }
 
     connection.on("message", (message: string) => {
@@ -28,6 +28,9 @@ const gameWebsocketHandler = async (
       connection.send(
         JSON.stringify({ type: "error", data: { message: error.message } }),
       );
+      if (connection.readyState === WebSocket.OPEN) {
+        connection.close(1008, error.message);
+      }
     }
   }
 };

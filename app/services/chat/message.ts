@@ -1,4 +1,4 @@
-import { FastifyInstance } from "fastify";
+import type { FastifyInstance } from "fastify";
 import { getMessagesWithUserInfo } from "../database/chat/message";
 
 export interface ChatMessage {
@@ -6,6 +6,13 @@ export interface ChatMessage {
   message: string;
   timestamp: string;
   isOwnMessage: boolean;
+  type: ChatMessageType;
+}
+
+export enum ChatMessageType {
+  text = "TEXT",
+  invite = "INVITE",
+  system = "SYSTEM",
 }
 
 export async function getChatMessagesForRoom(
@@ -13,12 +20,13 @@ export async function getChatMessagesForRoom(
   roomId: number,
   userId: string,
 ): Promise<ChatMessage[]> {
-  const db_messages = await getMessagesWithUserInfo(fastify, roomId);
+  const db_messages = await getMessagesWithUserInfo(fastify, userId, roomId);
 
   return db_messages.map((message) => ({
     userName: message["username"],
     message: message["message"],
     timestamp: message["timestamp"],
     isOwnMessage: userId === message["sender_id"],
+    type: message["type"] as ChatMessageType,
   }));
 }

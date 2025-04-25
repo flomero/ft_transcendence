@@ -1,7 +1,7 @@
 import type { FastifyRequest } from "fastify";
 import type { WebSocket } from "ws";
-import { matchMakingManager } from "./join/joinMatchMakingHandler";
-import joinTwoPlayerIfExist from "./joinTwoPlayerIfExist";
+import { matchMakingManager } from "./MatchMakingManager";
+import matchPlayers from "./matchPlayers";
 
 const matchMakingSocketHandler = async (
   connection: WebSocket,
@@ -13,7 +13,7 @@ const matchMakingSocketHandler = async (
     if (matchMakingManager.memberExists(userId) === false)
       throw new Error("User is not in the match making queue");
     matchMakingManager.setMemberSocket(userId, connection);
-    joinTwoPlayerIfExist(request.server.sqlite);
+    await matchPlayers(request.server.sqlite);
   } catch (error) {
     if (error instanceof Error)
       connection.send(JSON.stringify({ error: error.message }));

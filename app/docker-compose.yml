@@ -1,0 +1,20 @@
+services:
+  app:
+    build:
+      # context: ../app
+      dockerfile: DockerfileProd
+    container_name: transcendence_node_app
+    volumes:
+      - db-data:/app/database # Mount for development
+    ports:
+      - 80
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  db-data:

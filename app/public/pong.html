@@ -61,13 +61,29 @@
             options: {
               gameName: "pong",
               gameModeName: gameModeName,
-              gameModeConfig: {
-                powerUpRadius: 2,
-              },
+              gameModeConfig: {},
               modifierNames: {
-                powerUpSpawner: {},
+                timedStart: {},
+                timedGame: {
+                  duration: 360,
+                },
+                scoredGame: {
+                  threshold: 7,
+                },
+                survivalGame: {},
+                goalReset: {},
+                powerUpSpawner: {
+                  meanDelay: 10,
+                  delaySpan: 2.5,
+                },
               },
-              powerUpNames: {},
+              powerUpNames: {
+                speedBoost: {},
+                blinkingBall: {},
+                multiBall: {},
+                bumper: {},
+                shooter: {},
+              },
               playerCount: playerCount,
             },
           }),
@@ -95,6 +111,7 @@
 
         if (event.key === "ArrowUp") action.options.type = "UP";
         if (event.key === "ArrowDown") action.options.type = "DOWN";
+        if (event.key === " ") action.options.type = "SPACE";
 
         if (action.options.type) {
           socket.send(JSON.stringify(action));
@@ -113,6 +130,7 @@
 
         if (event.key === "ArrowUp" || event.key === "ArrowDown")
           action.options.type = "STOP";
+        if (event.key === " ") action.options.type = "STOP_SPACE";
 
         if (action.options.type) {
           socket.send(JSON.stringify(action));
@@ -221,15 +239,15 @@
                   ctx.fillStyle = "blue";
                   break;
 
-                case "multiball_modifier":
+                case "multiBall":
                   ctx.fillStyle = "green";
                   break;
 
-                case "grasping_vines_debuff_modifier":
+                case "shooter":
                   ctx.fillStyle = "yellow";
                   break;
 
-                case "black_hole_debuff_modifier":
+                case "bumper":
                   ctx.fillStyle = "purple";
                   break;
 

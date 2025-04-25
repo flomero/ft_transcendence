@@ -4,23 +4,53 @@ import type Player from "../../../interfaces/games/gameHandler/Player";
 import type { WebSocket } from "ws";
 import gameLoop from "./gameLoop";
 import type GameMessage from "../../../interfaces/games/gameHandler/GameMessage";
-import type { Database } from "sqlite";
+import { PongAIOpponent } from "../pong/pongAIOpponent";
+import aiLoop from "./aiLoop";
+import { Database } from "sqlite";
+import { RNG } from "../rng";
+import saveGameResultInDb from "./saveGameResultInDb";
+import type { GameOrigin } from "../../../types/games/gameHandler/GameOrigin";
+import terminateGame from "./terminateGame";
 
 class GameManager {
   private id: string = randomUUID();
+  private gameOrigin: GameOrigin | undefined;
   game: GameBase;
   players: Map<string, Player> = new Map();
+  aiOpponent: Map<string, PongAIOpponent> = new Map();
+  playerIdReferenceTable: Array<string> = [];
 
-  constructor(game: GameBase) {
+  constructor(game: GameBase, gameOrigin?: GameOrigin) {
     this.game = game;
+    this.gameOrigin = gameOrigin;
   }
 
-  addPlayer(userId: string): void {
+  public addPlayer(userId: string): void {
+    if (this.game.getStatus() === GameStatus.RUNNING) {
+      console.error("Game is already running");
+      return;
+    }
+
     const newPlayer = {
-      id: this.players.size,
+      id: -1,
       playerUUID: userId,
     };
     this.players.set(userId, newPlayer);
+    this.playerIdReferenceTable.push(userId);
+  }
+
+  public addAiOpponent(aiOpponentId: string): void {
+    if (this.game.getStatus() === GameStatus.RUNNING) {
+      console.error("Game is already running");
+      return;
+    }
+
+    const newAiOpponent = new PongAIOpponent(this.game, {
+      playerId: -1,
+      strategyName: "improvedNaive",
+    });
+    this.aiOpponent.set(aiOpponentId, newAiOpponent);
+    this.playerIdReferenceTable.push(aiOpponentId);
   }
 
   public hasPlayer(userId: string): boolean {
@@ -37,14 +67,27 @@ class GameManager {
     }
   }
 
-  public sendMessageToAll(type: string, data: string): void {
+  public sendMessageToAll(
+    type: string,
+    data: string,
+    referenceTable: string[],
+  ): void {
     for (const player of this.players.values()) {
       if (player.ws !== undefined) {
-        player.ws.send(JSON.stringify({ type: type, data: data }));
+        player.ws.send(
+          JSON.stringify({
+            type: type,
+            data: data,
+            referenceTable: referenceTable,
+          }),
+        );
       }
     }
   }
 
+  public getReferenceTable(): string[] {
+    return this.playerIdReferenceTable;
+  }
   public addSocketToPlayer(userId: string, ws: WebSocket): void {
     const player = this.players.get(userId);
     if (player === undefined) {
@@ -62,16 +105,70 @@ class GameManager {
     return true;
   }
 
-  public startGame(db: Database): void {
+  public removeAllPlayers(): void {
+    for (const player of this.players.values()) {
+      if (player.ws !== undefined) {
+        player.ws.close();
+      }
+    }
+    this.players.clear();
+    this.playerIdReferenceTable = [];
+  }
+
+  public async startGame(db: Database): Promise<void> {
     if (this.allPlayersAreConnected() === false) {
       throw new Error("Not all players are connected");
+    } else if (this.game.getStatus() !== GameStatus.CREATED) {
+      return;
     }
 
+    this.shuffleReferenceTable();
+    this.addIngameIdToPlayerAndAiOpponent();
     this.game.startGame();
+    this.startGameAndAiLoop(db);
+  }
+
+  private shuffleReferenceTable(): void {
+    const tmpRng = new RNG();
+    this.playerIdReferenceTable = tmpRng.randomArray(
+      this.playerIdReferenceTable,
+    );
+  }
+
+  private async startGameAndAiLoop(db: Database) {
     if (this.game.getStatus() === GameStatus.RUNNING) {
-      gameLoop(this.id, db);
+      gameLoop(this.id).then(async () => {
+        await saveGameResultInDb(this, db);
+        this.handleGameCompletion();
+        terminateGame(this);
+      });
+      aiLoop(this.id);
     }
   }
+
+  private addIngameIdToPlayerAndAiOpponent(): void {
+    for (let i = 0; i < this.playerIdReferenceTable.length; i++) {
+      const playerOrAiId = this.playerIdReferenceTable[i];
+
+      const aiOpponent = this.aiOpponent.get(playerOrAiId);
+      if (aiOpponent) {
+        aiOpponent.setPlayerId(i);
+      }
+
+      const player = this.players.get(playerOrAiId);
+      if (player) {
+        player.id = i;
+      }
+    }
+  }
+
+  private handleGameCompletion(): void {
+    if (this.gameOrigin?.type === "lobby") {
+      this.gameOrigin.lobby.setStateLobby = "open";
+    }
+    // Call tournament function later
+  }
+
   public get getId() {
     return this.id;
   }
@@ -82,6 +179,10 @@ class GameManager {
 
   public get getScores(): number[] {
     return this.game.getScores();
+  }
+
+  public get getAiIdsAsArray() {
+    return Array.from(this.aiOpponent.keys());
   }
 
   public getPlayer(playerId: string) {

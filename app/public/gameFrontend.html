@@ -64,7 +64,7 @@
       };
 
       gameSocket.onmessage = (event) => {
-        const message = JSON.parse(event.data);
+        let message = JSON.parse(event.data);
         if (message.type === "gameState") {
           gameState = JSON.parse(message.data);
           // console.log("Received gameState:", gameState);

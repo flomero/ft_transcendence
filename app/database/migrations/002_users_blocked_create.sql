@@ -1,7 +1,8 @@
-CREATE TABLE IF NOT EXISTS users_blocked (
-	blocker TEXT NOT NULL,
-	blocked TEXT NOT NULL,
-	Primary Key (blocker, blocked),
-	FOREIGN KEY (blocker) REFERENCES users(id),
-	FOREIGN KEY (blocked) REFERENCES users(id)
+CREATE TABLE IF NOT EXISTS users_blocked
+(
+    userId TEXT NOT NULL,
+    blockedUserId TEXT NOT NULL,
+    PRIMARY KEY (userId, blockedUserId),
+    FOREIGN KEY (userId) REFERENCES users (id) ON DELETE CASCADE,
+    FOREIGN KEY (blockedUserId) REFERENCES users (id) ON DELETE CASCADE
 );

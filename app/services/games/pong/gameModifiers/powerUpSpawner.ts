@@ -59,9 +59,10 @@ export class PowerUpSpawner extends TimeLimitedModifierBase {
   }
 
   onActivation(game: Pong): void {
-    this.duration = game
-      .getRNG()
-      .randomGaussian(this.meanDelay, this.delaySpan);
+    this.duration = Math.max(
+      0,
+      game.getRNG().randomGaussian(this.meanDelay, this.delaySpan),
+    );
 
     // console.log(`Next powerUpSpawn in ${this.duration} ticks`);
   }
