@@ -77,5 +77,25 @@ export function registerHelpers(handlebars: typeof Handlebars) {
       }
     },
   );
+
+  handlebars.registerHelper("length", (value) => {
+    if (Array.isArray(value) || typeof value === "string") {
+      return value.length;
+    }
+    return 0;
+  });
+
+  handlebars.registerHelper("dec", (value) => {
+    if (typeof value === "number") {
+      return value - 1;
+    }
+    return value;
+  });
+
+  handlebars.registerHelper("lt", (a, b) => {
+    return a < b;
+  });
+
+  handlebars.registerHelper("json", (v) => JSON.stringify(v));
   // Add other helpers here as needed
 }
