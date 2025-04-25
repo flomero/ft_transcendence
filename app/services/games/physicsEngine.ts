@@ -123,13 +123,13 @@ export class PhysicsEngine {
       let normalLocal: [number, number];
 
       if (minDist === distToRight) {
-        normalLocal = [1, 0]; // Local right direction
+        normalLocal = [1, 0]; // Push out to the right
       } else if (minDist === distToLeft) {
-        normalLocal = [-1, 0]; // Local left direction
+        normalLocal = [-1, 0]; // Push out to the left
       } else if (minDist === distToTop) {
-        normalLocal = [0, 1]; // Local top direction
+        normalLocal = [0, 1]; // Push out downward (in local space)
       } else {
-        normalLocal = [0, -1]; // Local bottom direction
+        normalLocal = [0, -1]; // Push out upward (in local space)
       }
 
       // Transform normal back to global coordinates
