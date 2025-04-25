@@ -77,14 +77,9 @@ const friends: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
 
   fastify.get("/search/:username", async (request, reply) => {
     const { username } = request.params as { username: string };
-    if (!username) {
-      return reply.status(400).send({ message: "Username required" });
-    }
-    if (username.length < 3) {
-      return reply
-        .status(400)
-        .send({ message: "Username must be at least 3 characters" });
-    }
+    if (!username) return reply.badRequest("Username required");
+    if (username.length < 3)
+      return reply.badRequest("Username must be at least 3 characters");
 
     try {
       const users = await searchUsers(fastify, request.userId, username);
@@ -93,9 +88,9 @@ const friends: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
         friends: users,
       });
     } catch (error) {
-      return reply
-        .status(500)
-        .send({ message: `Internal server error ${error}` });
+      if (error instanceof Error)
+        return reply.internalServerError(error.message);
+      return reply.internalServerError();
     }
   });
 };

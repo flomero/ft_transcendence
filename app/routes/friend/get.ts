@@ -5,12 +5,10 @@ const getFriendsRoutes: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.get("/search/:username", async (request, reply) => {
     const { username } = request.params as { username: string };
     if (!username) {
-      return reply.status(400).send({ message: "Username required" });
+      return reply.badRequest("Username required");
     }
     if (username.length < 3) {
-      return reply
-        .status(400)
-        .send({ message: "Username must be at least 3 characters" });
+      return reply.badRequest("Username must be at least 3 characters");
     }
 
     try {
@@ -18,7 +16,9 @@ const getFriendsRoutes: FastifyPluginAsync = async (fastify): Promise<void> => {
 
       reply.status(200).send({ users: users });
     } catch (error) {
-      reply.status(500).send({ message: `Internal server error ${error}` });
+      if (error instanceof Error)
+        return reply.internalServerError(error.message);
+      return reply.internalServerError();
     }
   });
 };

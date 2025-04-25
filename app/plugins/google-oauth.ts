@@ -59,7 +59,9 @@ const googleOAuthPlugin: FastifyPluginAsync = async (fastify, opts) => {
       reply.redirect("/login/reload");
     } catch (error) {
       fastify.log.error(error);
-      return reply.status(500).send(error);
+      if (error instanceof Error)
+        return reply.internalServerError(error.message);
+      return reply.internalServerError();
     }
   });
 };

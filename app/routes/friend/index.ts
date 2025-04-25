@@ -11,9 +11,7 @@ const friends: FastifyPluginAsync = async (fastify): Promise<void> => {
 
   fastify.post("/delete/:friendId", async (request, reply) => {
     const { friendId } = request.params as { friendId: string };
-    if (!friendId) {
-      return reply.status(400).send({ message: "FriendId ID required" });
-    }
+    if (!friendId) return reply.badRequest("FriendId ID required");
 
     const changes = await deleteFriendOrInvite(
       request.server,
@@ -21,10 +19,7 @@ const friends: FastifyPluginAsync = async (fastify): Promise<void> => {
       friendId,
     );
 
-    if (changes === 0) {
-      reply.status(400).send({ message: "Friend or invite not found" });
-      return;
-    }
+    if (changes === 0) return reply.badRequest("Friend or invite not found");
 
     fastify.log.info(`Deleting friend ${request.userId} and ${friendId}`);
 
