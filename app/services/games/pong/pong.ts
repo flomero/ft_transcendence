@@ -564,4 +564,9 @@ export abstract class Pong extends GameBase {
   }
 
   abstract getSettings(): GameModeCombinedSettings;
+
+  isEliminated(playerID: number): boolean {
+    if (playerID < 0 || playerID >= this.gameState.playerCount) return false;
+    return this.gameState.results[playerID] !== 0;
+  }
 }
