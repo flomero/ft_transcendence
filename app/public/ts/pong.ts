@@ -55,8 +55,9 @@ class PongGame {
   private ratio: number = 0.0;
   private gameId: string;
   private isConnected = false;
-  private debug = true;
+  private debug = false;
   private rotationAngle = 0;
+  private padding = 20;
   gameSocket: WebSocket;
   private currentUserId: string;
   private playerIndex = -1; // -1 means not determined yet
@@ -77,7 +78,7 @@ class PongGame {
 
     this.canvas.width = 800;
     this.canvas.height = 800;
-    this.ratio = this.canvas.width / 100.0;
+    this.ratio = (this.canvas.width - this.padding * 2) / 100.0;
 
     this.gameSocket = this.setupWebSocket();
     this.setupEventListeners();
@@ -115,7 +116,7 @@ class PongGame {
           if (this.playerCount == 2) {
             this.canvas.width = 800;
             this.canvas.height = 400;
-            this.ratio = this.canvas.width / 200.0;
+            this.ratio = (this.canvas.width - this.padding * 2) / 200.0;
           }
           if (
             this.playerIndex >= 0 &&
@@ -208,40 +209,41 @@ class PongGame {
   private draw(): void {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    // Only apply rotation for multiplayer games and when player position is known
+    this.ctx.save();
+    this.ctx.translate(this.padding, this.padding);
+
     const shouldRotate = this.playerCount > 2 && this.playerIndex >= 0;
-    console.log(
-      `Should rotate: ${shouldRotate}, Player Index: ${this.playerIndex}`,
-    );
 
     if (shouldRotate) {
-      this.ctx.save();
-      this.ctx.translate(this.canvas.width / 2, this.canvas.height / 2);
+      const paddedWidth = this.canvas.width - this.padding * 2;
+      const paddedHeight = this.canvas.height - this.padding * 2;
+
+      this.ctx.translate(paddedWidth / 2, paddedHeight / 2);
       this.ctx.rotate(this.rotationAngle);
-      this.ctx.translate(-this.canvas.width / 2, -this.canvas.height / 2);
+      this.ctx.translate(-paddedWidth / 2, -paddedHeight / 2);
     } else {
-      // For classic Pong, keep the existing rotation logic
       const classicRotate = this.playerIndex === 1;
       if (classicRotate) {
-        this.ctx.save();
-        this.ctx.translate(this.canvas.width, this.canvas.height);
+        const paddedWidth = this.canvas.width - this.padding * 2;
+        const paddedHeight = this.canvas.height - this.padding * 2;
+
+        this.ctx.translate(paddedWidth, paddedHeight);
         this.ctx.rotate(Math.PI);
       }
     }
 
-    if (this.gameState.balls) this.drawBalls();
-    if (this.gameState.paddles) this.drawPaddles();
     if (this.gameState.walls) this.drawWalls();
     if (this.gameState.modifiersState?.spawnedPowerUps) this.drawPowerUps();
+    if (this.gameState.paddles) this.drawPaddles();
+    if (this.gameState.balls) this.drawBalls();
 
     if (this.gameState.scores) {
       const rotated = shouldRotate || this.playerIndex === 1;
       this.drawScores(rotated);
     }
 
-    if (shouldRotate || this.playerIndex === 1) {
-      this.ctx.restore();
-    }
+    this.ctx.restore();
+
     if (this.debug) this.drawDebugElements();
   }
 
@@ -351,7 +353,7 @@ class PongGame {
         const width = paddle.width * this.ratio;
         const height = paddle.height * this.ratio;
 
-        const paddleColor = index === 0 ? "#ff00ff" : "#00ffff";
+        const paddleColor = index === this.playerIndex ? "#ff00ff" : "#00ffff";
 
         this.drawNeonRectangle(x, y, width, height, paddleColor, angle);
       }
@@ -454,6 +456,7 @@ class PongGame {
       g = 255,
       b = 255;
 
+    // Parse color from hex to RGB
     if (color && color.startsWith("#")) {
       if (color.length === 7) {
         r = parseInt(color.slice(1, 3), 16);
@@ -471,67 +474,29 @@ class PongGame {
     b = isNaN(b) ? 255 : Math.max(0, Math.min(255, b));
 
     this.ctx.save();
-
     this.ctx.translate(x, y);
     if (angle) this.ctx.rotate(angle);
 
-    this.ctx.lineJoin = "round";
-    this.ctx.globalCompositeOperation = "lighter";
-
-    const border = 1.5;
     const halfWidth = width / 2;
     const halfHeight = height / 2;
 
-    const drawGlowingLayer = (lineWidth: number, opacity: number) => {
-      this.ctx.beginPath();
-      this.ctx.moveTo(-halfWidth + border, -halfHeight);
-      this.ctx.lineTo(halfWidth - border, -halfHeight);
-      this.ctx.quadraticCurveTo(
-        halfWidth - border,
-        -halfHeight,
-        halfWidth,
-        -halfHeight + border,
-      );
-      this.ctx.lineTo(halfWidth, halfHeight - border);
-      this.ctx.quadraticCurveTo(
-        halfWidth,
-        halfHeight - border,
-        halfWidth - border,
-        halfHeight,
-      );
-      this.ctx.lineTo(-halfWidth + border, halfHeight);
-      this.ctx.quadraticCurveTo(
-        -halfWidth + border,
-        halfHeight,
-        -halfWidth,
-        halfHeight - border,
-      );
-      this.ctx.lineTo(-halfWidth, -halfHeight + border);
-      this.ctx.quadraticCurveTo(
-        -halfWidth,
-        -halfHeight + border,
-        -halfWidth + border,
-        -halfHeight,
-      );
-      this.ctx.closePath();
+    // Draw fill with semi-transparent color
+    this.ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.4)`;
+    this.ctx.fillRect(-halfWidth, -halfHeight, width, height);
 
-      this.ctx.lineWidth = lineWidth;
-      this.ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
-      this.ctx.stroke();
-    };
-
+    // Draw border with glow effect
+    this.ctx.lineJoin = "round";
+    this.ctx.lineWidth = 2;
+    this.ctx.strokeStyle = `rgb(${r}, ${g}, ${b})`;
     this.ctx.shadowColor = `rgb(${r}, ${g}, ${b})`;
-    this.ctx.shadowBlur = 10;
+    this.ctx.shadowBlur = 8;
+    this.ctx.strokeRect(-halfWidth, -halfHeight, width, height);
 
-    drawGlowingLayer(7.5, 0.2);
-    drawGlowingLayer(6, 0.2);
-    drawGlowingLayer(4.5, 0.2);
-    drawGlowingLayer(3, 0.2);
-
-    this.ctx.lineWidth = 1.5;
-    this.ctx.strokeStyle = "#fff";
+    // Draw bright inner border
+    this.ctx.lineWidth = 1;
     this.ctx.shadowBlur = 0;
-    drawGlowingLayer(1.5, 1);
+    this.ctx.strokeStyle = "#fff";
+    this.ctx.strokeRect(-halfWidth, -halfHeight, width, height);
 
     this.ctx.restore();
   }
