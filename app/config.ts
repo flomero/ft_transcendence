@@ -50,7 +50,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       timedGame: { duration: 360 },
       scoredGame: { goalObjective: 7 },
       survivalGame: {},
-      goalReset: {},
+      goalReset: { delay: 1.5 },
     },
     powerUpNames: {},
     playerCount: 2,
@@ -63,12 +63,8 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
     gameModeConfig: {},
     modifierNames: {
       timedStart: {},
-      timedGame: {
-        duration: 360,
-      },
-      scoredGame: {
-        goalObjective: 7,
-      },
+      timedGame: { duration: 360 },
+      scoredGame: { goalObjective: 7 },
       survivalGame: {},
       goalReset: {},
       powerUpSpawner: {
@@ -168,5 +164,19 @@ export const TOURNAMENT_CONFIGS_REGISTRY: TOURNAMENT_CONFIGS_REGISTRY_TYPE = {
     bracketType: "singleElimination",
     matchWinner: "bestOfX",
     possiblePlayerCount: [4, 8, 16, 32],
+  },
+
+  doubleElimination: {
+    bracketType: "singleElimination",
+    matchWinner: "bestOfX",
+    possiblePlayerCount: [4, 8, 16, 32],
+  },
+
+  swissRound: {
+    bracketType: "singleElimination",
+    matchWinner: "bestOfX",
+    possiblePlayerCount: Array.from({ length: 15 }).map(
+      (_, index) => 2 * (index + 1),
+    ),
   },
 };
