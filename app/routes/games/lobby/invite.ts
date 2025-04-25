@@ -8,18 +8,16 @@ const inviteLobby: FastifyPluginAsync = async (fastify): Promise<void> => {
       friendId: string;
       lobbyId: number;
     };
-    if (!friendId || !lobbyId) {
-      return reply.code(400).send({ error: "No friendId" });
-    }
+    if (!friendId || !lobbyId) return reply.badRequest("No friendId");
 
-    if (!(await isFriend(fastify, request.userId, friendId))) {
-      return reply.code(400).send({ error: "Friend not found" });
-    }
+    if (!(await isFriend(fastify, request.userId, friendId)))
+      return reply.badRequest("Friend not found");
 
     try {
       await sendGameInviteToUser(fastify, request, friendId, lobbyId);
     } catch (error) {
-      return reply.code(400).send({ error: error });
+      if (error instanceof Error) return reply.badRequest(error.message);
+      return reply.badRequest("Error sending invite");
     }
 
     return reply.code(200).send({ message: "Successfully send invite" });

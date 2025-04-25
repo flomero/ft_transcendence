@@ -52,7 +52,7 @@ class PongGame {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private gameState: GameState = {};
-  private ratio: number = 0.0;
+  private ratio = 0.0;
   private gameId: string;
   private isConnected = false;
   private debug = false;
@@ -113,7 +113,7 @@ class PongGame {
         if (message.referenceTable && this.playerIndex === -1) {
           this.playerIndex = message.referenceTable.indexOf(this.currentUserId);
           this.playerCount = message.referenceTable.length;
-          if (this.playerCount == 2) {
+          if (this.playerCount === 2) {
             this.canvas.width = 800;
             this.canvas.height = 400;
             this.ratio = (this.canvas.width - this.padding * 2) / 200.0;
@@ -169,7 +169,7 @@ class PongGame {
   }
 
   private handleKeyDown(event: KeyboardEvent): void {
-    let action: UserInputAction = {
+    const action: UserInputAction = {
       type: "userInput",
       options: {
         type: null,
@@ -187,7 +187,7 @@ class PongGame {
   }
 
   private handleKeyUp(event: KeyboardEvent): void {
-    let action: UserInputAction = {
+    const action: UserInputAction = {
       type: "userInput",
       options: {
         type: null,
@@ -417,7 +417,7 @@ class PongGame {
     }
   }
 
-  private drawScores(isRotated: boolean = false): void {
+  private drawScores(isRotated = false): void {
     if (!this.gameState.scores) return;
     // update scores
 
@@ -450,28 +450,28 @@ class PongGame {
     width: number,
     height: number,
     color: string,
-    angle: number = 0,
+    angle = 0,
   ): void {
-    let r = 255,
-      g = 255,
-      b = 255;
+    let r = 255;
+    let g = 255;
+    let b = 255;
 
     // Parse color from hex to RGB
-    if (color && color.startsWith("#")) {
+    if (color?.startsWith("#")) {
       if (color.length === 7) {
-        r = parseInt(color.slice(1, 3), 16);
-        g = parseInt(color.slice(3, 5), 16);
-        b = parseInt(color.slice(5, 7), 16);
+        r = Number.parseInt(color.slice(1, 3), 16);
+        g = Number.parseInt(color.slice(3, 5), 16);
+        b = Number.parseInt(color.slice(5, 7), 16);
       } else if (color.length === 4) {
-        r = parseInt(color.charAt(1) + color.charAt(1), 16);
-        g = parseInt(color.charAt(2) + color.charAt(2), 16);
-        b = parseInt(color.charAt(3) + color.charAt(3), 16);
+        r = Number.parseInt(color.charAt(1) + color.charAt(1), 16);
+        g = Number.parseInt(color.charAt(2) + color.charAt(2), 16);
+        b = Number.parseInt(color.charAt(3) + color.charAt(3), 16);
       }
     }
 
-    r = isNaN(r) ? 255 : Math.max(0, Math.min(255, r));
-    g = isNaN(g) ? 255 : Math.max(0, Math.min(255, g));
-    b = isNaN(b) ? 255 : Math.max(0, Math.min(255, b));
+    r = Number.isNaN(r) ? 255 : Math.max(0, Math.min(255, r));
+    g = Number.isNaN(g) ? 255 : Math.max(0, Math.min(255, g));
+    b = Number.isNaN(b) ? 255 : Math.max(0, Math.min(255, b));
 
     this.ctx.save();
     this.ctx.translate(x, y);
@@ -506,12 +506,11 @@ function initPongGame() {
   try {
     if (document.getElementById("gameCanvas")) {
       return new PongGame("gameCanvas");
-    } else {
-      throw new Error("Canvas element with id 'gameCanvas' not found");
     }
+    throw new Error("Canvas element with id 'gameCanvas' not found");
   } catch (error) {
     const errorMessage = document.createElement("div");
-    errorMessage.textContent = "Error initializing Pong game: " + error;
+    errorMessage.textContent = `Error initializing Pong game: ${error}`;
     errorMessage.style.color = "red";
     errorMessage.style.fontSize = "20px";
     errorMessage.style.textAlign = "center";

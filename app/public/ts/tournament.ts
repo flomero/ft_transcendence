@@ -1,6 +1,4 @@
-import { Edge, Round } from "../../types/tournament/tournament";
-
-export {};
+import type { Edge, Round } from "../../types/tournament/tournament";
 
 type Rounds = Round[];
 
@@ -67,7 +65,7 @@ class TournamentBracket {
 
   public destroy(): void {
     window.removeEventListener("resize", this.drawLines);
-    delete window.drawTournamentLines;
+    window.drawTournamentLines = undefined;
   }
 
   private drawLines(): void {
