@@ -1,7 +1,6 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "./public",
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "target": "ES2020",
