@@ -53,6 +53,14 @@ export class GoalReset extends ModifierBase {
   }
 
   onBallOutOfBounds(game: Pong, args: { ballID: number }): void {
-    this.activate(game);
+    if (this.status !== ModifierStatus.ACTIVE) return;
+    this.ticks = this.delay;
+    this.status = ModifierStatus.PAUSED;
+
+    const gameState = game.getState();
+
+    game.resetBall(gameState, -1, true);
+    this.ballSpeed = gameState.balls[0].speed;
+    gameState.balls[0].speed = 0;
   }
 }

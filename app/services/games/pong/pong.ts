@@ -327,9 +327,9 @@ export abstract class Pong extends GameBase {
       if (ball.doCollision) this.doCollisionChecks(gameState, ball, doTriggers);
 
     // Verify that no balls went out of bounds
-    gameState.balls.forEach((ball, id) => {
-      if (this.isOutOfBounds(ball)) this.resetBall(gameState, id, doTriggers);
-    });
+    // gameState.balls.forEach((ball, id) => {
+    //   if (this.isOutOfBounds(ball)) this.resetBall(gameState, id, doTriggers);
+    // });
 
     // Trigger modifiers
     if (doTriggers) this.modifierManager.trigger("onUpdate");
