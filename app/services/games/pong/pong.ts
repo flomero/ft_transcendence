@@ -106,7 +106,9 @@ export abstract class Pong extends GameBase {
 
       // Verify that no balls went out of bounds
       this.gameState.balls.forEach((ball, id) => {
-        if (this.isOutOfBounds(ball)) this.resetBall(this.gameState, id, false);
+        if (this.isOutOfBounds(ball))
+          this.modifierManager.trigger("onBallOutOfBounds", { ballID: id });
+        // this.resetBall(this.gameState, id, false);
       });
 
       // Trigger modifiers
@@ -325,9 +327,9 @@ export abstract class Pong extends GameBase {
       if (ball.doCollision) this.doCollisionChecks(gameState, ball, doTriggers);
 
     // Verify that no balls went out of bounds
-    gameState.balls.forEach((ball, id) => {
-      if (this.isOutOfBounds(ball)) this.resetBall(gameState, id, doTriggers);
-    });
+    // gameState.balls.forEach((ball, id) => {
+    //   if (this.isOutOfBounds(ball)) this.resetBall(gameState, id, doTriggers);
+    // });
 
     // Trigger modifiers
     if (doTriggers) this.modifierManager.trigger("onUpdate");
@@ -562,4 +564,9 @@ export abstract class Pong extends GameBase {
   }
 
   abstract getSettings(): GameModeCombinedSettings;
+
+  isEliminated(playerID: number): boolean {
+    if (playerID < 0 || playerID >= this.gameState.playerCount) return false;
+    return this.gameState.results[playerID] !== 0;
+  }
 }

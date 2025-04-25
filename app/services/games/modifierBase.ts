@@ -79,7 +79,9 @@ export class ModifierBase {
   onPaddleBounce(game: Pong, args: { playerId: number }): void {}
   onWallBounce(game: Pong, args: { wallID: number }): void {}
   onPlayerElimination(game: Pong, args: { playerId: number }): void {}
+  onArenaModification(game: Pong): void {}
   onBallReset(game: Pong): void {}
+  onBallOutOfBounds(game: Pong, args: { ballID: number }): void {}
 
   // Getters & Setters
   getName(): string {
@@ -96,5 +98,11 @@ export class ModifierBase {
 
   getActivationMode(): ModifierActivationMode {
     return this.activationMode;
+  }
+
+  getState(): Record<string, any> {
+    return {
+      status: this.status.toString(),
+    };
   }
 }

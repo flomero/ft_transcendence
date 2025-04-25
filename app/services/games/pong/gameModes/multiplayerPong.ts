@@ -367,8 +367,9 @@ export class MultiplayerPong extends Pong {
   // Implementation of isOutOfBounds method
   isOutOfBounds(ball: Ball): boolean {
     const tolerance: number =
-      this.settings.wallsHeight + this.settings.paddleOffset;
-    this.settings.wallsHeight + this.settings.paddleOffset;
+      this.settings.wallsHeight +
+      this.settings.wallOffset +
+      this.settings.paddleOffset;
 
     const distance =
       (ball.x - this.settings.arenaRadius) ** 2 +

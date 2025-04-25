@@ -132,5 +132,7 @@ export class ArenaShrink extends ModifierBase {
         adjacent * ((connectingWall.dy * connectingWall.width) / 2.0) +
         connectingWall.ny * coefficients[gameState.playerCount] * normalDiff;
     }
+
+    game.getModifierManager().trigger("onArenaModification");
   }
 }

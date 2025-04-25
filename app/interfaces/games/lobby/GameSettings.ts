@@ -40,6 +40,10 @@ interface GoalReset {
   delay?: number;
 }
 
+interface IdleWallBounceAcceleration {
+  bumperVelocityFactor?: number;
+}
+
 interface ModifierNames {
   powerUpSpawner?: PowerUpSpawner;
   timedGame?: TimedGame;
@@ -50,6 +54,7 @@ interface ModifierNames {
   goalReset?: GoalReset;
   paddleBoost?: {};
   timedStart?: {};
+  idleWallBounceAcceleration?: IdleWallBounceAcceleration;
 }
 
 interface SpeedBoost {

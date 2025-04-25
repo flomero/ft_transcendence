@@ -151,6 +151,14 @@ export class ModifierManager {
   getStateSnapshot(): Record<string, any> {
     const state = {
       spawnedPowerUps: this.spawnedPowerUps,
+      modifiersState: {
+        ...Object.fromEntries(
+          this.modifiers.map((modifiers) => [
+            modifiers.name,
+            modifiers.getState(),
+          ]),
+        ),
+      },
     };
 
     return state;
@@ -158,10 +166,6 @@ export class ModifierManager {
 
   loadStateSnapshot(snapshot: Record<string, any>): void {
     this.spawnedPowerUps = snapshot.spawnedPowerUps || [];
-
-    // For a complete implementation, you would need to reconstruct the modifier
-    // and powerUp instances from their states, but that requires additional knowledge
-    // about the ModifierBase class implementation
   }
 
   sampleRandomPowerUp(rng: RNG): string | null {
