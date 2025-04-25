@@ -2,7 +2,11 @@ import { GameSettings } from "./interfaces/games/lobby/GameSettings";
 
 export enum MatchmakingGameModes {
   ClassicPong = "classicPong",
-  BasicPowerUp1v1 = "basicPowerUp1v1",
+  BasicPowerUpClassicPong = "basicPowerUpClassicPong",
+  MultiplayerPong5 = "multiplayerPong5",
+  MultiplayerPong8 = "multiplayerPong8",
+  BasicPowerUpMultiplayerPong5 = "basicPowerUpMultiplayerPong5",
+  BasicPowerUpMultiplayerPong8 = "basicPowerUpMultiplayerPong8",
 }
 
 export enum LobbyGameModes {
@@ -115,19 +119,20 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
   },
 
   // All powerUps, quick game
-  basicPowerUpMultiplayerPong: {
+  basicPowerUpMultiplayerPong5: {
     gameName: "pong",
     gameModeName: "multiplayerPong",
-    gameModeConfig: {},
+    gameModeConfig: {
+      powerUpRadius: 3.5,
+    },
     modifierNames: {
       timedStart: {},
       timedGame: {
         duration: 360,
       },
-      scoredGame: {
-        goalObjective: 7,
-      },
       survivalGame: {},
+      elimination: { threshold: 3 },
+      arenaShrink: {},
       goalReset: {},
       powerUpSpawner: {
         meanDelay: 10,
@@ -138,10 +143,49 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       speedBoost: {},
       blinkingBall: {},
       multiBall: {},
-      bumper: {},
+      bumper: {
+        bumperJunctionDistanceFromCenter: 6,
+        bumperVelocityFactor: 25,
+        bumperAcceleration: -20,
+      },
       shooter: {},
     },
     playerCount: 5,
+  },
+
+  // All powerUps, quick game
+  basicPowerUpMultiplayerPong8: {
+    gameName: "pong",
+    gameModeName: "multiplayerPong",
+    gameModeConfig: {
+      powerUpRadius: 3.5,
+    },
+    modifierNames: {
+      timedStart: {},
+      timedGame: {
+        duration: 360,
+      },
+      survivalGame: {},
+      elimination: { threshold: 3 },
+      arenaShrink: {},
+      goalReset: {},
+      powerUpSpawner: {
+        meanDelay: 10,
+        delaySpan: 2.5,
+      },
+    },
+    powerUpNames: {
+      speedBoost: {},
+      blinkingBall: {},
+      multiBall: {},
+      bumper: {
+        bumperJunctionDistanceFromCenter: 6,
+        bumperVelocityFactor: 25,
+        bumperAcceleration: -20,
+      },
+      shooter: {},
+    },
+    playerCount: 8,
   },
 };
 
