@@ -6,17 +6,21 @@ import {
 import { PongGameState } from "../../games/pong/pong";
 import { PongAIOpponent } from "../../games/pong/pongAIOpponent";
 import { STRATEGY_REGISTRY } from "../strategyRegistryLoader";
+import type { GameModeCombinedSettings } from "../../../types/games/gameRegistry";
 
 export class Foresight implements IPongPaddlePositionSampler {
   name = "foresight";
 
+  protected gameSettings: GameModeCombinedSettings;
+
   protected widthFactor: number;
   protected lookAheadTimeS: number;
   protected idleThresholdS: number;
-  protected ballSpeedMultiplier: number;
   protected preparationTimeS: number;
 
-  constructor() {
+  constructor(gameSettings: GameModeCombinedSettings) {
+    this.gameSettings = gameSettings;
+
     // Load configuration from registry
     this.widthFactor =
       STRATEGY_REGISTRY.pongPaddlePositionSampler[this.name]
@@ -27,11 +31,6 @@ export class Foresight implements IPongPaddlePositionSampler {
 
     this.idleThresholdS =
       STRATEGY_REGISTRY.pongPaddlePositionSampler[this.name].idleThresholdS;
-
-    this.ballSpeedMultiplier =
-      STRATEGY_REGISTRY.pongPaddlePositionSampler[
-        this.name
-      ].ballSpeedMultiplier;
 
     this.preparationTimeS =
       STRATEGY_REGISTRY.pongPaddlePositionSampler[this.name].preparationTimeS;
@@ -45,14 +44,13 @@ export class Foresight implements IPongPaddlePositionSampler {
     const aiId = ai.getId();
     const paddle = gameState.paddles[aiId];
 
-    // Speed up the ball for prediction purposes
+    // Mark balls as not scoring to avoid simulation side effects
     gameState.balls.forEach((ball) => {
       ball.doGoal = false;
-      // Increase ball speed to compensate for AI's slower update rate
-      ball.speed *= this.ballSpeedMultiplier;
+      // Removed ball speed acceleration
     });
 
-    // Look ahead for wall collisions with the sped-up ball
+    // Look ahead for wall collisions with the ball at normal speed
     const wallCollisions: ExtendedCollisionData[] = ai
       .getGame()
       .findNextCollisions(
@@ -79,8 +77,6 @@ export class Foresight implements IPongPaddlePositionSampler {
     }
 
     // Calculate paddle properties
-    const deltaX = paddle.speed * paddle.dx;
-    const deltaY = paddle.speed * paddle.dy;
     const paddleHalfWidth = (paddle.coverage * this.widthFactor) / 2.0;
 
     const desiredPositions: PongPaddlePosition[] = [];
@@ -90,25 +86,28 @@ export class Foresight implements IPongPaddlePositionSampler {
     const maxMovementTime =
       (2 * paddle.maxDisplacement * 1000) / (paddle.speed * serverTickrateS);
 
-    // Adjust collision time to account for the ball speed multiplier
-    const timeAdjustmentFactor = 1 / this.ballSpeedMultiplier;
-
     // Process each collision to determine optimal paddle positions
     collisions.forEach((colData, index) => {
-      // Calculate adjusted collision timestamp (accounting for sped-up simulation)
+      // Calculate collision timestamp (without time adjustment factor)
       const collisionTimestamp =
-        now + (colData.tick * 1000.0 * timeAdjustmentFactor) / serverTickrateS;
+        now + (colData.tick * 1000.0) / serverTickrateS;
 
-      // Calculate target position based on collision position
-      const possibleDisplacement = [
-        (colData.collisionPos.x - paddle.x) / deltaX,
-        (colData.collisionPos.y - paddle.y) / deltaY,
-      ].filter((value) => isFinite(value) && value !== 0);
+      // Calculate idle position (displacement = 0)
+      const idleX =
+        paddle.x - (paddle.displacement * paddle.dx * paddle.amplitude) / 100;
+      const idleY =
+        paddle.y - (paddle.displacement * paddle.dy * paddle.amplitude) / 100;
 
-      const targetPosition =
-        possibleDisplacement.length > 0
-          ? possibleDisplacement[0]
-          : paddle.displacement;
+      // Vector from idle position to collision position
+      const vectorX = colData.collisionPos.x - idleX;
+      const vectorY = colData.collisionPos.y - idleY;
+
+      // Dot product to project onto paddle direction (dx, dy)
+      const projectionLength = vectorX * paddle.dx + vectorY * paddle.dy;
+
+      // Calculate displacement as percentage of maximum displacement
+      // Convert from absolute units to percentage of maxDisplacement
+      const targetPosition = (projectionLength / paddle.amplitude) * 100;
 
       // Clamp to allowed range
       let computedDisplacement = Math.max(
@@ -178,11 +177,6 @@ export class Foresight implements IPongPaddlePositionSampler {
         });
       }
     });
-
-    console.log(`Collisions:`);
-    console.dir(collisions, { depth: null });
-    console.log(`Desired positions:`);
-    console.dir(desiredPositions, { depth: null });
 
     return desiredPositions;
   }

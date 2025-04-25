@@ -12,6 +12,7 @@ export const pongConsumer = async (
   let gameLoopInterval: NodeJS.Timeout | null = null;
 
   let aiOpponent: PongAIOpponent | null = null;
+  let aiOpponent2: PongAIOpponent | null = null;
   let aiLoopInterval: NodeJS.Timeout | null = null;
 
   // Helper function to sleep
@@ -51,12 +52,12 @@ export const pongConsumer = async (
     }
   };
 
-  const startAILoop = async (game: GameBase, ai: PongAIOpponent) => {
+  const startAILoop = async (game: GameBase, ais: PongAIOpponent[]) => {
     if (aiLoopInterval) clearInterval(aiLoopInterval);
 
     const sleepIntervalMs: number = 1000.0;
     while (game.getStatus() === GameStatus.RUNNING) {
-      ai.update();
+      ais.forEach((ai) => ai.update());
       await sleep(sleepIntervalMs);
     }
   };
@@ -82,6 +83,11 @@ export const pongConsumer = async (
           currentGame = new GameClass(data || {});
 
           aiOpponent = new PongAIOpponent(currentGame, {
+            playerId: 0,
+            strategyName: "foresight",
+          });
+
+          aiOpponent2 = new PongAIOpponent(currentGame, {
             playerId: 1,
             strategyName: "foresight",
           });
@@ -112,7 +118,8 @@ export const pongConsumer = async (
           if (currentGame.getStatus() === GameStatus.RUNNING) {
             startGameLoop(currentGame);
 
-            if (aiOpponent) startAILoop(currentGame, aiOpponent);
+            if (aiOpponent && aiOpponent2)
+              startAILoop(currentGame, [aiOpponent, aiOpponent2]);
           }
 
           break;
