@@ -14,6 +14,18 @@ export enum MatchmakingGameModes {
 
 export enum LobbyGameModes {
   ClassicPong = "classicPong",
+  BasicPowerUpClassicPong = "basicPowerUpClassicPong",
+  MultiplayerPong5 = "multiplayerPong5",
+  MultiplayerPong8 = "multiplayerPong8",
+  BasicPowerUpMultiplayerPong5 = "basicPowerUpMultiplayerPong5",
+  PowerUpMayhem1v1 = "powerUpMayhem1v1",
+  BasicPowerUpMultiplayerPong8 = "basicPowerUpMultiplayerPong8",
+  PowerUpMayhem5 = "powerUpMayhem5",
+  PowerUpMayhem8 = "powerUpMayhem8",
+  CompetitiveClassicPong = "competitiveClassicPong",
+  CompetitiveClassicPongPowerUps = "competitiveClassicPongPowerUps",
+  CompetitiveMultiplayerPong = "competitiveMultiplayerPong",
+  CompetitiveMultiplayerPongPowerUps = "competitiveMultiplayerPongPowerUps",
 }
 
 export enum TournamentGameModes {
