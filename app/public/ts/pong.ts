@@ -1,36 +1,31 @@
-// Game object interfaces
-interface Ball {
+interface GameObject {
   x: number;
   y: number;
-  radius: number;
   isVisible: boolean;
 }
 
-interface Paddle {
-  x: number;
-  y: number;
+interface CircularGameObject extends GameObject {
+  radius: number;
+}
+
+interface RectangularGameObject extends GameObject {
   width: number;
   height: number;
-  dx: number;
-  dy: number;
-  isVisible: boolean;
 }
 
-interface Wall {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
+interface MovableGameObject extends GameObject {
   dx: number;
   dy: number;
-  isVisible: boolean;
 }
 
-interface PowerUp {
-  x: number;
-  y: number;
-  radius: number;
-  isVisible: boolean;
+interface Ball extends CircularGameObject {}
+
+interface PowerUp extends CircularGameObject {}
+
+interface Wall extends RectangularGameObject, MovableGameObject {}
+
+interface Paddle extends RectangularGameObject, MovableGameObject {
+  alpha: number;
 }
 
 interface ModifiersData {
@@ -53,54 +48,41 @@ interface UserInputAction {
   };
 }
 
-type GameMode = "classicPong" | "multiplayerPong";
-
 class PongGame {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private gameState: GameState = {};
   private ratio: number = 0.0;
-  private gameMode: GameMode;
   private gameId: string;
-  private isConnected: boolean = false;
+  private isConnected = false;
   private debug = false;
+  private rotationAngle = 0;
+  private padding = 20;
   gameSocket: WebSocket;
+  private currentUserId: string;
+  private playerIndex = -1; // -1 means not determined yet
+  private playerCount = 0;
 
   constructor(canvasId: string) {
     const path = window.location.pathname;
     this.gameId = path.split("/").pop() || "";
     if (!this.gameId) throw new Error("No gameId provided in URL parameters");
-    const urlParams = new URLSearchParams(window.location.search);
-    this.gameMode = (urlParams.get("gameMode") as GameMode) || "classicPong";
-    if (!this.gameMode)
-      throw new Error("No gameMode provided in URL parameters");
-
     this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
     if (!this.canvas) throw new Error(`Canvas with id ${canvasId} not found`);
+
+    this.currentUserId = this.canvas.dataset.userid || "";
 
     const context = this.canvas.getContext("2d");
     if (!context) throw new Error("Failed to get 2D context from canvas");
     this.ctx = context;
 
-    this.setupCanvasDimensions();
+    this.canvas.width = 800;
+    this.canvas.height = 800;
+    this.ratio = (this.canvas.width - this.padding * 2) / 100.0;
 
     this.gameSocket = this.setupWebSocket();
-
     this.setupEventListeners();
-
     this.startGameLoop();
-  }
-
-  private setupCanvasDimensions(): void {
-    if (this.gameMode === "multiplayerPong") {
-      this.canvas.width = 800;
-      this.canvas.height = 800;
-      this.ratio = this.canvas.width / 100.0;
-    } else {
-      this.canvas.width = 800;
-      this.canvas.height = 400;
-      this.ratio = this.canvas.width / 200.0;
-    }
   }
 
   private setupWebSocket(): WebSocket {
@@ -125,11 +107,51 @@ class PongGame {
       const message = JSON.parse(event.data);
 
       if (message.type === "gameState") {
-        this.gameState = JSON.parse(message.data);
+        const parsedData = JSON.parse(message.data);
+        this.gameState = parsedData;
+
+        if (message.referenceTable && this.playerIndex === -1) {
+          this.playerIndex = message.referenceTable.indexOf(this.currentUserId);
+          this.playerCount = message.referenceTable.length;
+          if (this.playerCount == 2) {
+            this.canvas.width = 800;
+            this.canvas.height = 400;
+            this.ratio = (this.canvas.width - this.padding * 2) / 200.0;
+          }
+          if (
+            this.playerIndex >= 0 &&
+            this.gameState.paddles &&
+            this.gameState.paddles[this.playerIndex]
+          ) {
+            this.calculateRotationAngle();
+          }
+        }
       }
-    } catch (error) {
-      console.error("Error parsing WebSocket message:", error);
+    } catch (error) {}
+  }
+
+  private calculateRotationAngle(): void {
+    if (
+      this.playerIndex < 0 ||
+      !this.gameState.paddles ||
+      !this.gameState.paddles[this.playerIndex]
+    ) {
+      return;
     }
+
+    const paddle = this.gameState.paddles[this.playerIndex];
+
+    if (!paddle || paddle.alpha === undefined) return;
+    const targetAngle = Math.PI;
+
+    this.rotationAngle = (targetAngle - paddle.alpha) % (Math.PI * 2);
+
+    if (this.rotationAngle > Math.PI) this.rotationAngle -= Math.PI * 2;
+    if (this.rotationAngle < -Math.PI) this.rotationAngle += Math.PI * 2;
+
+    console.log(
+      `Player ${this.playerIndex} rotation: ${this.rotationAngle.toFixed(2)} radians`,
+    );
   }
 
   private handleSocketClose(): void {
@@ -138,7 +160,6 @@ class PongGame {
   }
 
   private handleSocketError(error: Event): void {
-    console.error("WebSocket error:", error);
     this.isConnected = false;
   }
 
@@ -158,6 +179,7 @@ class PongGame {
 
     if (event.key === "ArrowUp") action.options.type = "UP";
     if (event.key === "ArrowDown") action.options.type = "DOWN";
+    if (event.key === "Space") action.options.type = "SPACE";
 
     if (action.options.type && this.isConnected) {
       this.gameSocket.send(JSON.stringify(action));
@@ -175,6 +197,8 @@ class PongGame {
 
     if (event.key === "ArrowUp" || event.key === "ArrowDown") {
       action.options.type = "STOP";
+    } else if (event.key === "Space") {
+      action.options.type = "SPACE_STOP";
     }
 
     if (action.options.type && this.isConnected) {
@@ -185,13 +209,42 @@ class PongGame {
   private draw(): void {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    if (this.debug) this.drawDebugElements();
+    this.ctx.save();
+    this.ctx.translate(this.padding, this.padding);
 
-    if (this.gameState.balls) this.drawBalls();
-    if (this.gameState.paddles) this.drawPaddles();
+    const shouldRotate = this.playerCount > 2 && this.playerIndex >= 0;
+
+    if (shouldRotate) {
+      const paddedWidth = this.canvas.width - this.padding * 2;
+      const paddedHeight = this.canvas.height - this.padding * 2;
+
+      this.ctx.translate(paddedWidth / 2, paddedHeight / 2);
+      this.ctx.rotate(this.rotationAngle);
+      this.ctx.translate(-paddedWidth / 2, -paddedHeight / 2);
+    } else {
+      const classicRotate = this.playerIndex === 1;
+      if (classicRotate) {
+        const paddedWidth = this.canvas.width - this.padding * 2;
+        const paddedHeight = this.canvas.height - this.padding * 2;
+
+        this.ctx.translate(paddedWidth, paddedHeight);
+        this.ctx.rotate(Math.PI);
+      }
+    }
+
     if (this.gameState.walls) this.drawWalls();
     if (this.gameState.modifiersState?.spawnedPowerUps) this.drawPowerUps();
-    if (this.gameState.scores) this.drawScores();
+    if (this.gameState.paddles) this.drawPaddles();
+    if (this.gameState.balls) this.drawBalls();
+
+    if (this.gameState.scores) {
+      const rotated = shouldRotate || this.playerIndex === 1;
+      this.drawScores(rotated);
+    }
+
+    this.ctx.restore();
+
+    if (this.debug) this.drawDebugElements();
   }
 
   private drawDebugElements(): void {
@@ -209,11 +262,6 @@ class PongGame {
     this.ctx.font = "14px ui-sans-serif";
     this.ctx.textAlign = "left";
     this.ctx.fillText(
-      `Game Mode: ${this.gameMode}, Connected: ${this.isConnected}`,
-      10,
-      20,
-    );
-    this.ctx.fillText(
       `Canvas: ${this.canvas.width}x${this.canvas.height}, Ratio: ${this.ratio.toFixed(2)}`,
       10,
       40,
@@ -223,6 +271,56 @@ class PongGame {
       ? `Game objects: ${Object.keys(this.gameState).join(", ")}`
       : "No game state received yet";
     this.ctx.fillText(gameStateInfo, 10, 60);
+
+    // Add rotation debug info
+    this.ctx.fillText(
+      `Player Index: ${this.playerIndex}, Rotation: ${this.rotationAngle.toFixed(2)} rad (${((this.rotationAngle * 180) / Math.PI).toFixed(2)}°)`,
+      10,
+      80,
+    );
+
+    // Add paddle position debug info if available
+    if (
+      this.playerIndex >= 0 &&
+      this.gameState.paddles &&
+      this.gameState.paddles[this.playerIndex]
+    ) {
+      const paddle = this.gameState.paddles[this.playerIndex];
+      this.ctx.fillText(
+        `Paddle Pos: x=${paddle.x.toFixed(1)}, y=${paddle.y.toFixed(1)}, alpha=${paddle.alpha.toFixed(3)} rad`,
+        10,
+        100,
+      );
+    }
+
+    // Draw a direction indicator showing the rotation effect
+    const centerX = 750;
+    const centerY = 50;
+    const radius = 30;
+
+    // Draw circle
+    this.ctx.beginPath();
+    this.ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+    this.ctx.strokeStyle = "white";
+    this.ctx.stroke();
+
+    // Draw direction line (points left before rotation)
+    this.ctx.beginPath();
+    this.ctx.moveTo(centerX, centerY);
+    this.ctx.lineTo(centerX - radius, centerY);
+    this.ctx.strokeStyle = "gray";
+    this.ctx.stroke();
+
+    // Draw rotated direction line
+    this.ctx.beginPath();
+    this.ctx.moveTo(centerX, centerY);
+    this.ctx.lineTo(
+      centerX + radius * Math.cos(Math.PI + this.rotationAngle),
+      centerY + radius * Math.sin(Math.PI + this.rotationAngle),
+    );
+    this.ctx.strokeStyle = "red";
+    this.ctx.lineWidth = 3;
+    this.ctx.stroke();
   }
 
   private drawBalls(): void {
@@ -255,7 +353,7 @@ class PongGame {
         const width = paddle.width * this.ratio;
         const height = paddle.height * this.ratio;
 
-        const paddleColor = index === 0 ? "#ff00ff" : "#00ffff";
+        const paddleColor = index === this.playerIndex ? "#ff00ff" : "#00ffff";
 
         this.drawNeonRectangle(x, y, width, height, paddleColor, angle);
       }
@@ -283,34 +381,17 @@ class PongGame {
 
     this.gameState.modifiersState.spawnedPowerUps.forEach((entry) => {
       const [type, powerUp] = entry;
-
       if (powerUp.isVisible) {
-        const color = this.getPowerUpColor(type);
-        const x = powerUp.x * this.ratio;
-        const y = powerUp.y * this.ratio;
-        const radius = powerUp.radius * this.ratio;
-
-        this.ctx.save();
+        this.ctx.fillStyle = this.getPowerUpColor(type);
         this.ctx.beginPath();
-        this.ctx.arc(x, y, radius, 0, Math.PI * 2);
-        this.ctx.fillStyle = color;
-        this.ctx.shadowColor = color;
-        this.ctx.shadowBlur = 8;
+        this.ctx.arc(
+          powerUp.x * this.ratio,
+          powerUp.y * this.ratio,
+          powerUp.radius * this.ratio,
+          0,
+          Math.PI * 2,
+        );
         this.ctx.fill();
-
-        this.ctx.beginPath();
-        this.ctx.arc(x, y - radius * 0.3, radius * 0.4, 0, Math.PI * 2);
-        this.ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
-        this.ctx.shadowBlur = 0;
-        this.ctx.fill();
-        this.ctx.restore();
-
-        if (this.debug) {
-          this.ctx.fillStyle = "white";
-          this.ctx.font = "10px ui-sans-serif";
-          this.ctx.textAlign = "center";
-          this.ctx.fillText(type, x, y - radius - 5);
-        }
       }
     });
   }
@@ -336,18 +417,11 @@ class PongGame {
     }
   }
 
-  private drawScores(): void {
+  private drawScores(isRotated: boolean = false): void {
     if (!this.gameState.scores) return;
+    // update scores
 
-    this.ctx.fillStyle = "white";
-    this.ctx.font = "24px ui-sans-serif";
-    this.ctx.textAlign = "center";
-
-    this.ctx.fillText(
-      `Scores: ${JSON.stringify(this.gameState.scores)}`,
-      this.canvas.width / 2,
-      30,
-    );
+    this.ctx.restore();
   }
 
   private startGameLoop(): void {
@@ -382,6 +456,7 @@ class PongGame {
       g = 255,
       b = 255;
 
+    // Parse color from hex to RGB
     if (color && color.startsWith("#")) {
       if (color.length === 7) {
         r = parseInt(color.slice(1, 3), 16);
@@ -392,49 +467,6 @@ class PongGame {
         g = parseInt(color.charAt(2) + color.charAt(2), 16);
         b = parseInt(color.charAt(3) + color.charAt(3), 16);
       }
-    } else {
-      switch (color.toLowerCase()) {
-        case "red":
-          r = 255;
-          g = 0;
-          b = 0;
-          break;
-        case "green":
-          r = 0;
-          g = 255;
-          b = 0;
-          break;
-        case "blue":
-          r = 0;
-          g = 0;
-          b = 255;
-          break;
-        case "yellow":
-          r = 255;
-          g = 255;
-          b = 0;
-          break;
-        case "purple":
-          r = 128;
-          g = 0;
-          b = 128;
-          break;
-        case "cyan":
-          r = 0;
-          g = 255;
-          b = 255;
-          break;
-        case "orange":
-          r = 255;
-          g = 165;
-          b = 0;
-          break;
-        case "white":
-          r = 255;
-          g = 255;
-          b = 255;
-          break;
-      }
     }
 
     r = isNaN(r) ? 255 : Math.max(0, Math.min(255, r));
@@ -442,67 +474,29 @@ class PongGame {
     b = isNaN(b) ? 255 : Math.max(0, Math.min(255, b));
 
     this.ctx.save();
-
     this.ctx.translate(x, y);
     if (angle) this.ctx.rotate(angle);
 
-    this.ctx.lineJoin = "round";
-    this.ctx.globalCompositeOperation = "lighter";
-
-    const border = 1.5;
     const halfWidth = width / 2;
     const halfHeight = height / 2;
 
-    const drawGlowingLayer = (lineWidth: number, opacity: number) => {
-      this.ctx.beginPath();
-      this.ctx.moveTo(-halfWidth + border, -halfHeight);
-      this.ctx.lineTo(halfWidth - border, -halfHeight);
-      this.ctx.quadraticCurveTo(
-        halfWidth - border,
-        -halfHeight,
-        halfWidth,
-        -halfHeight + border,
-      );
-      this.ctx.lineTo(halfWidth, halfHeight - border);
-      this.ctx.quadraticCurveTo(
-        halfWidth,
-        halfHeight - border,
-        halfWidth - border,
-        halfHeight,
-      );
-      this.ctx.lineTo(-halfWidth + border, halfHeight);
-      this.ctx.quadraticCurveTo(
-        -halfWidth + border,
-        halfHeight,
-        -halfWidth,
-        halfHeight - border,
-      );
-      this.ctx.lineTo(-halfWidth, -halfHeight + border);
-      this.ctx.quadraticCurveTo(
-        -halfWidth,
-        -halfHeight + border,
-        -halfWidth + border,
-        -halfHeight,
-      );
-      this.ctx.closePath();
+    // Draw fill with semi-transparent color
+    this.ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.4)`;
+    this.ctx.fillRect(-halfWidth, -halfHeight, width, height);
 
-      this.ctx.lineWidth = lineWidth;
-      this.ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
-      this.ctx.stroke();
-    };
-
+    // Draw border with glow effect
+    this.ctx.lineJoin = "round";
+    this.ctx.lineWidth = 2;
+    this.ctx.strokeStyle = `rgb(${r}, ${g}, ${b})`;
     this.ctx.shadowColor = `rgb(${r}, ${g}, ${b})`;
-    this.ctx.shadowBlur = 10;
+    this.ctx.shadowBlur = 8;
+    this.ctx.strokeRect(-halfWidth, -halfHeight, width, height);
 
-    drawGlowingLayer(7.5, 0.2);
-    drawGlowingLayer(6, 0.2);
-    drawGlowingLayer(4.5, 0.2);
-    drawGlowingLayer(3, 0.2);
-
-    this.ctx.lineWidth = 1.5;
-    this.ctx.strokeStyle = "#fff";
+    // Draw bright inner border
+    this.ctx.lineWidth = 1;
     this.ctx.shadowBlur = 0;
-    drawGlowingLayer(1.5, 1);
+    this.ctx.strokeStyle = "#fff";
+    this.ctx.strokeRect(-halfWidth, -halfHeight, width, height);
 
     this.ctx.restore();
   }

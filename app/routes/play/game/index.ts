@@ -10,6 +10,7 @@ const page: FastifyPluginAsync = async (fastify): Promise<void> => {
     const data = {
       title: "Game | ft_transcendence",
       gameId: gameId,
+      userId: request.userId,
     };
 
     reply.header("X-Page-Title", "Game | ft_transcendence");
