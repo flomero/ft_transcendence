@@ -51,4 +51,8 @@ export class GoalReset extends ModifierBase {
     this.ballSpeed = gameState.balls[0].speed;
     gameState.balls[0].speed = 0;
   }
+
+  onBallOutOfBounds(game: Pong, args: { ballID: number }): void {
+    this.activate(game);
+  }
 }

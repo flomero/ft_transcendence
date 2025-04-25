@@ -80,6 +80,7 @@ export class ModifierBase {
   onWallBounce(game: Pong, args: { wallID: number }): void {}
   onPlayerElimination(game: Pong, args: { playerId: number }): void {}
   onBallReset(game: Pong): void {}
+  onBallOutOfBounds(game: Pong, args: { ballID: number }): void {}
 
   // Getters & Setters
   getName(): string {
