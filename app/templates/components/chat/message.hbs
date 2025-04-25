@@ -1,3 +1,4 @@
+{{#ifeq message.type "TEXT"}}
 <div class="flex w-max max-w-[75%] flex-col gap-1 rounded-t-lg px-3 py-2 text-sm {{#if message.isOwnMessage}}bg-fg text-bg rounded-l-lg  ml-auto{{else}}bg-bg-muted text-fg rounded-r-lg{{/if}}">
     {{#unless message.isOwnMessage}}
         <span class="text-xs text-fg-muted truncate">{{message.userName}}</span>
@@ -6,4 +7,21 @@
       {{message.message}}
     </span>
 </div>
+{{/ifeq}}
 
+{{#ifeq message.type "INVITE"}}
+<div class="flex w-max max-w-[75%] flex-col gap-1 rounded-t-lg px-3 py-2 text-sm {{#if message.isOwnMessage}}bg-fg text-bg rounded-l-lg  ml-auto{{else}}bg-bg-muted text-fg rounded-r-lg{{/if}}">
+    {{#unless message.isOwnMessage}}
+        <span class="text-xs text-fg-muted truncate">{{message.userName}}</span>
+    {{/unless}}
+    {{#> components/button url=message.message class="bg-color-blue" }}
+      Join Game
+    {{/components/button}}
+</div>
+{{/ifeq}}
+
+{{#ifeq message.type "SYSTEM"}}
+    <div class="text-center text-sm text-fg-muted bg-bg-muted p-1 rounded-lg">
+        {{message.message}}
+    </div>
+{{/ifeq}}
