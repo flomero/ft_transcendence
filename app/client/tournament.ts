@@ -1,4 +1,4 @@
-import { Edge, Round } from "../../types/tournament/tournament";
+import { Edge, Round } from "../types/tournament/tournament";
 
 export {};
 

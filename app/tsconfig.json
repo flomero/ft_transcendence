@@ -6,5 +6,5 @@
     "sourceMap": true
   },
   "include": ["**/*.ts"],
-  "exclude": ["public"]
+  "exclude": ["public", "client"]
 }
