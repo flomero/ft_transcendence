@@ -188,6 +188,7 @@ export class Bumper extends TimeLimitedModifierBase {
         height: wall.height, // Same height as the original wall
         alpha: leftAngle,
         isVisible: true,
+        doRotation: true,
       };
 
       // 'RIGHT' BUMPER - Fixed the angle calculation
@@ -222,6 +223,7 @@ export class Bumper extends TimeLimitedModifierBase {
         height: wall.height, // Same height as the original wall
         alpha: rightAngle,
         isVisible: true,
+        doRotation: true,
       };
 
       // Add both bumpers to the bumpers array

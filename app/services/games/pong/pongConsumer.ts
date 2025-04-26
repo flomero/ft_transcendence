@@ -1,8 +1,9 @@
 import type { FastifyRequest } from "fastify";
 import type { WebSocket } from "ws";
-import { type GameBase, GameStatus } from "../gameBase";
+import type { GameBase } from "../gameBase";
 import { GAME_REGISTRY } from "../../../types/games/gameRegistry";
 import { PongAIOpponent } from "./pongAIOpponent";
+import { GameStatus } from "../../../types/games/gameBaseState";
 
 export const pongConsumer = async (
   ws: WebSocket,
@@ -34,8 +35,6 @@ export const pongConsumer = async (
 
       // Send the updated state to clients
       const gameState = game.getStateSnapshot();
-      // console.log(`State snapshot:`);
-      // console.dir(gameState.modifiersState);
       ws.send(
         JSON.stringify({
           type: "gameState",
@@ -47,8 +46,8 @@ export const pongConsumer = async (
       await sleep(sleepIntervalMs);
       loopCounter++;
 
-      // if (loopCounter >= 1)
-      //     break;
+      // if (loopCounter === 1000)
+      //   currentGame?.eliminate(1);
     }
   };
 

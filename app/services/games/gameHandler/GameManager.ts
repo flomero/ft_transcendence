@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { type GameBase, GameStatus } from "../gameBase";
+import type { GameBase } from "../gameBase";
+import { GameStatus } from "../../../types/games/gameBaseState";
 import type Player from "../../../interfaces/games/gameHandler/Player";
 import type { WebSocket } from "ws";
 import gameLoop from "./gameLoop";

@@ -25,15 +25,21 @@ export class Elimination extends ModifierBase {
     }
 
     const gameState = game.getState();
-    if (gameState.scores[args.playerId] >= this.threshold) {
-      gameState.paddles[args.playerId].isVisible = false;
-      gameState.results[args.playerId] =
-        gameState.playerCount - this.eliminatedCounter++;
-
-      console.log(`Player ${args.playerId} has been eliminated`);
-      console.log(`  |--> it's results: ${gameState.results[args.playerId]}`);
-
+    if (gameState.scores[args.playerId] >= this.threshold)
       game.getModifierManager().trigger("onPlayerElimination", args);
-    }
+  }
+
+  onPlayerElimination(game: Pong, args: { playerId: number }): void {
+    if (game.isEliminated(args.playerId)) return;
+    const gameState = game.getState();
+
+    gameState.paddles[args.playerId].isVisible = false;
+    gameState.results[args.playerId] =
+      gameState.playerCount - gameState.eliminatedPlayers.length;
+    gameState.eliminatedPlayers.push(args.playerId);
+
+    game
+      .getModifierManager()
+      .trigger("onResultUpdate", { playerId: args.playerId });
   }
 }

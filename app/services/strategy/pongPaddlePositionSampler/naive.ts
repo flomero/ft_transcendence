@@ -3,7 +3,7 @@ import type {
   IPongPaddlePositionSampler,
   PongPaddlePosition,
 } from "../../../types/strategy/IPongPaddlePositionSampler";
-import type { PongGameState } from "../../games/pong/pong";
+import type { PongGameState } from "../../../types/games/pong/gameState";
 import type { PongAIOpponent } from "../../games/pong/pongAIOpponent";
 
 export class Naive implements IPongPaddlePositionSampler {
