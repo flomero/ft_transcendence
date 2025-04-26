@@ -1,6 +1,6 @@
 // routes/profile.ts
 import type { FastifyPluginAsync } from "fastify";
-import { Edge, Round } from "../../types/tournament/tournament";
+import type { Edge, Round } from "../../types/tournament/tournament";
 
 interface BracketQuery {
   auto?: string; // "true" | "false" | (undefined → default)

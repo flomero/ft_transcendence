@@ -3,10 +3,10 @@ import { type GameBase, GameStatus } from "../gameBase";
 import type Player from "../../../interfaces/games/gameHandler/Player";
 import type { WebSocket } from "ws";
 import gameLoop from "./gameLoop";
-import type GameMessage from "../../../interfaces/games/gameHandler/GameMessage";
+import type { GameMessage } from "../../../types/games/userInput";
 import { PongAIOpponent } from "../pong/pongAIOpponent";
 import aiLoop from "./aiLoop";
-import { Database } from "sqlite";
+import type { Database } from "sqlite";
 import { RNG } from "../rng";
 import saveGameResultInDb from "./saveGameResultInDb";
 import type { GameOrigin } from "../../../types/games/gameHandler/GameOrigin";
@@ -116,11 +116,9 @@ class GameManager {
   }
 
   public async startGame(db: Database): Promise<void> {
-    if (this.allPlayersAreConnected() === false) {
+    if (this.allPlayersAreConnected() === false)
       throw new Error("Not all players are connected");
-    } else if (this.game.getStatus() !== GameStatus.CREATED) {
-      return;
-    }
+    if (this.game.getStatus() !== GameStatus.CREATED) return;
 
     this.shuffleReferenceTable();
     this.addIngameIdToPlayerAndAiOpponent();

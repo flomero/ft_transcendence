@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { ChatMessageType } from "../../chat/message";
+import type { ChatMessageType } from "../../chat/message";
 
 export async function saveMessage(
   fastify: FastifyInstance,

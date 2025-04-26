@@ -1,7 +1,7 @@
 import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
 import { TimeLimitedModifierBase } from "../../timeLimitedModifierBase";
 import { ModifierActivationMode, ModifierStatus } from "../../modifierBase";
-import { type Pong } from "../pong";
+import type { Pong } from "../pong";
 
 export class BlinkingBall extends TimeLimitedModifierBase {
   name = "blinkingBall";

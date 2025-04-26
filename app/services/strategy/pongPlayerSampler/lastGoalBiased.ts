@@ -1,5 +1,5 @@
-import { IPongPlayerSampler } from "../../../types/strategy/IPongPlayerSampler";
-import { Pong } from "../../games/pong/pong";
+import type { IPongPlayerSampler } from "../../../types/strategy/IPongPlayerSampler";
+import type { Pong } from "../../games/pong/pong";
 import { STRATEGY_REGISTRY } from "../strategyRegistryLoader";
 
 export class LastGoalBiased implements IPongPlayerSampler {

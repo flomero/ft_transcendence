@@ -4,8 +4,6 @@ export class UserInputManager {
   private inputQueue: UserInput[] = [];
   private queueLock: Promise<void> | null = null;
 
-  constructor() {}
-
   // Queue a user input action
   async queueInput(action: UserInput): Promise<void> {
     const release = await this.acquireLock();

@@ -1,8 +1,8 @@
 import { STRATEGY_REGISTRY } from "../strategyRegistryLoader";
-import { IPongPowerUpPositionSampler } from "../../../types/strategy/IPongPowerUpPositionSampler";
-import { Pong } from "../../games/pong/pong";
+import type { IPongPowerUpPositionSampler } from "../../../types/strategy/IPongPowerUpPositionSampler";
+import type { Pong } from "../../games/pong/pong";
 import { StrategyManager } from "../strategyManager";
-import { IPongPlayerSampler } from "../../../types/strategy/IPongPlayerSampler";
+import type { IPongPlayerSampler } from "../../../types/strategy/IPongPlayerSampler";
 
 export class BiasedQuadrantGaussianRATester
   implements IPongPowerUpPositionSampler

@@ -6,8 +6,9 @@ import {
   GAME_REGISTRY,
   type GameModeCombinedSettings,
 } from "../../../../types/games/gameRegistry";
-import { IPongBallResetSampler } from "../../../../types/strategy/IPongBallResetSampler";
+import type { IPongBallResetSampler } from "../../../../types/strategy/IPongBallResetSampler";
 import { StrategyManager } from "../../../strategy/strategyManager";
+import { pongUserInputs } from "../../../../types/games/userInput";
 
 export class ClassicPong extends Pong {
   name = "classicPong";
@@ -134,6 +135,11 @@ export class ClassicPong extends Pong {
         doMove: true,
         isVisible: true,
         maxDisplacement: maxDisplacement,
+        keyPressed: {
+          ...Object.fromEntries(
+            Object.keys(pongUserInputs).map((key) => [key, false]),
+          ),
+        },
       } as Paddle,
 
       // RIGHT PADDLE
@@ -165,6 +171,11 @@ export class ClassicPong extends Pong {
         doMove: true,
         isVisible: true,
         maxDisplacement: maxDisplacement,
+        keyPressed: {
+          ...Object.fromEntries(
+            Object.keys(pongUserInputs).map((key) => [key, false]),
+          ),
+        },
       } as Paddle,
     ];
   }

@@ -1,6 +1,6 @@
 import sqlite3 from "sqlite3";
 import fp from "fastify-plugin";
-import { open, Database } from "sqlite";
+import { open, type Database } from "sqlite";
 import path from "path";
 import createAIOpponents from "../services/games/aiOpponent/createAIOpponents";
 

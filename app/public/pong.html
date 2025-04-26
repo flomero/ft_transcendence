@@ -126,8 +126,8 @@
           },
         };
 
-        if (event.key === "ArrowUp" || event.key === "ArrowDown")
-          action.options.type = "STOP";
+        if (event.key === "ArrowUp") action.options.type = "STOP_UP";
+        if (event.key === "ArrowDown") action.options.type = "STOP_DOWN";
         if (event.key === " ") action.options.type = "STOP_SPACE";
 
         if (action.options.type) {

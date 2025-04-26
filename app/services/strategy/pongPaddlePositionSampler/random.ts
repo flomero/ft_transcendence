@@ -1,9 +1,9 @@
-import {
+import type {
   IPongPaddlePositionSampler,
   PongPaddlePosition,
 } from "../../../types/strategy/IPongPaddlePositionSampler";
-import { AIOpponent } from "../../games/aiOpponent";
-import { PongGameState } from "../../games/pong/pong";
+import type { AIOpponent } from "../../games/aiOpponent";
+import type { PongGameState } from "../../games/pong/pong";
 
 export class Random implements IPongPaddlePositionSampler {
   name = "random";

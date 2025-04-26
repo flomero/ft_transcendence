@@ -1,4 +1,4 @@
-import { GameSettings } from "./interfaces/games/lobby/GameSettings";
+import type { GameSettings } from "./interfaces/games/lobby/GameSettings";
 
 export enum MatchmakingGameModes {
   ClassicPong = "classicPong",

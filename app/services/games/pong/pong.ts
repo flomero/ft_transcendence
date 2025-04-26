@@ -1,16 +1,16 @@
-import { GameBase, GameBaseState, GameStatus } from "../gameBase";
+import { GameBase, type GameBaseState, GameStatus } from "../gameBase";
 import { PhysicsEngine, type Collision } from "../physicsEngine";
 import {
   GAME_REGISTRY,
-  GameModeCombinedSettings,
+  type GameModeCombinedSettings,
 } from "../../../types/games/gameRegistry";
 import type { Paddle } from "../../../types/games/pong/paddle";
 import type { Ball } from "../../../types/games/pong/ball";
 import type { Rectangle } from "../../../types/games/pong/rectangle";
 import { UserInputManager } from "../userInputManager";
-import { type UserInput } from "../../../types/games/userInput";
+import type { UserInput } from "../../../types/games/userInput";
 import { RNG } from "../rng";
-import { ExtendedCollisionData } from "../../../types/games/pong/extendedCollisionData";
+import type { ExtendedCollisionData } from "../../../types/games/pong/extendedCollisionData";
 
 const EPSILON = 1e-2;
 
@@ -98,6 +98,9 @@ export abstract class Pong extends GameBase {
         this.modifierManager.trigger("onPaddleUpdate", {
           playerId: index,
         });
+        paddle.velocity =
+          (paddle.keyPressed["UP"] ? paddle.speed : 0) -
+          (paddle.keyPressed["DOWN"] ? paddle.speed : 0);
         if (paddle.velocity !== 0) this.updatePaddle(paddle, true);
       });
 
@@ -217,13 +220,19 @@ export abstract class Pong extends GameBase {
 
     switch (action.type) {
       case "UP":
-        paddle.velocity = paddle.speed;
+        paddle.keyPressed["UP"] = true;
         break;
+
+      case "STOP_UP":
+        paddle.keyPressed["UP"] = false;
+        break;
+
       case "DOWN":
-        paddle.velocity = -paddle.speed;
+        paddle.keyPressed["DOWN"] = true;
         break;
-      case "STOP":
-        paddle.velocity = 0.0;
+
+      case "STOP_DOWN":
+        paddle.keyPressed["DOWN"] = false;
         break;
     }
   }

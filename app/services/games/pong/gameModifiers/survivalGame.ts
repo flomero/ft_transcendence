@@ -1,4 +1,4 @@
-import { Pong } from "../pong";
+import type { Pong } from "../pong";
 import { GameStatus } from "../../gameBase";
 import { ModifierBase } from "../../modifierBase";
 

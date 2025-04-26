@@ -1,8 +1,8 @@
 import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
-import { IPong7segmentMaker } from "../../../../types/strategy/IPong7segmentMaker";
+import type { IPong7segmentMaker } from "../../../../types/strategy/IPong7segmentMaker";
 import { StrategyManager } from "../../../strategy/strategyManager";
 import { TimeLimitedModifierBase } from "../../timeLimitedModifierBase";
-import { Pong } from "../pong";
+import type { Pong } from "../pong";
 
 enum Digit {
   ONE,

@@ -1,5 +1,5 @@
-import { IPongPlayerSampler } from "../../../types/strategy/IPongPlayerSampler";
-import { Pong } from "../../games/pong/pong";
+import type { IPongPlayerSampler } from "../../../types/strategy/IPongPlayerSampler";
+import type { Pong } from "../../games/pong/pong";
 
 export class LowestScoreBiased implements IPongPlayerSampler {
   name = "lowestScoreBiased";
