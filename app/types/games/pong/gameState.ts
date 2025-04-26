@@ -14,5 +14,6 @@ export type PongGameState = GameBaseState & {
   scores: number[];
   results: number[];
   playerCount: number;
+  eliminatedPlayers: number[];
   modifiersState?: Record<string, any>;
 };

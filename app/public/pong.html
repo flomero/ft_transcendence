@@ -67,10 +67,8 @@
                 timedGame: {
                   duration: 360,
                 },
-                scoredGame: {
-                  threshold: 7,
-                },
                 survivalGame: {},
+                elimination: {},
                 goalReset: {},
                 powerUpSpawner: {
                   meanDelay: 10,
@@ -149,6 +147,7 @@
           socket.send(JSON.stringify({ type: "gameStart" }));
         } else if (data.type === "gameState") {
           gameState = data.data;
+          console.log(gameState);
           lastUpdateTime = performance.now();
         } else if (data.type === "error") {
           console.error("Server error:", data.message);

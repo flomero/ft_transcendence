@@ -55,6 +55,7 @@ export abstract class Pong extends GameBase {
       lastGoal: -1,
       scores: Array(gameData.playerCount).fill(0),
       results: Array(gameData.playerCount).fill(0),
+      eliminatedPlayers: [],
       playerCount: gameData.playerCount,
     };
 
@@ -559,7 +560,11 @@ export abstract class Pong extends GameBase {
   abstract getSettings(): GameModeCombinedSettings;
 
   isEliminated(playerID: number): boolean {
-    if (playerID < 0 || playerID >= this.gameState.playerCount) return false;
-    return this.gameState.results[playerID] !== 0;
+    if (playerID < 0 || playerID >= this.gameState.playerCount) return true;
+    return this.gameState.eliminatedPlayers.includes(playerID);
+  }
+
+  eliminate(playerID: number): void {
+    this.modifierManager.trigger("onPlayerElimination", { playerId: playerID });
   }
 }

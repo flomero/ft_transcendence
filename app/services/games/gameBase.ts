@@ -63,6 +63,8 @@ export abstract class GameBase {
     return this.modifierManager;
   }
 
+  abstract eliminate(playerID: number): void;
+
   abstract getResults(): number[];
   abstract getScores(): number[];
   abstract getSettings(): Record<string, any>;

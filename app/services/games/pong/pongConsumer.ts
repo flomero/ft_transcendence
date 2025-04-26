@@ -35,8 +35,6 @@ export const pongConsumer = async (
 
       // Send the updated state to clients
       const gameState = game.getStateSnapshot();
-      // console.log(`State snapshot:`);
-      // console.dir(gameState.modifiersState);
       ws.send(
         JSON.stringify({
           type: "gameState",
@@ -48,8 +46,8 @@ export const pongConsumer = async (
       await sleep(sleepIntervalMs);
       loopCounter++;
 
-      // if (loopCounter >= 1)
-      //     break;
+      // if (loopCounter === 1000)
+      //   currentGame?.eliminate(1);
     }
   };
 
