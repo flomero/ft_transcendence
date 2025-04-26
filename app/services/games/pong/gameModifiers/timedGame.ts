@@ -1,4 +1,5 @@
-import { type GameBase, GameStatus } from "../../gameBase";
+import type { GameBase } from "../../gameBase";
+import { GameStatus } from "../../../../types/games/gameBaseState";
 import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
 import { TimeLimitedModifierBase } from "../../timeLimitedModifierBase";
 

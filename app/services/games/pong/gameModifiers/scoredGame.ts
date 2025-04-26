@@ -1,4 +1,4 @@
-import { GameStatus } from "../../gameBase";
+import { GameStatus } from "../../../../types/games/gameBaseState";
 import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
 import type { Pong } from "../pong";
 import { ModifierBase } from "../../modifierBase";
