@@ -5,7 +5,7 @@ import { ModifierBase } from "../../modifierBase";
 export class SurvivalGame extends ModifierBase {
   name = "survivalGame";
 
-  onPlayerElimination(game: Pong, args: { playerId: number }): void {
+  onResultUpdate(game: Pong, args: { playerId: number }): void {
     if (args.playerId < 0 || args.playerId >= game.getState().playerCount) {
       console.warn(`${args.playerId} out of bounds`);
       return;
