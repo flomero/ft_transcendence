@@ -17,7 +17,7 @@ declare module "fastify" {
 }
 
 export default fp(async (fastify) => {
-  const dbPath = path.resolve(__dirname, "../../database/db.sqlite");
+  const dbPath = fastify.config.DB_PATH;
   const db: Database = await open({
     filename: dbPath,
     driver: sqlite3.Database,
