@@ -3,7 +3,7 @@ import type {
   PongPaddlePosition,
 } from "../../../types/strategy/IPongPaddlePositionSampler";
 import type { AIOpponent } from "../../games/aiOpponent";
-import type { PongGameState } from "../../games/pong/pong";
+import type { PongGameState } from "../../../types/games/pong/gameState";
 
 export class Random implements IPongPaddlePositionSampler {
   name = "random";

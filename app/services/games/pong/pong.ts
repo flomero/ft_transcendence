@@ -1,4 +1,5 @@
-import { GameBase, type GameBaseState, GameStatus } from "../gameBase";
+import { GameBase } from "../gameBase";
+import { GameStatus } from "../../../types/games/gameBaseState";
 import { PhysicsEngine, type Collision } from "../physicsEngine";
 import {
   GAME_REGISTRY,
@@ -11,27 +12,9 @@ import { UserInputManager } from "../userInputManager";
 import type { UserInput } from "../../../types/games/userInput";
 import { RNG } from "../rng";
 import type { ExtendedCollisionData } from "../../../types/games/pong/extendedCollisionData";
+import type { PongGameState } from "../../../types/games/pong/gameState";
 
 const EPSILON = 1e-2;
-
-// Combined GameState interface w/ GameBaseState + <GameSpecific>State
-export type PongGameState = GameBaseState & {
-  // gameObjects
-  balls: Ball[];
-  paddles: Paddle[];
-  walls: Rectangle[];
-
-  // utils
-  rng: RNG;
-  lastHit: number;
-  lastGoal: number;
-  scores: number[];
-  results: number[];
-  eliminatedPlayers: number[];
-
-  // const additionalData
-  playerCount: number;
-};
 
 export abstract class Pong extends GameBase {
   static readonly name = "pong";

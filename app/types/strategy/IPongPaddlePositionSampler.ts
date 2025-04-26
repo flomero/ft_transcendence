@@ -1,5 +1,5 @@
 import type { AIOpponent } from "../../services/games/aiOpponent";
-import type { PongGameState } from "../../services/games/pong/pong";
+import type { PongGameState } from "../games/pong/gameState";
 
 export interface PongPaddlePosition {
   displacement: number;

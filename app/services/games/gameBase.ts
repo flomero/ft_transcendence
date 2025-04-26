@@ -1,22 +1,13 @@
 import { ModifierManager } from "./modifierManager";
 import { ConfigManager } from "./configManager";
-
-export enum GameStatus {
-  CREATED,
-  RUNNING,
-  PAUSED,
-  FINISHED,
-}
-
-export interface GameBaseState {
-  startDate: number;
-  lastUpdate: number;
-  status: GameStatus;
-}
+import {
+  GameStatus,
+  type GameBaseState,
+} from "../../types/games/gameBaseState";
 
 export abstract class GameBase {
   protected gameBaseState: GameBaseState;
-  protected serverTickrateS: number = 20;
+  protected serverTickrateS = 20;
 
   protected modifierManager: ModifierManager;
   protected configManager: ConfigManager;

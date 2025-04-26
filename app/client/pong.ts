@@ -1,51 +1,11 @@
 import type { GameMessage } from "../types/games/userInput";
-
-interface GameObject {
-  x: number;
-  y: number;
-  isVisible: boolean;
-}
-
-interface CircularGameObject extends GameObject {
-  radius: number;
-}
-
-interface RectangularGameObject extends GameObject {
-  width: number;
-  height: number;
-}
-
-interface MovableGameObject extends GameObject {
-  dx: number;
-  dy: number;
-}
-
-interface Ball extends CircularGameObject {}
-
-interface PowerUp extends CircularGameObject {}
-
-interface Wall extends RectangularGameObject, MovableGameObject {}
-
-interface Paddle extends RectangularGameObject, MovableGameObject {
-  alpha: number;
-}
-
-interface ModifiersData {
-  spawnedPowerUps: [string, PowerUp][];
-}
-
-interface GameState {
-  balls?: Ball[];
-  paddles?: Paddle[];
-  walls?: Wall[];
-  scores?: Record<string, number>;
-  modifiersState?: ModifiersData;
-}
+import type { PongGameState } from "../types/games/pong/gameState";
+import type { Ball } from "../types/games/pong/ball";
 
 class PongGame {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
-  private gameState: GameState = {};
+  private gameState: PongGameState | null = null;
   private ratio = 0.0;
   private gameId: string;
   private isConnected = false;
@@ -114,8 +74,7 @@ class PongGame {
           }
           if (
             this.playerIndex >= 0 &&
-            this.gameState.paddles &&
-            this.gameState.paddles[this.playerIndex]
+            this.gameState?.paddles[this.playerIndex]
           ) {
             this.calculateRotationAngle();
           }
@@ -125,11 +84,7 @@ class PongGame {
   }
 
   private calculateRotationAngle(): void {
-    if (
-      this.playerIndex < 0 ||
-      !this.gameState.paddles ||
-      !this.gameState.paddles[this.playerIndex]
-    ) {
+    if (this.playerIndex < 0 || !this.gameState?.paddles[this.playerIndex]) {
       return;
     }
 
@@ -224,17 +179,18 @@ class PongGame {
       }
     }
 
-    if (this.gameState.walls) this.drawWalls();
-    if (this.gameState.modifiersState?.spawnedPowerUps) this.drawPowerUps();
-    if (this.gameState.paddles) this.drawPaddles();
-    if (this.gameState.balls) this.drawBalls();
+    if (this.gameState?.walls) this.drawWalls(true);
+    if (this.gameState?.modifiersState?.spawnedPowerUps) this.drawPowerUps();
+    if (this.gameState?.paddles) this.drawPaddles();
+    if (this.gameState?.balls) this.drawBalls();
 
-    if (this.gameState.scores) {
+    if (this.gameState?.scores) {
       const rotated = shouldRotate || this.playerIndex === 1;
       this.drawScores(rotated);
     }
 
     this.ctx.restore();
+    this.drawWalls(false);
 
     if (this.debug) this.drawDebugElements();
   }
@@ -259,7 +215,7 @@ class PongGame {
       40,
     );
 
-    const gameStateInfo = Object.keys(this.gameState).length
+    const gameStateInfo = this.gameState
       ? `Game objects: ${Object.keys(this.gameState).join(", ")}`
       : "No game state received yet";
     this.ctx.fillText(gameStateInfo, 10, 60);
@@ -272,11 +228,7 @@ class PongGame {
     );
 
     // Add paddle position debug info if available
-    if (
-      this.playerIndex >= 0 &&
-      this.gameState.paddles &&
-      this.gameState.paddles[this.playerIndex]
-    ) {
+    if (this.playerIndex >= 0 && this.gameState?.paddles[this.playerIndex]) {
       const paddle = this.gameState.paddles[this.playerIndex];
       this.ctx.fillText(
         `Paddle Pos: x=${paddle.x.toFixed(1)}, y=${paddle.y.toFixed(1)}, alpha=${paddle.alpha.toFixed(3)} rad`,
@@ -316,7 +268,7 @@ class PongGame {
   }
 
   private drawBalls(): void {
-    if (!this.gameState.balls) return;
+    if (!this.gameState?.balls) return;
 
     this.gameState.balls.forEach((ball) => {
       if (ball.isVisible) {
@@ -335,7 +287,7 @@ class PongGame {
   }
 
   private drawPaddles(): void {
-    if (!this.gameState.paddles) return;
+    if (!this.gameState?.paddles) return;
 
     this.gameState.paddles.forEach((paddle, index) => {
       if (paddle.isVisible) {
@@ -352,11 +304,11 @@ class PongGame {
     });
   }
 
-  private drawWalls(): void {
-    if (!this.gameState.walls) return;
+  private drawWalls(rotated: boolean): void {
+    if (!this.gameState?.walls) return;
 
     this.gameState.walls.forEach((wall) => {
-      if (wall.isVisible) {
+      if (wall.isVisible && wall.doRotation === rotated) {
         const angle = Math.atan2(wall.dy, wall.dx);
         const x = wall.x * this.ratio;
         const y = wall.y * this.ratio;
@@ -369,10 +321,10 @@ class PongGame {
   }
 
   private drawPowerUps(): void {
-    if (!this.gameState.modifiersState?.spawnedPowerUps) return;
+    if (!this.gameState?.modifiersState?.spawnedPowerUps) return;
 
-    this.gameState.modifiersState.spawnedPowerUps.forEach((entry) => {
-      const [type, powerUp] = entry;
+    for (const [type, powerUp] of this.gameState.modifiersState
+      .spawnedPowerUps as [string, Ball][]) {
       if (powerUp.isVisible) {
         this.ctx.fillStyle = this.getPowerUpColor(type);
         this.ctx.beginPath();
@@ -385,7 +337,7 @@ class PongGame {
         );
         this.ctx.fill();
       }
-    });
+    }
   }
 
   private getPowerUpColor(type: string): string {
@@ -410,7 +362,7 @@ class PongGame {
   }
 
   private drawScores(isRotated = false): void {
-    if (!this.gameState.scores) return;
+    if (!this.gameState?.scores) return;
     // update scores
 
     this.ctx.restore();
