@@ -8,6 +8,7 @@ import {
 } from "../../../../types/games/gameRegistry";
 import { StrategyManager } from "../../../strategy/strategyManager";
 import { IPongBallResetSampler } from "../../../../types/strategy/IPongBallResetSampler";
+import { pongUserInputs } from "../../../../types/games/userInput";
 
 export class MultiplayerPong extends Pong {
   name = "multiplayerPong";
@@ -139,6 +140,11 @@ export class MultiplayerPong extends Pong {
         dy: 0,
         doCollision: true,
         maxDisplacement: maxDisplacement,
+        keyPressed: {
+          ...Object.fromEntries(
+            Object.keys(pongUserInputs).map((key) => [key, false]),
+          ),
+        },
       };
 
       const tmp: number = Math.sqrt(paddle.x ** 2 + paddle.y ** 2);
