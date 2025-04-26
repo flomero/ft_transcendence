@@ -30,7 +30,7 @@ const createTournament = async (
   };
 
   const newTournament = new Tournament(tournamentSettings);
-  await addTournamentToDB(db, tournamentManager);
+  await addTournamentToDB(db, tournamentManager, newTournament);
 
   return newTournament;
 };
@@ -38,8 +38,9 @@ const createTournament = async (
 const addTournamentToDB = async (
   db: Database,
   tournamentManager: TournamentManager,
+  tournament: Tournament,
 ) => {
-  const tournamentStatus = tournamentManager.getTournamentStatus();
+  const tournamentStatus = tournament.getStatus();
   const tournamentId = tournamentManager.getId();
   const gameMode = tournamentManager.getGameModeType();
 
