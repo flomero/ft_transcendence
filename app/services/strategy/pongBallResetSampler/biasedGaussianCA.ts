@@ -1,6 +1,6 @@
 import { STRATEGY_REGISTRY } from "../strategyRegistryLoader";
-import { Pong } from "../../games/pong/pong";
-import { IPongBallResetSampler } from "../../../types/strategy/IPongBallResetSampler";
+import type { Pong } from "../../games/pong/pong";
+import type { IPongBallResetSampler } from "../../../types/strategy/IPongBallResetSampler";
 
 export class BiasedGaussianCA implements IPongBallResetSampler {
   name = "biasedGaussianCA";

@@ -6,7 +6,7 @@ import {
   GAME_REGISTRY,
   type GameModeCombinedSettings,
 } from "../../../../types/games/gameRegistry";
-import { IPongBallResetSampler } from "../../../../types/strategy/IPongBallResetSampler";
+import type { IPongBallResetSampler } from "../../../../types/strategy/IPongBallResetSampler";
 import { StrategyManager } from "../../../strategy/strategyManager";
 import { pongUserInputs } from "../../../../types/games/userInput";
 

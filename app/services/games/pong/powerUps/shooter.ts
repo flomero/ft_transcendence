@@ -1,9 +1,9 @@
 import { TimeLimitedModifierBase } from "../../timeLimitedModifierBase";
 import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
 import { ModifierActivationMode } from "../../modifierBase";
-import { Pong } from "../pong";
+import type { Pong } from "../pong";
 import { StrategyManager } from "../../../strategy/strategyManager";
-import { IPongBallResetSampler } from "../../../../types/strategy/IPongBallResetSampler";
+import type { IPongBallResetSampler } from "../../../../types/strategy/IPongBallResetSampler";
 
 enum ShooterStatus {
   CREATED,

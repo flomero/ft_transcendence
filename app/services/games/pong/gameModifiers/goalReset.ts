@@ -1,6 +1,6 @@
 import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
 import { ModifierBase, ModifierStatus } from "../../modifierBase";
-import { Pong } from "../pong";
+import type { Pong } from "../pong";
 
 export class GoalReset extends ModifierBase {
   name = "goalReset";

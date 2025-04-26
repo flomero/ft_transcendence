@@ -1,4 +1,4 @@
-import { GameSettings } from "./GameSettings";
+import type { GameSettings } from "./GameSettings";
 
 interface NewLobbyRequestBody extends GameSettings {
   lobbyMode: "public" | "private";

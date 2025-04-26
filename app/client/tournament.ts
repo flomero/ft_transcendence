@@ -1,4 +1,4 @@
-import { Edge, Round } from "../types/tournament/tournament";
+import type { Edge, Round } from "../types/tournament/tournament";
 
 type Rounds = Round[];
 

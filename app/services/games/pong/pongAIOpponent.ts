@@ -1,11 +1,11 @@
-import { AIData, AIOpponent } from "../aiOpponent";
+import { type AIData, AIOpponent } from "../aiOpponent";
 import { StrategyManager } from "../../strategy/strategyManager";
-import {
+import type {
   IPongPaddlePositionSampler,
   PongPaddlePosition,
 } from "../../../types/strategy/IPongPaddlePositionSampler";
-import { UserInput } from "../../../types/games/userInput";
-import { Pong, PongGameState } from "./pong";
+import type { UserInput } from "../../../types/games/userInput";
+import type { Pong, PongGameState } from "./pong";
 
 interface MovementInterval {
   type: "UP" | "DOWN";

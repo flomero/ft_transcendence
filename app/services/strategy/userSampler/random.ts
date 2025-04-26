@@ -1,4 +1,4 @@
-import { IUserSampler } from "../../../types/strategy/IUserSampler";
+import type { IUserSampler } from "../../../types/strategy/IUserSampler";
 import { RNG } from "../../games/rng";
 
 export class Random implements IUserSampler {

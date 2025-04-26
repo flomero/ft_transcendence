@@ -1,4 +1,4 @@
-import GameManager from "./GameManager";
+import type GameManager from "./GameManager";
 import { gameManagers } from "../lobby/start/startLobbyHandler";
 
 const terminateGame = (game: GameManager) => {
