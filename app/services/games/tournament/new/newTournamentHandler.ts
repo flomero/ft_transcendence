@@ -14,8 +14,8 @@ export const tournaments = new Map<string, TournamentManager>();
 async function newTournamentHandler(
   request: FastifyRequest<{
     Params: {
-      gameMode: string;
-      tournamentMode: string;
+      gameModeName: string;
+      tournamentConfigName: string;
       tournamentSize: string;
     };
   }>,
@@ -26,12 +26,13 @@ async function newTournamentHandler(
     const tournamentSize = Number(request.params.tournamentSize);
 
     canTournamentBeCreatedCheck(userId);
+
     const gameMode = gameModeFromString(
-      request.params.gameMode,
+      request.params.gameModeName,
       TournamentGameModes,
     );
     const tournamentConfigKey = tournamentConfigFromString(
-      request.params.tournamentMode,
+      request.params.tournamentConfigName,
     );
 
     if (gameMode === null || tournamentConfigKey === null)
