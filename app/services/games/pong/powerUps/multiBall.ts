@@ -1,7 +1,7 @@
 import { TimeLimitedModifierBase } from "../../timeLimitedModifierBase";
 import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
 import { ModifierActivationMode } from "../../modifierBase";
-import { Pong } from "../pong";
+import type { Pong } from "../pong";
 import type { Ball } from "../../../../types/games/pong/ball";
 
 export class MultiBall extends TimeLimitedModifierBase {

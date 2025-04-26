@@ -1,5 +1,5 @@
-import { Pong } from "../pong";
-import { Rectangle } from "../../../../types/games/pong/rectangle";
+import type { Pong } from "../pong";
+import type { Rectangle } from "../../../../types/games/pong/rectangle";
 import { ModifierBase } from "../../modifierBase";
 
 const coefficients: { [playerCount: number]: number } = {

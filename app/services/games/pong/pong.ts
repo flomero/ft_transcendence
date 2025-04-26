@@ -1,16 +1,16 @@
-import { GameBase, GameBaseState, GameStatus } from "../gameBase";
+import { GameBase, type GameBaseState, GameStatus } from "../gameBase";
 import { PhysicsEngine, type Collision } from "../physicsEngine";
 import {
   GAME_REGISTRY,
-  GameModeCombinedSettings,
+  type GameModeCombinedSettings,
 } from "../../../types/games/gameRegistry";
 import type { Paddle } from "../../../types/games/pong/paddle";
 import type { Ball } from "../../../types/games/pong/ball";
 import type { Rectangle } from "../../../types/games/pong/rectangle";
 import { UserInputManager } from "../userInputManager";
-import { type UserInput } from "../../../types/games/userInput";
+import type { UserInput } from "../../../types/games/userInput";
 import { RNG } from "../rng";
-import { ExtendedCollisionData } from "../../../types/games/pong/extendedCollisionData";
+import type { ExtendedCollisionData } from "../../../types/games/pong/extendedCollisionData";
 
 const EPSILON = 1e-2;
 

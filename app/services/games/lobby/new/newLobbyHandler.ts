@@ -5,7 +5,7 @@ import { isUserInAnyLobby } from "../lobbyVaidation/isUserInAnyLobby";
 import validateGameModifierCheck from "../lobbyVaidation/validateGameModifierCheck";
 import { setLobby } from "./setLobby";
 import { GAMEMODE_REGISTRY } from "../../../../config";
-import { GameSettings } from "../../../../interfaces/games/lobby/GameSettings";
+import type { GameSettings } from "../../../../interfaces/games/lobby/GameSettings";
 
 export const PublicLobbies = new Map<string, Lobby>();
 export const PrivateLobbies = new Map<string, Lobby>();

@@ -7,7 +7,7 @@ import {
   type GameModeCombinedSettings,
 } from "../../../../types/games/gameRegistry";
 import { StrategyManager } from "../../../strategy/strategyManager";
-import { IPongBallResetSampler } from "../../../../types/strategy/IPongBallResetSampler";
+import type { IPongBallResetSampler } from "../../../../types/strategy/IPongBallResetSampler";
 import { pongUserInputs } from "../../../../types/games/userInput";
 
 export class MultiplayerPong extends Pong {

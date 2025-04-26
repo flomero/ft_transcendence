@@ -1,5 +1,5 @@
-import { IPongPowerUpPositionSampler } from "../../../types/strategy/IPongPowerUpPositionSampler";
-import { Pong } from "../../games/pong/pong";
+import type { IPongPowerUpPositionSampler } from "../../../types/strategy/IPongPowerUpPositionSampler";
+import type { Pong } from "../../games/pong/pong";
 
 export class UniformCA implements IPongPowerUpPositionSampler {
   name = "uniformCA";

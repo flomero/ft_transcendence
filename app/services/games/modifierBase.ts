@@ -1,7 +1,7 @@
-import { UserInput } from "../../types/games/userInput";
+import type { UserInput } from "../../types/games/userInput";
 import { ConfigManager } from "./configManager";
 import type { GameBase } from "./gameBase";
-import { Pong } from "./pong/pong";
+import type { Pong } from "./pong/pong";
 
 export enum ModifierStatus {
   INACTIVE,
