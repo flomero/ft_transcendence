@@ -102,7 +102,7 @@
 
       "idleWallBounceAcceleration": {
         "className": "IdleWallBounceAcceleration",
-        "bumperVelocityPercent": 0.13
+        "bumperVelocityPercent": 0.2
       },
 
       "paddleBoost": {
@@ -125,7 +125,7 @@
         "spawnWeight": 2.0,
         "selfActivation": false,
         "durationS": 5,
-        "totalRampUpStrength": 1.35,
+        "totalRampUpStrength": 1.15,
         "rampUpFrequencyS": 0.25
       },
 
@@ -155,8 +155,8 @@
         "durationS": 5,
         "chargeDurationS": 2,
         "chargeRadius": 5,
-        "shootInitialVelocityPercent": 225,
-        "shootFinalVelocityPercent": 105,
+        "shootInitialVelocityPercent": 140,
+        "shootFinalVelocityPercent": 100,
         "shootDirectionSamplerStrategyName": "biasedQuadrantGaussianRA"
       },
 
@@ -167,9 +167,9 @@
         "durationS": 10,
         "bumperJunctionDistanceFromCenterPercent": 13.5,
         "bumperWallJunctionDistancePercent": 80,
-        "bumperVelocityPercent": 80,
+        "bumperVelocityPercent": 20,
         "bumperMaxVelocityPercent": 150,
-        "bumperAccelerationPercentS": -60
+        "bumperAccelerationPercentS": -12.5
       }
     }
   }
