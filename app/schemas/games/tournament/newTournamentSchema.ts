@@ -7,12 +7,13 @@ import {
 const tournamentConfigs = S.enum(Object.keys(TOURNAMENT_CONFIGS_REGISTRY));
 const gamemodeNames = S.enum(Object.values(TournamentGameModes));
 
-const newTournamentBodySchema = S.object()
+const newTournamentParamsSchema = S.object()
   .prop("tournamentConfigName", tournamentConfigs.required())
-  .prop("gamemodeName", gamemodeNames.required());
+  .prop("gameModeName", gamemodeNames.required())
+  .prop("tournamentSize", S.number().required().minimum(2));
 
 const newTournamentSchema = {
-  body: newTournamentBodySchema,
+  params: newTournamentParamsSchema,
 };
 
 export default newTournamentSchema;

@@ -3,7 +3,7 @@ import newTournamentSchema from "../../../../schemas/games/tournament/newTournam
 import newTournamentHandler from "../../../../services/games/tournament/new/newTournamentHandler";
 
 const newTournament: FastifyPluginAsync = async (fastify): Promise<void> => {
-  fastify.post("/", {
+  fastify.post("/:tournamentConfigName/:gameModeName/:tournamentSize", {
     schema: newTournamentSchema,
     handler: newTournamentHandler,
   });
