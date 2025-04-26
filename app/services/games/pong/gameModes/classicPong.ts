@@ -134,6 +134,7 @@ export class ClassicPong extends Pong {
         doMove: true,
         isVisible: true,
         maxDisplacement: maxDisplacement,
+        doRotation: true,
       } as Paddle,
 
       // RIGHT PADDLE
@@ -165,6 +166,7 @@ export class ClassicPong extends Pong {
         doMove: true,
         isVisible: true,
         maxDisplacement: maxDisplacement,
+        doRotation: true,
       } as Paddle,
     ];
   }
@@ -188,6 +190,7 @@ export class ClassicPong extends Pong {
         height: this.settings.wallsHeight,
         isVisible: true,
         isGoal: true,
+        doRotation: true,
       } as Rectangle,
 
       // UP WALL
@@ -207,6 +210,7 @@ export class ClassicPong extends Pong {
         height: this.settings.wallsHeight,
         isVisible: true,
         isGoal: false,
+        doRotation: true,
       } as Rectangle,
 
       // RIGHT WALL
@@ -226,6 +230,7 @@ export class ClassicPong extends Pong {
         height: this.settings.wallsHeight,
         isVisible: true,
         isGoal: true,
+        doRotation: true,
       } as Rectangle,
 
       // DOWN WALL
@@ -245,6 +250,7 @@ export class ClassicPong extends Pong {
         height: this.settings.wallsHeight,
         isVisible: true,
         isGoal: false,
+        doRotation: true,
       } as Rectangle,
     ];
   }

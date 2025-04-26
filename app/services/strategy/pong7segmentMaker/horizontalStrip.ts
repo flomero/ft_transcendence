@@ -39,6 +39,7 @@ export class HorizontalStrip implements IPong7segmentMaker {
         width: this.stripWidth,
         height: this.stripHeight,
         doCollision: false,
+        doRotation: false,
         isVisible: true,
       },
 
@@ -57,6 +58,7 @@ export class HorizontalStrip implements IPong7segmentMaker {
         width: endsSize,
         height: endsSize,
         doCollision: false,
+        doRotation: false,
         isVisible: true,
       },
 
@@ -75,6 +77,7 @@ export class HorizontalStrip implements IPong7segmentMaker {
         width: endsSize,
         height: endsSize,
         doCollision: false,
+        doRotation: false,
         isVisible: true,
       },
     ];

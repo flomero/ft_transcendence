@@ -138,6 +138,7 @@ export class MultiplayerPong extends Pong {
         dx: 0,
         dy: 0,
         doCollision: true,
+        doRotation: true,
         maxDisplacement: maxDisplacement,
       };
 
@@ -199,6 +200,7 @@ export class MultiplayerPong extends Pong {
         dy: 0,
         isGoal: index % 2 == 0,
         doCollision: true,
+        doRotation: true,
       };
 
       const tmp = Math.sqrt(wall.x ** 2 + wall.y ** 2);
