@@ -13,6 +13,14 @@ declare module "fastify" {
   }
 }
 
+export function isIgnoreAuthUrl(url: string): boolean {
+  return (
+    url.startsWith("/login") ||
+    url.startsWith("/public") ||
+    url.startsWith("/js")
+  );
+}
+
 export default fp(
   async (fastify) => {
     fastify.decorateRequest("userId", "");
@@ -38,12 +46,7 @@ export default fp(
 
       const token = req.cookies.token;
       if (!token) {
-        if (
-          req.url.startsWith("/login") ||
-          req.url.startsWith("/public") ||
-          req.url.startsWith("/js")
-        )
-          return;
+        if (isIgnoreAuthUrl(req.url)) return;
         return redirectTo(req, reply, "/login");
       }
 
