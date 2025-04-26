@@ -5,7 +5,8 @@ import type {
   PongPaddlePosition,
 } from "../../../types/strategy/IPongPaddlePositionSampler";
 import type { UserInput } from "../../../types/games/userInput";
-import type { Pong, PongGameState } from "./pong";
+import type { Pong } from "./pong";
+import type { PongGameState } from "../../../types/games/pong/gameState";
 
 interface MovementInterval {
   type: "UP" | "DOWN";

@@ -1,5 +1,5 @@
 import type { Pong } from "../pong";
-import { GameStatus } from "../../gameBase";
+import { GameStatus } from "../../../../types/games/gameBaseState";
 import { ModifierBase } from "../../modifierBase";
 
 export class SurvivalGame extends ModifierBase {
