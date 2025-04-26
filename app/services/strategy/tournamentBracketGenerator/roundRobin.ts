@@ -48,7 +48,7 @@ export class RoundRobin implements ITournamentBracketGenerator {
 
     // Generate match schedule based on number positions (0, 1, 2, ...)
     const numericMatches = this.generateMatchSchedule(
-      this.tournamentData.playerCount,
+      this.tournamentData.players.length,
       this.tournamentData.gameData.playerCount,
     );
 
