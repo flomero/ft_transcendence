@@ -89,18 +89,32 @@ class TournamentManager {
 
   public async startTournament(db: Database): Promise<void> {
     if (this.canTournamentBeStarted() === false) {
-      throw new Error("[start Tournamen] Tournament cannot be started");
+      throw new Error("[start Tournemant] Tournament cannot be started");
     }
 
     this.tournament = await createTournament(db, this);
+    this.tournament.startTournament();
   }
 
   public canTournamentBeStarted(): boolean {
-    if (this.isTournamentFull() === false) return false;
+    if (this.isTournamentFull() === false)
+      throw new Error("Not enough members to start tournament");
     if (this.tournament?.getStatus() === TournamentStatus.ON_GOING)
-      return false;
+      throw new Error("Tournament is already started");
     if (this.tournament?.getStatus() === TournamentStatus.FINISHED)
-      return false;
+      throw new Error("Tournament is already finished");
+    //if (this.allMembersAreConnected() === false)
+    // throw new Error("Not all members are connected");
+    return true;
+  }
+
+  public allMembersAreConnected(): boolean {
+    for (const member of this.tournamentMembers.values()) {
+      if (member.webSocket === undefined) {
+        // check is ai later
+        return false;
+      }
+    }
     return true;
   }
 

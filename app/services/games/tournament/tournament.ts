@@ -21,10 +21,11 @@ export enum TournamentStatus {
   ON_GOING,
   FINISHED,
 }
+import { TournamentSettings } from "../../../interfaces/games/tournament/TournamentSettings";
 
 export class Tournament {
   // All tournament related data given at creation
-  protected tournamentData: Record<string, any>;
+  protected tournamentData: TournamentSettings;
 
   // Strategy managers for bracket generation and match winner determination
   protected bracketManager: StrategyManager<
@@ -52,7 +53,7 @@ export class Tournament {
   protected status: TournamentStatus = TournamentStatus.CREATED;
   protected tournamentResults: TournamentResults = {};
 
-  constructor(tournamentData: Record<string, any>) {
+  constructor(tournamentData: TournamentSettings) {
     this.tournamentData = tournamentData;
 
     // Initialize bracket generator strategy
@@ -65,7 +66,7 @@ export class Tournament {
 
     // Initialize match winner strategy
     this.matchWinnerManager = new StrategyManager(
-      this.tournamentData.matchWinnerType,
+      this.tournamentData.matchWinner,
       "tournamentMatchWinner",
       "recordGameResult",
       [],
