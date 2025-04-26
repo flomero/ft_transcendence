@@ -179,7 +179,7 @@ class PongGame {
       }
     }
 
-    if (this.gameState?.walls) this.drawWalls();
+    if (this.gameState?.walls) this.drawWalls(true);
     if (this.gameState?.modifiersState?.spawnedPowerUps) this.drawPowerUps();
     if (this.gameState?.paddles) this.drawPaddles();
     if (this.gameState?.balls) this.drawBalls();
@@ -190,6 +190,7 @@ class PongGame {
     }
 
     this.ctx.restore();
+    this.drawWalls(false);
 
     if (this.debug) this.drawDebugElements();
   }
@@ -303,11 +304,11 @@ class PongGame {
     });
   }
 
-  private drawWalls(): void {
+  private drawWalls(rotated: boolean): void {
     if (!this.gameState?.walls) return;
 
     this.gameState.walls.forEach((wall) => {
-      if (wall.isVisible) {
+      if (wall.isVisible && wall.doRotation === rotated) {
         const angle = Math.atan2(wall.dy, wall.dx);
         const x = wall.x * this.ratio;
         const y = wall.y * this.ratio;
