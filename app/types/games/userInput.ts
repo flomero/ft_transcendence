@@ -11,7 +11,7 @@ export type PongUserInput =
   (typeof pongUserInputs)[keyof typeof pongUserInputs];
 
 export interface UserInput {
-  type: PongUserInput;
+  type?: PongUserInput;
   playerId: number;
   timestamp: number;
 }
