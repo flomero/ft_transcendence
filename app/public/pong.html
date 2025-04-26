@@ -61,13 +61,15 @@
             options: {
               gameName: "pong",
               gameModeName: gameModeName,
-              gameModeConfig: {},
+              gameModeConfig: {
+                powerUpRadius: 50,
+              },
               modifierNames: {
                 timedStart: {},
                 timedGame: {
                   duration: 360,
                 },
-                elimination: {},
+                elimination: { threshold: 11 },
                 arenaShrink: {},
                 goalReset: {},
                 powerUpSpawner: {
@@ -76,11 +78,7 @@
                 },
               },
               powerUpNames: {
-                speedBoost: {},
-                blinkingBall: {},
-                multiBall: {},
                 bumper: {},
-                shooter: {},
               },
               playerCount: playerCount,
             },

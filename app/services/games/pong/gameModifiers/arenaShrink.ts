@@ -7,7 +7,7 @@ export class ArenaShrink extends ModifierBase {
 
   shrunkIds: number[] = [];
 
-  onPlayerElimination(game: Pong, args: { playerId: number }): void {
+  onResultUpdate(game: Pong, args: { playerId: number }): void {
     const gameState = game.getState();
     const arenaRadius =
       game.getSettings().arenaRadius || game.getSettings().arenaWidth / 2.0;
@@ -115,7 +115,9 @@ export class ArenaShrink extends ModifierBase {
   }
 
   protected updateWalls(game: Pong) {
-    const walls = game.getState().walls;
+    const walls = game
+      .getState()
+      .walls.slice(0, 2 * game.getState().playerCount);
     const totalWalls = walls.length;
 
     // Only process even-indexed walls
