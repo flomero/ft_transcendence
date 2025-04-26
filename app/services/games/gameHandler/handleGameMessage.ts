@@ -1,6 +1,6 @@
 import { gameManagers } from "../lobby/start/startLobbyHandler";
 import validGameMessageCheck from "./validGameMessageCheck";
-import type GameMessage from "../../../interfaces/games/gameHandler/GameMessage";
+import type { GameMessage } from "../../../types/games/userInput";
 
 const handleGameMessage = (
   message: string,

@@ -1,14 +1,14 @@
-import { UserInput } from "../../../../types/games/userInput";
+import type { UserInput } from "../../../../types/games/userInput";
 import { PongModifierBase } from "../pongModifierBase";
-import { Pong } from "../pong";
+import type { Pong } from "../pong";
 import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
-import { Paddle } from "../../../../types/games/pong/paddle";
+import type { Paddle } from "../../../../types/games/pong/paddle";
 
 enum AnimationStatus {
-  IDLE,
-  EXTENDING,
-  RETRACTING,
-  EXTENDED,
+  IDLE = 0,
+  EXTENDING = 1,
+  RETRACTING = 2,
+  EXTENDED = 3,
 }
 
 type MovementDirection = "UP" | "DOWN" | "STOP";
@@ -25,14 +25,14 @@ interface PaddleInfos {
 export class PaddleBoost extends PongModifierBase {
   name = "paddleBoost";
 
-  protected maxDisplacement: number = 50;
-  protected extendedSpeedMultiplier: number = 0;
+  protected maxDisplacement = 50;
+  protected extendedSpeedMultiplier = 0;
 
   protected paddlesInfos: PaddleInfos[] = [];
-  protected paddleExtensionLength: number = 0;
-  protected paddleExtensionVelocity: number = 0;
-  protected paddleRetractionVelocity: number = 0;
-  protected extensionVelocityTransmissionFactor: number = 0;
+  protected paddleExtensionLength = 0;
+  protected paddleExtensionVelocity = 0;
+  protected paddleRetractionVelocity = 0;
+  protected extensionVelocityTransmissionFactor = 0;
 
   constructor(customConfig?: Record<string, any>) {
     super();
@@ -160,7 +160,24 @@ export class PaddleBoost extends PongModifierBase {
         }
         break;
 
-      case "STOP":
+      case "STOP_DOWN":
+        // Reset movement only if the player isn't pressing the other direction
+        paddleInfos.lastMovementDirection = "STOP";
+        // Only apply velocity immediately if we're in a state that allows movement
+        if (
+          [AnimationStatus.IDLE, AnimationStatus.EXTENDED].includes(
+            paddleInfos.animationStatus,
+          )
+        ) {
+          this.applyMovementDirection(
+            game.getState().paddles[args.input.playerId],
+            paddleInfos,
+          );
+        }
+        break;
+
+      // Quick fix, TODO: maybe fix this in the future
+      case "STOP_UP":
         // Reset movement only if the player isn't pressing the other direction
         paddleInfos.lastMovementDirection = "STOP";
         // Only apply velocity immediately if we're in a state that allows movement

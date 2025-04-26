@@ -5,10 +5,18 @@ export const pongUserInputs = {
   STOP_DOWN: "STOP_DOWN",
   SPACE: "SPACE",
   STOP_SPACE: "STOP_SPACE",
-};
+} as const;
+
+export type PongUserInput =
+  (typeof pongUserInputs)[keyof typeof pongUserInputs];
 
 export interface UserInput {
-  type: string;
+  type: PongUserInput;
   playerId: number;
   timestamp: number;
+}
+
+export interface GameMessage {
+  type: "userInput";
+  options: UserInput;
 }
