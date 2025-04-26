@@ -4,7 +4,7 @@ const validTournamentConnectionCheck = (
   memberId: string,
   tournamentId: string,
 ) => {
-  if (!tournaments.has(tournamentId) === false) {
+  if (tournaments.has(tournamentId) === false) {
     throw new Error(
       "[validTournamentConnectionCheck] Tournament does not exist",
     );

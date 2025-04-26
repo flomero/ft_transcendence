@@ -13,7 +13,7 @@ async function tournamentWebsocketHandler(
 
   try {
     connection.send(`Welcome to the tournament ${tournamentId}`);
-    validTournamentConnectionCheck(tournamentId, userId);
+    validTournamentConnectionCheck(userId, tournamentId);
   } catch (error) {
     if (error instanceof Error) {
       console.error(`Error in tournamentWebsocketHandler: ${error.message}`);
