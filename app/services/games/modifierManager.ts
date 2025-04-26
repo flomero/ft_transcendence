@@ -6,7 +6,7 @@ import {
   type ModifierBase,
   ModifierStatus,
 } from "./modifierBase";
-import type { RNG } from "./rng";
+import { IRNG } from "../../types/games/rng";
 
 export class ModifierManager {
   // Arrays that maintain the allowed names and their definitions.
@@ -164,7 +164,7 @@ export class ModifierManager {
     this.spawnedPowerUps = snapshot.spawnedPowerUps || [];
   }
 
-  sampleRandomPowerUp(rng: RNG): string | null {
+  sampleRandomPowerUp(rng: IRNG): string | null {
     if (this.cumulativeDensityFunction.length <= 0) return null;
 
     const rnd = rng.random();
@@ -178,7 +178,7 @@ export class ModifierManager {
     return null;
   }
 
-  spawnRandomPowerUp(rng: RNG, position: { x: number; y: number }): boolean {
+  spawnRandomPowerUp(rng: IRNG, position: { x: number; y: number }): boolean {
     const powerUpName: string | null = this.sampleRandomPowerUp(rng);
     if (!powerUpName) {
       console.log("Can't spawn any power up");

@@ -1,14 +1,14 @@
 import type { Ball } from "./ball";
 import type { Paddle } from "./paddle";
 import type { Rectangle } from "./rectangle";
-import type { RNG } from "../../../services/games/rng";
+import type { IRNG } from "../rng";
 import type { GameBaseState } from "../gameBaseState";
 
 export type PongGameState = GameBaseState & {
   balls: Ball[];
   paddles: Paddle[];
   walls: Rectangle[];
-  rng: RNG;
+  rng: IRNG;
   lastHit: number;
   lastGoal: number;
   scores: number[];

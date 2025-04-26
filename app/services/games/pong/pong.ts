@@ -13,6 +13,7 @@ import type { UserInput } from "../../../types/games/userInput";
 import { RNG } from "../rng";
 import type { ExtendedCollisionData } from "../../../types/games/pong/extendedCollisionData";
 import type { PongGameState } from "../../../types/games/pong/gameState";
+import { IRNG } from "../../../types/games/rng";
 
 const EPSILON = 1e-2;
 
@@ -549,7 +550,7 @@ export abstract class Pong extends GameBase {
     return collisionsData;
   }
 
-  getRNG(): RNG {
+  getRNG(): IRNG {
     return this.gameState.rng;
   }
 

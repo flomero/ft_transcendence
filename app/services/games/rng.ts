@@ -1,4 +1,6 @@
-export class RNG {
+import { IRNG } from "../../types/games/rng";
+
+export class RNG implements IRNG {
   protected seed: number = Date.now();
   protected state: number;
 
