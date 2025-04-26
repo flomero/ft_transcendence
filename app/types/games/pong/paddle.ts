@@ -7,5 +7,6 @@ export interface Paddle extends Rectangle {
   maxDisplacement: number;
   coverage: number;
   doMove: boolean;
+  keyPressed: { [key: string]: boolean };
   [key: string]: any;
 }
