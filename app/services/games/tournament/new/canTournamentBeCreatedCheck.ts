@@ -7,7 +7,9 @@ const canTournamentBeCreatedCheck = (memberId: string): void => {
     throw new Error("User is already in a lobby");
   }
   if (isMemberInAnyTournament(memberId) !== null) {
-    throw new Error("User is already in a tournament");
+    throw new Error(
+      "User is already in a tournament: " + isMemberInAnyTournament(memberId),
+    );
   }
   if (matchMakingManager.memberExists(memberId) === true) {
     throw new Error("User is already in match making");
