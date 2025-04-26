@@ -38,7 +38,11 @@ export default fp(
 
       const token = req.cookies.token;
       if (!token) {
-        if (req.url.startsWith("/login") || req.url.startsWith("/public"))
+        if (
+          req.url.startsWith("/login") ||
+          req.url.startsWith("/public") ||
+          req.url.startsWith("/js")
+        )
           return;
         return redirectTo(req, reply, "/login");
       }
