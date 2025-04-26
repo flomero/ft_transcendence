@@ -1,4 +1,4 @@
-import { Lobby } from "../../../services/games/lobby/Lobby";
+import type { Lobby } from "../../../services/games/lobby/Lobby";
 //import { TournamentManager } from "../../../services/tournament/tournament";
 
 export type GameOrigin = {} & (

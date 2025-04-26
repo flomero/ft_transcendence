@@ -1,5 +1,5 @@
-import { randomUUID, UUID } from "node:crypto";
-import { FastifyInstance } from "fastify";
+import { randomUUID, type UUID } from "node:crypto";
+import type { FastifyInstance } from "fastify";
 
 export async function getImage(
   fastify: FastifyInstance,

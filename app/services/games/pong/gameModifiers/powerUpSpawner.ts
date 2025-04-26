@@ -2,9 +2,9 @@ import type { GameBase } from "../../gameBase";
 import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
 import { TimeLimitedModifierBase } from "../../timeLimitedModifierBase";
 import { ModifierStatus } from "../../modifierBase";
-import { Pong } from "../pong";
+import type { Pong } from "../pong";
 import { StrategyManager } from "../../../strategy/strategyManager";
-import { type IPongPowerUpPositionSampler } from "../../../../types/strategy/IPongPowerUpPositionSampler";
+import type { IPongPowerUpPositionSampler } from "../../../../types/strategy/IPongPowerUpPositionSampler";
 
 export class PowerUpSpawner extends TimeLimitedModifierBase {
   name = "powerUpSpawner";

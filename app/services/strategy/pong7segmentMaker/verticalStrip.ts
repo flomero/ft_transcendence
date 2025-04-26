@@ -1,5 +1,5 @@
-import { Rectangle } from "../../../types/games/pong/rectangle";
-import { IPong7segmentMaker } from "../../../types/strategy/IPong7segmentMaker";
+import type { Rectangle } from "../../../types/games/pong/rectangle";
+import type { IPong7segmentMaker } from "../../../types/strategy/IPong7segmentMaker";
 import { STRATEGY_REGISTRY } from "../strategyRegistryLoader";
 
 export class VerticalStrip implements IPong7segmentMaker {

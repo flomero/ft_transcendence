@@ -1,5 +1,5 @@
-import { IPongBallResetSampler } from "../../../types/strategy/IPongBallResetSampler";
-import { Pong } from "../../games/pong/pong";
+import type { IPongBallResetSampler } from "../../../types/strategy/IPongBallResetSampler";
+import type { Pong } from "../../games/pong/pong";
 
 export class UniformCA implements IPongBallResetSampler {
   name = "uniformCA";

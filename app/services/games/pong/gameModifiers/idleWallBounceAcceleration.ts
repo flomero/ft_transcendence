@@ -1,5 +1,5 @@
 import { ModifierBase } from "../../modifierBase";
-import { Pong } from "../pong";
+import type { Pong } from "../pong";
 import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
 
 export class IdleWallBounceAcceleration extends ModifierBase {

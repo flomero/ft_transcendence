@@ -1,6 +1,6 @@
-import { IPongBallResetSampler } from "../../../types/strategy/IPongBallResetSampler";
-import { IPongPlayerSampler } from "../../../types/strategy/IPongPlayerSampler";
-import { Pong } from "../../games/pong/pong";
+import type { IPongBallResetSampler } from "../../../types/strategy/IPongBallResetSampler";
+import type { IPongPlayerSampler } from "../../../types/strategy/IPongPlayerSampler";
+import type { Pong } from "../../games/pong/pong";
 import { StrategyManager } from "../strategyManager";
 import { STRATEGY_REGISTRY } from "../strategyRegistryLoader";
 

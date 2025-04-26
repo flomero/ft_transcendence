@@ -1,3 +1,5 @@
+import type { GameMessage } from "../types/games/userInput";
+
 interface GameObject {
   x: number;
   y: number;
@@ -38,14 +40,6 @@ interface GameState {
   walls?: Wall[];
   scores?: Record<string, number>;
   modifiersState?: ModifiersData;
-}
-
-interface UserInputAction {
-  type: string;
-  options: {
-    type: string | null;
-    timestamp: number;
-  };
 }
 
 class PongGame {
@@ -169,11 +163,11 @@ class PongGame {
   }
 
   private handleKeyDown(event: KeyboardEvent): void {
-    const action: UserInputAction = {
+    const action: GameMessage = {
       type: "userInput",
       options: {
-        type: null,
         timestamp: Date.now(),
+        playerId: -1, // will be set in the server
       },
     };
 
@@ -187,19 +181,17 @@ class PongGame {
   }
 
   private handleKeyUp(event: KeyboardEvent): void {
-    const action: UserInputAction = {
+    const action: GameMessage = {
       type: "userInput",
       options: {
-        type: null,
         timestamp: Date.now(),
+        playerId: -1, // will be set in the server
       },
     };
 
-    if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-      action.options.type = "STOP";
-    } else if (event.key === "Space") {
-      action.options.type = "SPACE_STOP";
-    }
+    if (event.key === "ArrowUp") action.options.type = "STOP_UP";
+    if (event.key === "ArrowDown") action.options.type = "STOP_DOWN";
+    if (event.key === "Space") action.options.type = "STOP_SPACE";
 
     if (action.options.type && this.isConnected) {
       this.gameSocket.send(JSON.stringify(action));
