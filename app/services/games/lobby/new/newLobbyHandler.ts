@@ -11,7 +11,10 @@ export const PublicLobbies = new Map<string, Lobby>();
 export const PrivateLobbies = new Map<string, Lobby>();
 
 function initializeSampleLobbies() {
-  const sampleUserIds = ["102633657525324851776", "user456", "user456"];
+  const sampleUserIds = Array.from<string>({
+    length: Object.values(GAMEMODE_REGISTRY).length,
+  }).fill("user123");
+  // sampleUserIds[4] = "102633657525324851776"
 
   const lobbyConfigs: NewLobbyRequestBody[] = Object.values(GAMEMODE_REGISTRY)
     .filter((_, index) => index < sampleUserIds.length)
