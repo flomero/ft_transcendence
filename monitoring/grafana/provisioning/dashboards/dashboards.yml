@@ -1,9 +1,8 @@
 apiVersion: 1
 
 providers:
-  - name: 'JWT Metrics Dashboard'
+  - name: 'Custome Fastify Dashboards'
     orgId: 1
-    folder: 'JWT Metrics'
     type: file
     disableDeletion: false
     updateIntervalSeconds: 10
