@@ -171,11 +171,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       speedBoost: {},
       blinkingBall: {},
       multiBall: {},
-      bumper: {
-        bumperJunctionDistanceFromCenter: 6,
-        bumperVelocityFactor: 25,
-        bumperAcceleration: -20,
-      },
+      bumper: {},
       shooter: {},
     },
     playerCount: 5,
@@ -195,7 +191,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       elimination: { threshold: 8 },
       goalReset: {},
       idleWallBounceAcceleration: {
-        bumperVelocityFactor: 0.25,
+        bumperVelocityFactor: 0.35,
       },
       powerUpSpawner: {
         meanDelay: 10,
@@ -203,11 +199,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       },
     },
     powerUpNames: {
-      speedBoost: {
-        duration: 3,
-        rampUpStrength: 2,
-        rampUpFrequency: 0.25,
-      },
+      speedBoost: {},
       blinkingBall: {
         duration: 6,
         blinkDuration: 75,
@@ -216,18 +208,13 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       multiBall: {
         ballCount: 179,
         totalAngle: 360,
-        radiusFactor: 0.75,
+        radiusFactor: 75,
       },
-      bumper: {
-        duration: 15,
-        bumperMaxVelocityFactor: 250,
-        bumperVelocityFactor: 100,
-        bumperAcceleration: -75,
-      },
+      bumper: {},
       shooter: {
         chargeDuration: 1,
-        shootInitialVelocityFactor: 300,
-        shootAcceleration: 125,
+        shootInitialVelocityFactor: 200,
+        shootAcceleration: 100,
       },
     },
     playerCount: 2,
@@ -247,7 +234,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       arenaShrink: {},
       goalReset: {},
       idleWallBounceAcceleration: {
-        bumperVelocityFactor: 0.25,
+        bumperVelocityFactor: 0.35,
       },
       powerUpSpawner: {
         meanDelay: 10,
@@ -255,11 +242,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       },
     },
     powerUpNames: {
-      speedBoost: {
-        duration: 3,
-        rampUpStrength: 2,
-        rampUpFrequency: 0.25,
-      },
+      speedBoost: {},
       blinkingBall: {
         duration: 6,
         blinkDuration: 75,
@@ -268,18 +251,17 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       multiBall: {
         ballCount: 179,
         totalAngle: 360,
-        radiusFactor: 0.75,
+        radiusFactor: 75,
       },
       bumper: {
-        duration: 15,
-        bumperMaxVelocityFactor: 250,
-        bumperVelocityFactor: 100,
-        bumperAcceleration: -75,
+        bumperJunctionDistanceFromCenter: 6,
+        bumperVelocityFactor: 25,
+        bumperAcceleration: -20,
       },
       shooter: {
         chargeDuration: 1,
-        shootInitialVelocityFactor: 300,
-        shootAcceleration: 125,
+        shootInitialVelocityFactor: 200,
+        shootAcceleration: 100,
       },
     },
     playerCount: 5,
@@ -299,7 +281,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       arenaShrink: {},
       goalReset: {},
       idleWallBounceAcceleration: {
-        bumperVelocityFactor: 0.25,
+        bumperVelocityFactor: 0.35,
       },
       powerUpSpawner: {
         meanDelay: 10,
@@ -307,11 +289,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       },
     },
     powerUpNames: {
-      speedBoost: {
-        duration: 3,
-        rampUpStrength: 2,
-        rampUpFrequency: 0.25,
-      },
+      speedBoost: {},
       blinkingBall: {
         duration: 6,
         blinkDuration: 75,
@@ -320,18 +298,17 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       multiBall: {
         ballCount: 179,
         totalAngle: 360,
-        radiusFactor: 0.75,
+        radiusFactor: 75,
       },
       bumper: {
-        duration: 15,
-        bumperMaxVelocityFactor: 250,
-        bumperVelocityFactor: 100,
-        bumperAcceleration: -75,
+        bumperJunctionDistanceFromCenter: 6,
+        bumperVelocityFactor: 25,
+        bumperAcceleration: -20,
       },
       shooter: {
         chargeDuration: 1,
-        shootInitialVelocityFactor: 300,
-        shootAcceleration: 125,
+        shootInitialVelocityFactor: 200,
+        shootAcceleration: 100,
       },
     },
     playerCount: 8,
@@ -441,8 +418,8 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
         bumperWallJunctionDistance: 95,
       },
       shooter: {
-        shootInitialVelocityFactor: 250,
-        shootAcceleration: 125,
+        shootInitialVelocityFactor: 225,
+        shootAcceleration: 100,
       },
     },
     playerCount: 2,
