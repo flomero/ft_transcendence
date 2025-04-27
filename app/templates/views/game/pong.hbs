@@ -2,3 +2,37 @@
   <canvas id="gameCanvas" data-userid={{userId}}></canvas>
 </div>
 
+<div class="flex flex-col items-center">
+  {{#if (eq users.length 2)}}
+    {{!-- Two players case: current user on left, other player on right --}}
+    <div class="flex justify-between gap-8 mt-16 w-full max-w-3xl">
+      {{!-- Current user (always on left) --}}
+      {{#each users as |user|}}
+        {{#if (eq user.userId ../userId)}}
+          {{#> components/game/user user=user}}
+          {{/components/game/user}}
+        {{/if}}
+      {{/each}}
+
+      {{!-- Other user (always on right) --}}
+      {{#each users as |user|}}
+        {{#unless (eq user.userId ../userId)}}
+          {{#> components/game/user
+            user=user
+            reversed=true
+          }}
+          {{/components/game/user}}
+        {{/unless}}
+      {{/each}}
+    </div>
+  {{else}}
+    {{!-- More than 2 players case: display all players without special positioning --}}
+    <div class="flex flex-wrap gap-8 mt-16 justify-center">
+      {{#each users}}
+        {{#> components/game/user user=user }}
+        {{/components/game/user}}
+      {{/each}}
+      <p class="text-fg-muted text-xs">counting goals received</p>
+    </div>
+  {{/if}}
+</div>
