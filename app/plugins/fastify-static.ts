@@ -10,7 +10,7 @@ export default fp(async (fastify) => {
   });
 
   await fastify.register(fastifyStatic, {
-    root: path.resolve(__dirname, "../../dist/client"),
+    root: path.resolve(__dirname, "../../dist/client/client"),
     prefix: "/js/",
     decorateReply: false,
   });
