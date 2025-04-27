@@ -272,6 +272,50 @@ export class MultiplayerPong extends Pong {
 
       currentWall.width = width;
     }
+
+    // First compute all new widths without modifying the walls
+    for (let i = 0; i < totalWalls; i += 2) {
+      const currentWall = this.gameState.walls[(i + 1) % totalWalls];
+
+      // Get the wall before and after (odd-indexed walls that remain fixed)
+      const prevWallIndex = (i + totalWalls) % totalWalls;
+      const nextWallIndex = (i + 2) % totalWalls;
+
+      const prevWall = this.gameState.walls[prevWallIndex];
+      const nextWall = this.gameState.walls[nextWallIndex];
+
+      // Get the corners of the fixed odd walls that we need to connect to
+      // For prevWall, we need its bottom-right corner (+direction, -normal)
+      const prevWallCorner = {
+        x:
+          prevWall.x +
+          (prevWall.dx * prevWall.width) / 2 -
+          (prevWall.nx * prevWall.height) / 2,
+        y:
+          prevWall.y +
+          (prevWall.dy * prevWall.width) / 2 -
+          (prevWall.ny * prevWall.height) / 2,
+      };
+
+      // For nextWall, we need its bottom-left corner (-direction, -normal)
+      const nextWallCorner = {
+        x:
+          nextWall.x -
+          (nextWall.dx * nextWall.width) / 2 -
+          (nextWall.nx * nextWall.height) / 2,
+        y:
+          nextWall.y -
+          (nextWall.dy * nextWall.width) / 2 -
+          (nextWall.ny * nextWall.height) / 2,
+      };
+
+      // Calculate the vector between the corners
+      let dx = nextWallCorner.x - prevWallCorner.x;
+      let dy = nextWallCorner.y - prevWallCorner.y;
+      const width = Math.sqrt(dx ** 2 + dy ** 2) || currentWall.width;
+
+      currentWall.width = width;
+    }
   }
 
   resetBall(

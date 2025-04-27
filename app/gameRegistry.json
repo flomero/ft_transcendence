@@ -38,10 +38,10 @@
         "fixedSettings": {
           "arenaWidth": 100,
           "arenaHeight": 100,
-          "paddleOffset": 2.5,
+          "paddleOffset": 3.5,
           "paddleHeight": 1,
           "wallsHeight": 2,
-          "wallsOffset": 1
+          "wallsOffset": 0
         },
 
         "customizableSettings": {
