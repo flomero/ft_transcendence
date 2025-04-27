@@ -1,4 +1,4 @@
-import { type FastifyRequest, type FastifyReply, fastify } from "fastify";
+import { type FastifyRequest, type FastifyReply } from "fastify";
 import { validConnectionCheck } from "../lobbyVaidation/validConnectionCheck";
 import setLobbyStateToStart from "./setLobbyStateToStart";
 import gameManagerCreate from "./gameManagerCreate";

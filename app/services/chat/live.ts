@@ -23,6 +23,10 @@ interface ChatClient {
 
 const chatClients: ChatClient[] = [];
 
+export function getCountOnlineChatUsers(): number {
+  return chatClients.length;
+}
+
 export function addChatClient(fastify: FastifyInstance, client: ChatClient) {
   chatClients.push(client);
 
