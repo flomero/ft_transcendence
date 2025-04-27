@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Enhanced Tic Tac Toe Tester</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin: 20px;
+      }
+      #status {
+        font-size: 1.2em;
+        margin-bottom: 20px;
+      }
+      #game-container {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+      .outer-cell {
+        border: 3px solid #333;
+        padding: 5px;
+        position: relative;
+      }
+      .outer-cell.highlight {
+        border-color: gold;
+      }
+      .inner-board {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2px;
+      }
+      .inner-cell {
+        width: 50px;
+        height: 50px;
+        border: 1px solid #666;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.5em;
+        cursor: pointer;
+      }
+      .inner-cell.disabled {
+        cursor: default;
+        background-color: #eee;
+      }
+      .outer-winner {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(255, 255, 255, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 2em;
+      }
+      .player-x {
+        color: blue;
+      }
+      .player-o {
+        color: red;
+      }
+      .last-move {
+        outline: 3px solid green;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="status">Connecting...</div>
+    <div id="game-container"></div>
+
+    <script>
+      // WebSocket settings
+      const WS_URL = "ws://localhost:3000/ws/game/";
+      const GRID_SELECTION = "grid_selection";
+      const CELL_SELECTION = "cell_selection";
+      const player_turn = ["X", "O"];
+      let playerId = 0; // simple modulo 2 player id, toggled after each play
+      let gameState = null;
+      let lastMove = null; // { grid: {row, col}, cell: {row, col} }
+
+      const socket = new WebSocket(WS_URL);
+
+      socket.onopen = function () {
+        console.log("WebSocket connected");
+        document.getElementById("status").innerText =
+          "Connected. Waiting for game state...";
+        // Send game creation message for enhanced tic-tac-toe
+        const creationMessage = {
+          type: "game_creation",
+          game: "enhanced_tic_tac_toe",
+          game_mode: "enhanced_tic_tac_toe_classic",
+          modifiers: [],
+          power_ups: [],
+          player_count: 2,
+          start_game: true,
+        };
+        socket.send(JSON.stringify(creationMessage));
+      };
+
+      socket.onmessage = function (event) {
+        const data = JSON.parse(event.data);
+        if (data.type === "game_state") {
+          gameState = data;
+          if (gameState.updated) {
+            console.log(gameState);
+            updateUI();
+          }
+        }
+      };
+
+      function updateUI() {
+        const statusDiv = document.getElementById("status");
+        // If game is complete, show the final status
+        if (gameState.game_status.completed) {
+          statusDiv.innerHTML = `Game Over: <span class="${
+            gameState.game_status.winner === "X" ? "player-x" : "player-o"
+          }">${gameState.game_status.winner}</span> wins!`;
+        } else {
+          statusDiv.innerHTML = `Current Turn: <span class="${
+            gameState.current_player === "X" ? "player-x" : "player-o"
+          }">${gameState.current_player}</span> &mdash; Mode: ${
+            gameState.next_action
+          }`;
+        }
+
+        // Clear game container
+        const container = document.getElementById("game-container");
+        container.innerHTML = "";
+
+        // Outer grid is a 3x3 grid
+        for (let outerRow = 0; outerRow < 3; outerRow++) {
+          for (let outerCol = 0; outerCol < 3; outerCol++) {
+            const outerCellDiv = document.createElement("div");
+            outerCellDiv.className = "outer-cell";
+            outerCellDiv.dataset.row = outerRow;
+            outerCellDiv.dataset.col = outerCol;
+
+            // Check if this outer grid has been completed (display winner if so)
+            const outerVal = gameState.outer_grid[outerRow][outerCol];
+            if (outerVal !== null) {
+              const winnerDiv = document.createElement("div");
+              winnerDiv.className =
+                "outer-winner " + (outerVal === "X" ? "player-x" : "player-o");
+              winnerDiv.innerText = outerVal;
+              outerCellDiv.appendChild(winnerDiv);
+            }
+
+            // In CELL_SELECTION mode, highlight the forced (selected) outer grid
+            if (
+              gameState.next_action === CELL_SELECTION &&
+              gameState.selected_grid
+            ) {
+              if (
+                gameState.selected_grid[0] === outerRow &&
+                gameState.selected_grid[1] === outerCol
+              ) {
+                outerCellDiv.classList.add("highlight");
+              }
+            }
+            // In GRID_SELECTION mode, make outer grids clickable if not complete and game is not over
+            if (
+              !gameState.game_status.completed &&
+              gameState.next_action === GRID_SELECTION &&
+              outerVal === null &&
+              player_turn[playerId] === gameState.current_player
+            ) {
+              outerCellDiv.style.cursor = "pointer";
+              outerCellDiv.addEventListener("click", function () {
+                const gridSelectionMessage = {
+                  type: "user_input",
+                  sub_type: "user_grid_selection",
+                  grid: { row: outerRow, col: outerCol },
+                };
+                socket.send(JSON.stringify(gridSelectionMessage));
+              });
+            }
+
+            // Create the inner board (always render for visualization)
+            const innerBoardDiv = document.createElement("div");
+            innerBoardDiv.className = "inner-board";
+            const innerBoard = gameState.inner_boards[outerRow][outerCol].board;
+
+            for (let innerRow = 0; innerRow < 3; innerRow++) {
+              for (let innerCol = 0; innerCol < 3; innerCol++) {
+                const cellDiv = document.createElement("div");
+                cellDiv.className = "inner-cell";
+                cellDiv.dataset.innerRow = innerRow;
+                cellDiv.dataset.innerCol = innerCol;
+                const cellVal = innerBoard[innerRow][innerCol];
+
+                if (cellVal !== null) {
+                  cellDiv.innerText = cellVal;
+                  cellDiv.classList.add(
+                    cellVal === "X" ? "player-x" : "player-o",
+                  );
+                }
+
+                // Highlight last move
+                if (
+                  lastMove &&
+                  lastMove.grid.row === outerRow &&
+                  lastMove.grid.col === outerCol &&
+                  lastMove.cell.row === innerRow &&
+                  lastMove.cell.col === innerCol
+                ) {
+                  cellDiv.classList.add("last-move");
+                }
+
+                // In CELL_SELECTION mode, if this is the forced board, the cell is empty, and game not complete, make it clickable.
+                if (
+                  !gameState.game_status.completed &&
+                  gameState.next_action === CELL_SELECTION &&
+                  player_turn[playerId] === gameState.current_player
+                ) {
+                  if (
+                    gameState.selected_grid &&
+                    gameState.selected_grid[0] === outerRow &&
+                    gameState.selected_grid[1] === outerCol &&
+                    cellVal === null
+                  ) {
+                    cellDiv.style.cursor = "pointer";
+                    cellDiv.addEventListener("click", function () {
+                      const cellSelectionMessage = {
+                        type: "user_input",
+                        sub_type: "user_cell_selection",
+                        grid: { row: outerRow, col: outerCol },
+                        cell: { row: innerRow, col: innerCol },
+                      };
+                      socket.send(JSON.stringify(cellSelectionMessage));
+                      // Store last move for highlighting
+                      lastMove = {
+                        grid: { row: outerRow, col: outerCol },
+                        cell: { row: innerRow, col: innerCol },
+                      };
+                      playerId = (playerId + 1) % 2;
+                    });
+                  } else {
+                    cellDiv.classList.add("disabled");
+                  }
+                }
+
+                innerBoardDiv.appendChild(cellDiv);
+              }
+            }
+
+            outerCellDiv.appendChild(innerBoardDiv);
+            container.appendChild(outerCellDiv);
+          }
+        }
+      }
+    </script>
+  </body>
+</html>

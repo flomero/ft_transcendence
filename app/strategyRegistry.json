@@ -1,0 +1,168 @@
+{
+  "pongPowerUpPositionSampler": {
+    "uniformRA": {
+      "className": "UniformRA"
+    },
+
+    "elipticGaussianRA": {
+      "className": "ElipticGaussianRA"
+    },
+
+    "uniformCA": {
+      "className": "UniformCA"
+    },
+
+    "flowerGaussianCA": {
+      "className": "FlowerGaussianCA",
+      "playerSampler": "highestScoreBiased",
+      "stdAngleDeviationDeg": 30,
+      "baseRadiusFactor": 0.325,
+      "variationStrength": 0.125,
+      "stdDistanceDeviationPercent": 10
+    },
+
+    "biasedQuadrantGaussianRATester": {
+      "className": "BiasedQuadrantGaussianRATester"
+    },
+
+    "biasedGaussianCATester": {
+      "className": "BiasedGaussianCATester"
+    }
+  },
+
+  "pongBallResetSampler": {
+    "uniformCA": {
+      "className": "UniformCA"
+    },
+
+    "biasedQuadrantGaussianRA": {
+      "className": "BiasedQuadrantGaussianRA",
+      "stdAngularVariationDeg": 10,
+      "angularOffsetDeg": 15,
+      "stdVelocityVariationPercent": 10,
+      "maxVelocityPercent": 30,
+      "playerSampler": "lastGoalBiased"
+    },
+
+    "biasedGaussianCA": {
+      "className": "BiasedGaussianCA",
+      "stdAngularVariationPercent": 40,
+      "angularOffsetPercent": 70,
+      "stdVelocityVariationPercent": 35,
+      "minVelocityPercent": 20,
+      "maxVelocityPercent": 60,
+      "lastGoalBiasPercent": 75
+    }
+  },
+
+  "pongPaddlePositionSampler": {
+    "random": {
+      "className": "Random"
+    },
+
+    "naive": {
+      "className": "Naive"
+    },
+
+    "improvedNaive": {
+      "className": "ImprovedNaive",
+      "widthPercentFactor": 90
+    },
+
+    "foresight": {
+      "className": "Foresight",
+      "widthPercentFactor": 85,
+      "lookAheadTimeS": 3,
+      "idleThresholdS": 2,
+      "preparationTimeS": 0.3
+    }
+  },
+
+  "pongPlayerSampler": {
+    "uniformComplete": {
+      "className": "UniformComplete"
+    },
+
+    "uniformIncomplete": {
+      "className": "UniformIncomplete"
+    },
+
+    "highestScoreBiased": {
+      "className": "HighestScoreBiased"
+    },
+
+    "lowestScoreBiased": {
+      "className": "LowestScoreBiased"
+    },
+
+    "lastGoalBiased": {
+      "className": "LastGoalBiased",
+      "lastGoalBiasPercent": 65
+    }
+  },
+
+  "pong7segmentMaker": {
+    "verticalStrip": {
+      "className": "VerticalStrip",
+      "stripHeight": 20,
+      "stripWidth": 3.5
+    },
+
+    "horizontalStrip": {
+      "className": "HorizontalStrip",
+      "stripHeight": 3.5,
+      "stripWidth": 20
+    },
+
+    "one": {
+      "className": "One",
+      "padding": 2.5
+    },
+
+    "two": {
+      "className": "Two",
+      "padding": 2.5
+    },
+
+    "three": {
+      "className": "Three",
+      "padding": 2.5
+    }
+  },
+
+  "tournamentBracketGenerator": {
+    "roundRobin": {
+      "className": "RoundRobin",
+      "gamesCount": 5
+    },
+
+    "singleElimination": {
+      "className": "SingleElimination",
+      "gamesCount": 3
+    },
+
+    "doubleElimination": {
+      "className": "DoubleElimination",
+      "gamesCount": 3
+    },
+
+    "swissRound": {
+      "className": "SwissRound",
+      "roundCount": 3,
+      "gamesCount": 1,
+      "finalGamesCount": 3
+    }
+  },
+
+  "tournamentMatchWinner": {
+    "bestOfX": {
+      "className": "BestOfX"
+    }
+  },
+
+  "userSampler": {
+    "random": {
+      "className": "Random"
+    }
+  }
+}

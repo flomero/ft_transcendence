@@ -1,10 +1,11 @@
-import { FastifyInstance } from "fastify";
+import type { FastifyInstance } from "fastify";
+import { type ChatRoom, getChatRoomsForUser } from "../database/chat/room";
 
-export async function createChatRoom(
+export async function getChatRoomsForUserView(
   fastify: FastifyInstance,
-): Promise<number> {
-  const sql = "INSERT INTO chat_rooms DEFAULT VALUES RETURNING id";
-  const result = await fastify.sqlite.get(sql);
-  fastify.log.trace(`Created chat_room with id: ${result.id}`);
-  return result.id;
+  userId: string,
+): Promise<ChatRoom[]> {
+  const db_rooms = await getChatRoomsForUser(fastify, userId);
+
+  return db_rooms;
 }

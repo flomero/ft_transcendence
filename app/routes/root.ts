@@ -1,7 +1,7 @@
-import { FastifyPluginAsync } from "fastify";
+import type { FastifyPluginAsync } from "fastify";
 
 const root: FastifyPluginAsync = async (fastify): Promise<void> => {
-  fastify.get("/", async function (request, reply) {
+  fastify.get("/", async (request, reply) => {
     const viewOptions = request.isAjax() ? {} : { layout: "layouts/main" };
     return reply.view(
       "views/home",
@@ -15,8 +15,10 @@ const root: FastifyPluginAsync = async (fastify): Promise<void> => {
     );
   });
 
-  fastify.get("/health", async function () {
-    return { status: "ok" };
+  fastify.get("/health", async () => ({ status: "ok" }));
+
+  fastify.get("/robots.txt", async (request, reply) => {
+    return reply.sendFile("robots.txt");
   });
 };
 

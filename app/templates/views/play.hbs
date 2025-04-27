@@ -1,0 +1,35 @@
+<div class="mt-8 flex flex-col gap-4">
+  <h1>Play Pong</h1>
+  <h2>Quick Play Matchmaking</h2>
+  <div class="flex flex-row flex-wrap gap-2">
+	  {{#each matchmakingmodes}}
+      {{#with this as |gameMode|}}
+        {{#> components/button variant="primary" url=(add "/games/matchmaking/join/" gameMode)}}
+          {{hrGameModeName gameMode}}
+        {{/components/button}}
+      {{/with}}
+    {{/each}}
+  </div>
+  <h2>Lobbys</h2>
+	<div class="flex flex-row gap-2">
+	{{#> components/button variant="outline"}}
+		Create New
+	{{/components/button}}
+	{{#> components/button variant="outline" url="/play/join/code"}}
+		Join with Code
+	{{/components/button}}
+  </div>
+  <div class="flex flex-col gap-2 divide-y divide-fg-muted">
+	 {{#if lobbies.length}}
+      {{#each lobbies}}
+        {{> components/lobby/lobby
+          gameModeName=this.gameSettings.gameModeName
+          ownerName=this.ownerName
+          lobbyId=this.lobbyId
+        }}
+      {{/each}}
+    {{else}}
+      <p class="text-fg-muted">No open lobbies available</p>
+    {{/if}}
+  </div>
+</div>

@@ -1,0 +1,7 @@
+{{#each friends}}
+	{{#unless accepted}}
+		{{> components/user/card userId=userId userName=userName imageUrl=imageUrl showFriendButton="true" showText="true"}}
+	{{/unless}}
+{{else}}
+	<p>No matching Users found...</p>
+{{/each}}

@@ -1,0 +1,176 @@
+{
+  "pong": {
+    "serverTickrateS": 100,
+    "serverMaxDelayS": 2,
+    "gameModes": {
+      "classicPong": {
+        "className": "ClassicPong",
+
+        "fixedSettings": {
+          "arenaWidth": 200,
+          "arenaHeight": 100,
+          "paddleOffset": 2.5,
+          "paddleHeight": 1,
+          "wallsHeight": 2
+        },
+
+        "customizableSettings": {
+          "ballSpeedWidthPercentS": 55,
+          "ballRadius": 0.95,
+          "ballResetSampler": "biasedQuadrantGaussianRA",
+          "paddleCoveragePercent": 25,
+          "paddleSpeedWidthPercentS": 150,
+          "paddleVelocityAngularTransmissionPercent": 45,
+          "paddleVelocitySpeedTransmissionPercent": 10,
+          "powerUpRadius": 4.5,
+          "powerUpCapacities": {
+            "speedBoost": 1,
+            "blinkingBall": 1,
+            "multiBall": 1,
+            "shooter": 1,
+            "bumper": 1
+          }
+        }
+      },
+
+      "multiplayerPong": {
+        "className": "MultiplayerPong",
+        "fixedSettings": {
+          "arenaWidth": 100,
+          "arenaHeight": 100,
+          "paddleOffset": 2.5,
+          "paddleHeight": 1,
+          "wallsHeight": 2,
+          "wallsOffset": 1
+        },
+
+        "customizableSettings": {
+          "ballSpeedWidthPercentS": 65,
+          "ballRadius": 0.8,
+          "ballResetSampler": "biasedGaussianCA",
+          "paddleCoveragePercent": 25,
+          "paddleSpeedWidthPercentS": 140,
+          "paddleVelocityAngularTransmissionPercent": 45,
+          "paddleVelocitySpeedTransmissionPercent": 10,
+          "powerUpRadius": 3,
+          "powerUpCapacities": {
+            "speedBoost": 1,
+            "blinkingBall": 1,
+            "multiBall": 1,
+            "shooter": 1,
+            "bumper": 1
+          }
+        }
+      }
+    },
+
+    "gameModifiers": {
+      "powerUpSpawner": {
+        "className": "PowerUpSpawner",
+        "meanDelayS": 10,
+        "delaySpanS": 2,
+        "positionSampler": "elipticGaussianRA"
+      },
+
+      "timedGame": {
+        "className": "TimedGame",
+        "durationS": 600
+      },
+
+      "scoredGame": {
+        "className": "ScoredGame",
+        "goalObjective": 7
+      },
+
+      "survivalGame": {
+        "className": "SurvivalGame"
+      },
+
+      "elimination": {
+        "className": "Elimination",
+        "threshold": 3
+      },
+
+      "arenaShrink": {
+        "className": "ArenaShrink"
+      },
+
+      "goalReset": {
+        "className": "GoalReset",
+        "delayS": 1.5
+      },
+
+      "idleWallBounceAcceleration": {
+        "className": "IdleWallBounceAcceleration",
+        "bumperVelocityPercent": 0.2
+      },
+
+      "paddleBoost": {
+        "className": "PaddleBoost",
+        "paddleExtensionLength": 2.5,
+        "paddleExtendedSpeedMultiplierPercent": 30,
+        "paddleExtensionDurationS": 0.08,
+        "paddleRetractionDurationS": 0.12,
+        "extensionVelocityTransmissionPercent": 10
+      },
+
+      "timedStart": {
+        "className": "TimedStart"
+      }
+    },
+
+    "powerUps": {
+      "speedBoost": {
+        "className": "SpeedBoost",
+        "spawnWeight": 2.0,
+        "selfActivation": false,
+        "durationS": 5,
+        "totalRampUpStrength": 1.15,
+        "rampUpFrequencyS": 0.25
+      },
+
+      "blinkingBall": {
+        "className": "BlinkingBall",
+        "spawnWeight": 1.5,
+        "selfActivation": false,
+        "durationS": 6,
+        "blinkIntervalS": 0.5,
+        "blinkDurationPercent": 50
+      },
+
+      "multiBall": {
+        "className": "MultiBall",
+        "spawnWeight": 1.5,
+        "selfActivation": false,
+        "durationS": 6,
+        "ballCount": 8,
+        "totalAngleDeg": 80,
+        "radiusFactorPercent": 70
+      },
+
+      "shooter": {
+        "className": "Shooter",
+        "spawnWeight": 2.0,
+        "selfActivation": false,
+        "durationS": 5,
+        "chargeDurationS": 2,
+        "chargeRadius": 5,
+        "shootInitialVelocityPercent": 140,
+        "shootFinalVelocityPercent": 100,
+        "shootDirectionSamplerStrategyName": "biasedQuadrantGaussianRA"
+      },
+
+      "bumper": {
+        "className": "Bumper",
+        "spawnWeight": 1.0,
+        "selfActivation": false,
+        "durationS": 10,
+        "bumperJunctionDistanceFromCenterPercent": 13.5,
+        "bumperWallJunctionDistancePercent": 80,
+        "bumperVelocityPercent": 20,
+        "bumperMaxVelocityPercent": 150,
+        "bumperAccelerationPercentS": -12.5
+      }
+    }
+  }
+}

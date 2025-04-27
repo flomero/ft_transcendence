@@ -1,10 +1,10 @@
-import { FastifyPluginAsync } from "fastify";
+import type { FastifyPluginAsync } from "fastify";
 import fp from "fastify-plugin";
 import oauthPlugin from "@fastify/oauth2";
-import { OAuth2Namespace } from "@fastify/oauth2";
+import type { OAuth2Namespace } from "@fastify/oauth2";
 import { signJWT } from "../services/auth/jwt";
 import { getGoogleProfile } from "../services/auth/google-api";
-import { insertUserIfNotExists } from "../services/database/user";
+import { insertUser } from "../services/auth/newUser";
 
 declare module "fastify" {
   interface FastifyInstance {
@@ -17,14 +17,14 @@ const googleOAuthPlugin: FastifyPluginAsync = async (fastify, opts) => {
     name: "googleOAuth2",
     credentials: {
       client: {
-        id: process.env.GOOGLE_CLIENT_ID!,
-        secret: process.env.GOOGLE_CLIENT_SECRET!,
+        id: fastify.config.GOOGLE_CLIENT_ID,
+        secret: fastify.config.GOOGLE_CLIENT_SECRET,
       },
       auth: oauthPlugin.GOOGLE_CONFIGURATION,
     },
     scope: ["profile", "email"],
     startRedirectPath: "/login/google",
-    callbackUri: process.env.PUBLIC_URL + "/login/google/callback",
+    callbackUri: `${fastify.config.PUBLIC_URL}/login/google/callback`,
     callbackUriParams: {
       access_type: "offline",
       prompt: "consent",
@@ -37,15 +37,15 @@ const googleOAuthPlugin: FastifyPluginAsync = async (fastify, opts) => {
         await fastify.googleOAuth2.getAccessTokenFromAuthorizationCodeFlow(
           request,
         );
+      if (!token || !token.token) {
+        throw new Error("Invalid or null token received");
+      }
       const userInfo = await getGoogleProfile(token.token.access_token);
       if (!userInfo.verified_email) {
         throw new Error("Google account not verified");
       }
 
-      await insertUserIfNotExists(fastify, {
-        id: userInfo.id,
-        username: userInfo.name,
-      });
+      await insertUser(fastify, userInfo);
 
       const jwtToken = await signJWT(fastify, {
         id: userInfo.id,
@@ -56,10 +56,12 @@ const googleOAuthPlugin: FastifyPluginAsync = async (fastify, opts) => {
       reply.cookie("token", jwtToken, {
         path: "/",
       });
-      reply.redirect("/");
+      reply.redirect("/login/reload");
     } catch (error) {
       fastify.log.error(error);
-      reply.status(500).send(error);
+      if (error instanceof Error)
+        return reply.internalServerError(error.message);
+      return reply.internalServerError();
     }
   });
 };

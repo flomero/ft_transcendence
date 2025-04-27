@@ -6,6 +6,7 @@
   --color-bg-muted: var(--color-zinc-700);
   --color-fg-muted: var(--color-zinc-300);
   --color-border: var(--color-zinc-600);
+  --color-error: var(--color-rose-900);
 }
 
 @layer base {
@@ -40,19 +41,92 @@
     max-width: 68.75rem;
     @apply mx-auto w-11/12;
   }
+
+  ::-webkit-scrollbar {
+    @apply h-2 w-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-border rounded-full border-[1px] border-solid border-transparent bg-clip-padding;
+  }
 }
 
-@layer components {
-  .fade-transition {
-    transition: opacity 0.3s ease-out;
+@theme {
+  --animate-slide-in-right: slideInRight 0.3s forwards;
+  --animate-slide-out-right: slideOutRight 0.3s forwards;
+  --animate-slide-in-left: slideInLeft 0.3s forwards;
+  --animate-slide-out-left: slideOutLeft 0.3s forwards;
+  --animate-slide-in-up: slideInUp 0.3s forwards;
+  --animate-slide-out-down: slideOutDown 0.3s forwards;
+
+  @keyframes slideInUp {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
   }
 
-  .fade-out {
-    opacity: 0;
+  @keyframes slideOutDown {
+    from {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateY(100%);
+      opacity: 0;
+    }
   }
 
-  .fade-in {
-    opacity: 1;
+  @keyframes slideInRight {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideOutRight {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+
+  @keyframes slideInLeft {
+    from {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideOutLeft {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
   }
 
   @keyframes fade-in {
@@ -71,6 +145,20 @@
     to {
       opacity: 0;
     }
+  }
+}
+
+@layer components {
+  .fade-transition {
+    transition: opacity 0.3s ease-out;
+  }
+
+  .fade-out {
+    opacity: 0;
+  }
+
+  .fade-in {
+    opacity: 1;
   }
 
   /* For browsers supporting View Transitions API */
@@ -112,5 +200,41 @@
     syntax: "<angle>";
     initial-value: 0deg;
     inherits: false;
+  }
+
+  #chat-rooms-view,
+  #chat-messages-view,
+  #chat-input {
+    position: relative;
+    overflow: hidden;
+    transition: height 0.3s ease;
+  }
+
+  .input {
+    @apply rounded-lg outline;
+  }
+
+  button.input {
+    @apply px-4 py-2;
+  }
+
+  input.input:not([type="file"]) {
+    @apply px-4 py-2;
+  }
+
+  input:focus-visible {
+    @apply outline-fg-muted;
+  }
+
+  input[type="file"]::file-selector-button {
+    @apply bg-bg-muted px-4 py-2;
+  }
+
+  a.active {
+    @apply underline;
+  }
+
+  .badge {
+    @apply bg-bg-muted text-fg-muted rounded-full px-2 py-1 text-xs;
   }
 }

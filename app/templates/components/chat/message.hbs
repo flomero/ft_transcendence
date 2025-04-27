@@ -1,50 +1,27 @@
-<div class="chat-message {{#if isOwnMessage}}chat-message-own{{else}}chat-message-other{{/if}}">
-    <div class="chat-message-header">
-        <span class="chat-message-username">{{message.userName}}</span>
-        <span class="chat-message-time">{{message.timestamp}}</span>
-    </div>
-    <div class="chat-message-content text-bg">
+{{#ifeq message.type "TEXT"}}
+<div class="flex w-max max-w-[75%] flex-col gap-1 rounded-t-lg px-3 py-2 text-sm {{#if message.isOwnMessage}}bg-fg text-bg rounded-l-lg  ml-auto{{else}}bg-bg-muted text-fg rounded-r-lg{{/if}}">
+    {{#unless message.isOwnMessage}}
+        <span class="text-xs text-fg-muted truncate">{{message.userName}}</span>
+    {{/unless}}
+    <span class="font-light text-wrap break-words hyphens-auto">
+      {{message.message}}
+    </span>
+</div>
+{{/ifeq}}
+
+{{#ifeq message.type "INVITE"}}
+<div class="flex w-max max-w-[75%] flex-col gap-1 rounded-t-lg px-3 py-2 text-sm {{#if message.isOwnMessage}}bg-fg text-bg rounded-l-lg  ml-auto{{else}}bg-bg-muted text-fg rounded-r-lg{{/if}}">
+    {{#unless message.isOwnMessage}}
+        <span class="text-xs text-fg-muted truncate">{{message.userName}}</span>
+    {{/unless}}
+    {{#> components/button url=message.message class="bg-color-blue" }}
+      Join Game
+    {{/components/button}}
+</div>
+{{/ifeq}}
+
+{{#ifeq message.type "SYSTEM"}}
+    <div class="text-center text-sm text-fg-muted bg-bg-muted p-1 rounded-lg">
         {{message.message}}
     </div>
-</div>
-
-<style>
-    .chat-message {
-        margin-bottom: 15px;
-        padding: 10px;
-        border-radius: 8px;
-        max-width: 70%;
-    }
-    
-    .chat-message-own {
-        background-color: #DCF8C6;
-        margin-left: auto;
-        margin-right: 10px;
-    }
-    
-    .chat-message-other {
-        background-color: #F2F2F2;
-        margin-right: auto;
-        margin-left: 10px;
-    }
-    
-    .chat-message-header {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 5px;
-        font-size: 0.8rem;
-    }
-    
-    .chat-message-username {
-        font-weight: bold;
-        color: #555;
-    }
-    
-    .chat-message-time {
-        color: #999;
-    }
-    
-    .chat-message-content {
-        word-wrap: break-word;
-    }
-</style>
+{{/ifeq}}

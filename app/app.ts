@@ -1,6 +1,44 @@
 import { join } from "node:path";
-import AutoLoad, { AutoloadPluginOptions } from "@fastify/autoload";
-import { FastifyPluginAsync, FastifyServerOptions } from "fastify";
+import AutoLoad, { type AutoloadPluginOptions } from "@fastify/autoload";
+import type { FastifyPluginAsync, FastifyServerOptions } from "fastify";
+import { loadGameRegistry } from "./services/games/gameRegistryLoader";
+import { loadStrategyRegistry } from "./services/strategy/strategyRegistryLoader";
+import fastifyEnv from "@fastify/env";
+// import { Tournament } from "./services/tournament/tournament";
+
+const envSchema = {
+  type: "object",
+  required: [
+    "COOKIE_SECRET",
+    "JWT_SECRET",
+    "GOOGLE_CLIENT_SECRET",
+    "GOOGLE_CLIENT_ID",
+    "PUBLIC_URL",
+  ],
+  properties: {
+    COOKIE_SECRET: { type: "string" },
+    JWT_SECRET: { type: "string" },
+    GOOGLE_CLIENT_SECRET: { type: "string" },
+    GOOGLE_CLIENT_ID: { type: "string" },
+    PUBLIC_URL: { type: "string" },
+    NODE_ENV: { type: "string", default: "production" },
+    DB_PATH: { type: "string", default: "./database/db.sqlite" },
+  },
+};
+
+declare module "fastify" {
+  interface FastifyInstance {
+    config: {
+      COOKIE_SECRET: string;
+      JWT_SECRET: string;
+      GOOGLE_CLIENT_SECRET: string;
+      GOOGLE_CLIENT_ID: string;
+      PUBLIC_URL: string;
+      NODE_ENV: string;
+      DB_PATH: string;
+    };
+  }
+}
 
 export interface AppOptions
   extends FastifyServerOptions,
@@ -13,6 +51,41 @@ const app: FastifyPluginAsync<AppOptions> = async (
   opts,
 ): Promise<void> => {
   // Place here your custom code!
+
+  // load env vars and stop the server if it fails
+  fastify.register(fastifyEnv, { schema: envSchema }).ready((err) => {
+    if (err) {
+      fastify.log.error(err);
+      fastify.close().then(() => process.exit(1));
+    }
+  });
+
+  await loadGameRegistry();
+  await loadStrategyRegistry();
+
+  // const tournamentData = {
+  //   bracketType: "swissRound",
+  //   matchWinnerType: "bestOfX",
+  //   playerCount: 16,
+  //   players: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15'],
+  //   gameData:{
+  //     playerCount: 2
+  //   }
+  // }
+  // const tournament = new Tournament(tournamentData);
+
+  // tournament.startTournament();
+
+  // console.log(`Results:`);
+  // console.dir(tournament.getResults(), {depth: null});
+
+  // console.log(`Final Ranking:`);
+  // console.dir(tournament.getFinalRankings(), {depth: null});
+
+  await fastify.register(require("@fastify/swagger"));
+  await fastify.register(import("@fastify/swagger-ui"), {
+    routePrefix: "/documentation",
+  });
 
   // Do not touch the following lines
 
@@ -37,6 +110,7 @@ const app: FastifyPluginAsync<AppOptions> = async (
     dir: join(__dirname, "middlewares"),
     options: opts,
   });
+  fastify.ready();
 };
 
 export default app;

@@ -5,10 +5,15 @@
     "source=${localEnv:HOME}/.gitconfig,target=/root/.gitconfig,type=bind,consistency=cached",
     "source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind,consistency=cached"
   ],
+  "postCreateCommand": "apt update && apt install -y sqlite3",
   "customizations": {
     "vscode": {
-      "extensions": ["bradlc.vscode-tailwindcss", "esbenp.prettier-vscode"],
+      "extensions": [],
       "settings": {
+        "remote.extensionKind": {
+          "GitHub.copilot": ["ui"],
+          "cweijan.vscode-database-client2": ["ui"]
+        },
         "files.associations": {
           "*.css": "tailwindcss"
         },

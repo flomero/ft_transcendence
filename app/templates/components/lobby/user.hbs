@@ -1,0 +1,16 @@
+<div class="justify-top flex flex-col gap-3 items-center align-top" data-id="{{userId}}">
+  <img
+    src="{{imageUrl}}"
+    alt="User Avatar"
+    class="bg-bg-muted h-28 w-28 rounded-full border object-cover"
+  />
+  <p class="truncate text-center text-2xl max-w-48">{{userName}}</p>
+  <div class="flex items-center justify-center gap-2">
+    {{#if owner}}
+      <span class="badge">Owner</span>
+    {{/if}}
+    {{#if ready}}
+      <span class="badge">Ready</span>
+    {{/if}}
+  </div>
+</div>
