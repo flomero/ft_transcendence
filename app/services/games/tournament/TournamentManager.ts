@@ -6,6 +6,11 @@ import { TournamentConfigKey } from "../../config/tournamentConfig";
 import { Tournament, TournamentStatus } from "./tournament";
 import createTournament from "./websocket/createTournament";
 import { Database } from "sqlite";
+import {
+  Round,
+  MatchResults,
+} from "../../../types/strategy/ITournamentBracketGenerator";
+import { createMatch } from "../matchMaking/createMatch";
 
 class TournamentManager {
   public tournamentId: string = randomUUID();
@@ -15,17 +20,21 @@ class TournamentManager {
   public gameModeType: GameModeType;
   public tournament: Tournament | undefined;
   public tournamentSize: number;
+  public gameManagerIdToTorunGameId: Map<string, string[]> = new Map();
+  public db: Database;
 
   constructor(
     tournamentConfigKey: TournamentConfigKey,
     userId: string,
     gameModeType: GameModeType,
     tournamentSize: number,
+    db: Database,
   ) {
     this.ownerId = userId;
     this.gameModeType = gameModeType;
     this.tournamentConfigKey = tournamentConfigKey;
     this.tournamentSize = tournamentSize;
+    this.db = db;
 
     const newMember: TournamentMember = {
       id: userId,
@@ -94,6 +103,7 @@ class TournamentManager {
 
     this.tournament = await createTournament(db, this);
     this.tournament.startTournament();
+    await this.generateRound();
   }
 
   public canTournamentBeStarted(): boolean {
@@ -103,9 +113,73 @@ class TournamentManager {
       throw new Error("Tournament is already started");
     if (this.tournament?.getStatus() === TournamentStatus.FINISHED)
       throw new Error("Tournament is already finished");
-    //if (this.allMembersAreConnected() === false)
-    // throw new Error("Not all members are connected");
+    if (this.allMembersAreConnected() === false)
+      // put this check of for testing
+      throw new Error("Not all members are connected");
     return true;
+  }
+
+  private async generateRound(): Promise<void> {
+    if (this.tournament === undefined)
+      return console.error("Tournament is not started");
+    const brackets = this.tournament.bracketManager.executeStrategy();
+    this.createMatches(brackets);
+  }
+
+  private async createMatches(brackets: Round): Promise<void> {
+    const bracketKeys = Object.keys(brackets);
+
+    for (let i = 0; i < bracketKeys.length; i++) {
+      const bracketKey = bracketKeys[i];
+      const bracket = brackets[bracketKey];
+      const playersOfMatch = this.getBracketResultsKeysArr(bracket.results);
+
+      const gameManagerId = await createMatch(
+        playersOfMatch,
+        this.gameModeType,
+        this.db,
+      );
+      this.sendGameManagerIdToPlayersOfMatch(gameManagerId, playersOfMatch);
+      this.addToGameManagerIdToTorunGameId(gameManagerId, bracketKey);
+    }
+  }
+
+  private sendGameManagerIdToPlayersOfMatch(
+    gameManagerId: string,
+    playersOfMatch: string[],
+  ): void {
+    for (const player of playersOfMatch) {
+      const member = this.tournamentMembers.get(player);
+      member?.webSocket?.send(
+        JSON.stringify({
+          type: "gameManagerId",
+          gameManagerId: gameManagerId,
+        }),
+      );
+    }
+  }
+
+  private getBracketResultsKeysArr(result: MatchResults): string[] {
+    const resultKeys = Object.keys(result);
+    const resultKeyArr: string[] = [];
+
+    for (let i = 0; i < resultKeys.length; i++) {
+      resultKeyArr.push(resultKeys[i]);
+    }
+    return resultKeyArr;
+  }
+
+  private addToGameManagerIdToTorunGameId(
+    gameManagerId: string,
+    tournamentGameId: string,
+  ): void {
+    const existingGameIds =
+      this.gameManagerIdToTorunGameId.get(tournamentGameId);
+    if (existingGameIds) {
+      existingGameIds.push(gameManagerId);
+    } else {
+      this.gameManagerIdToTorunGameId.set(tournamentGameId, [gameManagerId]);
+    }
   }
 
   public allMembersAreConnected(): boolean {
