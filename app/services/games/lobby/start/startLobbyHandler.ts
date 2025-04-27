@@ -1,4 +1,4 @@
-import type { FastifyRequest, FastifyReply } from "fastify";
+import { type FastifyRequest, type FastifyReply, fastify } from "fastify";
 import { validConnectionCheck } from "../lobbyVaidation/validConnectionCheck";
 import setLobbyStateToStart from "./setLobbyStateToStart";
 import gameManagerCreate from "./gameManagerCreate";
@@ -31,6 +31,7 @@ async function startLobbyHandler(
     lobby.sendMessageToAllMembers(
       JSON.stringify({ type: "gameStarted", data: newGameManager.getId }),
     );
+    request.server.customMetrics.countGameStarted();
     lobby.disconnectMembersFromSockets();
     return reply.code(200).send({ gameId: newGameManager.getId });
   } catch (error) {

@@ -178,6 +178,7 @@ async function updateRoomAndSendMessage(
     client.socket.send(JSON.stringify(response));
   }
 
+  fastify.customMetrics.countChatMsg(roomId);
   saveMessage(fastify, roomId, userId, message, type);
 }
 
