@@ -2,10 +2,7 @@ import { FastifyRequest, FastifyReply } from "fastify";
 import canTournamentBeCreatedCheck from "./canTournamentBeCreatedCheck";
 import TournamentManager from "../TournamentManager";
 import { gameModeFromString } from "../../../config/gameModes";
-import {
-  TOURNAMENT_CONFIGS_REGISTRY,
-  TournamentGameModes,
-} from "../../../../config";
+import { TournamentGameModes } from "../../../../config";
 import { tournamentConfigFromString } from "../../../config/tournamentConfig";
 
 // Store active tournaments
@@ -24,9 +21,6 @@ async function newTournamentHandler(
   try {
     const userId = request.userId;
     const tournamentSize = Number(request.params.tournamentSize);
-
-    canTournamentBeCreatedCheck(userId);
-
     const gameMode = gameModeFromString(
       request.params.gameModeName,
       TournamentGameModes,
@@ -35,21 +29,19 @@ async function newTournamentHandler(
       request.params.tournamentConfigName,
     );
 
-    if (gameMode === null || tournamentConfigKey === null)
-      return reply.notFound("Game mode or tournament config not found");
-
-    if (
-      TOURNAMENT_CONFIGS_REGISTRY[
-        tournamentConfigKey
-      ].possiblePlayerCount.includes(tournamentSize) === false
-    )
-      return reply.badRequest("Tournament size invalid");
-
-    const newTournament = new TournamentManager(
-      tournamentConfigKey,
+    canTournamentBeCreatedCheck(
       userId,
       gameMode,
       tournamentSize,
+      tournamentConfigKey,
+    );
+
+    const newTournament = new TournamentManager(
+      tournamentConfigKey!,
+      userId,
+      gameMode!,
+      tournamentSize,
+      request.server.sqlite,
     );
     tournaments.set(newTournament.tournamentId, newTournament);
 
