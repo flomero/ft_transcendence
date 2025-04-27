@@ -17,7 +17,9 @@ export function isIgnoreAuthUrl(url: string): boolean {
   return (
     url.startsWith("/login") ||
     url.startsWith("/public") ||
-    url.startsWith("/js")
+    url.startsWith("/js") ||
+    url.startsWith("/metrics") ||
+    url.startsWith("/health")
   );
 }
 
