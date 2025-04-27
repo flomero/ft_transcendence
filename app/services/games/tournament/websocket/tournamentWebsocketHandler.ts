@@ -1,7 +1,7 @@
 import { FastifyRequest } from "fastify";
 import { WebSocket } from "ws";
 import validTournamentConnectionCheck from "../tournamentValidation/validTournamentConnectionCheck";
-//import { tournaments } from "../new/newTournamentHandler";
+import { tournaments } from "../new/newTournamentHandler";
 
 async function tournamentWebsocketHandler(
   connection: WebSocket,
@@ -9,11 +9,12 @@ async function tournamentWebsocketHandler(
 ) {
   const tournamentId = request.params.tournamentId;
   const userId = request.userId;
-  //const tournament = tournaments.get(tournamentId);
+  const tournament = tournaments.get(tournamentId);
 
   try {
     connection.send(`Welcome to the tournament ${tournamentId}`);
     validTournamentConnectionCheck(userId, tournamentId);
+    tournament?.setMemberSocket(userId, connection);
   } catch (error) {
     if (error instanceof Error) {
       console.error(`Error in tournamentWebsocketHandler: ${error.message}`);
