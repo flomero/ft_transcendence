@@ -181,9 +181,10 @@ class GameManager {
     if (this.gameOrigin?.type === "lobby") {
       this.gameOrigin.lobby.setStateLobby = "open";
     }
-    if (this.gameOrigin?.type === "tournament")
+    if (this.gameOrigin?.type === "tournament") {
       const gameResult = this.createGameResult();
-    this.gameOrigin.tournament.notifyGameCompleted(this.id, gameResult);
+      this.gameOrigin.tournament.notifyGameCompleted(this.id, gameResult);
+    }
   }
 
   private createGameResult(): GameResult {
