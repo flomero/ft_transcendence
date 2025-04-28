@@ -9,6 +9,8 @@ import { Database } from "sqlite";
 import {
   Round,
   MatchResults,
+  GameResult,
+  Match,
 } from "../../../types/strategy/ITournamentBracketGenerator";
 import { createMatch } from "../matchMaking/createMatch";
 
@@ -22,6 +24,7 @@ class TournamentManager {
   public tournamentSize: number;
   public gameManagerIdToTorunGameId: Map<string, string[]> = new Map();
   public db: Database;
+  public gameMatches: Map<string, Match> = new Map();
 
   constructor(
     tournamentConfigKey: TournamentConfigKey,
@@ -133,6 +136,7 @@ class TournamentManager {
       const bracketKey = bracketKeys[i];
       const bracket = brackets[bracketKey];
       const playersOfMatch = this.getBracketResultsKeysArr(bracket.results);
+      this.gameMatches.set(bracketKey, bracket);
 
       const gameManagerId = await createMatch(
         playersOfMatch,
@@ -180,6 +184,91 @@ class TournamentManager {
     } else {
       this.gameManagerIdToTorunGameId.set(tournamentGameId, [gameManagerId]);
     }
+  }
+
+  public notifyGameCompleted(
+    gameManagerId: string,
+    gameResult: GameResult,
+  ): void {
+    const isMatchOver = this.notifyMatchWinnder(gameManagerId, gameResult);
+
+    if (isMatchOver === true) {
+      this.notifyBracketManager(gameResult, gameManagerId);
+    } else {
+      this.createOneGame(gameManagerId);
+    }
+  }
+
+  private notifyMatchWinnder(
+    gameManagerId: string,
+    gameResult: GameResult,
+  ): boolean {
+    const matchId = this.getInGameIdFromGameManagerId(gameManagerId);
+    if (matchId === undefined || this.tournament === undefined)
+      throw new Error(
+        `[notifyMatchWinner] GameManagerId: ${gameManagerId} does not exist`,
+      );
+
+    const isMatchOver = this.tournament?.matchWinnerManager.executeStrategy(
+      matchId,
+      gameResult,
+    );
+    return isMatchOver;
+  }
+
+  private notifyBracketManager(
+    gameResult: GameResult,
+    gameManagerId: string,
+  ): void {
+    const matchId = this.getInGameIdFromGameManagerId(gameManagerId);
+    if (matchId === undefined || this.tournament === undefined)
+      throw new Error(
+        `[notifyBracketManager] GameManagerId: ${gameManagerId} does not exist`,
+      );
+
+    const isRoundOver = this.tournament?.bracketManager.execute(
+      "notifyGameCompleted",
+      matchId,
+      gameResult,
+    );
+
+    if (isRoundOver === true) this.generateRound();
+  }
+
+  private getInGameIdFromGameManagerId(
+    gameManagerId: string,
+  ): string | undefined {
+    for (const [
+      tournamentGameId,
+      gameManagerIds,
+    ] of this.gameManagerIdToTorunGameId.entries()) {
+      if (gameManagerIds.includes(gameManagerId)) {
+        return tournamentGameId;
+      }
+    }
+    return undefined;
+  }
+
+  private async createOneGame(gameManagerId: string) {
+    const matchId = this.getInGameIdFromGameManagerId(gameManagerId);
+    if (matchId === undefined) {
+      throw new Error(
+        `[craeteMatch] Match with ID ${gameManagerId} does not exist`,
+      );
+    }
+    const matchOptions = this.gameMatches.get(matchId);
+    if (matchOptions === undefined) {
+      throw new Error(`[createMatch] Match with ID ${matchId} does not exist`);
+    }
+
+    const playersOfMatch = this.getBracketResultsKeysArr(matchOptions.results);
+    const newGameManagerId = await createMatch(
+      playersOfMatch,
+      this.gameModeType,
+      this.db,
+    );
+    this.sendGameManagerIdToPlayersOfMatch(newGameManagerId, playersOfMatch);
+    this.addToGameManagerIdToTorunGameId(newGameManagerId, matchId);
   }
 
   public allMembersAreConnected(): boolean {

@@ -33,7 +33,7 @@ export class Tournament {
     "nextRound"
   >;
 
-  protected matchWinnerManager: StrategyManager<
+  public matchWinnerManager: StrategyManager<
     ITournamentMatchWinner,
     "recordGameResult"
   >;
