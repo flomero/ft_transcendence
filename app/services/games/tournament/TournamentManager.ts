@@ -13,6 +13,7 @@ import {
   Match,
 } from "../../../types/strategy/ITournamentBracketGenerator";
 import { createMatch } from "../matchMaking/createMatch";
+import { GameOrigin } from "../../../types/games/gameHandler/GameOrigin";
 
 class TournamentManager {
   public tournamentId: string = randomUUID();
@@ -116,9 +117,9 @@ class TournamentManager {
       throw new Error("Tournament is already started");
     if (this.tournament?.getStatus() === TournamentStatus.FINISHED)
       throw new Error("Tournament is already finished");
-    if (this.allMembersAreConnected() === false)
-      // put this check of for testing
-      throw new Error("Not all members are connected");
+    //    if (this.allMembersAreConnected() === false)
+    // put this check of for testing
+    //      throw new Error("Not all members are connected");
     return true;
   }
 
@@ -137,11 +138,16 @@ class TournamentManager {
       const bracket = brackets[bracketKey];
       const playersOfMatch = this.getBracketResultsKeysArr(bracket.results);
       this.gameMatches.set(bracketKey, bracket);
+      const gameOrigin: GameOrigin = {
+        type: "tournament",
+        tournament: this,
+      };
 
       const gameManagerId = await createMatch(
         playersOfMatch,
         this.gameModeType,
         this.db,
+        gameOrigin,
       );
       this.sendGameManagerIdToPlayersOfMatch(gameManagerId, playersOfMatch);
       this.addToGameManagerIdToTorunGameId(gameManagerId, bracketKey);
@@ -262,10 +268,15 @@ class TournamentManager {
     }
 
     const playersOfMatch = this.getBracketResultsKeysArr(matchOptions.results);
+    const gameOrigin: GameOrigin = {
+      type: "tournament",
+      tournament: this,
+    };
     const newGameManagerId = await createMatch(
       playersOfMatch,
       this.gameModeType,
       this.db,
+      gameOrigin,
     );
     this.sendGameManagerIdToPlayersOfMatch(newGameManagerId, playersOfMatch);
     this.addToGameManagerIdToTorunGameId(newGameManagerId, matchId);
