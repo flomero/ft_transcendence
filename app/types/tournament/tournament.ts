@@ -34,6 +34,7 @@ export interface Match {
 export interface Round {
   name: string;
   matches: Match[];
+  isCurrent?: boolean; // Optional flag to indicate if this is the current round
 }
 
 export type Edge = [string, string] | [string, string, number];

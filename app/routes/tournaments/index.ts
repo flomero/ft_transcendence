@@ -105,6 +105,7 @@ const profile: FastifyPluginAsync = async (fastify) => {
             previousRoundInfo: "Winner of Semifinal 1 vs Winner of Semifinal 2",
           },
         ],
+        isCurrent: true,
       },
       {
         name: "Final",
