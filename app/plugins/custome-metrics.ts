@@ -30,14 +30,12 @@ export default fp(async (fastify: FastifyInstance) => {
 
   const newUserCounter = new Counter({
     name: "new_user_total",
-    help: "Total number of new USers",
-    labelNames: ["status"],
+    help: "Total number of new users",
   });
 
   const chatMsgCounter = new Counter({
     name: "chat_msg_total",
-    help: "Total number of chat msg send",
-    labelNames: ["roomId"],
+    help: "Total number of chat messages sent",
   });
 
   const gameStartedCounter = new Counter({

@@ -1,7 +1,7 @@
 apiVersion: 1
 
 providers:
-  - name: 'Custome Fastify Dashboards'
+  - name: 'Custom Fastify Dashboards'
     orgId: 1
     type: file
     disableDeletion: false
