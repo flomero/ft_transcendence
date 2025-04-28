@@ -4,14 +4,24 @@ import {
   LobbyGameModes,
 } from "../../config";
 
+export type GameModeType =
+  | MatchmakingGameModes
+  | LobbyGameModes
+  | TournamentGameModes;
+export type GameModeEnumType =
+  | typeof MatchmakingGameModes
+  | typeof LobbyGameModes
+  | typeof TournamentGameModes;
+
 export const gameModeFromString = (
   gameModeString: string,
-): MatchmakingGameModes | null => {
-  const gameMode = Object.values(MatchmakingGameModes).find(
+  gameModeEnum: GameModeEnumType,
+): GameModeType | null => {
+  const gameMode = Object.values(gameModeEnum).find(
     (mode) => mode.toLowerCase() === gameModeString.toLowerCase(),
   );
   if (gameMode === undefined) return null;
-  return gameMode as MatchmakingGameModes;
+  return gameMode as GameModeType;
 };
 
 export const getMatchmakingGameModes = (): MatchmakingGameModes[] => {

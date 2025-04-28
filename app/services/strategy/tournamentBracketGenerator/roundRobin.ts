@@ -40,15 +40,12 @@ export class RoundRobin implements ITournamentBracketGenerator {
   constructor(tournamentData: Record<string, any>) {
     this.tournamentData = tournamentData;
 
-    console.log("Tournament data:");
-    console.dir(this.tournamentData);
-
     this.gamesCount =
       STRATEGY_REGISTRY.tournamentBracketGenerator[this.name].gamesCount;
 
     // Generate match schedule based on number positions (0, 1, 2, ...)
     const numericMatches = this.generateMatchSchedule(
-      this.tournamentData.playerCount,
+      this.tournamentData.players.length,
       this.tournamentData.gameData.playerCount,
     );
 
@@ -81,9 +78,6 @@ export class RoundRobin implements ITournamentBracketGenerator {
 
     // Randomize the rounds
     this.possibleRounds = this.rng.randomArray(playerRounds);
-
-    console.log("Rounds:");
-    console.dir(this.possibleRounds, { depth: null });
   }
 
   nextRound(): Round {
