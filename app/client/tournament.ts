@@ -12,7 +12,6 @@ declare global {
     __CONNECTIONS__: Connections;
     tournamentBracket?: TournamentBracket;
     drawTournamentLines?: () => void;
-
     TournamentBracket: typeof TournamentBracket;
   }
 }
@@ -23,6 +22,7 @@ class TournamentBracket {
   private edges: Edge[];
   private svg: SVGSVGElement;
   private bracket: HTMLElement;
+  private timerInterval: number | null = null;
 
   constructor() {
     this.rounds = window.__ROUNDS__;
@@ -48,7 +48,7 @@ class TournamentBracket {
       currentMatches.forEach((match, i) => {
         const target = nextMatches[Math.floor(i / 2)];
         if (match.id && target.id) {
-          list.push([match.id, target.id]); // no offset (defaults to 0)
+          list.push([match.id, target.id]);
         } else {
           console.error("Match or target ID is undefined", { match, target });
         }
@@ -57,15 +57,55 @@ class TournamentBracket {
     return list;
   }
 
+  private updateElapsedTime(element: Element) {
+    const startTime = element.getAttribute("data-start");
+    if (!startTime) return;
+
+    const start = new Date(startTime).getTime();
+    const now = new Date().getTime();
+    const diffInSeconds = Math.floor((now - start) / 1000);
+    const hours = Math.floor(diffInSeconds / 3600);
+    const minutes = Math.floor((diffInSeconds % 3600) / 60);
+    const seconds = diffInSeconds % 60;
+
+    const formattedHours = hours > 0 ? `${hours}h ` : "";
+    const formattedMinutes = minutes > 0 ? `${minutes}m ` : "";
+    const formattedSeconds = `${seconds}s`;
+
+    element.textContent = `${formattedHours}${formattedMinutes}${formattedSeconds}`;
+  }
+
+  private startLiveTimers() {
+    const updateAllTimers = () => {
+      document
+        .querySelectorAll(".elapsed-time")
+        .forEach((element) => this.updateElapsedTime(element));
+    };
+
+    // Clear existing interval if any
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+    }
+
+    // Update every second
+    this.timerInterval = window.setInterval(updateAllTimers, 1000);
+    // Initial update
+    updateAllTimers();
+  }
+
   private init(): void {
     this.drawLines();
     window.addEventListener("resize", this.drawLines);
     window.drawTournamentLines = this.drawLines;
+    this.startLiveTimers();
   }
 
   public destroy(): void {
     window.removeEventListener("resize", this.drawLines);
     window.drawTournamentLines = undefined;
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+    }
   }
 
   private drawLines(): void {

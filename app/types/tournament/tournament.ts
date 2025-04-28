@@ -16,10 +16,19 @@ export interface Player {
   results?: number[]; // Optional results for the player
 }
 
+export enum MatchStatus {
+  NOT_STARTED = "NOT_STARTED",
+  ONGOING = "ONGOING",
+  COMPLETED = "COMPLETED",
+}
+
 export interface Match {
   id?: string; // Assigned dynamically
   name?: string; // Optional name for the match
   players: Player[];
+  status: MatchStatus;
+  startTime?: string; // ISO date string for match start time
+  previousRoundInfo?: string; // Info about previous matches for NOT_STARTED matches
 }
 
 export interface Round {

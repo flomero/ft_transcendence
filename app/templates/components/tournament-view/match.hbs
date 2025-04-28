@@ -24,23 +24,32 @@
 
 <div id="{{match.id}}"
      class="match border bg-black-200 mt-2 mb-2 p-2 rounded-lg">
-<!--  <h3 class="match-name font-bold text-lg">{{match.name}}</h3>-->
-  <ul class="players-list mt-2">
-    {{#each match.players as |player|}}
-      <li>
-        <a
-          href="/users/{{player.userId}}"
-          class="reusable-item"
-          style="--hover-bg-color: #e2e8f0; /* Custom hover color */
-           --focus-bg-color: #e2e8f0; /* Custom focus color */
-           --focus-ring-color: rgba(148, 163, 184, 0.4);">
-          <span class="w-2 text-right">{{inc @index}}.</span>
-          <span class="player-name">{{player.name}}</span>
-          {{#if player.score}}
-            <span class="player-score text-gray-500">{{player.score}}</span>
-          {{/if}}
-        </a>
-      </li>
-    {{/each}}
-  </ul>
+  {{#if (eq match.status "COMPLETED")}}
+    <ul class="players-list mt-2">
+      {{#each match.players as |player|}}
+        <li>
+          <a
+            href="/users/{{player.userId}}"
+            class="reusable-item"
+            style="--hover-bg-color: #e2e8f0; /* Custom hover color */
+         --focus-bg-color: #e2e8f0; /* Custom focus color */
+         --focus-ring-color: rgba(148, 163, 184, 0.4);">
+            <span class="w-2 text-right">{{inc @index}}.</span>
+            <span class="player-name">{{player.name}}</span>
+            {{#if player.score}}
+              <span class="player-score text-gray-500">{{player.score}}</span>
+            {{/if}}
+          </a>
+        </li>
+      {{/each}}
+    </ul>
+
+  {{else if (eq match.status "ONGOING")}}
+    <h3>In Progress</h3>
+    <p>Started at: {{formatDate match.startTime "HH:mm"}}</p>
+    <p>Duration: <span class="elapsed-time" data-start="{{match.startTime}}"></span></p>
+  {{else}}
+    <h3>Not Started</h3>
+    <p>From: {{match.previousRoundInfo}}</p>
+  {{/if}}
 </div>
