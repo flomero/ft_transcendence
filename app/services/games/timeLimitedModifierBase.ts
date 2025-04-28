@@ -16,7 +16,7 @@ export abstract class TimeLimitedModifierBase extends ModifierBase {
 
   // Triggered events
   onUpdate(game: GameBase): void {
-    if (this.duration < 0 || this.status !== ModifierStatus.ACTIVE) return;
+    if (this.status !== ModifierStatus.ACTIVE) return;
 
     this.ticks--;
     if (this.ticks <= 0) this.deactivate(game);
@@ -25,5 +25,13 @@ export abstract class TimeLimitedModifierBase extends ModifierBase {
   // Getters & Setters
   setDuration(duration: number): void {
     this.duration = duration;
+  }
+
+  getState(): Record<string, any> {
+    return {
+      ...super.getState(),
+      ticks: this.ticks,
+      duration: this.duration,
+    };
   }
 }

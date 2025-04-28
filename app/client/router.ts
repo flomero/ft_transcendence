@@ -1,5 +1,6 @@
 import { TransitionManager } from "./transitions.js";
 import LobbyHandler from "./lobby.js";
+import TournamentBracket from "./tournament.js";
 import MatchmakingHandler from "./matchmaking.js";
 import { initPongGame, type PongGame } from "./pong.js";
 
@@ -20,6 +21,7 @@ declare global {
     lobbyHandler: LobbyHandler;
     MatchmakingHandler: typeof MatchmakingHandler;
     matchmakingHandler: MatchmakingHandler;
+    // TournamentBracket: TournamentBracket | undefined
   }
 }
 
@@ -27,8 +29,8 @@ class Router {
   private routes: Record<string, RouteHandler>;
   private contentContainer: HTMLElement;
   private transitionManager: TransitionManager;
-  private currentPath: string = "";
-  private isInitialLoad: boolean = true;
+  private currentPath = "";
+  private isInitialLoad = true;
 
   constructor() {
     this.routes = {};
@@ -248,7 +250,12 @@ class Router {
 
   async fetchContent(path: string): Promise<string | null> {
     try {
-      const response = await fetch(`${path}?partial=true`, {
+      const url = new URL(path, window.location.origin);
+
+      /* add or overwrite the “partial” flag */
+      url.searchParams.set("partial", "true");
+
+      const response = await fetch(url.toString(), {
         headers: { "X-Requested-With": "XMLHttpRequest" },
         redirect: "follow",
       });
@@ -411,6 +418,32 @@ document.addEventListener("DOMContentLoaded", () => {
         if (window.lobbyHandler.socket) {
           window.lobbyHandler.socket.close();
         }
+      }
+    },
+  });
+
+  window.router.addRoute("/tournaments?auto=false", {
+    onEnter: () => {
+      console.log("Tournament");
+      window.tournamentBracket = new TournamentBracket();
+    },
+    onExit: () => {
+      if (window.tournamentBracket) {
+        window.tournamentBracket.destroy();
+        window.tournamentBracket = undefined;
+      }
+    },
+  });
+
+  window.router.addRoute("/tournaments", {
+    onEnter: () => {
+      console.log("Tournament");
+      window.tournamentBracket = new TournamentBracket();
+    },
+    onExit: () => {
+      if (window.tournamentBracket) {
+        window.tournamentBracket.destroy();
+        window.tournamentBracket = undefined;
       }
     },
   });

@@ -1,6 +1,6 @@
-import { GameBase } from "../../gameBase";
+import type { GameBase } from "../../gameBase";
 import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
-import { GameSettings } from "../../../../interfaces/games/lobby/GameSettings";
+import type { GameSettings } from "../../../../interfaces/games/lobby/GameSettings";
 import { getLobby } from "../lobbyWebsocket/getLobby";
 
 function createNewGameClass(lobbyId: string): GameBase {

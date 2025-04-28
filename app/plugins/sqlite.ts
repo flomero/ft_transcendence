@@ -1,6 +1,6 @@
 import sqlite3 from "sqlite3";
 import fp from "fastify-plugin";
-import { open, Database } from "sqlite";
+import { open, type Database } from "sqlite";
 import path from "path";
 import createAIOpponents from "../services/games/aiOpponent/createAIOpponents";
 
@@ -17,7 +17,7 @@ declare module "fastify" {
 }
 
 export default fp(async (fastify) => {
-  const dbPath = path.resolve(__dirname, "../../database/db.sqlite");
+  const dbPath = fastify.config.DB_PATH;
   const db: Database = await open({
     filename: dbPath,
     driver: sqlite3.Database,

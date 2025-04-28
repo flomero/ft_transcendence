@@ -6,8 +6,9 @@ import {
   GAME_REGISTRY,
   type GameModeCombinedSettings,
 } from "../../../../types/games/gameRegistry";
-import { IPongBallResetSampler } from "../../../../types/strategy/IPongBallResetSampler";
+import type { IPongBallResetSampler } from "../../../../types/strategy/IPongBallResetSampler";
 import { StrategyManager } from "../../../strategy/strategyManager";
+import { pongUserInputs } from "../../../../types/games/userInput";
 
 export class ClassicPong extends Pong {
   name = "classicPong";
@@ -134,6 +135,12 @@ export class ClassicPong extends Pong {
         doMove: true,
         isVisible: true,
         maxDisplacement: maxDisplacement,
+        doRotation: true,
+        keyPressed: {
+          ...Object.fromEntries(
+            Object.keys(pongUserInputs).map((key) => [key, false]),
+          ),
+        },
       } as Paddle,
 
       // RIGHT PADDLE
@@ -165,6 +172,12 @@ export class ClassicPong extends Pong {
         doMove: true,
         isVisible: true,
         maxDisplacement: maxDisplacement,
+        doRotation: true,
+        keyPressed: {
+          ...Object.fromEntries(
+            Object.keys(pongUserInputs).map((key) => [key, false]),
+          ),
+        },
       } as Paddle,
     ];
   }
@@ -175,19 +188,20 @@ export class ClassicPong extends Pong {
       {
         doCollision: true,
         id: 0,
-        x: 0.0,
+        x: -this.settings.wallsHeight / 2.0,
         y: this.settings.arenaHeight / 2.0,
         alpha: Math.PI,
         dx: 0.0,
         dy: -1.0,
         nx: 1.0,
         ny: 0.0,
-        absX: 0.0,
+        absX: -this.settings.wallsHeight / 2.0,
         absY: this.settings.arenaHeight / 2.0,
-        width: this.settings.arenaHeight,
+        width: this.settings.arenaHeight + this.settings.wallsHeight * 2,
         height: this.settings.wallsHeight,
         isVisible: true,
         isGoal: true,
+        doRotation: true,
       } as Rectangle,
 
       // UP WALL
@@ -195,37 +209,39 @@ export class ClassicPong extends Pong {
         doCollision: true,
         id: 1,
         x: this.settings.arenaWidth / 2.0,
-        y: 0.0,
+        y: -this.settings.wallsHeight / 2.0,
         alpha: (3.0 * Math.PI) / 2.0,
         dx: 1.0,
         dy: 0.0,
         nx: 0.0,
         ny: 1.0,
         absX: this.settings.arenaWidth / 2.0,
-        absY: 0.0,
-        width: this.settings.arenaWidth,
+        absY: -this.settings.wallsHeight / 2.0,
+        width: this.settings.arenaWidth + this.settings.wallsHeight * 2,
         height: this.settings.wallsHeight,
         isVisible: true,
         isGoal: false,
+        doRotation: true,
       } as Rectangle,
 
       // RIGHT WALL
       {
         doCollision: true,
         id: 2,
-        x: this.settings.arenaWidth,
+        x: this.settings.arenaWidth + this.settings.wallsHeight / 2.0,
         y: this.settings.arenaHeight / 2.0,
         alpha: 0.0,
         dx: 0.0,
         dy: 1.0,
         nx: -1.0,
         ny: 0.0,
-        absX: this.settings.arenaWidth,
+        absX: this.settings.arenaWidth + this.settings.wallsHeight / 2.0,
         absY: this.settings.arenaHeight / 2.0,
-        width: this.settings.arenaHeight,
+        width: this.settings.arenaHeight + this.settings.wallsHeight * 2,
         height: this.settings.wallsHeight,
         isVisible: true,
         isGoal: true,
+        doRotation: true,
       } as Rectangle,
 
       // DOWN WALL
@@ -233,18 +249,19 @@ export class ClassicPong extends Pong {
         doCollision: true,
         id: 3,
         x: this.settings.arenaWidth / 2.0,
-        y: this.settings.arenaHeight,
+        y: this.settings.arenaHeight + this.settings.wallsHeight / 2.0,
         alpha: Math.PI / 2.0,
         dx: -1.0,
         dy: 0.0,
         nx: 0.0,
         ny: -1.0,
         absX: this.settings.arenaWidth / 2.0,
-        absY: this.settings.arenaHeight,
-        width: this.settings.arenaWidth,
+        absY: this.settings.arenaHeight + this.settings.wallsHeight / 2.0,
+        width: this.settings.arenaWidth + this.settings.wallsHeight * 2,
         height: this.settings.wallsHeight,
         isVisible: true,
         isGoal: false,
+        doRotation: true,
       } as Rectangle,
     ];
   }
@@ -298,7 +315,7 @@ export class ClassicPong extends Pong {
   }
 
   isOutOfBounds(ball: Ball): boolean {
-    const tolerance: number = 0; //this.settings.wallsHeight / 2.0;
+    const tolerance: number = -this.settings.wallsHeight / 4.0;
 
     return (
       ball.x <= -tolerance ||

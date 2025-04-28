@@ -1,3 +1,4 @@
+import type { MatchmakingGameModes } from "../../../config";
 import type MemberMatchMaking from "../../../interfaces/games/matchMaking/MemberMatchMaking";
 import type WebSocket from "ws";
 import { GameModeType } from "../../config/gameModes";

@@ -2,7 +2,7 @@ import type { Rectangle } from "../../../../types/games/pong/rectangle";
 import { TimeLimitedModifierBase } from "../../timeLimitedModifierBase";
 import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
 import { ModifierActivationMode } from "../../modifierBase";
-import { Pong } from "../pong";
+import type { Pong } from "../pong";
 
 export class Bumper extends TimeLimitedModifierBase {
   name = "bumper";
@@ -115,6 +115,10 @@ export class Bumper extends TimeLimitedModifierBase {
   }
 
   onActivation(game: Pong): void {
+    this.createBumperWalls(game);
+  }
+
+  protected createBumperWalls(game: Pong) {
     const gameState = game.getState();
     if (gameState.balls.length === 0) {
       this.deactivate(game);
@@ -126,15 +130,16 @@ export class Bumper extends TimeLimitedModifierBase {
     const junctionDistanceFromCenter =
       (this.bumperJunctionDistanceFromCenter * game.getSettings().arenaHeight) /
       2.0;
-    const wallJunctionDistance =
-      this.bumperWallJunctionDistance * game.getState().walls[1].width;
 
-    Array.from({ length: gameState.playerCount }).forEach((_, index) => {
-      const wallID = 2 * index + 1;
-      const wall = gameState.walls[wallID];
+    // Array.from({ length: gameState.playerCount }).forEach((_, index) => {
+    //   const wallID = 2 * index + 1;
+    gameState.walls.forEach((wall, index) => {
+      // const wall = gameState.walls[wallID];
+      if (index % 2 === 0 && !game.isEliminated(index / 2)) return;
       const ca = parseFloat(Math.cos(wall.alpha).toFixed(3));
       const sa = parseFloat(Math.sin(wall.alpha).toFixed(3));
 
+      const wallJunctionDistance = this.bumperWallJunctionDistance * wall.width;
       // Calculate junction point for the bumpers
       const junctionX = wall.x - junctionDistanceFromCenter * ca;
       const junctionY = wall.y - junctionDistanceFromCenter * sa;
@@ -183,6 +188,7 @@ export class Bumper extends TimeLimitedModifierBase {
         height: wall.height, // Same height as the original wall
         alpha: leftAngle,
         isVisible: true,
+        doRotation: true,
       };
 
       // 'RIGHT' BUMPER - Fixed the angle calculation
@@ -217,6 +223,7 @@ export class Bumper extends TimeLimitedModifierBase {
         height: wall.height, // Same height as the original wall
         alpha: rightAngle,
         isVisible: true,
+        doRotation: true,
       };
 
       // Add both bumpers to the bumpers array
@@ -232,13 +239,17 @@ export class Bumper extends TimeLimitedModifierBase {
     if (!isBumper) return;
 
     // Add velocity (clamped to max)
-    this.velocityFactor += Math.min(
-      this.bumperVelocityFactor,
+    this.velocityFactor = Math.min(
+      this.velocityFactor + this.bumperVelocityFactor,
       this.bumperMaxVelocityFactor,
     );
   }
 
   onUpdate(game: Pong): void {
+    if (this.ticks <= 0) {
+      this.deactivate(game);
+      return;
+    }
     super.onUpdate(game);
 
     if (game.getState().balls.length === 0) return;
@@ -266,5 +277,18 @@ export class Bumper extends TimeLimitedModifierBase {
   onGoal(game: Pong, args: { playerId: number }): void {
     // On goal reset the currently stored velocityFactor
     this.velocityFactor = 0.0;
+  }
+
+  onArenaModification(game: Pong): void {
+    if (game.getState().walls.length > 0) {
+      this.bumpers.forEach((bumperWall) => {
+        const wallID = game.getState().walls.indexOf(bumperWall);
+        if (wallID < 0) return;
+        game.getState().walls.splice(wallID, 1);
+      });
+      this.bumpers = [];
+    }
+
+    this.createBumperWalls(game);
   }
 }

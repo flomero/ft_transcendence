@@ -35,13 +35,13 @@
       let ratio = 0.0;
       let playerCount = 2;
 
-      const gameModeName = "classicPong";
+      const gameModeName = "multiplayerPong";
 
       if (gameModeName === "multiplayerPong") {
         canvas.width = 800;
         canvas.height = 800;
         ratio = canvas.width / 100.0;
-        playerCount = 7;
+        playerCount = 8;
       } else if (gameModeName === "classicPong") {
         canvas.width = 800;
         canvas.height = 400;
@@ -61,16 +61,16 @@
             options: {
               gameName: "pong",
               gameModeName: gameModeName,
-              gameModeConfig: {},
+              gameModeConfig: {
+                powerUpRadius: 50,
+              },
               modifierNames: {
                 timedStart: {},
                 timedGame: {
                   duration: 360,
                 },
-                scoredGame: {
-                  threshold: 7,
-                },
-                survivalGame: {},
+                elimination: { threshold: 11 },
+                arenaShrink: {},
                 goalReset: {},
                 powerUpSpawner: {
                   meanDelay: 10,
@@ -78,11 +78,7 @@
                 },
               },
               powerUpNames: {
-                speedBoost: {},
-                blinkingBall: {},
-                multiBall: {},
                 bumper: {},
-                shooter: {},
               },
               playerCount: playerCount,
             },
@@ -128,8 +124,8 @@
           },
         };
 
-        if (event.key === "ArrowUp" || event.key === "ArrowDown")
-          action.options.type = "STOP";
+        if (event.key === "ArrowUp") action.options.type = "STOP_UP";
+        if (event.key === "ArrowDown") action.options.type = "STOP_DOWN";
         if (event.key === " ") action.options.type = "STOP_SPACE";
 
         if (action.options.type) {
@@ -149,6 +145,7 @@
           socket.send(JSON.stringify({ type: "gameStart" }));
         } else if (data.type === "gameState") {
           gameState = data.data;
+          console.log(gameState);
           lastUpdateTime = performance.now();
         } else if (data.type === "error") {
           console.error("Server error:", data.message);

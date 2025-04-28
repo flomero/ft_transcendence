@@ -5,13 +5,10 @@ import { deleteBlockedUser } from "../../../services/database/friend/block";
 const blockUserRoutes: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.post("/:userId", async (request, reply) => {
     const { userId } = request.params as { userId: string };
-    if (!userId) {
-      return reply.badRequest("User ID required");
-    }
+    if (!userId) return reply.badRequest("User ID required");
 
-    if (userId === request.userId) {
+    if (userId === request.userId)
       return reply.badRequest("Cannot block yourself");
-    }
 
     try {
       await blockUser(fastify, request.userId, userId);
@@ -24,16 +21,12 @@ const blockUserRoutes: FastifyPluginAsync = async (fastify): Promise<void> => {
 
   fastify.delete("/:userId", async (request, reply) => {
     const { userId } = request.params as { userId: string };
-    if (!userId) {
-      return reply.badRequest("User ID required");
-    }
+    if (!userId) return reply.badRequest("User ID required");
 
     try {
       const changes = (await deleteBlockedUser(fastify, request.userId, userId))
         .changes;
-      if (changes === 0) {
-        return reply.badRequest("User not blocked");
-      }
+      if (changes === 0) return reply.badRequest("User not blocked");
     } catch (error) {
       return reply.badRequest("Error unblocking user");
     }

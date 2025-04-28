@@ -1,20 +1,13 @@
-import { Pong } from "../pong";
-import { Rectangle } from "../../../../types/games/pong/rectangle";
+import type { Pong } from "../pong";
+import type { Rectangle } from "../../../../types/games/pong/rectangle";
 import { ModifierBase } from "../../modifierBase";
-
-const coefficients: { [playerCount: number]: number } = {
-  5: 3.1,
-  6: 2.4,
-  7: 1.5,
-  8: 1.31,
-};
 
 export class ArenaShrink extends ModifierBase {
   name = "arenaShrink";
 
   shrunkIds: number[] = [];
 
-  onPlayerElimination(game: Pong, args: { playerId: number }): void {
+  onResultUpdate(game: Pong, args: { playerId: number }): void {
     const gameState = game.getState();
     const arenaRadius =
       game.getSettings().arenaRadius || game.getSettings().arenaWidth / 2.0;
@@ -56,15 +49,6 @@ export class ArenaShrink extends ModifierBase {
     shrunkWall["absY"] = (leftmost["absY"] + rightmost["absY"]) / 2.0;
     shrunkWall["isGoal"] = false;
 
-    // If a non-goal wall is surrounded by 2 players that got eliminated, hide it.
-    // Check whether adjacent players are eliminated
-    const adjacentPlayerStatus = [-1, 1].filter((offset) => {
-      const index =
-        (args.playerId + offset + gameState.playerCount) %
-        gameState.playerCount;
-      return gameState.results[index] !== 0;
-    });
-
     if (!this.shrunkIds.includes(wallIds[0])) {
       gameState.walls[wallIds[0]].width /= 2.0;
       gameState.walls[wallIds[0]].x +=
@@ -89,48 +73,111 @@ export class ArenaShrink extends ModifierBase {
       this.shrunkIds.push(wallIds[2]);
     }
 
-    // Process walls when adjacent players are eliminated
-    for (const adjacent of adjacentPlayerStatus) {
-      // Get the adjacent player's ID
-      const adjacentPlayerId =
-        (args.playerId + adjacent + gameState.playerCount) %
+    // If a non-goal wall is surrounded by 2 players that got eliminated, hide it.
+    // Check whether adjacent players are eliminated
+    const adjacentPlayerStatus = [-1, 1].filter((offset) => {
+      const index =
+        (args.playerId + offset + gameState.playerCount) %
         gameState.playerCount;
+      return gameState.results[index] !== 0;
+    });
 
-      // Get the main walls (even IDs) of the current player and adjacent player
-      const currentMainWallId = args.playerId * 2;
-      const adjacentMainWallId = adjacentPlayerId * 2;
-
-      // Get the wall between them (odd ID)
-      const connectingWallId =
-        (2 * args.playerId + adjacent + 2 * gameState.playerCount) %
+    adjacentPlayerStatus.forEach((id) => {
+      const adjacentWallID =
+        (wallIds[1] + id + 2 * gameState.playerCount) %
         (2 * gameState.playerCount);
 
-      const currentMainWall = gameState.walls[currentMainWallId];
-      const adjacentMainWall = gameState.walls[adjacentMainWallId];
-      const connectingWall = gameState.walls[connectingWallId];
+      // Along direction
+      gameState.walls[adjacentWallID].x +=
+        (id *
+          gameState.walls[adjacentWallID].dx *
+          gameState.walls[adjacentWallID].width) /
+        2.0;
+      gameState.walls[adjacentWallID].y +=
+        (id *
+          gameState.walls[adjacentWallID].dy *
+          gameState.walls[adjacentWallID].width) /
+        2.0;
 
-      const angleDiff = Math.abs(currentMainWall.alpha - connectingWall.alpha);
+      // Along normal
+      gameState.walls[adjacentWallID].x +=
+        (gameState.walls[adjacentWallID].nx *
+          gameState.walls[adjacentWallID].width) /
+        2.0;
+      gameState.walls[adjacentWallID].y +=
+        (gameState.walls[adjacentWallID].ny *
+          gameState.walls[adjacentWallID].width) /
+        2.0;
+    });
 
-      const widthDiff = (Math.cos(angleDiff) * connectingWall.width) / 2.0;
-      const normalDiff = connectingWall.height / Math.cos(angleDiff);
+    this.updateWalls(game);
+    game.getModifierManager().trigger("onArenaModification");
+  }
 
-      currentMainWall.width -=
-        (widthDiff * coefficients[gameState.playerCount]) / 2.0;
-      currentMainWall.x -= (adjacent * currentMainWall.dx * widthDiff) / 2.0;
-      currentMainWall.y -= (adjacent * currentMainWall.dy * widthDiff) / 2.0;
+  protected updateWalls(game: Pong) {
+    const walls = game
+      .getState()
+      .walls.slice(0, 2 * game.getState().playerCount);
+    const totalWalls = walls.length;
 
-      adjacentMainWall.width -=
-        (widthDiff * coefficients[gameState.playerCount]) / 2.0;
-      adjacentMainWall.x += (adjacent * adjacentMainWall.dx * widthDiff) / 2.0;
-      adjacentMainWall.y += (adjacent * adjacentMainWall.dy * widthDiff) / 2.0;
+    // Only process even-indexed walls
+    for (let i = 0; i < totalWalls; i += 2) {
+      const currentWall = walls[i];
 
-      // Adjust the connecting wall position to create a continuous barrier
-      connectingWall.x +=
-        adjacent * ((connectingWall.dx * connectingWall.width) / 2.0) +
-        connectingWall.nx * coefficients[gameState.playerCount] * normalDiff;
-      connectingWall.y +=
-        adjacent * ((connectingWall.dy * connectingWall.width) / 2.0) +
-        connectingWall.ny * coefficients[gameState.playerCount] * normalDiff;
+      // Get the wall before and after (odd-indexed walls that remain fixed)
+      const prevWallIndex = (i - 1 + totalWalls) % totalWalls;
+      const nextWallIndex = (i + 1) % totalWalls;
+
+      const prevWall = walls[prevWallIndex];
+      const nextWall = walls[nextWallIndex];
+
+      // Get the corners of the fixed odd walls that we need to connect to
+      // For prevWall, we need its bottom-right corner (+direction, -normal)
+      const prevWallCorner = {
+        x:
+          prevWall.x +
+          (prevWall.dx * prevWall.width) / 2 -
+          (prevWall.nx * prevWall.height) / 2,
+        y:
+          prevWall.y +
+          (prevWall.dy * prevWall.width) / 2 -
+          (prevWall.ny * prevWall.height) / 2,
+      };
+
+      // For nextWall, we need its bottom-left corner (-direction, -normal)
+      const nextWallCorner = {
+        x:
+          nextWall.x -
+          (nextWall.dx * nextWall.width) / 2 -
+          (nextWall.nx * nextWall.height) / 2,
+        y:
+          nextWall.y -
+          (nextWall.dy * nextWall.width) / 2 -
+          (nextWall.ny * nextWall.height) / 2,
+      };
+
+      // Calculate the midpoint between the corners
+      const midX = (prevWallCorner.x + nextWallCorner.x) / 2;
+      const midY = (prevWallCorner.y + nextWallCorner.y) / 2;
+
+      // Calculate the vector between the corners
+      let dx = nextWallCorner.x - prevWallCorner.x;
+      let dy = nextWallCorner.y - prevWallCorner.y;
+      const width = Math.sqrt(dx ** 2 + dy ** 2) || 1;
+      dx /= width;
+      dy /= width;
+
+      currentWall.width = width;
+      currentWall.dx = dx;
+      currentWall.dy = dy;
+      currentWall.nx = -dy;
+      currentWall.ny = dx;
+
+      // Set the center position of the current wall
+      // Since we're connecting the bottom edges, we need to offset by half the height
+      // in the normal direction to get the center
+      currentWall.x = midX + (currentWall.nx * currentWall.height) / 2;
+      currentWall.y = midY + (currentWall.ny * currentWall.height) / 2;
     }
   }
 }

@@ -6,23 +6,16 @@ import { updateImage } from "../../services/database/image/image";
 const updateProfile: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.post("/update/username", async (request, reply) => {
     const token = request.cookies.token;
-    if (!request.isAuthenticated || !token) {
-      return reply
-        .code(401)
-        .send({ error: "You are not authorized to authenticate" });
-    }
+    if (!request.isAuthenticated || !token)
+      return reply.unauthorized("You are not authorized to authenticate");
 
     let newUsername = request.body as string;
     newUsername = newUsername.trim();
-    if (newUsername.length < 3) {
-      return reply
-        .code(400)
-        .send({ error: "Username must be at least 3 characters long" });
-    }
+    if (newUsername.length < 3)
+      return reply.badRequest("Username must be at least 3 characters long");
 
-    if (!(await updateUsername(fastify, request.userId, newUsername))) {
-      return reply.code(500).send({ error: "Failed to update username" });
-    }
+    if (!(await updateUsername(fastify, request.userId, newUsername)))
+      return reply.internalServerError("Failed to update username");
 
     const decoded = await verifyJWT(fastify, token);
 
@@ -40,27 +33,21 @@ const updateProfile: FastifyPluginAsync = async (fastify): Promise<void> => {
   });
 
   fastify.post("/update/image", async (request, reply) => {
-    if (!request.isAuthenticated) {
-      return reply
-        .code(401)
-        .send({ error: "You are not authorized to authenticate" });
-    }
+    if (!request.isAuthenticated)
+      return reply.unauthorized("You are not authorized to authenticate");
     const userData = await getUserById(fastify, request.userId);
-    if (!userData) {
-      return reply.code(500).send({ error: "Failed to get user data" });
-    }
+    if (!userData) return reply.notFound("User not found");
 
     const file = await request.file();
-    if (!file) {
-      return reply.code(400).send({ error: "No file uploaded" });
-    }
+    if (!file) return reply.badRequest("File is required");
     if (
       file.mimetype !== "image/png" &&
       file.mimetype !== "image/jpeg" &&
       file.mimetype !== "image/gif"
-    ) {
-      return reply.code(401).send({ error: "Invalid file upload" });
-    }
+    )
+      return reply.badRequest(
+        "Invalid file type. Only PNG, JPEG, and GIF are allowed",
+      );
 
     const base64 = (await file.toBuffer()).toString("base64");
     const completeData = `data:${file.mimetype};base64,${base64}`;

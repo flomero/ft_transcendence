@@ -15,7 +15,7 @@
         },
 
         "customizableSettings": {
-          "ballSpeedWidthPercentS": 50,
+          "ballSpeedWidthPercentS": 55,
           "ballRadius": 0.95,
           "ballResetSampler": "biasedQuadrantGaussianRA",
           "paddleCoveragePercent": 25,
@@ -45,11 +45,11 @@
         },
 
         "customizableSettings": {
-          "ballSpeedWidthPercentS": 60,
-          "ballRadius": 0.85,
+          "ballSpeedWidthPercentS": 65,
+          "ballRadius": 0.8,
           "ballResetSampler": "biasedGaussianCA",
           "paddleCoveragePercent": 25,
-          "paddleSpeedWidthPercentS": 150,
+          "paddleSpeedWidthPercentS": 140,
           "paddleVelocityAngularTransmissionPercent": 45,
           "paddleVelocitySpeedTransmissionPercent": 10,
           "powerUpRadius": 3,
@@ -100,6 +100,11 @@
         "delayS": 1.5
       },
 
+      "idleWallBounceAcceleration": {
+        "className": "IdleWallBounceAcceleration",
+        "bumperVelocityPercent": 0.2
+      },
+
       "paddleBoost": {
         "className": "PaddleBoost",
         "paddleExtensionLength": 2.5,
@@ -120,7 +125,7 @@
         "spawnWeight": 2.0,
         "selfActivation": false,
         "durationS": 5,
-        "totalRampUpStrength": 1.35,
+        "totalRampUpStrength": 1.15,
         "rampUpFrequencyS": 0.25
       },
 
@@ -130,7 +135,7 @@
         "selfActivation": false,
         "durationS": 6,
         "blinkIntervalS": 0.5,
-        "blinkDurationPercent": 66
+        "blinkDurationPercent": 50
       },
 
       "multiBall": {
@@ -140,7 +145,7 @@
         "durationS": 6,
         "ballCount": 8,
         "totalAngleDeg": 80,
-        "radiusFactorPercent": 60
+        "radiusFactorPercent": 70
       },
 
       "shooter": {
@@ -150,8 +155,8 @@
         "durationS": 5,
         "chargeDurationS": 2,
         "chargeRadius": 5,
-        "shootInitialVelocityPercent": 225,
-        "shootFinalVelocityPercent": 105,
+        "shootInitialVelocityPercent": 140,
+        "shootFinalVelocityPercent": 100,
         "shootDirectionSamplerStrategyName": "biasedQuadrantGaussianRA"
       },
 
@@ -162,9 +167,9 @@
         "durationS": 10,
         "bumperJunctionDistanceFromCenterPercent": 13.5,
         "bumperWallJunctionDistancePercent": 80,
-        "bumperVelocityPercent": 80,
-        "bumperMaxVelocityPercent": 120,
-        "bumperAccelerationPercentS": -60
+        "bumperVelocityPercent": 20,
+        "bumperMaxVelocityPercent": 150,
+        "bumperAccelerationPercentS": -12.5
       }
     }
   }

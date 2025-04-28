@@ -5,13 +5,16 @@ import { isUserInAnyLobby } from "../lobbyVaidation/isUserInAnyLobby";
 import validateGameModifierCheck from "../lobbyVaidation/validateGameModifierCheck";
 import { setLobby } from "./setLobby";
 import { GAMEMODE_REGISTRY } from "../../../../config";
-import { GameSettings } from "../../../../interfaces/games/lobby/GameSettings";
+import type { GameSettings } from "../../../../interfaces/games/lobby/GameSettings";
 
 export const PublicLobbies = new Map<string, Lobby>();
 export const PrivateLobbies = new Map<string, Lobby>();
 
 function initializeSampleLobbies() {
-  const sampleUserIds = ["103562899409920461542", "user456", "user789"];
+  const sampleUserIds = Array.from<string>({
+    length: Object.values(GAMEMODE_REGISTRY).length,
+  }).fill("user123");
+  // sampleUserIds[4] = "102633657525324851776"
 
   const lobbyConfigs: NewLobbyRequestBody[] = Object.values(GAMEMODE_REGISTRY)
     .filter((_, index) => index < sampleUserIds.length)
@@ -47,7 +50,8 @@ async function newLobbyHandler(
     setLobby(lobby, body.lobbyMode);
     reply.send({ lobbyId: lobby.getLobbyId });
   } catch (error) {
-    if (error instanceof Error) reply.code(400).send({ error: error.message });
+    if (error instanceof Error) return reply.badRequest(error.message);
+    return reply.badRequest("Error creating lobby");
   }
 }
 

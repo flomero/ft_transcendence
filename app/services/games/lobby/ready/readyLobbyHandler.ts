@@ -14,8 +14,8 @@ async function readyLobbyHandler(
     setReadyState(lobbyId, userId, state);
     return reply.code(200).send({ message: "User is ready" });
   } catch (error) {
-    if (error instanceof Error)
-      return reply.code(400).send({ error: error.message });
+    if (error instanceof Error) return reply.badRequest(error.message);
+    return reply.badRequest("Error setting ready state");
   }
 }
 export default readyLobbyHandler;

@@ -15,10 +15,10 @@
     "flowerGaussianCA": {
       "className": "FlowerGaussianCA",
       "playerSampler": "highestScoreBiased",
-      "stdAngleDeviationDeg": 60,
-      "baseRadiusFactor": 0.45,
-      "variationStrength": 0.2,
-      "stdDistanceDeviationPercent": 15
+      "stdAngleDeviationDeg": 30,
+      "baseRadiusFactor": 0.325,
+      "variationStrength": 0.125,
+      "stdDistanceDeviationPercent": 10
     },
 
     "biasedQuadrantGaussianRATester": {
@@ -38,7 +38,7 @@
     "biasedQuadrantGaussianRA": {
       "className": "BiasedQuadrantGaussianRA",
       "stdAngularVariationDeg": 10,
-      "angularOffsetDeg": 20,
+      "angularOffsetDeg": 15,
       "stdVelocityVariationPercent": 10,
       "maxVelocityPercent": 30,
       "playerSampler": "lastGoalBiased"
@@ -46,8 +46,8 @@
 
     "biasedGaussianCA": {
       "className": "BiasedGaussianCA",
-      "stdAngularVariationPercent": 50,
-      "angularOffsetPercent": 85,
+      "stdAngularVariationPercent": 40,
+      "angularOffsetPercent": 70,
       "stdVelocityVariationPercent": 35,
       "minVelocityPercent": 20,
       "maxVelocityPercent": 60,
@@ -67,6 +67,14 @@
     "improvedNaive": {
       "className": "ImprovedNaive",
       "widthPercentFactor": 90
+    },
+
+    "foresight": {
+      "className": "Foresight",
+      "widthPercentFactor": 85,
+      "lookAheadTimeS": 3,
+      "idleThresholdS": 2,
+      "preparationTimeS": 0.3
     }
   },
 
