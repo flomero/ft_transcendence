@@ -1,9 +1,9 @@
-<div class="{{twMerge 'justify-center flex flex-row gap-6 items-center' (when reversed "flex-row-reverse")}}" data-id="{{userId}}">
+<div class="{{twMerge 'justify-center flex flex-row gap-6 items-center w-64' (when reversed "flex-row-reverse")}}" data-id="{{userId}}">
   <img
     src="{{user.imageUrl}}"
     alt="User Avatar"
     class="bg-bg-muted size-12 rounded-full border object-cover"
   />
-  <p class="truncate text-center text-2xl max-w-48">{{user.userName}}</p>
+  <p class="truncate text-left text-2xl w-full">{{user.userName}}</p>
   <span class="text-5xl font-mono" id="result-{{user.userId}}">0</span>
 </div>
