@@ -25,8 +25,16 @@
   {{else}}
     <div class="flex flex-wrap gap-8 mt-16 justify-center">
       {{#each users as |user|}}
-        {{#> components/game/user user=user }}
-        {{/components/game/user}}
+        {{#if (eq user.userId ../userId)}}
+          {{#> components/game/user user=user}}
+          {{/components/game/user}}
+        {{/if}}
+      {{/each}}
+      {{#each users as |user|}}
+        {{#unless (eq user.userId ../userId)}}
+          {{#> components/game/user user=user }}
+          {{/components/game/user}}
+        {{/unless}}
       {{/each}}
     </div>
     <p class="text-fg-muted text-xs pt-8">counting goals received</p>
