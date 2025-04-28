@@ -16,6 +16,7 @@ class PongGame {
   private currentUserId: string;
   private playerIndex = -1; // -1 means not determined yet
   private playerCount = 0;
+  private referenceTable: string[] = [];
 
   constructor(canvasId: string) {
     const path = window.location.pathname;
@@ -65,6 +66,7 @@ class PongGame {
         this.gameState = parsedData;
 
         if (message.referenceTable && this.playerIndex === -1) {
+          this.referenceTable = message.referenceTable; // Store the reference table
           this.playerIndex = message.referenceTable.indexOf(this.currentUserId);
           this.playerCount = message.referenceTable.length;
           if (this.playerCount === 2) {
@@ -185,8 +187,7 @@ class PongGame {
     if (this.gameState?.balls) this.drawBalls();
 
     if (this.gameState?.scores) {
-      const rotated = shouldRotate || this.playerIndex === 1;
-      this.drawScores(rotated);
+      this.drawScores();
     }
 
     this.ctx.restore();
@@ -361,11 +362,28 @@ class PongGame {
     }
   }
 
-  private drawScores(isRotated = false): void {
-    if (!this.gameState?.scores) return;
-    // update scores
+  private drawScores(): void {
+    if (!this.gameState?.scores || !this.referenceTable.length) return;
+
+    const scores = this.gameState.scores;
+
+    if (this.playerCount === 2) {
+      this.updateScoreDisplay(this.referenceTable[0], scores[1] || 0);
+      this.updateScoreDisplay(this.referenceTable[1], scores[0] || 0);
+    } else {
+      this.referenceTable.forEach((userId, i) => {
+        this.updateScoreDisplay(userId, scores[i] || 0);
+      });
+    }
 
     this.ctx.restore();
+  }
+
+  private updateScoreDisplay(userId: string, score: number): void {
+    const scoreElement = document.getElementById(`result-${userId}`);
+    if (scoreElement) {
+      scoreElement.textContent = score.toString();
+    }
   }
 
   private startGameLoop(): void {
