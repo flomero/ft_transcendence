@@ -24,11 +24,14 @@ class TournamentBracket {
   private bracket: HTMLElement;
   private timerInterval: number | null = null;
 
+  private resizeObserver!: ResizeObserver;
+
   constructor() {
     this.rounds = window.__ROUNDS__;
     this.connections = window.__CONNECTIONS__;
-    this.svg = document.querySelector<SVGSVGElement>("#lines")!;
+
     this.bracket = document.querySelector<HTMLElement>("#bracket")!;
+    this.svg = this.bracket.querySelector<SVGSVGElement>("#lines")!;
 
     this.edges = this.connections.auto
       ? this.buildAutoEdges()
@@ -93,50 +96,56 @@ class TournamentBracket {
     updateAllTimers();
   }
 
-  private init(): void {
+  private init() {
     this.drawLines();
+
+    // redraw when the window resizes OR the bracket itself grows/shrinks
     window.addEventListener("resize", this.drawLines);
+    this.resizeObserver = new ResizeObserver(this.drawLines);
+    this.resizeObserver.observe(this.bracket);
+
     window.drawTournamentLines = this.drawLines;
     this.startLiveTimers();
   }
 
-  public destroy(): void {
+  public destroy() {
     window.removeEventListener("resize", this.drawLines);
+    this.resizeObserver.disconnect();
     window.drawTournamentLines = undefined;
-    if (this.timerInterval) {
-      clearInterval(this.timerInterval);
-    }
+    if (this.timerInterval) clearInterval(this.timerInterval);
   }
 
-  private drawLines(): void {
-    console.log("Drawing Lines");
-    console.log("Edges", this.edges);
-    console.log(this.connections.auto);
+  private drawLines() {
+    const width = this.bracket.scrollWidth;
+    const height = this.bracket.scrollHeight;
 
-    const box = this.bracket.getBoundingClientRect();
-    this.svg.setAttribute("width", `${box.width}`);
-    this.svg.setAttribute("height", `${box.height}`);
-    this.svg.setAttribute("viewBox", `0 0 ${box.width} ${box.height}`);
+    // style.width/height overrule Tailwind’s w-full/h-full
+    this.svg.style.width = `${width}px`;
+    this.svg.style.height = `${height}px`;
+    this.svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
     this.svg.innerHTML = "";
 
-    this.edges.forEach((edge) => {
-      const [from, to, offset = 0] = edge;
+    const bracketBox = this.bracket.getBoundingClientRect();
 
-      const a = document.getElementById(from)!.getBoundingClientRect();
-      const b = document.getElementById(to)!.getBoundingClientRect();
+    this.edges.forEach(([from, to, offset = 0]) => {
+      const aBox = document.getElementById(from)!.getBoundingClientRect();
+      const bBox = document.getElementById(to)!.getBoundingClientRect();
 
-      const x1 = a.right - box.left;
-      const y1 = a.top - box.top + a.height / 2;
-      const x2 = b.left - box.left;
-      const y2 = b.top - box.top + b.height / 2;
+      const x1 = aBox.right - bracketBox.left;
+      const y1 = aBox.top - bracketBox.top + aBox.height / 2;
+      const x2 = bBox.left - bracketBox.left;
+      const y2 = bBox.top - bracketBox.top + bBox.height / 2;
       const midX = (x1 + x2) / 2 + offset;
 
-      const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      p.setAttribute("d", `M${x1},${y1} H${midX} V${y2} H${x2}`);
-      p.setAttribute("fill", "none");
-      p.setAttribute("stroke", "#999");
-      p.setAttribute("stroke-width", "2");
-      this.svg.appendChild(p);
+      const path = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "path",
+      );
+      path.setAttribute("d", `M${x1},${y1} H${midX} V${y2} H${x2}`);
+      path.setAttribute("fill", "none");
+      path.setAttribute("stroke", "#999");
+      path.setAttribute("stroke-width", "2");
+      this.svg.appendChild(path);
     });
   }
 }

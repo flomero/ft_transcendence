@@ -92,6 +92,48 @@ const profile: FastifyPluginAsync = async (fastify) => {
           },
         ],
       },
+      {
+        name: "Final",
+        matches: [
+          {
+            name: "Match 1",
+            players: [
+              { id: "0", name: "Winner of Semifinal 1", score: 0 },
+              { id: "5", name: "Player 5", score: 0 },
+            ],
+            status: MatchStatus.NOT_STARTED,
+            previousRoundInfo: "Winner of Semifinal 1 vs Winner of Semifinal 2",
+          },
+        ],
+      },
+      {
+        name: "Final",
+        matches: [
+          {
+            name: "Match 1",
+            players: [
+              { id: "0", name: "Winner of Semifinal 1", score: 0 },
+              { id: "5", name: "Player 5", score: 0 },
+            ],
+            status: MatchStatus.NOT_STARTED,
+            previousRoundInfo: "Winner of Semifinal 1 vs Winner of Semifinal 2",
+          },
+        ],
+      },
+      {
+        name: "Final",
+        matches: [
+          {
+            name: "Match 1",
+            players: [
+              { id: "0", name: "Winner of Semifinal 1", score: 0 },
+              { id: "5", name: "Player 5", score: 0 },
+            ],
+            status: MatchStatus.NOT_STARTED,
+            previousRoundInfo: "Winner of Semifinal 1 vs Winner of Semifinal 2",
+          },
+        ],
+      },
     ];
 
     /* ----- assign stable DOM ids ----- */
