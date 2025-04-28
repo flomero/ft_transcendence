@@ -11,6 +11,7 @@ import { RNG } from "../rng";
 import saveGameResultInDb from "./saveGameResultInDb";
 import type { GameOrigin } from "../../../types/games/gameHandler/GameOrigin";
 import terminateGame from "./terminateGame";
+import { GameResult } from "../../../types/strategy/ITournamentBracketGenerator";
 
 class GameManager {
   private id: string = randomUUID();
@@ -180,7 +181,20 @@ class GameManager {
     if (this.gameOrigin?.type === "lobby") {
       this.gameOrigin.lobby.setStateLobby = "open";
     }
-    // Call tournament function later
+    if (this.gameOrigin?.type === "tournament")
+      const gameResult = this.createGameResult();
+    this.gameOrigin.tournament.notifyGameCompleted(this.id, gameResult);
+  }
+
+  private createGameResult(): GameResult {
+    const result = this.game.getResults();
+    const gameResult: GameResult = {};
+
+    for (let i = 0; i < result.length; i++) {
+      const playerId = this.playerIdReferenceTable[i];
+      gameResult[playerId] = result[i];
+    }
+    return gameResult;
   }
 
   public get getId() {
