@@ -16,6 +16,7 @@ class PongGame {
   private currentUserId: string;
   private playerIndex = -1; // -1 means not determined yet
   private playerCount = 0;
+  private referenceTable: string[] = [];
 
   constructor(canvasId: string) {
     const path = window.location.pathname;
@@ -65,6 +66,7 @@ class PongGame {
         this.gameState = parsedData;
 
         if (message.referenceTable && this.playerIndex === -1) {
+          this.referenceTable = message.referenceTable; // Store the reference table
           this.playerIndex = message.referenceTable.indexOf(this.currentUserId);
           this.playerCount = message.referenceTable.length;
           if (this.playerCount === 2) {
@@ -185,8 +187,7 @@ class PongGame {
     if (this.gameState?.balls) this.drawBalls();
 
     if (this.gameState?.scores) {
-      const rotated = shouldRotate || this.playerIndex === 1;
-      this.drawScores(rotated);
+      this.drawScores();
     }
 
     this.ctx.restore();
@@ -326,16 +327,12 @@ class PongGame {
     for (const [type, powerUp] of this.gameState.modifiersState
       .spawnedPowerUps as [string, Ball][]) {
       if (powerUp.isVisible) {
-        this.ctx.fillStyle = this.getPowerUpColor(type);
-        this.ctx.beginPath();
-        this.ctx.arc(
-          powerUp.x * this.ratio,
-          powerUp.y * this.ratio,
-          powerUp.radius * this.ratio,
-          0,
-          Math.PI * 2,
-        );
-        this.ctx.fill();
+        const x = powerUp.x * this.ratio;
+        const y = powerUp.y * this.ratio;
+        const radius = powerUp.radius * this.ratio;
+        const color = this.getPowerUpColor(type);
+
+        this.drawNeonCircle(x, y, radius, color);
       }
     }
   }
@@ -343,29 +340,42 @@ class PongGame {
   private getPowerUpColor(type: string): string {
     switch (type) {
       case "speedBoost":
-        return "#ff0000"; // red
+        return "#ff1493"; // neon pink/red
       case "blinkingBall":
-        return "#0000ff"; // blue
-      case "multiball_modifier":
-        return "#00ff00"; // green
-      case "grasping_vines_debuff_modifier":
-        return "#ffff00"; // yellow
-      case "black_hole_debuff_modifier":
-        return "#800080"; // purple
-      case "carousel_debuff_modifier":
-        return "#00ff00"; // lime
-      case "shooting_modifier":
-        return "#ffff00"; // yellow
+        return "#00ffff"; // cyan/neon blue
+      case "multiBall":
+        return "#39ff14"; // electric green
+      case "shooter":
+        return "#ffff33"; // bright yellow
+      case "bumper":
+        return "#bf00ff"; // vivid purple
       default:
-        return "#ff8800"; // orange
+        return "#7fff00"; // chartreuse
     }
   }
 
-  private drawScores(isRotated = false): void {
-    if (!this.gameState?.scores) return;
-    // update scores
+  private drawScores(): void {
+    if (!this.gameState?.scores || !this.referenceTable.length) return;
+
+    const scores = this.gameState.scores;
+
+    if (this.playerCount === 2) {
+      this.updateScoreDisplay(this.referenceTable[0], scores[1] || 0);
+      this.updateScoreDisplay(this.referenceTable[1], scores[0] || 0);
+    } else {
+      this.referenceTable.forEach((userId, i) => {
+        this.updateScoreDisplay(userId, scores[i] || 0);
+      });
+    }
 
     this.ctx.restore();
+  }
+
+  private updateScoreDisplay(userId: string, score: number): void {
+    const scoreElement = document.getElementById(`result-${userId}`);
+    if (scoreElement) {
+      scoreElement.textContent = score.toString();
+    }
   }
 
   private startGameLoop(): void {
@@ -441,6 +451,57 @@ class PongGame {
     this.ctx.shadowBlur = 0;
     this.ctx.strokeStyle = "#fff";
     this.ctx.strokeRect(-halfWidth, -halfHeight, width, height);
+
+    this.ctx.restore();
+  }
+
+  private drawNeonCircle(
+    x: number,
+    y: number,
+    radius: number,
+    color: string,
+  ): void {
+    let r = 255;
+    let g = 255;
+    let b = 255;
+
+    // Parse color from hex to RGB
+    if (color?.startsWith("#")) {
+      if (color.length === 7) {
+        r = Number.parseInt(color.slice(1, 3), 16);
+        g = Number.parseInt(color.slice(3, 5), 16);
+        b = Number.parseInt(color.slice(5, 7), 16);
+      } else if (color.length === 4) {
+        r = Number.parseInt(color.charAt(1) + color.charAt(1), 16);
+        g = Number.parseInt(color.charAt(2) + color.charAt(2), 16);
+        b = Number.parseInt(color.charAt(3) + color.charAt(3), 16);
+      }
+    }
+
+    r = Number.isNaN(r) ? 255 : Math.max(0, Math.min(255, r));
+    g = Number.isNaN(g) ? 255 : Math.max(0, Math.min(255, g));
+    b = Number.isNaN(b) ? 255 : Math.max(0, Math.min(255, b));
+
+    this.ctx.save();
+
+    // Draw fill with semi-transparent color
+    this.ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.4)`;
+    this.ctx.beginPath();
+    this.ctx.arc(x, y, radius, 0, Math.PI * 2);
+    this.ctx.fill();
+
+    // Draw border with glow effect
+    this.ctx.lineWidth = 2;
+    this.ctx.strokeStyle = `rgb(${r}, ${g}, ${b})`;
+    this.ctx.shadowColor = `rgb(${r}, ${g}, ${b})`;
+    this.ctx.shadowBlur = 8;
+    this.ctx.stroke();
+
+    // Draw bright inner border
+    this.ctx.lineWidth = 1;
+    this.ctx.shadowBlur = 0;
+    this.ctx.strokeStyle = "#fff";
+    this.ctx.stroke();
 
     this.ctx.restore();
   }
