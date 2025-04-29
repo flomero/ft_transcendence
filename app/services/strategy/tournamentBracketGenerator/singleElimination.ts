@@ -9,6 +9,7 @@ import type {
   TournamentRankings,
   ITournamentBracketGenerator,
   GameResult,
+  TournamentBracket,
 } from "../../../types/strategy/ITournamentBracketGenerator";
 import { STRATEGY_REGISTRY } from "../strategyRegistryLoader";
 import { StrategyManager } from "../strategyManager";
@@ -448,7 +449,10 @@ export class SingleElimination implements ITournamentBracketGenerator {
     return this.activeMatches.has(matchID);
   }
 
-  getCompleteBracket(): Round[] {
-    return this.rounds;
+  getCompleteBracket(): TournamentBracket {
+    return {
+      rounds: this.rounds,
+      seeding: this.nextMatchSeeding,
+    };
   }
 }
