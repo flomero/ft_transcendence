@@ -73,35 +73,28 @@ export class MultiplayerPong extends Pong {
       ))
         this.settings.powerUpCapacities[key] = value;
 
-    console.log("Loaded settings:");
-    console.dir(this.settings, { depth: null });
-
     this.ballResetSampler = new StrategyManager(
       this.settings.ballResetSampler,
       "pongBallResetSampler",
       "sampleDirection",
     );
 
-    this.initPaddles();
     this.initWalls();
+    this.initPaddles();
     this.resetBall(this.gameState, -1, true);
   }
 
   startGame(): void {
-    console.log("Starting Game");
     super.startGame();
     console.log("Game Started");
-
-    console.log(`Balls: ${this.gameState.balls.length}`);
-    console.log(`Paddles: ${this.gameState.paddles.length}`);
-    console.log(`Walls: ${this.gameState.walls.length}`);
   }
 
   initPaddles(): void {
     // Calculate paddleAmplitude - the maximum possible distance the paddle can travel
     const paddleAmplitude =
-      (this.settings.arenaRadius - this.settings.paddleOffset) *
-      Math.sin(Math.PI / this.gameState.playerCount);
+      (this.gameState.walls[0].width *
+        (this.settings.arenaRadius - this.settings.paddleOffset)) /
+      this.settings.arenaRadius;
 
     // Calculate the coverage percentage (0 to 1)
     const coverage = this.settings.paddleCoveragePercent / 100.0;
@@ -171,9 +164,8 @@ export class MultiplayerPong extends Pong {
     // Initialize walls, rotate by alpha
     const wallWidth =
       2.0 *
-      Math.sin(Math.PI / (2.0 * this.gameState.playerCount)) *
-      (this.settings.arenaRadius *
-        (1 + 1 / (this.gameState.playerCount + 0.5)));
+      this.settings.arenaRadius *
+      Math.sin(Math.PI / (2.0 * this.gameState.playerCount));
 
     for (let index = 0; index < 2 * this.gameState.playerCount; index++) {
       const wall: Rectangle = {

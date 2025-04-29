@@ -106,41 +106,38 @@ export class PhysicsEngine {
       r_by >= -rh / 2.0 - EPSILON &&
       r_by <= rh / 2.0 + EPSILON
     ) {
-      // Calculate the minimum distance to push the ball out of the rectangle
-      const distToRight = rw / 2.0 - r_bx;
-      const distToLeft = r_bx + rw / 2.0;
-      const distToTop = rh / 2.0 - r_by;
-      const distToBottom = r_by + rh / 2.0;
+      // Use the object's existing normal (already pointing toward the center of the arena)
+      // Transform the object's normal from global to local coordinates
+      const normalLocal: [number, number] = [
+        obj.nx * ca + obj.ny * sa,
+        -obj.nx * sa + obj.ny * ca,
+      ];
 
-      // Find the shortest way out
-      const minDist = Math.min(
-        distToRight,
-        distToLeft,
-        distToTop,
-        distToBottom,
-      );
+      // Calculate how far to move along the normal direction
+      // We need to find the distance to move out of the rectangle along the normal
+      // Project current position onto the normal to find the distance
+      // const dotProduct = r_bx * normalLocal[0] + r_by * normalLocal[1];
 
-      let normalLocal: [number, number];
-
-      if (minDist === distToRight) {
-        normalLocal = [1, 0]; // Push out to the right
-      } else if (minDist === distToLeft) {
-        normalLocal = [-1, 0]; // Push out to the left
-      } else if (minDist === distToTop) {
-        normalLocal = [0, 1]; // Push out downward (in local space)
+      // Calculate the penetration depth
+      let distanceToMove: number;
+      if (Math.abs(normalLocal[0]) > Math.abs(normalLocal[1])) {
+        // Normal is more horizontal
+        distanceToMove =
+          (normalLocal[0] > 0 ? rw / 2.0 - r_bx : r_bx + rw / 2.0) +
+          2 * EPSILON;
       } else {
-        normalLocal = [0, -1]; // Push out upward (in local space)
+        // Normal is more vertical
+        distanceToMove =
+          (normalLocal[1] > 0 ? rh / 2.0 - r_by : r_by + rh / 2.0) +
+          2 * EPSILON;
       }
 
       // Transform normal back to global coordinates
-      const normalGlobal: [number, number] = [
-        normalLocal[0] * ca - normalLocal[1] * sa,
-        normalLocal[0] * sa + normalLocal[1] * ca,
-      ];
+      const normalGlobal: [number, number] = [obj.nx, obj.ny];
 
       // Return collision with out-of-bounds flag set
       return {
-        distance: minDist + EPSILON,
+        distance: distanceToMove,
         objectId: objId,
         normal: normalGlobal,
         outOfBounds: true,
