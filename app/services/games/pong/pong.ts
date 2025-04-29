@@ -255,12 +255,12 @@ export abstract class Pong extends GameBase {
     this.gameState.balls = snapshot?.balls; //.map(ball => ({...ball}));
     this.gameState.paddles = snapshot?.paddles; //.map(paddle => ({...paddle}));
     this.gameState.walls = snapshot?.walls; //.map(wall => ({...wall}));
-    this.gameState.scores = [...snapshot?.scores];
+    this.gameState.scores = [...(snapshot?.scores || [])];
     this.gameState.lastHit = snapshot?.lastHit;
 
-    this.modifierManager.loadStateSnapshot(snapshot?.modifiersData);
+    this.modifierManager.loadStateSnapshot(snapshot?.modifiersData || {});
 
-    this.gameState.rng.setState(snapshot?.rng);
+    if (snapshot?.rng) this.gameState.rng.setState(snapshot.rng);
   }
 
   protected async saveStateSnapshot(
