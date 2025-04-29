@@ -18,7 +18,8 @@ export enum TournamentStatus {
 export interface Player {
   id: string;
   name: string;
-  score?: number; // Optional score for the player
+  score: number[];
+  winCount: number;
   results?: number[]; // Optional results for the player
 }
 
@@ -28,10 +29,18 @@ export enum MatchStatus {
   COMPLETED = "COMPLETED",
 }
 
+export interface AdditionalMatchData {
+  gameWinners: number[]; // PlayerIDs for each game of the player that won (no draws) -> same length as players.score
+  leadPlayer: number; // PlayerID of player in the lead -> -1 in case of tie
+  currentGame: number; // ID of the current game being played -> 0 by default (first game)
+  playersWinCount: number[];
+}
+
 export interface Match {
   id?: string; // Assigned dynamically
   name?: string; // Optional name for the match
   players: Player[];
+  additionalData?: AdditionalMatchData;
   status: MatchStatus;
   startTime?: string; // ISO date string for match start time
   previousRoundInfo?: string; // Info about previous matches for NOT_STARTED matches

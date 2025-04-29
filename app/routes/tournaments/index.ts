@@ -1,5 +1,6 @@
 import type { FastifyPluginAsync } from "fastify";
 import type {
+  AdditionalMatchData,
   Edge,
   Round,
   Tournament,
@@ -23,8 +24,8 @@ const tournamentsRoute: FastifyPluginAsync = async (fastify) => {
           {
             name: "Match 1",
             players: [
-              { id: "1", name: "Player 1", score: 21 },
-              { id: "2", name: "Player 2", score: 15 },
+              { id: "1", name: "Player 1", score: [11, 3, 11], winCount: 2 },
+              { id: "2", name: "Player 2", score: [5, 11, 9], winCount: 1 },
             ],
             status: MatchStatus.COMPLETED,
             startTime: "2024-03-20T10:00:00Z",
@@ -32,8 +33,8 @@ const tournamentsRoute: FastifyPluginAsync = async (fastify) => {
           {
             name: "Match 2",
             players: [
-              { id: "3", name: "Player 3", score: 18 },
-              { id: "4", name: "Player 4", score: 21 },
+              { id: "3", name: "Player 3", score: [0, 0], winCount: 0 },
+              { id: "4", name: "Player 4", score: [11, 11], winCount: 2 },
             ],
             status: MatchStatus.COMPLETED,
             startTime: "2024-03-20T10:00:00Z",
@@ -41,8 +42,8 @@ const tournamentsRoute: FastifyPluginAsync = async (fastify) => {
           {
             name: "Match 3",
             players: [
-              { id: "5", name: "Player 5", score: 21 },
-              { id: "6", name: "Player 6", score: 19 },
+              { id: "5", name: "Player 5", score: [1, 11, 3], winCount: 1 },
+              { id: "6", name: "Player 6", score: [11, 9, 11], winCount: 2 },
             ],
             status: MatchStatus.COMPLETED,
             startTime: "2024-03-20T11:00:00Z",
@@ -50,8 +51,8 @@ const tournamentsRoute: FastifyPluginAsync = async (fastify) => {
           {
             name: "Match 4",
             players: [
-              { id: "7", name: "Player 7", score: 14 },
-              { id: "8", name: "Player 8", score: 21 },
+              { id: "7", name: "Player 7", score: [6, 11, 11], winCount: 2 },
+              { id: "8", name: "Player 8", score: [11, 8, 7], winCount: 0 },
             ],
             status: MatchStatus.COMPLETED,
             startTime: "2024-03-20T11:00:00Z",
@@ -64,8 +65,8 @@ const tournamentsRoute: FastifyPluginAsync = async (fastify) => {
           {
             name: "Match 1",
             players: [
-              { id: "1", name: "Player 1", score: 15 },
-              { id: "4", name: "Player 4", score: 12 },
+              { id: "1", name: "Player 1", score: [11], winCount: 1 },
+              { id: "4", name: "Player 4", score: [2], winCount: 0 },
             ],
             status: MatchStatus.ONGOING,
             startTime: "2025-04-28T12:00:00Z",
@@ -74,8 +75,8 @@ const tournamentsRoute: FastifyPluginAsync = async (fastify) => {
           {
             name: "Match 2",
             players: [
-              { id: "5", name: "Player 5", score: 21 },
-              { id: "8", name: "Player 8", score: 18 },
+              { id: "5", name: "Player 5", score: [11, 11], winCount: 2 },
+              { id: "8", name: "Player 8", score: [8, 5], winCount: 0 },
             ],
             status: MatchStatus.COMPLETED,
             startTime: "2025-04-12T00:00:00Z",
@@ -89,8 +90,8 @@ const tournamentsRoute: FastifyPluginAsync = async (fastify) => {
           {
             name: "Match 1",
             players: [
-              { id: "0", name: "Winner SF-1", score: 0 },
-              { id: "5", name: "Player 5", score: 0 },
+              { id: "0", name: "Winner SF-1", score: [], winCount: 0 },
+              { id: "5", name: "Player 5", score: [], winCount: 0 },
             ],
             status: MatchStatus.NOT_STARTED,
             previousRoundInfo: "Winner SF-1 vs Winner SF-2",
@@ -122,6 +123,37 @@ const tournamentsRoute: FastifyPluginAsync = async (fastify) => {
         rounds: [],
       },
     ];
+
+    tournaments.forEach((tournament) => {
+      tournament.rounds.forEach((round) => {
+        round.matches.forEach((match) => {
+          const player0WinCount = match.players[0].winCount;
+          const player1WinCount = match.players[1].winCount;
+
+          const leadPlayer =
+            player0WinCount > player1WinCount
+              ? 0
+              : player1WinCount > player0WinCount
+                ? 1
+                : -1;
+
+          const playersWinCount = [player1WinCount, player0WinCount]; // so index matches playerIndex
+
+          const data: AdditionalMatchData = {
+            gameWinners: match.players[0].score.map((_, index) =>
+              match.players[0].score[index] > match.players[1].score[index]
+                ? 0
+                : 1,
+            ),
+            currentGame: match.players[0].score.length,
+            leadPlayer,
+            playersWinCount,
+          };
+
+          match.additionalData = data;
+        });
+      });
+    });
 
     tournaments.forEach((tournament) => {
       tournament.rounds = tournament.rounds.map((round, r) => ({

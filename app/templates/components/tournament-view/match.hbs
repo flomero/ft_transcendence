@@ -22,34 +22,59 @@
   }
 </style>
 
-<div id="{{match.id}}"
-     class="match border bg-black-200 mt-2 mb-2 p-2 rounded-lg">
-  {{#if (eq match.status "COMPLETED")}}
-    <ul class="players-list mt-2">
-      {{#each match.players as |player|}}
-        <li>
-          <a
-            href="/users/{{player.userId}}"
-            class="reusable-item"
-            style="--hover-bg-color: #e2e8f0; /* Custom hover color */
-         --focus-bg-color: #e2e8f0; /* Custom focus color */
-         --focus-ring-color: rgba(148, 163, 184, 0.4);">
-            <span class="w-2 text-right">{{inc @index}}.</span>
-            <span class="player-name">{{player.name}}</span>
-            {{#if player.score}}
-              <span class="player-score text-gray-500">{{player.score}}</span>
-            {{/if}}
-          </a>
-        </li>
-      {{/each}}
-    </ul>
+<div id="{{match.id}}" class="match border bg-black-200 mt-2 mb-2 p-2 rounded-lg">
+  <table class="w-full table-auto text-sm font-mono">
+    <tbody>
+      {{#each match.players as |player playerIndex|}}
+        <tr>
+          <!-- Player name -->
+          <td class="pr-2 font-semibold text-left whitespace-nowrap">
+            {{player.name}}
+          </td>
 
-  {{else if (eq match.status "ONGOING")}}
-    <h3>In Progress</h3>
-    <p>Started at: {{formatDate match.startTime "HH:mm"}}</p>
-    <p>Duration: <span class="elapsed-time" data-start="{{match.startTime}}"></span></p>
-  {{else}}
-    <h3>Not Started</h3>
-    <p>From: {{match.previousRoundInfo}}</p>
+          <!-- Win count with lead highlight -->
+          <td class="px-2 text-center font-bold rounded
+            {{#if (eq match.additionalData.leadPlayer playerIndex)}}
+              bg-green-500 text-white
+            {{else if (eq match.additionalData.leadPlayer -1)}}
+              bg-gray-400
+            {{else}}
+              bg-gray-600 text-white
+            {{/if}}">
+            {{player.winCount}}
+          </td>
+
+          <!-- Separator -->
+          <td class="px-2 text-gray-500">|</td>
+
+          <!-- Game scores -->
+          {{#each player.score as |score gameIndex|}}
+            <td class="px-1 text-center rounded
+              {{#if (eq match.additionalData.gameWinners.[gameIndex] playerIndex)}}
+                bg-blue-300
+              {{else}}
+                bg-gray-200
+              {{/if}}">
+              {{score}}
+            </td>
+          {{/each}}
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  {{#if (eq match.status "ONGOING")}}
+    <div class="mt-4">
+      <h3 class="text-lg font-bold text-yellow-300">In Progress</h3>
+      <p class="text-sm">Started at: {{formatDate match.startTime "HH:mm"}}</p>
+      <p class="text-sm">
+        Duration: <span class="elapsed-time" data-start="{{match.startTime}}"></span>
+      </p>
+    </div>
+  {{else if (eq match.status "NOT_STARTED")}}
+    <div class="mt-4">
+      <h3 class="text-lg font-bold text-gray-400">Not Started</h3>
+      <p class="text-sm">From: {{match.previousRoundInfo}}</p>
+    </div>
   {{/if}}
 </div>
