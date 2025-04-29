@@ -57,8 +57,10 @@ const googleOAuthPlugin: FastifyPluginAsync = async (fastify, opts) => {
         path: "/",
       });
       reply.redirect("/login/reload");
+      fastify.customMetrics.googleLogin("success");
     } catch (error) {
       fastify.log.error(error);
+      fastify.customMetrics.googleLogin("failure");
       if (error instanceof Error)
         return reply.internalServerError(error.message);
       return reply.internalServerError();
