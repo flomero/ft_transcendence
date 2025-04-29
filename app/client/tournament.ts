@@ -1,6 +1,4 @@
-import type { Edge, Round } from "../types/tournament/tournament";
-
-type Rounds = Round[];
+import type { Edge, Tournament } from "../types/tournament/tournament";
 
 type Connections =
   | { auto: true; edges: never[] }
@@ -8,7 +6,7 @@ type Connections =
 
 declare global {
   interface Window {
-    __ROUNDS__: Rounds;
+    __TOURNAMENTS__: Tournament[];
     __CONNECTIONS__: Connections;
     tournamentBracket?: TournamentBracket;
     drawTournamentLines?: () => void;
@@ -17,89 +15,95 @@ declare global {
 }
 
 class TournamentBracket {
-  private rounds: Rounds;
+  /* ---------- state ---------- */
+  private tournaments: Tournament[];
   private connections: Connections;
   private edges: Edge[];
+
   private svg: SVGSVGElement;
   private bracket: HTMLElement;
-  private timerInterval: number | null = null;
 
+  private timerInterval: number | null = null;
   private resizeObserver!: ResizeObserver;
 
+  /* ---------- bootstrap ---------- */
   constructor() {
-    this.rounds = window.__ROUNDS__;
+    /* the server now exposes tournaments instead of plain rounds */
+    this.tournaments = window.__TOURNAMENTS__;
     this.connections = window.__CONNECTIONS__;
 
     this.bracket = document.querySelector<HTMLElement>("#bracket")!;
     this.svg = this.bracket.querySelector<SVGSVGElement>("#lines")!;
 
+    /* build the edge list once */
     this.edges = this.connections.auto
       ? this.buildAutoEdges()
       : this.connections.edges;
 
+    /* make sure `this` is preserved when used as a callback */
     this.drawLines = this.drawLines.bind(this);
+
     this.init();
   }
 
+  /* ---------- edge helpers ---------- */
+  /**
+   * Auto-generate edges for **every** tournament that was rendered
+   * (classic «winner-moves-on» single-elimination pairing).
+   */
   private buildAutoEdges(): Edge[] {
-    console.log("Building auto edges");
     const list: Edge[] = [];
-    for (let r = 0; r < this.rounds.length - 1; r++) {
-      const currentMatches = this.rounds[r].matches;
-      const nextMatches = this.rounds[r + 1].matches;
 
-      currentMatches.forEach((match, i) => {
-        const target = nextMatches[Math.floor(i / 2)];
-        if (match.id && target.id) {
-          list.push([match.id, target.id]);
-        } else {
-          console.error("Match or target ID is undefined", { match, target });
-        }
-      });
-    }
+    this.tournaments.forEach((tournament) => {
+      const rounds = tournament.rounds;
+
+      for (let r = 0; r < rounds.length - 1; r++) {
+        const currentMatches = rounds[r].matches;
+        const nextMatches = rounds[r + 1].matches;
+
+        currentMatches.forEach((match, i) => {
+          const target = nextMatches[Math.floor(i / 2)];
+
+          if (match.id && target.id) {
+            list.push([tournament.id, match.id, target.id]);
+          }
+        });
+      }
+    });
+
     return list;
   }
 
+  /* ---------- timers ---------- */
   private updateElapsedTime(element: Element) {
     const startTime = element.getAttribute("data-start");
     if (!startTime) return;
 
-    const start = new Date(startTime).getTime();
-    const now = new Date().getTime();
-    const diffInSeconds = Math.floor((now - start) / 1000);
-    const hours = Math.floor(diffInSeconds / 3600);
-    const minutes = Math.floor((diffInSeconds % 3600) / 60);
-    const seconds = diffInSeconds % 60;
+    const diff = Math.floor(
+      (Date.now() - new Date(startTime).getTime()) / 1000,
+    );
+    const h = Math.floor(diff / 3600);
+    const m = Math.floor((diff % 3600) / 60);
+    const s = diff % 60;
 
-    const formattedHours = hours > 0 ? `${hours}h ` : "";
-    const formattedMinutes = minutes > 0 ? `${minutes}m ` : "";
-    const formattedSeconds = `${seconds}s`;
-
-    element.textContent = `${formattedHours}${formattedMinutes}${formattedSeconds}`;
+    element.textContent = `${h ? `${h}h ` : ""}${m ? `${m}m ` : ""}${s}s`;
   }
 
   private startLiveTimers() {
-    const updateAllTimers = () => {
+    const tick = () =>
       document
         .querySelectorAll(".elapsed-time")
-        .forEach((element) => this.updateElapsedTime(element));
-    };
+        .forEach((el) => this.updateElapsedTime(el));
 
-    // Clear existing interval if any
-    if (this.timerInterval) {
-      clearInterval(this.timerInterval);
-    }
-
-    // Update every second
-    this.timerInterval = window.setInterval(updateAllTimers, 1000);
-    // Initial update
-    updateAllTimers();
+    if (this.timerInterval) clearInterval(this.timerInterval);
+    this.timerInterval = window.setInterval(tick, 1000);
+    tick();
   }
 
+  /* ---------- lifecycle ---------- */
   private init() {
     this.drawLines();
 
-    // redraw when the window resizes OR the bracket itself grows/shrinks
     window.addEventListener("resize", this.drawLines);
     this.resizeObserver = new ResizeObserver(this.drawLines);
     this.resizeObserver.observe(this.bracket);
@@ -115,11 +119,11 @@ class TournamentBracket {
     if (this.timerInterval) clearInterval(this.timerInterval);
   }
 
+  /* ---------- SVG rendering ---------- */
   private drawLines() {
     const width = this.bracket.scrollWidth;
     const height = this.bracket.scrollHeight;
 
-    // style.width/height overrule Tailwind’s w-full/h-full
     this.svg.style.width = `${width}px`;
     this.svg.style.height = `${height}px`;
     this.svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
@@ -127,9 +131,16 @@ class TournamentBracket {
 
     const bracketBox = this.bracket.getBoundingClientRect();
 
-    this.edges.forEach(([from, to, offset = 0]) => {
-      const aBox = document.getElementById(from)!.getBoundingClientRect();
-      const bBox = document.getElementById(to)!.getBoundingClientRect();
+    this.edges.forEach(([tid, from, to, offset = 0]) => {
+      const fromId = `${tid}-${from}`;
+      const toId = `${tid}-${to}`;
+
+      const aEl = document.getElementById(fromId);
+      const bEl = document.getElementById(toId);
+      if (!aEl || !bEl) return; // element missing → skip
+
+      const aBox = aEl.getBoundingClientRect();
+      const bBox = bEl.getBoundingClientRect();
 
       const x1 = aBox.right - bracketBox.left;
       const y1 = aBox.top - bracketBox.top + aBox.height / 2;

@@ -51,4 +51,10 @@ export interface Tournament {
   rounds: Round[];
 }
 
-export type Edge = [string, string] | [string, string, number];
+/** ────────────────────────────────────────────────────────────────
+ *  Edge   — [from-match] ➜ [to-match] (+ optional horizontal offset)
+ *  Now carries the tournament id in position 0.
+ * ────────────────────────────────────────────────────────────────*/
+export type Edge =
+  | [tournamentId: string, from: string, to: string]
+  | [tournamentId: string, from: string, to: string, offset: number];

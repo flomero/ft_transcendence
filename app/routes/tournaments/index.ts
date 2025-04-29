@@ -10,13 +10,12 @@ import {
 } from "../../types/tournament/tournament";
 
 interface BracketQuery {
-  auto?: string;
-  partial?: string;
+  auto?: string; // ?auto=false      ➜ manual edges
+  partial?: string; // (left intact – not used here)
 }
 
-const tournaments: FastifyPluginAsync = async (fastify) => {
+const tournamentsRoute: FastifyPluginAsync = async (fastify) => {
   fastify.get<{ Querystring: BracketQuery }>("/", async (request, reply) => {
-    /* ----- tournament data (variable players per match) ----- */
     const rawRounds: Round[] = [
       {
         name: "Round 1",
@@ -70,7 +69,7 @@ const tournaments: FastifyPluginAsync = async (fastify) => {
             ],
             status: MatchStatus.ONGOING,
             startTime: "2025-04-28T12:00:00Z",
-            previousRoundInfo: "Winner of Match 1 vs Winner of Match 2",
+            previousRoundInfo: "Winner M1 vs Winner M2",
           },
           {
             name: "Match 2",
@@ -80,7 +79,7 @@ const tournaments: FastifyPluginAsync = async (fastify) => {
             ],
             status: MatchStatus.COMPLETED,
             startTime: "2025-04-12T00:00:00Z",
-            previousRoundInfo: "Winner of Match 3 vs Winner of Match 4",
+            previousRoundInfo: "Winner M3 vs Winner M4",
           },
         ],
       },
@@ -90,51 +89,51 @@ const tournaments: FastifyPluginAsync = async (fastify) => {
           {
             name: "Match 1",
             players: [
-              { id: "0", name: "Winner of Semifinal 1", score: 0 },
+              { id: "0", name: "Winner SF-1", score: 0 },
               { id: "5", name: "Player 5", score: 0 },
             ],
             status: MatchStatus.NOT_STARTED,
-            previousRoundInfo: "Winner of Semifinal 1 vs Winner of Semifinal 2",
+            previousRoundInfo: "Winner SF-1 vs Winner SF-2",
           },
         ],
       },
     ];
 
-    /* ----- assign stable DOM ids ----- */
-    const rounds: Round[] = rawRounds.map((round, r) => ({
-      ...round,
-      matches: round.matches.map((match, i) => ({
-        ...match,
-        id: `r${r}m${i}`,
-      })),
-    }));
-
-    // Create sample tournaments
     const tournaments: Tournament[] = [
       {
         id: "t1",
         state: TournamentStatus.ON_GOING,
         playerCount: 8,
         type: "SINGLE_ELIMINATION",
-        rounds: rounds,
+        rounds: rawRounds,
       },
       {
         id: "t2",
         state: TournamentStatus.CREATED,
         playerCount: 16,
         type: "DOUBLE_ELIMINATION",
-        rounds: [], // Empty rounds for new tournament
+        rounds: [],
       },
       {
         id: "t3",
         state: TournamentStatus.FINISHED,
         playerCount: 4,
         type: "SINGLE_ELIMINATION",
-        rounds: [], // Add completed tournament rounds here
+        rounds: [],
       },
     ];
 
-    /* ----- decide connection strategy ----- */
+    tournaments.forEach((tournament) => {
+      tournament.rounds = tournament.rounds.map((round, r) => ({
+        ...round,
+        matches: round.matches.map((match, i) => ({
+          ...match,
+          id: `${tournament.id}-r${r}m${i}`, // Add tournament ID prefix
+        })),
+      }));
+    });
+
+    /* ---------- connection strategy ---------- */
     const auto = request.query.auto !== "false";
 
     let connectionConfig: { auto: true } | { auto: false; edges: Edge[] };
@@ -142,19 +141,19 @@ const tournaments: FastifyPluginAsync = async (fastify) => {
     if (auto) {
       connectionConfig = { auto: true };
     } else {
+      // manual edges for tournament t1 only
       const edges: Edge[] = [
-        ["r0m0", "r1m0", -10],
-        ["r0m1", "r1m0", -10],
-        ["r0m2", "r1m1", 10],
-        ["r0m3", "r1m1", 10],
-        ["r1m0", "r2m0"],
-        ["r1m1", "r2m0"],
-        ["r1m2", "r2m1"],
-        ["r1m3", "r2m1"],
+        ["t1", "r0m0", "r1m0", -10],
+        ["t1", "r0m1", "r1m0", -10],
+        ["t1", "r0m2", "r1m1", 10],
+        ["t1", "r0m3", "r1m1", 10],
+        ["t1", "r1m0", "r2m0"],
+        ["t1", "r1m1", "r2m0"],
       ];
       connectionConfig = { auto: false, edges };
     }
 
+    /* ---------- render ---------- */
     const viewOptions = request.isAjax() ? {} : { layout: "layouts/main" };
     return reply.view(
       "views/tournaments",
@@ -164,4 +163,4 @@ const tournaments: FastifyPluginAsync = async (fastify) => {
   });
 };
 
-export default tournaments;
+export default tournamentsRoute;
