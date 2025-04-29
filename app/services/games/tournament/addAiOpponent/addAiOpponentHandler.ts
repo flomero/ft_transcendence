@@ -13,7 +13,7 @@ async function addAIOpponentHandler(
     const tournament = tournaments.get(tournamentId);
 
     tournament?.addAiOpponent(memberId);
-    return reply.send({ message: "AI Opponent has been added" });
+    return reply.code(200).send({ message: "AI Opponent has been added" });
   } catch (error) {
     if (error instanceof Error) return reply.badRequest(error.message);
   }
