@@ -20,7 +20,7 @@
           "ballResetSampler": "biasedQuadrantGaussianRA",
           "paddleCoveragePercent": 25,
           "paddleSpeedWidthPercentS": 150,
-          "paddleVelocityAngularTransmissionPercent": 45,
+          "paddleVelocityAngularTransmissionPercent": 55,
           "paddleVelocitySpeedTransmissionPercent": 10,
           "powerUpRadius": 4.5,
           "powerUpCapacities": {
@@ -38,21 +38,21 @@
         "fixedSettings": {
           "arenaWidth": 100,
           "arenaHeight": 100,
-          "paddleOffset": 2.5,
+          "paddleOffset": 3,
           "paddleHeight": 1,
           "wallsHeight": 2,
-          "wallsOffset": 1
+          "wallsOffset": 0
         },
 
         "customizableSettings": {
-          "ballSpeedWidthPercentS": 65,
-          "ballRadius": 0.8,
+          "ballSpeedWidthPercentS": 60,
+          "ballRadius": 0.7,
           "ballResetSampler": "biasedGaussianCA",
-          "paddleCoveragePercent": 25,
-          "paddleSpeedWidthPercentS": 140,
-          "paddleVelocityAngularTransmissionPercent": 45,
+          "paddleCoveragePercent": 22,
+          "paddleSpeedWidthPercentS": 150,
+          "paddleVelocityAngularTransmissionPercent": 55,
           "paddleVelocitySpeedTransmissionPercent": 10,
-          "powerUpRadius": 3,
+          "powerUpRadius": 3.25,
           "powerUpCapacities": {
             "speedBoost": 1,
             "blinkingBall": 1,

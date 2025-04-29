@@ -1,33 +1,39 @@
-import type { ITournamentBracketGenerator } from "../../types/strategy/ITournamentBracketGenerator";
+import type { ITournamentBracketGenerator } from "../../../types/strategy/ITournamentBracketGenerator";
 import type {
   ITournamentMatchWinner,
   MatchData,
-} from "../../types/strategy/ITournamentMatchWinner";
-import { StrategyManager } from "../strategy/strategyManager";
-import type { GameBase } from "../games/gameBase";
+} from "../../../types/strategy/ITournamentMatchWinner";
+import { StrategyManager } from "../../strategy/strategyManager";
+import type { GameBase } from "../../games/gameBase";
 import type {
   Match,
   Round,
   TournamentRankings,
   GameResult,
-} from "../../types/strategy/ITournamentBracketGenerator";
-import {
-  type TournamentResults,
-  type PlayerResults,
-  TournamentStatus,
-} from "../../types/tournament/tournament";
+} from "../../../types/strategy/ITournamentBracketGenerator";
+import type {
+  TournamentResults,
+  PlayerResults,
+} from "../../../types/tournament/tournament";
+
+export enum TournamentStatus {
+  CREATED,
+  ON_GOING,
+  FINISHED,
+}
+import { TournamentSettings } from "../../../interfaces/games/tournament/TournamentSettings";
 
 export class Tournament {
   // All tournament related data given at creation
-  protected tournamentData: Record<string, any>;
+  protected tournamentData: TournamentSettings;
 
   // Strategy managers for bracket generation and match winner determination
-  protected bracketManager: StrategyManager<
+  public bracketManager: StrategyManager<
     ITournamentBracketGenerator,
     "nextRound"
   >;
 
-  protected matchWinnerManager: StrategyManager<
+  public matchWinnerManager: StrategyManager<
     ITournamentMatchWinner,
     "recordGameResult"
   >;
@@ -47,7 +53,7 @@ export class Tournament {
   protected status: TournamentStatus = TournamentStatus.CREATED;
   protected tournamentResults: TournamentResults = {};
 
-  constructor(tournamentData: Record<string, any>) {
+  constructor(tournamentData: TournamentSettings) {
     this.tournamentData = tournamentData;
 
     // Initialize bracket generator strategy
@@ -60,7 +66,7 @@ export class Tournament {
 
     // Initialize match winner strategy
     this.matchWinnerManager = new StrategyManager(
-      this.tournamentData.matchWinnerType,
+      this.tournamentData.matchWinner,
       "tournamentMatchWinner",
       "recordGameResult",
       [],
@@ -76,47 +82,6 @@ export class Tournament {
 
   startTournament(): void {
     this.status = TournamentStatus.ON_GOING;
-
-    // Start tournament with no previous round results
-    let currentRound = this.bracketManager.executeStrategy();
-    let roundNumber = 1;
-
-    // Continue until there are no more matches to play
-    while (Object.keys(currentRound).length > 0) {
-      this.currentRound = currentRound;
-      this.completedMatches.clear();
-
-      console.log(`\n ---- ROUND ${roundNumber} ----`);
-      console.log(`Round ${roundNumber} matches:`);
-
-      // Initialize matches in the match winner strategy
-      Object.entries(currentRound).forEach(([matchID, match]) => {
-        const playerIDs = Object.keys(match.results);
-        // Initialize match in the match winner strategy
-        this.matchWinnerManager.execute(
-          "initializeMatch",
-          matchID,
-          playerIDs,
-          match.gamesCount,
-        );
-
-        console.log(
-          `  |->  ${matchID}: ${playerIDs.join(" vs ")} (Best of ${match.gamesCount})`,
-        );
-      });
-
-      // Simulate playing all games in this round
-      this.simulateRound(currentRound);
-
-      // Get matches for the next round
-      currentRound = this.bracketManager.executeStrategy();
-      roundNumber++;
-    }
-
-    console.log("\n ---- TOURNAMENT COMPLETED ----");
-    this.status = TournamentStatus.FINISHED;
-
-    this.tournamentResults = this.getResults();
   }
 
   /**

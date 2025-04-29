@@ -72,8 +72,6 @@ export class ClassicPong extends Pong {
       ))
         this.settings.powerUpCapacities[key] = value;
 
-    console.dir(this.settings, { depth: null });
-
     this.ballResetSampler = new StrategyManager(
       this.settings.ballResetSampler,
       "pongBallResetSampler",
@@ -88,13 +86,8 @@ export class ClassicPong extends Pong {
   }
 
   startGame(): void {
-    console.log("Starting Game");
     super.startGame();
     console.log("Game Started");
-
-    console.log(`Balls: ${this.gameState.balls.length}`);
-    console.log(`Paddles: ${this.gameState.paddles.length}`);
-    console.log(`Walls: ${this.gameState.walls.length}`);
   }
 
   initPaddles(): void {
@@ -315,7 +308,7 @@ export class ClassicPong extends Pong {
   }
 
   isOutOfBounds(ball: Ball): boolean {
-    const tolerance: number = -this.settings.wallsHeight / 4.0;
+    const tolerance: number = 0;
 
     return (
       ball.x <= -tolerance ||
