@@ -94,7 +94,7 @@ class TournamentManager {
     if (this.tournamentMembers.size >= this.tournamentSize) {
       throw new Error("[addAiOpponent] Tournament is already full");
     }
-    if (this.tournamentMembers.size >= aiOpponents.length)
+    if (this.getNumberOfAiOpponents() >= aiOpponents.length)
       throw new Error("[addAiOpponent] No more AI opponents available");
   }
 
