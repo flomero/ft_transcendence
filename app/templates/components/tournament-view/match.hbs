@@ -32,32 +32,34 @@
             {{player.name}}
           </td>
 
-          <!-- Win count with lead highlight -->
-          <td class="px-2 text-center font-bold rounded
-            {{#if (eq match.additionalData.leadPlayer playerIndex)}}
-              bg-green-500 text-white
-            {{else if (eq match.additionalData.leadPlayer -1)}}
-              bg-gray-400
-            {{else}}
-              bg-gray-600 text-white
-            {{/if}}">
-            {{player.winCount}}
-          </td>
-
-          <!-- Separator -->
-          <td class="px-2 text-gray-500">|</td>
-
-          <!-- Game scores -->
-          {{#each player.score as |score gameIndex|}}
-            <td class="px-1 text-center rounded
-              {{#if (eq match.additionalData.gameWinners.[gameIndex] playerIndex)}}
-                bg-blue-300
+          {{#if player.isReady}}
+            <!-- Win count with lead highlight -->
+            <td class="px-2 text-center font-bold rounded
+              {{#if (eq match.additionalData.leadPlayer playerIndex)}}
+                bg-green-500 text-white
+              {{else if (eq match.additionalData.leadPlayer -1)}}
+                bg-gray-400
               {{else}}
-                bg-gray-200
+                bg-gray-600 text-white
               {{/if}}">
-              {{score}}
+              {{player.winCount}}
             </td>
-          {{/each}}
+
+            <!-- Separator -->
+            <td class="px-2 text-gray-500">|</td>
+
+            <!-- Game scores -->
+            {{#each player.score as |score gameIndex|}}
+              <td class="px-1 text-center rounded
+                {{#if (eq match.additionalData.gameWinners.[gameIndex] playerIndex)}}
+                  bg-blue-300
+                {{else}}
+                  bg-gray-200
+                {{/if}}">
+                {{score}}
+              </td>
+            {{/each}}
+          {{/if}}
         </tr>
       {{/each}}
     </tbody>
@@ -65,16 +67,17 @@
 
   {{#if (eq match.status "ONGOING")}}
     <div class="mt-4">
-      <h3 class="text-lg font-bold text-yellow-300">In Progress</h3>
+      <h3 class="text-lg font-bold text-yellow-300">Game {{add match.additionalData.currentGame 1}} in progress</h3>
       <p class="text-sm">Started at: {{formatDate match.startTime "HH:mm"}}</p>
       <p class="text-sm">
         Duration: <span class="elapsed-time" data-start="{{match.startTime}}"></span>
       </p>
     </div>
-  {{else if (eq match.status "NOT_STARTED")}}
+  {{/if}}
+  {{!-- {{else if (eq match.status "NOT_STARTED")}}
     <div class="mt-4">
       <h3 class="text-lg font-bold text-gray-400">Not Started</h3>
       <p class="text-sm">From: {{match.previousRoundInfo}}</p>
     </div>
-  {{/if}}
+  {{/if}} --}}
 </div>

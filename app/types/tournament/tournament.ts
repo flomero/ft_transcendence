@@ -18,6 +18,7 @@ export enum TournamentStatus {
 export interface Player {
   id: string;
   name: string;
+  isReady?: boolean;
   score: number[];
   winCount: number;
   results?: number[]; // Optional results for the player

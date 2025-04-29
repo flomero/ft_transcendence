@@ -124,9 +124,22 @@ const tournamentsRoute: FastifyPluginAsync = async (fastify) => {
       },
     ];
 
+    function getPreviousMatch(
+      roundID: number,
+      matchID: number,
+      playerID: number,
+    ): { roundID: number; matchID: number } {
+      if (roundID === 0) return { roundID: -1, matchID: 0 }; // No previous round
+
+      const prevRoundID = roundID - 1;
+      const matchIndexInPrevRound = matchID * 2 + playerID;
+
+      return { roundID: prevRoundID, matchID: matchIndexInPrevRound };
+    }
+
     tournaments.forEach((tournament) => {
-      tournament.rounds.forEach((round) => {
-        round.matches.forEach((match) => {
+      tournament.rounds.forEach((round, roundID) => {
+        round.matches.forEach((match, matchID) => {
           const player0WinCount = match.players[0].winCount;
           const player1WinCount = match.players[1].winCount;
 
@@ -150,6 +163,15 @@ const tournamentsRoute: FastifyPluginAsync = async (fastify) => {
             playersWinCount,
           };
 
+          match.players.forEach((player, playerID) => {
+            const prevMatch = getPreviousMatch(roundID, matchID, playerID);
+            player.isReady =
+              prevMatch.roundID === -1
+                ? true
+                : tournament.rounds[prevMatch.roundID].matches[
+                    prevMatch.matchID
+                  ].status === MatchStatus.COMPLETED;
+          });
           match.additionalData = data;
         });
       });
