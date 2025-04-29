@@ -146,7 +146,18 @@ export class ModifierManager {
 
   getStateSnapshot(): Record<string, any> {
     const state = {
-      spawnedPowerUps: this.spawnedPowerUps,
+      spawnedPowerUps: {
+        ...Object.fromEntries(
+          this.spawnedPowerUps.map((powerUp) => [
+            powerUp[0],
+            {
+              radius: powerUp[1].radius,
+              x: powerUp[1].x,
+              y: powerUp[1].y,
+            },
+          ]),
+        ),
+      },
       modifiersState: {
         ...Object.fromEntries(
           this.modifiers.map((modifiers) => [

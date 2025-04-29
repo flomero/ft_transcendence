@@ -12,7 +12,12 @@ import { UserInputManager } from "../userInputManager";
 import type { UserInput } from "../../../types/games/userInput";
 import { RNG } from "../rng";
 import type { ExtendedCollisionData } from "../../../types/games/pong/extendedCollisionData";
-import type { PongGameState } from "../../../types/games/pong/gameState";
+import type {
+  BallState,
+  PaddleState,
+  PongGameState,
+  WallState,
+} from "../../../types/games/pong/gameState";
 
 const EPSILON = 1e-2;
 
@@ -229,22 +234,58 @@ export abstract class Pong extends GameBase {
   getStateSnapshot(): Record<string, any> {
     const gameBaseState = super.getStateSnapshot();
 
+    const balls: BallState[] = this.gameState.balls
+      .filter((ball) => ball.isVisible)
+      .map((ball) => {
+        return {
+          radius: ball.radius,
+          x: ball.x,
+          y: ball.y,
+        };
+      });
+
+    const paddles: PaddleState[] = this.gameState.paddles
+      .filter((paddle) => paddle.isVisible)
+      .map((paddle) => {
+        return {
+          alpha: paddle.alpha,
+          x: paddle.x,
+          y: paddle.y,
+          width: paddle.width,
+          height: paddle.height,
+          doRotation: paddle.doRotation,
+        };
+      });
+
+    const walls: WallState[] = this.gameState.walls
+      .filter((wall) => wall.isVisible)
+      .map((wall) => {
+        return {
+          alpha: wall.alpha,
+          x: wall.x,
+          y: wall.y,
+          width: wall.width,
+          height: wall.height,
+          doRotation: wall.doRotation,
+        };
+      });
+
     const snapshot = {
-      startDate: gameBaseState.startDate,
-      lastUpdate: gameBaseState.lastUpdate,
-      status: gameBaseState.status,
+      // startDate: gameBaseState.startDate,
+      // lastUpdate: gameBaseState.lastUpdate,
+      // status: gameBaseState.status,
       modifiersState: gameBaseState.modifiersState,
 
-      balls: this.gameState.balls,
-      paddles: this.gameState.paddles,
-      walls: this.gameState.walls,
+      balls: balls, // this.gameState.balls,
+      paddles: paddles, // this.gameState.paddles,
+      walls: walls, // this.gameState.walls,
 
-      rng: this.gameState.rng.getState(),
-      lastHit: this.gameState.lastHit,
-      lastGoal: this.gameState.lastGoal,
+      // rng: this.gameState.rng.getState(),
+      // lastHit: this.gameState.lastHit,
+      // lastGoal: this.gameState.lastGoal,
       scores: this.gameState.scores,
-      results: this.gameState.results,
-      playerCount: this.gameState.playerCount,
+      // results: this.gameState.results,
+      // playerCount: this.gameState.playerCount,
     };
 
     return snapshot;

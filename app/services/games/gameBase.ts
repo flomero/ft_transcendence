@@ -33,9 +33,9 @@ export abstract class GameBase {
 
   getStateSnapshot(): Record<string, any> {
     const state = {
-      startDate: this.gameBaseState.startDate,
-      lastUpdate: this.gameBaseState.lastUpdate,
-      status: this.gameBaseState.status,
+      // startDate: this.gameBaseState.startDate,
+      // lastUpdate: this.gameBaseState.lastUpdate,
+      // status: this.gameBaseState.status,
       modifiersState: this.modifierManager.getStateSnapshot(),
     };
 
