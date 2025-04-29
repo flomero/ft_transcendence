@@ -14,6 +14,7 @@ import {
 } from "../../../types/strategy/ITournamentBracketGenerator";
 import { createMatch } from "../matchMaking/createMatch";
 import { GameOrigin } from "../../../types/games/gameHandler/GameOrigin";
+import aiOpponents from "../aiOpponent/aiOpponents";
 
 class TournamentManager {
   public tournamentId: string = randomUUID();
@@ -26,6 +27,10 @@ class TournamentManager {
   public gameManagerIdToTorunGameId: Map<string, string[]> = new Map();
   public db: Database;
   public gameMatches: Map<string, Match> = new Map();
+  private static readonly PlayerType = {
+    PLAYER: 0,
+    AI: 1,
+  } as const;
 
   constructor(
     tournamentConfigKey: TournamentConfigKey,
@@ -43,6 +48,7 @@ class TournamentManager {
     const newMember: TournamentMember = {
       id: userId,
       status: "joined",
+      isAI: false,
     };
     this.tournamentMembers.set(userId, newMember);
   }
@@ -65,8 +71,31 @@ class TournamentManager {
     const newMember: TournamentMember = {
       id: memberId,
       status: "joined",
+      isAI: false,
     };
     this.tournamentMembers.set(memberId, newMember);
+  }
+
+  public addAiOpponent(memberId: string): void {
+    this.canAIOpponentBeAdded(memberId);
+    const aiId = this.getNumberOfAiOpponents();
+    const newAiOpponent: TournamentMember = {
+      id: aiId.toString(),
+      status: "joined",
+      isAI: true,
+    };
+    this.tournamentMembers.set(aiId.toString(), newAiOpponent);
+  }
+
+  private canAIOpponentBeAdded(memberId: string): void {
+    if (memberId !== this.ownerId) {
+      throw new Error("[addAiOpponent] Only the owner can add AI opponents");
+    }
+    if (this.tournamentMembers.size >= this.tournamentSize) {
+      throw new Error("[addAiOpponent] Tournament is already full");
+    }
+    if (this.tournamentMembers.size >= aiOpponents.length)
+      throw new Error("[addAiOpponent] No more AI opponents available");
   }
 
   public isMemberInTournament(memberId: string): boolean {
@@ -117,9 +146,9 @@ class TournamentManager {
       throw new Error("Tournament is already started");
     if (this.tournament?.getStatus() === TournamentStatus.FINISHED)
       throw new Error("Tournament is already finished");
-    //    if (this.allMembersAreConnected() === false)
-    // put this check of for testing
-    //      throw new Error("Not all members are connected");
+    if (this.allMembersAreConnected() === false)
+      // put this check of for testing
+      throw new Error("Not all members are connected");
     return true;
   }
 
@@ -132,11 +161,13 @@ class TournamentManager {
 
   private async createMatches(brackets: Round): Promise<void> {
     const bracketKeys = Object.keys(brackets);
+    const { PLAYER, AI } = TournamentManager.PlayerType;
 
     for (let i = 0; i < bracketKeys.length; i++) {
       const bracketKey = bracketKeys[i];
       const bracket = brackets[bracketKey];
-      const playersOfMatch = this.getBracketResultsKeysArr(bracket.results);
+      const bracketKeysArr = this.getBracketResultsKeysArr(bracket.results);
+      const playersAndAis = this.dividePlayersAndAIs(bracketKeysArr);
       this.gameMatches.set(bracketKey, bracket);
       const gameOrigin: GameOrigin = {
         type: "tournament",
@@ -144,13 +175,14 @@ class TournamentManager {
       };
 
       const gameManagerId = await createMatch(
-        playersOfMatch,
+        playersAndAis[PLAYER],
         this.gameModeType,
         this.db,
         gameOrigin,
+        playersAndAis[AI],
       );
-      this.sendGameManagerIdToPlayersOfMatch(gameManagerId, playersOfMatch);
-      this.addToGameManagerIdToTorunGameId(gameManagerId, bracketKey);
+      this.sendGameManagerIdToPlayersOfMatch(gameManagerId, playersAndAis[0]);
+      this.addToGameManagerIdToTourunGameId(gameManagerId, bracketKey);
     }
   }
 
@@ -169,6 +201,26 @@ class TournamentManager {
     }
   }
 
+  /**
+   * Divides the players and AIs into two arrays
+   * @param playersAndAis - Array of player and AI ids
+   * @returns - Array of two arrays, first array contains player ids, second array contains AI ids
+   */
+  private dividePlayersAndAIs(playersAndAis: string[]): string[][] {
+    // 0 beeing player | 1 AIs
+    const { PLAYER, AI } = TournamentManager.PlayerType;
+    const dividedPlayersAndAIs: string[][] = [[], []];
+    for (let i = 0; i < playersAndAis.length; i++) {
+      const playerOrAI = this.tournamentMembers.get(playersAndAis[i]);
+
+      if (playerOrAI?.isAI === false)
+        dividedPlayersAndAIs[PLAYER].push(playerOrAI.id);
+      else if (playerOrAI?.isAI === true)
+        dividedPlayersAndAIs[AI].push(playerOrAI.id);
+    }
+    return dividedPlayersAndAIs;
+  }
+
   private getBracketResultsKeysArr(result: MatchResults): string[] {
     const resultKeys = Object.keys(result);
     const resultKeyArr: string[] = [];
@@ -179,7 +231,7 @@ class TournamentManager {
     return resultKeyArr;
   }
 
-  private addToGameManagerIdToTorunGameId(
+  private addToGameManagerIdToTourunGameId(
     gameManagerId: string,
     tournamentGameId: string,
   ): void {
@@ -257,6 +309,7 @@ class TournamentManager {
 
   private async createOneGame(gameManagerId: string) {
     const matchId = this.getInGameIdFromGameManagerId(gameManagerId);
+    const { PLAYER, AI } = TournamentManager.PlayerType;
     if (matchId === undefined) {
       throw new Error(
         `[craeteMatch] Match with ID ${gameManagerId} does not exist`,
@@ -267,27 +320,29 @@ class TournamentManager {
       throw new Error(`[createMatch] Match with ID ${matchId} does not exist`);
     }
 
-    const playersOfMatch = this.getBracketResultsKeysArr(matchOptions.results);
+    const resultKeys = this.getBracketResultsKeysArr(matchOptions.results);
+    const playersAndAis = this.dividePlayersAndAIs(resultKeys);
     const gameOrigin: GameOrigin = {
       type: "tournament",
       tournament: this,
     };
     const newGameManagerId = await createMatch(
-      playersOfMatch,
+      playersAndAis[PLAYER],
       this.gameModeType,
       this.db,
       gameOrigin,
+      playersAndAis[AI],
     );
-    this.sendGameManagerIdToPlayersOfMatch(newGameManagerId, playersOfMatch);
-    this.addToGameManagerIdToTorunGameId(newGameManagerId, matchId);
+    this.sendGameManagerIdToPlayersOfMatch(
+      newGameManagerId,
+      playersAndAis[PLAYER],
+    );
+    this.addToGameManagerIdToTourunGameId(newGameManagerId, matchId);
   }
 
   public allMembersAreConnected(): boolean {
     for (const member of this.tournamentMembers.values()) {
-      if (member.webSocket === undefined) {
-        // check is ai later
-        return false;
-      }
+      if (member.webSocket === undefined && member.isAI === false) return false;
     }
     return true;
   }
@@ -314,6 +369,14 @@ class TournamentManager {
 
   public getId(): string {
     return this.tournamentId;
+  }
+
+  public getNumberOfAiOpponents(): number {
+    let numberOfAiOpponents = 0;
+    for (const member of this.tournamentMembers.values()) {
+      if (member.isAI === true) numberOfAiOpponents++;
+    }
+    return numberOfAiOpponents;
   }
 }
 

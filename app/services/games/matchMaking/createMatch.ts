@@ -16,6 +16,7 @@ export const createMatch = async (
   gameMode: GameModeType,
   db: Database,
   gameOrigin?: GameOrigin,
+  aiOpponentIds?: string[],
 ): Promise<string> => {
   const gameModeSettings = GAMEMODE_REGISTRY[
     gameMode as keyof typeof GAMEMODE_REGISTRY
@@ -36,10 +37,17 @@ export const createMatch = async (
   playerIds.forEach((playerId) => {
     gameManager.addPlayer(playerId);
   });
+  aiOpponentIds?.forEach((aiOpponentId) => {
+    gameManager.addAiOpponent(aiOpponentId);
+  });
 
   gameManagers.set(gameManager.getId, gameManager);
 
-  await addGameToDatabase(gameManager, db, gameModeSettings);
+  try {
+    await addGameToDatabase(gameManager, db, gameModeSettings);
+  } catch (error) {
+    console.error("[createMatch] Error adding game to DB:", error);
+  }
 
   return gameManager.getId;
 };
