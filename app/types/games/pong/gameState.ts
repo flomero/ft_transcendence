@@ -14,6 +14,8 @@ export type PaddleState = {
   alpha: number;
   x: number;
   y: number;
+  dx: number;
+  dy: number;
   width: number;
   height: number;
   doRotation: boolean;
@@ -23,6 +25,8 @@ export type WallState = {
   alpha: number;
   x: number;
   y: number;
+  dx: number;
+  dy: number;
   width: number;
   height: number;
   doRotation: boolean;
