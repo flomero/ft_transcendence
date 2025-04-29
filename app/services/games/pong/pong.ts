@@ -58,6 +58,7 @@ export abstract class Pong extends GameBase {
       eliminatedPlayers: [],
       playerCount: gameData.playerCount,
     };
+    this.tickData.push(this.gameState);
 
     // Initialize UserInputManager
     this.inputManager = new UserInputManager();
@@ -103,8 +104,8 @@ export abstract class Pong extends GameBase {
     }
 
     // Save the current state for potential rewinding
-    const snapshot = this.getStateSnapshot();
-    this.saveStateSnapshot(snapshot);
+    // const snapshot = this.getStateSnapshot();
+    this.saveStateSnapshot(this.gameState);
   }
 
   protected updatePaddle(paddle: Paddle, doTriggers: boolean): void {
@@ -250,15 +251,15 @@ export abstract class Pong extends GameBase {
   }
 
   loadStateSnapshot(snapshot: Record<string, any>): void {
-    this.gameState.balls = snapshot.balls; //.map(ball => ({...ball}));
-    this.gameState.paddles = snapshot.paddles; //.map(paddle => ({...paddle}));
-    this.gameState.walls = snapshot.walls; //.map(wall => ({...wall}));
-    this.gameState.scores = [...snapshot.scores];
-    this.gameState.lastHit = snapshot.lastHit;
+    this.gameState.balls = snapshot?.balls; //.map(ball => ({...ball}));
+    this.gameState.paddles = snapshot?.paddles; //.map(paddle => ({...paddle}));
+    this.gameState.walls = snapshot?.walls; //.map(wall => ({...wall}));
+    this.gameState.scores = [...(snapshot?.scores || [])];
+    this.gameState.lastHit = snapshot?.lastHit;
 
-    this.modifierManager.loadStateSnapshot(snapshot.modifiersData);
+    this.modifierManager.loadStateSnapshot(snapshot?.modifiersData || {});
 
-    this.gameState.rng.setState(snapshot.rng);
+    if (snapshot?.rng) this.gameState.rng.setState(snapshot.rng);
   }
 
   protected async saveStateSnapshot(
