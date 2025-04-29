@@ -237,7 +237,7 @@ export abstract class Pong extends GameBase {
       .filter((ball) => ball.isVisible)
       .map((ball) => {
         return {
-          radius: parseFloat(ball.radius.toFixed(3)),
+          r: parseFloat(ball.radius.toFixed(3)),
           x: parseFloat(ball.x.toFixed(3)),
           y: parseFloat(ball.y.toFixed(3)),
         };
@@ -247,11 +247,11 @@ export abstract class Pong extends GameBase {
       .filter((paddle) => paddle.isVisible)
       .map((paddle) => {
         return {
-          alpha: paddle.alpha,
+          a: paddle.alpha,
           x: parseFloat(paddle.x.toFixed(3)),
           y: parseFloat(paddle.y.toFixed(3)),
-          width: parseFloat(paddle.width.toFixed(3)),
-          height: parseFloat(paddle.height.toFixed(3)),
+          w: parseFloat(paddle.width.toFixed(3)),
+          h: parseFloat(paddle.height.toFixed(3)),
         };
       });
 
@@ -263,8 +263,8 @@ export abstract class Pong extends GameBase {
           y: parseFloat(wall.y.toFixed(3)),
           dx: parseFloat(wall.dx.toFixed(3)),
           dy: parseFloat(wall.dy.toFixed(3)),
-          width: parseFloat(wall.width.toFixed(3)),
-          height: parseFloat(wall.height.toFixed(3)),
+          w: parseFloat(wall.width.toFixed(3)),
+          h: parseFloat(wall.height.toFixed(3)),
           doRot: wall.doRotation,
         };
       });

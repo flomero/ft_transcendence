@@ -1,6 +1,6 @@
 {
   "pong": {
-    "serverTickrateS": 100,
+    "serverTickrateS": 60,
     "serverMaxDelayS": 2,
     "gameModes": {
       "classicPong": {

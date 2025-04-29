@@ -1,11 +1,10 @@
 import type { GameMessage } from "../types/games/userInput";
-import type { PongGameState } from "../types/games/pong/gameState";
-import type { Ball } from "../types/games/pong/ball";
+import type { PongMinimalGameState } from "../types/games/pong/gameState";
 
 class PongGame {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
-  private gameState: PongGameState | null = null;
+  private gameState: PongMinimalGameState | null = null;
   private ratio = 0.0;
   private gameId: string;
   private isConnected = false;
@@ -62,8 +61,7 @@ class PongGame {
       const message = JSON.parse(event.data);
 
       if (message.type === "gameState") {
-        const parsedData = JSON.parse(message.data);
-        this.gameState = parsedData;
+        this.gameState = message.data as PongMinimalGameState;
 
         if (message.referenceTable && this.playerIndex === -1) {
           this.referenceTable = message.referenceTable; // Store the reference table
@@ -92,10 +90,10 @@ class PongGame {
 
     const paddle = this.gameState.paddles[this.playerIndex];
 
-    if (!paddle || paddle.alpha === undefined) return;
+    if (!paddle || paddle.a === undefined) return;
     const targetAngle = Math.PI;
 
-    this.rotationAngle = (targetAngle - paddle.alpha) % (Math.PI * 2);
+    this.rotationAngle = (targetAngle - paddle.a) % (Math.PI * 2);
 
     if (this.rotationAngle > Math.PI) this.rotationAngle -= Math.PI * 2;
     if (this.rotationAngle < -Math.PI) this.rotationAngle += Math.PI * 2;
@@ -232,7 +230,7 @@ class PongGame {
     if (this.playerIndex >= 0 && this.gameState?.paddles[this.playerIndex]) {
       const paddle = this.gameState.paddles[this.playerIndex];
       this.ctx.fillText(
-        `Paddle Pos: x=${paddle.x.toFixed(1)}, y=${paddle.y.toFixed(1)}, alpha=${paddle.alpha.toFixed(3)} rad`,
+        `Paddle Pos: x=${paddle.x.toFixed(1)}, y=${paddle.y.toFixed(1)}, alpha=${paddle.a.toFixed(3)} rad`,
         10,
         100,
       );
@@ -272,18 +270,16 @@ class PongGame {
     if (!this.gameState?.balls) return;
 
     this.gameState.balls.forEach((ball) => {
-      if (ball.isVisible) {
-        this.ctx.fillStyle = "white";
-        this.ctx.beginPath();
-        this.ctx.arc(
-          ball.x * this.ratio,
-          ball.y * this.ratio,
-          ball.radius * this.ratio,
-          0,
-          Math.PI * 2,
-        );
-        this.ctx.fill();
-      }
+      this.ctx.fillStyle = "white";
+      this.ctx.beginPath();
+      this.ctx.arc(
+        ball.x * this.ratio,
+        ball.y * this.ratio,
+        ball.r * this.ratio,
+        0,
+        Math.PI * 2,
+      );
+      this.ctx.fill();
     });
   }
 
@@ -291,30 +287,28 @@ class PongGame {
     if (!this.gameState?.paddles) return;
 
     this.gameState.paddles.forEach((paddle, index) => {
-      if (paddle.isVisible) {
-        const angle = Math.atan2(paddle.dy, paddle.dx);
-        const x = paddle.x * this.ratio;
-        const y = paddle.y * this.ratio;
-        const width = paddle.width * this.ratio;
-        const height = paddle.height * this.ratio;
+      const angle = paddle.a + Math.PI / 2;
+      const x = paddle.x * this.ratio;
+      const y = paddle.y * this.ratio;
+      const width = paddle.w * this.ratio;
+      const height = paddle.h * this.ratio;
 
-        const paddleColor = index === this.playerIndex ? "#ff00ff" : "#00ffff";
+      const paddleColor = index === this.playerIndex ? "#ff00ff" : "#00ffff";
 
-        this.drawNeonRectangle(x, y, width, height, paddleColor, angle);
-      }
+      this.drawNeonRectangle(x, y, width, height, paddleColor, angle);
     });
   }
 
   private drawWalls(rotated: boolean): void {
     if (!this.gameState?.walls) return;
 
-    this.gameState.walls.forEach((wall) => {
-      if (wall.isVisible && wall.doRotation === rotated) {
+    this.gameState.walls.forEach((wall, id) => {
+      if (wall.doRot === rotated) {
         const angle = Math.atan2(wall.dy, wall.dx);
         const x = wall.x * this.ratio;
         const y = wall.y * this.ratio;
-        const width = wall.width * this.ratio;
-        const height = wall.height * this.ratio;
+        const width = wall.w * this.ratio;
+        const height = wall.h * this.ratio;
 
         this.drawNeonRectangle(x, y, width, height, "#ffffff", angle);
       }
@@ -323,17 +317,17 @@ class PongGame {
 
   private drawPowerUps(): void {
     if (!this.gameState?.modifiersState?.spawnedPowerUps) return;
+    console.table(this.gameState.modifiersState.spawnedPowerUps);
 
-    for (const [type, powerUp] of this.gameState.modifiersState
-      .spawnedPowerUps as [string, Ball][]) {
-      if (powerUp.isVisible) {
-        const x = powerUp.x * this.ratio;
-        const y = powerUp.y * this.ratio;
-        const radius = powerUp.radius * this.ratio;
-        const color = this.getPowerUpColor(type);
+    for (const [type, powerUp] of Object.entries(
+      this.gameState.modifiersState.spawnedPowerUps,
+    )) {
+      const x = powerUp.x * this.ratio;
+      const y = powerUp.y * this.ratio;
+      const radius = powerUp.r * this.ratio;
+      const color = this.getPowerUpColor(type);
 
-        this.drawNeonCircle(x, y, radius, color);
-      }
+      this.drawNeonCircle(x, y, radius, color);
     }
   }
 

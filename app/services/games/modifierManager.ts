@@ -151,9 +151,9 @@ export class ModifierManager {
           this.spawnedPowerUps.map((powerUp) => [
             powerUp[0],
             {
-              radius: powerUp[1].radius,
-              x: powerUp[1].x,
-              y: powerUp[1].y,
+              r: powerUp[1].radius,
+              x: parseFloat(powerUp[1].x.toFixed(3)),
+              y: parseFloat(powerUp[1].y.toFixed(3)),
             },
           ]),
         ),

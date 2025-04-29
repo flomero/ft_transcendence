@@ -11,7 +11,7 @@
 
 {{#if url}}
 <a href="{{url}}" 
-  class="{{twMerge 'rounded-lg transition-colors w-fit block px-4 py-2' (buttonVariants variant) 'disabled:opacity-50 disabled:cursor-not-allowed' class}}"
+  class="{{twMerge 'rounded-lg transition-colors w-fit block select-none px-4 py-2' (buttonVariants variant) 'disabled:opacity-50 disabled:cursor-not-allowed' class}}"
   {{#if id}}id="{{id}}"{{/if}}
   {{#if disabled}}aria-disabled="true" tabindex="-1"{{/if}}
   {{#if spaIgnore}}data-spa-ignore="true"{{/if}}>
@@ -19,7 +19,7 @@
 </a>
 {{else}}
 <button 
-  class="{{twMerge 'rounded-lg transition-colors w-fit px-4 py-2 has-[svg]:gap-1 has-[svg]:not-[.hidden]:flex has-[svg]:text-center has-[svg]:items-center' (buttonVariants variant) 'disabled:opacity-50 disabled:cursor-not-allowed' class}}"
+  class="{{twMerge 'rounded-lg transition-colors w-fit select-none px-4 py-2 has-[svg]:gap-1 has-[svg]:not-[.hidden]:flex has-[svg]:text-center has-[svg]:items-center' (buttonVariants variant) 'disabled:opacity-50 disabled:cursor-not-allowed' class}}"
   {{#if id}}id="{{id}}"{{/if}}
   {{#if disabled}}disabled{{/if}}
   {{#if aria-label}}aria-label="{{aria-label}}"{{/if}}

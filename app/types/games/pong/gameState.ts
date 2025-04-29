@@ -5,17 +5,17 @@ import type { RNG } from "../../../services/games/rng";
 import type { GameBaseState } from "../gameBaseState";
 
 export type BallState = {
-  radius: number;
+  r: number;
   x: number;
   y: number;
 };
 
 export type PaddleState = {
-  alpha: number;
+  a: number;
   x: number;
   y: number;
-  width: number;
-  height: number;
+  w: number;
+  h: number;
 };
 
 export type WallState = {
@@ -23,8 +23,8 @@ export type WallState = {
   y: number;
   dx: number;
   dy: number;
-  width: number;
-  height: number;
+  w: number;
+  h: number;
   doRot: boolean;
 };
 
