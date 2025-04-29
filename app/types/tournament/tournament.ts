@@ -9,6 +9,12 @@ export type TournamentResults = {
   [playerID: string]: PlayerResults[];
 };
 
+export enum TournamentStatus {
+  CREATED,
+  ON_GOING,
+  FINISHED,
+}
+
 export interface Player {
   id: string;
   name: string;
@@ -35,6 +41,14 @@ export interface Round {
   name: string;
   matches: Match[];
   isCurrent?: boolean; // Optional flag to indicate if this is the current round
+}
+
+export interface Tournament {
+  id: string;
+  state: TournamentStatus;
+  playerCount: number;
+  type: string; // e.g., "SINGLE_ELIMINATION", "DOUBLE_ELIMINATION", etc.
+  rounds: Round[];
 }
 
 export type Edge = [string, string] | [string, string, number];

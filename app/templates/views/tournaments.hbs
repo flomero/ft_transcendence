@@ -1,8 +1,20 @@
-{{> components/tournament-view/tournament-bracket
-  rounds=rounds
-}}
+{{#each tournaments as |tournament|}}
+  <div class="mb-8">
+    <div class="mb-4">
+      <h2 class="text-xl font-bold">Tournament {{tournament.id}}</h2>
+      <div class="text-sm text-gray-600">
+        <span>Type: {{tournament.type}}</span> |
+        <span>Players: {{tournament.playerCount}}</span> |
+        <span>Status: {{tournament.state}}</span>
+      </div>
+    </div>
+    {{> components/tournament-view/tournament-bracket
+      rounds=tournament.rounds
+    }}
+  </div>
+{{/each}}
 
 <script>
-  window.__ROUNDS__ = {{{json rounds}}};
+  window.__TOURNAMENTS__ = {{{json tournaments}}};
   window.__CONNECTIONS__ = {{{json connectionConfig}}};
 </script>

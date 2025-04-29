@@ -11,16 +11,11 @@ import type {
   TournamentRankings,
   GameResult,
 } from "../../types/strategy/ITournamentBracketGenerator";
-import type {
-  TournamentResults,
-  PlayerResults,
+import {
+  type TournamentResults,
+  type PlayerResults,
+  TournamentStatus,
 } from "../../types/tournament/tournament";
-
-export enum TournamentStatus {
-  CREATED,
-  ON_GOING,
-  FINISHED,
-}
 
 export class Tournament {
   // All tournament related data given at creation

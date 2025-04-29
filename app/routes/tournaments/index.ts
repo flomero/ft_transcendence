@@ -1,14 +1,20 @@
-// routes/profile.ts
 import type { FastifyPluginAsync } from "fastify";
-import type { Edge, Round } from "../../types/tournament/tournament";
-import { MatchStatus } from "../../types/tournament/tournament";
+import type {
+  Edge,
+  Round,
+  Tournament,
+} from "../../types/tournament/tournament";
+import {
+  MatchStatus,
+  TournamentStatus,
+} from "../../types/tournament/tournament";
 
 interface BracketQuery {
-  auto?: string; // "true" | "false" | (undefined → default)
-  partial?: string; // "true" | "false" | (undefined → default)
+  auto?: string;
+  partial?: string;
 }
 
-const profile: FastifyPluginAsync = async (fastify) => {
+const tournaments: FastifyPluginAsync = async (fastify) => {
   fastify.get<{ Querystring: BracketQuery }>("/", async (request, reply) => {
     /* ----- tournament data (variable players per match) ----- */
     const rawRounds: Round[] = [
@@ -92,49 +98,6 @@ const profile: FastifyPluginAsync = async (fastify) => {
           },
         ],
       },
-      {
-        name: "Final",
-        matches: [
-          {
-            name: "Match 1",
-            players: [
-              { id: "0", name: "Winner of Semifinal 1", score: 0 },
-              { id: "5", name: "Player 5", score: 0 },
-            ],
-            status: MatchStatus.NOT_STARTED,
-            previousRoundInfo: "Winner of Semifinal 1 vs Winner of Semifinal 2",
-          },
-        ],
-        isCurrent: true,
-      },
-      {
-        name: "Final",
-        matches: [
-          {
-            name: "Match 1",
-            players: [
-              { id: "0", name: "Winner of Semifinal 1", score: 0 },
-              { id: "5", name: "Player 5", score: 0 },
-            ],
-            status: MatchStatus.NOT_STARTED,
-            previousRoundInfo: "Winner of Semifinal 1 vs Winner of Semifinal 2",
-          },
-        ],
-      },
-      {
-        name: "Final",
-        matches: [
-          {
-            name: "Match 1",
-            players: [
-              { id: "0", name: "Winner of Semifinal 1", score: 0 },
-              { id: "5", name: "Player 5", score: 0 },
-            ],
-            status: MatchStatus.NOT_STARTED,
-            previousRoundInfo: "Winner of Semifinal 1 vs Winner of Semifinal 2",
-          },
-        ],
-      },
     ];
 
     /* ----- assign stable DOM ids ----- */
@@ -146,8 +109,33 @@ const profile: FastifyPluginAsync = async (fastify) => {
       })),
     }));
 
+    // Create sample tournaments
+    const tournaments: Tournament[] = [
+      {
+        id: "t1",
+        state: TournamentStatus.ON_GOING,
+        playerCount: 8,
+        type: "SINGLE_ELIMINATION",
+        rounds: rounds,
+      },
+      {
+        id: "t2",
+        state: TournamentStatus.CREATED,
+        playerCount: 16,
+        type: "DOUBLE_ELIMINATION",
+        rounds: [], // Empty rounds for new tournament
+      },
+      {
+        id: "t3",
+        state: TournamentStatus.FINISHED,
+        playerCount: 4,
+        type: "SINGLE_ELIMINATION",
+        rounds: [], // Add completed tournament rounds here
+      },
+    ];
+
     /* ----- decide connection strategy ----- */
-    const auto = request.query.auto !== "false"; // default = auto=true
+    const auto = request.query.auto !== "false";
 
     let connectionConfig: { auto: true } | { auto: false; edges: Edge[] };
 
@@ -170,10 +158,10 @@ const profile: FastifyPluginAsync = async (fastify) => {
     const viewOptions = request.isAjax() ? {} : { layout: "layouts/main" };
     return reply.view(
       "views/tournaments",
-      { rounds, connectionConfig },
+      { tournaments, connectionConfig },
       viewOptions,
     );
   });
 };
 
-export default profile;
+export default tournaments;
