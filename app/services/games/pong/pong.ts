@@ -40,6 +40,7 @@ export abstract class Pong extends GameBase {
 
     // Network playability related
     this.tickData = new Array(this.serverMaxDelayTicks);
+    this.tickData.push({});
 
     // Initial gameState
     this.gameState = {

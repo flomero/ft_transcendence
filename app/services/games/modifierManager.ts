@@ -161,7 +161,7 @@ export class ModifierManager {
   }
 
   loadStateSnapshot(snapshot: Record<string, any>): void {
-    this.spawnedPowerUps = snapshot.spawnedPowerUps || [];
+    this.spawnedPowerUps = snapshot?.spawnedPowerUps || [];
   }
 
   sampleRandomPowerUp(rng: RNG): string | null {
