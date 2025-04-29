@@ -73,35 +73,28 @@ export class MultiplayerPong extends Pong {
       ))
         this.settings.powerUpCapacities[key] = value;
 
-    console.log("Loaded settings:");
-    console.dir(this.settings, { depth: null });
-
     this.ballResetSampler = new StrategyManager(
       this.settings.ballResetSampler,
       "pongBallResetSampler",
       "sampleDirection",
     );
 
-    this.initPaddles();
     this.initWalls();
+    this.initPaddles();
     this.resetBall(this.gameState, -1, true);
   }
 
   startGame(): void {
-    console.log("Starting Game");
     super.startGame();
     console.log("Game Started");
-
-    console.log(`Balls: ${this.gameState.balls.length}`);
-    console.log(`Paddles: ${this.gameState.paddles.length}`);
-    console.log(`Walls: ${this.gameState.walls.length}`);
   }
 
   initPaddles(): void {
     // Calculate paddleAmplitude - the maximum possible distance the paddle can travel
     const paddleAmplitude =
-      (this.settings.arenaRadius - this.settings.paddleOffset) *
-      Math.sin(Math.PI / this.gameState.playerCount);
+      (this.gameState.walls[0].width *
+        (this.settings.arenaRadius - this.settings.paddleOffset)) /
+      this.settings.arenaRadius;
 
     // Calculate the coverage percentage (0 to 1)
     const coverage = this.settings.paddleCoveragePercent / 100.0;
@@ -228,93 +221,77 @@ export class MultiplayerPong extends Pong {
 
     // Calculate proper widths for walls to ensure they overlap correctly
     const totalWalls = this.gameState.walls.length;
+    const newWidths: number[] = new Array(totalWalls);
 
     // First compute all new widths without modifying the walls
-    for (let i = 0; i < totalWalls; i += 2) {
+    for (let i = 0; i < totalWalls; i++) {
       const currentWall = this.gameState.walls[i];
-
-      // Get the wall before and after (odd-indexed walls that remain fixed)
-      const prevWallIndex = (i - 1 + totalWalls) % totalWalls;
       const nextWallIndex = (i + 1) % totalWalls;
-
-      const prevWall = this.gameState.walls[prevWallIndex];
       const nextWall = this.gameState.walls[nextWallIndex];
 
-      // Get the corners of the fixed odd walls that we need to connect to
-      // For prevWall, we need its bottom-right corner (+direction, -normal)
-      const prevWallCorner = {
-        x:
-          prevWall.x +
-          (prevWall.dx * prevWall.width) / 2 -
-          (prevWall.nx * prevWall.height) / 2,
-        y:
-          prevWall.y +
-          (prevWall.dy * prevWall.width) / 2 -
-          (prevWall.ny * prevWall.height) / 2,
+      const currentWallInfos = {
+        x: currentWall.x - (currentWall.nx * currentWall.height) / 2.0,
+        y: currentWall.y - (currentWall.ny * currentWall.height) / 2.0,
+        vectorX: currentWall.dx,
+        vectorY: currentWall.dy,
       };
 
-      // For nextWall, we need its bottom-left corner (-direction, -normal)
-      const nextWallCorner = {
-        x:
-          nextWall.x -
-          (nextWall.dx * nextWall.width) / 2 -
-          (nextWall.nx * nextWall.height) / 2,
-        y:
-          nextWall.y -
-          (nextWall.dy * nextWall.width) / 2 -
-          (nextWall.ny * nextWall.height) / 2,
+      const nextWallInfos = {
+        x: nextWall.x - (nextWall.nx * nextWall.height) / 2.0,
+        y: nextWall.y - (nextWall.ny * nextWall.height) / 2.0,
+        vectorX: -nextWall.dx,
+        vectorY: -nextWall.dy,
       };
 
-      // Calculate the vector between the corners
-      let dx = nextWallCorner.x - prevWallCorner.x;
-      let dy = nextWallCorner.y - prevWallCorner.y;
-      const width = Math.sqrt(dx ** 2 + dy ** 2) || currentWall.width;
+      // Compute intersection point between the two lines
+      // Line 1: currentWallInfos.x + t * currentWallInfos.vectorX, currentWallInfos.y + t * currentWallInfos.vectorY
+      // Line 2: nextWallInfos.x + s * nextWallInfos.vectorX, nextWallInfos.y + s * nextWallInfos.vectorY
 
-      currentWall.width = width;
+      // Using the formula for line intersection:
+      // det = cross(v1, v2) = v1.x * v2.y - v1.y * v2.x
+      const det =
+        currentWallInfos.vectorX * nextWallInfos.vectorY -
+        currentWallInfos.vectorY * nextWallInfos.vectorX;
+
+      // If det is close to 0, lines are parallel and won't intersect properly
+      if (Math.abs(det) < 1e-10) {
+        // Fallback to default width if no intersection
+        newWidths[i] = wallWidth;
+        continue;
+      }
+
+      // Calculate vector between starting points
+      const dx = nextWallInfos.x - currentWallInfos.x;
+      const dy = nextWallInfos.y - currentWallInfos.y;
+
+      // Calculate parameters t and s
+      const t = (dx * nextWallInfos.vectorY - dy * nextWallInfos.vectorX) / det;
+
+      // We only need t for the current wall to determine its width
+      // The intersection point
+      const intersectionX = currentWallInfos.x + t * currentWallInfos.vectorX;
+      const intersectionY = currentWallInfos.y + t * currentWallInfos.vectorY;
+
+      // Calculate distance from the wall's center to the intersection point
+      const centerToIntersectionX = intersectionX - currentWall.x;
+      const centerToIntersectionY = intersectionY - currentWall.y;
+
+      // Project this vector onto the wall's direction vector
+      const projectionLength =
+        centerToIntersectionX * currentWallInfos.vectorX +
+        centerToIntersectionY * currentWallInfos.vectorY;
+
+      // The new width should be twice this projection (to extend from center)
+      newWidths[i] = Math.abs(projectionLength) * 2;
+
+      // Add a small margin to ensure walls overlap
+      const overlapMargin = 0.01; // Small overlap to prevent gaps
+      newWidths[i] += overlapMargin;
     }
 
-    // First compute all new widths without modifying the walls
-    for (let i = 0; i < totalWalls; i += 2) {
-      const currentWall = this.gameState.walls[(i + 1) % totalWalls];
-
-      // Get the wall before and after (odd-indexed walls that remain fixed)
-      const prevWallIndex = (i + totalWalls) % totalWalls;
-      const nextWallIndex = (i + 2) % totalWalls;
-
-      const prevWall = this.gameState.walls[prevWallIndex];
-      const nextWall = this.gameState.walls[nextWallIndex];
-
-      // Get the corners of the fixed odd walls that we need to connect to
-      // For prevWall, we need its bottom-right corner (+direction, -normal)
-      const prevWallCorner = {
-        x:
-          prevWall.x +
-          (prevWall.dx * prevWall.width) / 2 -
-          (prevWall.nx * prevWall.height) / 2,
-        y:
-          prevWall.y +
-          (prevWall.dy * prevWall.width) / 2 -
-          (prevWall.ny * prevWall.height) / 2,
-      };
-
-      // For nextWall, we need its bottom-left corner (-direction, -normal)
-      const nextWallCorner = {
-        x:
-          nextWall.x -
-          (nextWall.dx * nextWall.width) / 2 -
-          (nextWall.nx * nextWall.height) / 2,
-        y:
-          nextWall.y -
-          (nextWall.dy * nextWall.width) / 2 -
-          (nextWall.ny * nextWall.height) / 2,
-      };
-
-      // Calculate the vector between the corners
-      let dx = nextWallCorner.x - prevWallCorner.x;
-      let dy = nextWallCorner.y - prevWallCorner.y;
-      const width = Math.sqrt(dx ** 2 + dy ** 2) || currentWall.width;
-
-      currentWall.width = width;
+    // Now update all walls with their new widths
+    for (let i = 0; i < totalWalls; i++) {
+      this.gameState.walls[i].width = newWidths[i];
     }
   }
 

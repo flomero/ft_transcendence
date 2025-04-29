@@ -46,8 +46,8 @@ export const pongConsumer = async (
       await sleep(sleepIntervalMs);
       loopCounter++;
 
-      if (loopCounter % 300 === 0)
-        currentGame?.eliminate(loopCounter / 300 - 1);
+      // if (loopCounter % 300 === 0)
+      //   currentGame?.eliminate(loopCounter / 300 - 1);
     }
   };
 

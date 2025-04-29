@@ -72,8 +72,6 @@ export class ClassicPong extends Pong {
       ))
         this.settings.powerUpCapacities[key] = value;
 
-    console.dir(this.settings, { depth: null });
-
     this.ballResetSampler = new StrategyManager(
       this.settings.ballResetSampler,
       "pongBallResetSampler",
@@ -88,13 +86,8 @@ export class ClassicPong extends Pong {
   }
 
   startGame(): void {
-    console.log("Starting Game");
     super.startGame();
     console.log("Game Started");
-
-    console.log(`Balls: ${this.gameState.balls.length}`);
-    console.log(`Paddles: ${this.gameState.paddles.length}`);
-    console.log(`Walls: ${this.gameState.walls.length}`);
   }
 
   initPaddles(): void {
