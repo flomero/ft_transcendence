@@ -43,11 +43,7 @@ export const createMatch = async (
 
   gameManagers.set(gameManager.getId, gameManager);
 
-  try {
-    await addGameToDatabase(gameManager, db, gameModeSettings);
-  } catch (error) {
-    console.error("[createMatch] Error adding game to DB:", error);
-  }
+  await addGameToDatabase(gameManager, db, gameModeSettings);
 
   return gameManager.getId;
 };
