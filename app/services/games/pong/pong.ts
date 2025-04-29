@@ -40,7 +40,6 @@ export abstract class Pong extends GameBase {
 
     // Network playability related
     this.tickData = new Array(this.serverMaxDelayTicks);
-    this.tickData.push({});
 
     // Initial gameState
     this.gameState = {
@@ -59,6 +58,7 @@ export abstract class Pong extends GameBase {
       eliminatedPlayers: [],
       playerCount: gameData.playerCount,
     };
+    this.tickData.push(this.gameState);
 
     // Initialize UserInputManager
     this.inputManager = new UserInputManager();
@@ -105,8 +105,8 @@ export abstract class Pong extends GameBase {
     }
 
     // Save the current state for potential rewinding
-    const snapshot = this.getStateSnapshot();
-    this.saveStateSnapshot(snapshot);
+    // const snapshot = this.getStateSnapshot();
+    this.saveStateSnapshot(this.gameState);
   }
 
   protected updatePaddle(paddle: Paddle, doTriggers: boolean): void {
