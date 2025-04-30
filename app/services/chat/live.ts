@@ -126,7 +126,12 @@ async function updateRoomAndSendMessage(
   type: ChatMessageType,
 ) {
   const userIdsBlacklist = chatClients
-    .filter((client) => client.currentRoomId === roomId)
+    .filter((client) => {
+      if (type === ChatMessageType.invite) {
+        return client.currentRoomId === roomId || client.userId === userId;
+      }
+      return client.currentRoomId === roomId;
+    })
     .map((client) => client.userId);
 
   await setRoomReadForAllUsersBlacklist(
@@ -222,9 +227,9 @@ export async function sendGameInvite(
   fastify: FastifyInstance,
   request: FastifyRequest,
   roomId: number,
-  gameId: number,
+  lobbyId: number,
 ) {
-  const message: string = "/games/lobby/join/" + gameId;
+  const message: string = "/games/lobby/join/" + lobbyId;
 
   await updateRoomAndSendMessage(
     fastify,
