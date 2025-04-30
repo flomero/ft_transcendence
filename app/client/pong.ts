@@ -1,4 +1,4 @@
-import type { GameMessage } from "../types/games/userInput";
+import type { GameMessage, PongUserInput } from "../types/games/userInput";
 import type { PongMinimalGameState } from "../types/games/pong/gameState";
 
 class PongGame {
@@ -16,6 +16,20 @@ class PongGame {
   private playerIndex = -1; // -1 means not determined yet
   private playerCount = 0;
   private referenceTable: string[] = [];
+
+  private readonly KEY_MAPPINGS: Record<string, PongUserInput> = {
+    ArrowUp: "UP",
+    ArrowDown: "DOWN",
+    Space: "SPACE",
+    " ": "SPACE",
+  };
+
+  private readonly KEY_RELEASE_MAPPINGS: Record<string, PongUserInput> = {
+    ArrowUp: "STOP_UP",
+    ArrowDown: "STOP_DOWN",
+    Space: "STOP_SPACE",
+    " ": "STOP_SPACE",
+  };
 
   constructor(canvasId: string) {
     const path = window.location.pathname;
@@ -118,39 +132,34 @@ class PongGame {
   }
 
   private handleKeyDown(event: KeyboardEvent): void {
-    const action: GameMessage = {
-      type: "userInput",
-      options: {
-        timestamp: Date.now(),
-        playerId: -1, // will be set in the server
-      },
-    };
-
-    if (event.key === "ArrowUp") action.options.type = "UP";
-    if (event.key === "ArrowDown") action.options.type = "DOWN";
-    if (event.key === "Space") action.options.type = "SPACE";
-
-    if (action.options.type && this.isConnected) {
-      this.gameSocket.send(JSON.stringify(action));
+    const actionType = this.KEY_MAPPINGS[event.key];
+    if (actionType) {
+      event.preventDefault();
+      this.sendGameInput(actionType);
     }
   }
 
   private handleKeyUp(event: KeyboardEvent): void {
+    const actionType = this.KEY_RELEASE_MAPPINGS[event.key];
+    if (actionType) {
+      event.preventDefault();
+      this.sendGameInput(actionType);
+    }
+  }
+
+  private sendGameInput(actionType: PongUserInput): void {
+    if (!this.isConnected) return;
+
     const action: GameMessage = {
       type: "userInput",
       options: {
         timestamp: Date.now(),
         playerId: -1, // will be set in the server
+        type: actionType,
       },
     };
 
-    if (event.key === "ArrowUp") action.options.type = "STOP_UP";
-    if (event.key === "ArrowDown") action.options.type = "STOP_DOWN";
-    if (event.key === "Space") action.options.type = "STOP_SPACE";
-
-    if (action.options.type && this.isConnected) {
-      this.gameSocket.send(JSON.stringify(action));
-    }
+    this.gameSocket.send(JSON.stringify(action));
   }
 
   private draw(): void {
