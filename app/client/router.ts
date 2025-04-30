@@ -3,6 +3,7 @@ import LobbyHandler from "./lobby.js";
 import TournamentBracket from "./tournament.js";
 import MatchmakingHandler from "./matchmaking.js";
 import { initPongGame, type PongGame } from "./pong.js";
+import { closeSidebar } from "./sidebar.js";
 
 // Route handler interface with lifecycle hooks
 interface RouteHandler {
@@ -412,6 +413,19 @@ document.addEventListener("DOMContentLoaded", () => {
       const lobbyHandler = new LobbyHandler();
       lobbyHandler.connect();
       window.lobbyHandler = lobbyHandler;
+
+      const chatRoomsView = document.getElementById("chat-rooms");
+      console.log("Chat rooms view:", chatRoomsView);
+      if (!chatRoomsView) {
+        console.error("Chat rooms view not found");
+        return;
+      }
+      const inviteIcons = chatRoomsView.querySelectorAll(
+        "button#send-invite-button",
+      );
+      inviteIcons.forEach((icon) => {
+        icon.classList.remove("hidden");
+      });
     },
     onExit: () => {
       if (window.lobbyHandler) {
@@ -419,6 +433,18 @@ document.addEventListener("DOMContentLoaded", () => {
           window.lobbyHandler.socket.close();
         }
       }
+
+      const chatRoomsView = document.getElementById("chat-rooms");
+      if (!chatRoomsView) {
+        console.error("Chat rooms view not found");
+        return;
+      }
+      const inviteIcons = chatRoomsView.querySelectorAll(
+        "button#send-invite-button",
+      );
+      inviteIcons.forEach((icon) => {
+        icon.classList.add("hidden");
+      });
     },
   });
 
@@ -464,17 +490,11 @@ document.addEventListener("DOMContentLoaded", () => {
     },
   });
 
-  // window.router.addRoute("/login", {
-  //   onEnter: () => {
-  //     // Check if the referrer is from Google accounts
-  //     const referrer = document.referrer;
-  //     if (referrer && referrer.startsWith("https://accounts.google.com/")) {
-  //       console.log("Detected Google OAuth redirect, performing full page reload");
-  //       // Force a full page reload to ensure cookies are properly set
-  //       window.location.reload();
-  //     }
-  //   }
-  // });
+  window.router.addRoute("/login", {
+    onEnter: () => {
+      closeSidebar();
+    },
+  });
 
   window.router.init();
 });
