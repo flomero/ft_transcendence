@@ -15,6 +15,22 @@ const page: FastifyPluginAsync = async (fastify): Promise<void> => {
     const viewOptions = request.isAjax() ? {} : { layout: "layouts/main" };
     return reply.view("views/lobby/menu", data, viewOptions);
   });
+
+  fastify.get<{
+    Params: {
+      gameMode: string;
+    };
+  }>("/:gameMode", async (request, reply) => {
+    const gameMode = request.params.gameMode;
+
+    const data = {
+      title: "Choose Visibility | ft_transcendence",
+      gameMode: gameMode,
+    };
+    reply.header("X-Page-Title", "Choose Visibility Lobby | ft_transcendence");
+    const viewOptions = request.isAjax() ? {} : { layout: "layouts/main" };
+    return reply.view("views/lobby/visibility", data, viewOptions);
+  });
 };
 
 export default page;

@@ -4,7 +4,7 @@
   <div class="flex flex-row flex-wrap gap-2 justify-center">
     {{#each gamemodes}}
       {{#with this as |gameMode|}}
-        {{#> components/button variant="primary" }}
+        {{#> components/button variant="primary" url=(add "/play/lobby/" gameMode) }}
           {{hrGameModeName gameMode}}
         {{/components/button}}
       {{/with}}
