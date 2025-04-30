@@ -130,7 +130,7 @@ async function updateRoomAndSendMessage(
       if (type === ChatMessageType.invite) {
         return client.currentRoomId === roomId || client.userId === userId;
       }
-      return client.currentRoomId === roomId;
+      return client.currentRoomId === roomId || client.userId === userId;
     })
     .map((client) => client.userId);
 
@@ -142,7 +142,7 @@ async function updateRoomAndSendMessage(
   );
 
   for (const client of chatClients) {
-    if (client.currentRoomId != roomId) {
+    if (client.currentRoomId != roomId && client.userId != userId) {
       let room = client.roomIds.find((id) => id == roomId);
       if (!room) {
         continue;
