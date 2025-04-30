@@ -78,14 +78,16 @@ class PongGame {
         this.gameState = message.data as PongMinimalGameState;
 
         if (message.referenceTable && this.playerIndex === -1) {
-          this.referenceTable = message.referenceTable; // Store the reference table
+          this.referenceTable = message.referenceTable;
           this.playerIndex = message.referenceTable.indexOf(this.currentUserId);
           this.playerCount = message.referenceTable.length;
+
           if (this.playerCount === 2) {
             this.canvas.width = 800;
             this.canvas.height = 400;
             this.ratio = (this.canvas.width - this.padding * 2) / 200.0;
           }
+
           if (
             this.playerIndex >= 0 &&
             this.gameState?.paddles[this.playerIndex]
@@ -94,7 +96,10 @@ class PongGame {
           }
         }
       }
-    } catch (error) {}
+    } catch (error) {
+      if (this.debug)
+        console.error("Error processing WebSocket message:", error);
+    }
   }
 
   private calculateRotationAngle(): void {
@@ -170,23 +175,7 @@ class PongGame {
 
     const shouldRotate = this.playerCount > 2 && this.playerIndex >= 0;
 
-    if (shouldRotate) {
-      const paddedWidth = this.canvas.width - this.padding * 2;
-      const paddedHeight = this.canvas.height - this.padding * 2;
-
-      this.ctx.translate(paddedWidth / 2, paddedHeight / 2);
-      this.ctx.rotate(this.rotationAngle);
-      this.ctx.translate(-paddedWidth / 2, -paddedHeight / 2);
-    } else {
-      const classicRotate = this.playerIndex === 1;
-      if (classicRotate) {
-        const paddedWidth = this.canvas.width - this.padding * 2;
-        const paddedHeight = this.canvas.height - this.padding * 2;
-
-        this.ctx.translate(paddedWidth, paddedHeight);
-        this.ctx.rotate(Math.PI);
-      }
-    }
+    this.applyCanvasTransformation(shouldRotate);
 
     if (this.gameState?.walls) this.drawWalls(true);
     if (this.gameState?.modifiersState?.spawnedPowerUps) this.drawPowerUps();
@@ -326,7 +315,6 @@ class PongGame {
 
   private drawPowerUps(): void {
     if (!this.gameState?.modifiersState?.spawnedPowerUps) return;
-    console.table(this.gameState.modifiersState.spawnedPowerUps);
 
     for (const [type, powerUp] of Object.entries(
       this.gameState.modifiersState.spawnedPowerUps,
@@ -409,26 +397,7 @@ class PongGame {
     color: string,
     angle = 0,
   ): void {
-    let r = 255;
-    let g = 255;
-    let b = 255;
-
-    // Parse color from hex to RGB
-    if (color?.startsWith("#")) {
-      if (color.length === 7) {
-        r = Number.parseInt(color.slice(1, 3), 16);
-        g = Number.parseInt(color.slice(3, 5), 16);
-        b = Number.parseInt(color.slice(5, 7), 16);
-      } else if (color.length === 4) {
-        r = Number.parseInt(color.charAt(1) + color.charAt(1), 16);
-        g = Number.parseInt(color.charAt(2) + color.charAt(2), 16);
-        b = Number.parseInt(color.charAt(3) + color.charAt(3), 16);
-      }
-    }
-
-    r = Number.isNaN(r) ? 255 : Math.max(0, Math.min(255, r));
-    g = Number.isNaN(g) ? 255 : Math.max(0, Math.min(255, g));
-    b = Number.isNaN(b) ? 255 : Math.max(0, Math.min(255, b));
+    const [r, g, b] = this.parseHexColor(color);
 
     this.ctx.save();
     this.ctx.translate(x, y);
@@ -464,26 +433,7 @@ class PongGame {
     radius: number,
     color: string,
   ): void {
-    let r = 255;
-    let g = 255;
-    let b = 255;
-
-    // Parse color from hex to RGB
-    if (color?.startsWith("#")) {
-      if (color.length === 7) {
-        r = Number.parseInt(color.slice(1, 3), 16);
-        g = Number.parseInt(color.slice(3, 5), 16);
-        b = Number.parseInt(color.slice(5, 7), 16);
-      } else if (color.length === 4) {
-        r = Number.parseInt(color.charAt(1) + color.charAt(1), 16);
-        g = Number.parseInt(color.charAt(2) + color.charAt(2), 16);
-        b = Number.parseInt(color.charAt(3) + color.charAt(3), 16);
-      }
-    }
-
-    r = Number.isNaN(r) ? 255 : Math.max(0, Math.min(255, r));
-    g = Number.isNaN(g) ? 255 : Math.max(0, Math.min(255, g));
-    b = Number.isNaN(b) ? 255 : Math.max(0, Math.min(255, b));
+    const [r, g, b] = this.parseHexColor(color);
 
     this.ctx.save();
 
@@ -507,6 +457,47 @@ class PongGame {
     this.ctx.stroke();
 
     this.ctx.restore();
+  }
+
+  private parseHexColor(color: string): [number, number, number] {
+    let r = 255,
+      g = 255,
+      b = 255;
+
+    if (color?.startsWith("#")) {
+      if (color.length === 7) {
+        r = Number.parseInt(color.slice(1, 3), 16);
+        g = Number.parseInt(color.slice(3, 5), 16);
+        b = Number.parseInt(color.slice(5, 7), 16);
+      } else if (color.length === 4) {
+        r = Number.parseInt(color.charAt(1) + color.charAt(1), 16);
+        g = Number.parseInt(color.charAt(2) + color.charAt(2), 16);
+        b = Number.parseInt(color.charAt(3) + color.charAt(3), 16);
+      }
+    }
+
+    r = Number.isNaN(r) ? 255 : Math.max(0, Math.min(255, r));
+    g = Number.isNaN(g) ? 255 : Math.max(0, Math.min(255, g));
+    b = Number.isNaN(b) ? 255 : Math.max(0, Math.min(255, b));
+
+    return [r, g, b];
+  }
+
+  private applyCanvasTransformation(shouldRotate: boolean): void {
+    const paddedWidth = this.canvas.width - this.padding * 2;
+    const paddedHeight = this.canvas.height - this.padding * 2;
+
+    if (shouldRotate) {
+      this.ctx.translate(paddedWidth / 2, paddedHeight / 2);
+      this.ctx.rotate(this.rotationAngle);
+      this.ctx.translate(-paddedWidth / 2, -paddedHeight / 2);
+    } else {
+      const classicRotate = this.playerIndex === 1;
+      if (classicRotate) {
+        this.ctx.translate(paddedWidth, paddedHeight);
+        this.ctx.rotate(Math.PI);
+      }
+    }
   }
 }
 
