@@ -124,6 +124,8 @@ class Chat {
 
     if (!message) return;
 
+    inputElement.value = "";
+
     fetch(`/chat/${this.currentRoomId}`, {
       method: "POST",
       body: message,
