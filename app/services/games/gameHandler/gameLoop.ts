@@ -68,8 +68,8 @@ const getGameWinner = (game: GameBase, playerIdReferenceTable: string[]) => {
   if (game.getStatus() !== GameStatus.FINISHED) return null;
 
   const gameResult = game.getResults();
-  const smalestResult = Math.min(...gameResult);
-  const indexOfGameResult = gameResult.indexOf(smalestResult);
+  const smallestResult = Math.min(...gameResult);
+  const indexOfGameResult = gameResult.indexOf(smallestResult);
   const indexOfGameWinner = playerIdReferenceTable[indexOfGameResult];
   return indexOfGameWinner;
 };
