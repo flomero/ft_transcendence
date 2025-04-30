@@ -1,9 +1,12 @@
-import type { GameMessage } from "../types/games/userInput";
+import type { GameMessage, PongUserInput } from "../types/games/userInput";
 import type { PongMinimalGameState } from "../types/games/pong/gameState";
 
 class PongGame {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
+  private wallCanvas: HTMLCanvasElement;
+  private wallCtx: CanvasRenderingContext2D;
+  private wallsNeedRedraw = true;
   private gameState: PongMinimalGameState | null = null;
   private ratio = 0.0;
   private gameId: string;
@@ -16,6 +19,20 @@ class PongGame {
   private playerIndex = -1; // -1 means not determined yet
   private playerCount = 0;
   private referenceTable: string[] = [];
+
+  private readonly KEY_MAPPINGS: Record<string, PongUserInput> = {
+    ArrowUp: "UP",
+    ArrowDown: "DOWN",
+    Space: "SPACE",
+    " ": "SPACE",
+  };
+
+  private readonly KEY_RELEASE_MAPPINGS: Record<string, PongUserInput> = {
+    ArrowUp: "STOP_UP",
+    ArrowDown: "STOP_DOWN",
+    Space: "STOP_SPACE",
+    " ": "STOP_SPACE",
+  };
 
   constructor(canvasId: string) {
     const path = window.location.pathname;
@@ -30,8 +47,18 @@ class PongGame {
     if (!context) throw new Error("Failed to get 2D context from canvas");
     this.ctx = context;
 
+    this.wallCanvas = document.createElement("canvas");
+    this.wallCanvas.width = this.canvas.width;
+    this.wallCanvas.height = this.canvas.height;
+    const wallContext = this.wallCanvas.getContext("2d");
+    if (!wallContext)
+      throw new Error("Failed to get 2D context from wall canvas");
+    this.wallCtx = wallContext;
+
     this.canvas.width = 800;
     this.canvas.height = 800;
+    this.wallCanvas.width = this.canvas.width;
+    this.wallCanvas.height = this.canvas.height;
     this.ratio = (this.canvas.width - this.padding * 2) / 100.0;
 
     this.gameSocket = this.setupWebSocket();
@@ -61,17 +88,29 @@ class PongGame {
       const message = JSON.parse(event.data);
 
       if (message.type === "gameState") {
+        const prevWalls = this.gameState?.walls || [];
         this.gameState = message.data as PongMinimalGameState;
+        const currentWalls = this.gameState?.walls || [];
+
+        // Check if walls have changed (either count or properties)
+        if (this.haveWallsChanged(prevWalls, currentWalls)) {
+          this.wallsNeedRedraw = true;
+        }
 
         if (message.referenceTable && this.playerIndex === -1) {
-          this.referenceTable = message.referenceTable; // Store the reference table
+          this.referenceTable = message.referenceTable;
           this.playerIndex = message.referenceTable.indexOf(this.currentUserId);
           this.playerCount = message.referenceTable.length;
+
           if (this.playerCount === 2) {
             this.canvas.width = 800;
             this.canvas.height = 400;
+            this.wallCanvas.width = this.canvas.width;
+            this.wallCanvas.height = this.canvas.height;
             this.ratio = (this.canvas.width - this.padding * 2) / 200.0;
+            this.wallsNeedRedraw = true;
           }
+
           if (
             this.playerIndex >= 0 &&
             this.gameState?.paddles[this.playerIndex]
@@ -80,7 +119,33 @@ class PongGame {
           }
         }
       }
-    } catch (error) {}
+    } catch (error) {
+      if (this.debug)
+        console.error("Error processing WebSocket message:", error);
+    }
+  }
+
+  private haveWallsChanged(prevWalls: any[], currentWalls: any[]): boolean {
+    if (prevWalls.length !== currentWalls.length) return true;
+
+    for (let i = 0; i < currentWalls.length; i++) {
+      const prev = prevWalls[i];
+      const curr = currentWalls[i];
+
+      if (
+        prev.x !== curr.x ||
+        prev.y !== curr.y ||
+        prev.w !== curr.w ||
+        prev.h !== curr.h ||
+        prev.dx !== curr.dx ||
+        prev.dy !== curr.dy ||
+        prev.doRot !== curr.doRot
+      ) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   private calculateRotationAngle(): void {
@@ -118,68 +183,50 @@ class PongGame {
   }
 
   private handleKeyDown(event: KeyboardEvent): void {
-    const action: GameMessage = {
-      type: "userInput",
-      options: {
-        timestamp: Date.now(),
-        playerId: -1, // will be set in the server
-      },
-    };
-
-    if (event.key === "ArrowUp") action.options.type = "UP";
-    if (event.key === "ArrowDown") action.options.type = "DOWN";
-    if (event.key === "Space") action.options.type = "SPACE";
-
-    if (action.options.type && this.isConnected) {
-      this.gameSocket.send(JSON.stringify(action));
+    const actionType = this.KEY_MAPPINGS[event.key];
+    if (actionType) {
+      event.preventDefault();
+      this.sendGameInput(actionType);
     }
   }
 
   private handleKeyUp(event: KeyboardEvent): void {
+    const actionType = this.KEY_RELEASE_MAPPINGS[event.key];
+    if (actionType) {
+      event.preventDefault();
+      this.sendGameInput(actionType);
+    }
+  }
+
+  private sendGameInput(actionType: PongUserInput): void {
+    if (!this.isConnected) return;
+
     const action: GameMessage = {
       type: "userInput",
       options: {
         timestamp: Date.now(),
         playerId: -1, // will be set in the server
+        type: actionType,
       },
     };
 
-    if (event.key === "ArrowUp") action.options.type = "STOP_UP";
-    if (event.key === "ArrowDown") action.options.type = "STOP_DOWN";
-    if (event.key === "Space") action.options.type = "STOP_SPACE";
-
-    if (action.options.type && this.isConnected) {
-      this.gameSocket.send(JSON.stringify(action));
-    }
+    this.gameSocket.send(JSON.stringify(action));
   }
 
   private draw(): void {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    this.drawWalls();
+
+    this.ctx.drawImage(this.wallCanvas, 0, 0);
 
     this.ctx.save();
     this.ctx.translate(this.padding, this.padding);
 
     const shouldRotate = this.playerCount > 2 && this.playerIndex >= 0;
 
-    if (shouldRotate) {
-      const paddedWidth = this.canvas.width - this.padding * 2;
-      const paddedHeight = this.canvas.height - this.padding * 2;
+    this.applyCanvasTransformation(shouldRotate);
 
-      this.ctx.translate(paddedWidth / 2, paddedHeight / 2);
-      this.ctx.rotate(this.rotationAngle);
-      this.ctx.translate(-paddedWidth / 2, -paddedHeight / 2);
-    } else {
-      const classicRotate = this.playerIndex === 1;
-      if (classicRotate) {
-        const paddedWidth = this.canvas.width - this.padding * 2;
-        const paddedHeight = this.canvas.height - this.padding * 2;
-
-        this.ctx.translate(paddedWidth, paddedHeight);
-        this.ctx.rotate(Math.PI);
-      }
-    }
-
-    if (this.gameState?.walls) this.drawWalls(true);
     if (this.gameState?.modifiersState?.spawnedPowerUps) this.drawPowerUps();
     if (this.gameState?.paddles) this.drawPaddles();
     if (this.gameState?.balls) this.drawBalls();
@@ -189,7 +236,6 @@ class PongGame {
     }
 
     this.ctx.restore();
-    this.drawWalls(false);
 
     if (this.debug) this.drawDebugElements();
   }
@@ -299,25 +345,68 @@ class PongGame {
     });
   }
 
-  private drawWalls(rotated: boolean): void {
-    if (!this.gameState?.walls) return;
+  private drawWalls(): void {
+    if (!this.gameState?.walls || !this.wallsNeedRedraw) return;
 
-    this.gameState.walls.forEach((wall, id) => {
-      if (wall.doRot === rotated) {
+    this.wallCtx.clearRect(0, 0, this.wallCanvas.width, this.wallCanvas.height);
+
+    this.wallCtx.save();
+    this.wallCtx.translate(this.padding, this.padding);
+
+    const shouldRotate = this.playerCount > 2 && this.playerIndex >= 0;
+    this.applyCanvasTransformationToContext(this.wallCtx, shouldRotate);
+
+    this.gameState.walls.forEach((wall) => {
+      if (wall.doRot) {
         const angle = Math.atan2(wall.dy, wall.dx);
         const x = wall.x * this.ratio;
         const y = wall.y * this.ratio;
         const width = wall.w * this.ratio;
         const height = wall.h * this.ratio;
 
-        this.drawNeonRectangle(x, y, width, height, "#ffffff", angle);
+        this.drawNeonRectangleToContext(
+          this.wallCtx,
+          x,
+          y,
+          width,
+          height,
+          "#ffffff",
+          angle,
+        );
       }
     });
+
+    this.wallCtx.restore();
+
+    this.wallCtx.save();
+    this.wallCtx.translate(this.padding, this.padding);
+
+    this.gameState.walls.forEach((wall) => {
+      if (!wall.doRot) {
+        const angle = Math.atan2(wall.dy, wall.dx);
+        const x = wall.x * this.ratio;
+        const y = wall.y * this.ratio;
+        const width = wall.w * this.ratio;
+        const height = wall.h * this.ratio;
+
+        this.drawNeonRectangleToContext(
+          this.wallCtx,
+          x,
+          y,
+          width,
+          height,
+          "#ffffff",
+          angle,
+        );
+      }
+    });
+
+    this.wallCtx.restore();
+    this.wallsNeedRedraw = false;
   }
 
   private drawPowerUps(): void {
     if (!this.gameState?.modifiersState?.spawnedPowerUps) return;
-    console.table(this.gameState.modifiersState.spawnedPowerUps);
 
     for (const [type, powerUp] of Object.entries(
       this.gameState.modifiersState.spawnedPowerUps,
@@ -392,6 +481,45 @@ class PongGame {
     }
   }
 
+  private drawNeonRectangleToContext(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    color: string,
+    angle = 0,
+  ): void {
+    const [r, g, b] = this.parseHexColor(color);
+
+    ctx.save();
+    ctx.translate(x, y);
+    if (angle) ctx.rotate(angle);
+
+    const halfWidth = width / 2;
+    const halfHeight = height / 2;
+
+    // Draw fill with semi-transparent color
+    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.4)`;
+    ctx.fillRect(-halfWidth, -halfHeight, width, height);
+
+    // Draw border with glow effect
+    ctx.lineJoin = "round";
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = `rgb(${r}, ${g}, ${b})`;
+    ctx.shadowColor = `rgb(${r}, ${g}, ${b})`;
+    ctx.shadowBlur = 8;
+    ctx.strokeRect(-halfWidth, -halfHeight, width, height);
+
+    // Draw bright inner border
+    ctx.lineWidth = 1;
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = "#fff";
+    ctx.strokeRect(-halfWidth, -halfHeight, width, height);
+
+    ctx.restore();
+  }
+
   private drawNeonRectangle(
     x: number,
     y: number,
@@ -400,53 +528,15 @@ class PongGame {
     color: string,
     angle = 0,
   ): void {
-    let r = 255;
-    let g = 255;
-    let b = 255;
-
-    // Parse color from hex to RGB
-    if (color?.startsWith("#")) {
-      if (color.length === 7) {
-        r = Number.parseInt(color.slice(1, 3), 16);
-        g = Number.parseInt(color.slice(3, 5), 16);
-        b = Number.parseInt(color.slice(5, 7), 16);
-      } else if (color.length === 4) {
-        r = Number.parseInt(color.charAt(1) + color.charAt(1), 16);
-        g = Number.parseInt(color.charAt(2) + color.charAt(2), 16);
-        b = Number.parseInt(color.charAt(3) + color.charAt(3), 16);
-      }
-    }
-
-    r = Number.isNaN(r) ? 255 : Math.max(0, Math.min(255, r));
-    g = Number.isNaN(g) ? 255 : Math.max(0, Math.min(255, g));
-    b = Number.isNaN(b) ? 255 : Math.max(0, Math.min(255, b));
-
-    this.ctx.save();
-    this.ctx.translate(x, y);
-    if (angle) this.ctx.rotate(angle);
-
-    const halfWidth = width / 2;
-    const halfHeight = height / 2;
-
-    // Draw fill with semi-transparent color
-    this.ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.4)`;
-    this.ctx.fillRect(-halfWidth, -halfHeight, width, height);
-
-    // Draw border with glow effect
-    this.ctx.lineJoin = "round";
-    this.ctx.lineWidth = 2;
-    this.ctx.strokeStyle = `rgb(${r}, ${g}, ${b})`;
-    this.ctx.shadowColor = `rgb(${r}, ${g}, ${b})`;
-    this.ctx.shadowBlur = 8;
-    this.ctx.strokeRect(-halfWidth, -halfHeight, width, height);
-
-    // Draw bright inner border
-    this.ctx.lineWidth = 1;
-    this.ctx.shadowBlur = 0;
-    this.ctx.strokeStyle = "#fff";
-    this.ctx.strokeRect(-halfWidth, -halfHeight, width, height);
-
-    this.ctx.restore();
+    this.drawNeonRectangleToContext(
+      this.ctx,
+      x,
+      y,
+      width,
+      height,
+      color,
+      angle,
+    );
   }
 
   private drawNeonCircle(
@@ -455,26 +545,7 @@ class PongGame {
     radius: number,
     color: string,
   ): void {
-    let r = 255;
-    let g = 255;
-    let b = 255;
-
-    // Parse color from hex to RGB
-    if (color?.startsWith("#")) {
-      if (color.length === 7) {
-        r = Number.parseInt(color.slice(1, 3), 16);
-        g = Number.parseInt(color.slice(3, 5), 16);
-        b = Number.parseInt(color.slice(5, 7), 16);
-      } else if (color.length === 4) {
-        r = Number.parseInt(color.charAt(1) + color.charAt(1), 16);
-        g = Number.parseInt(color.charAt(2) + color.charAt(2), 16);
-        b = Number.parseInt(color.charAt(3) + color.charAt(3), 16);
-      }
-    }
-
-    r = Number.isNaN(r) ? 255 : Math.max(0, Math.min(255, r));
-    g = Number.isNaN(g) ? 255 : Math.max(0, Math.min(255, g));
-    b = Number.isNaN(b) ? 255 : Math.max(0, Math.min(255, b));
+    const [r, g, b] = this.parseHexColor(color);
 
     this.ctx.save();
 
@@ -498,6 +569,54 @@ class PongGame {
     this.ctx.stroke();
 
     this.ctx.restore();
+  }
+
+  private parseHexColor(color: string): [number, number, number] {
+    let r = 255,
+      g = 255,
+      b = 255;
+
+    if (color?.startsWith("#")) {
+      if (color.length === 7) {
+        r = Number.parseInt(color.slice(1, 3), 16);
+        g = Number.parseInt(color.slice(3, 5), 16);
+        b = Number.parseInt(color.slice(5, 7), 16);
+      } else if (color.length === 4) {
+        r = Number.parseInt(color.charAt(1) + color.charAt(1), 16);
+        g = Number.parseInt(color.charAt(2) + color.charAt(2), 16);
+        b = Number.parseInt(color.charAt(3) + color.charAt(3), 16);
+      }
+    }
+
+    r = Number.isNaN(r) ? 255 : Math.max(0, Math.min(255, r));
+    g = Number.isNaN(g) ? 255 : Math.max(0, Math.min(255, g));
+    b = Number.isNaN(b) ? 255 : Math.max(0, Math.min(255, b));
+
+    return [r, g, b];
+  }
+
+  private applyCanvasTransformationToContext(
+    ctx: CanvasRenderingContext2D,
+    shouldRotate: boolean,
+  ): void {
+    const paddedWidth = this.canvas.width - this.padding * 2;
+    const paddedHeight = this.canvas.height - this.padding * 2;
+
+    if (shouldRotate) {
+      ctx.translate(paddedWidth / 2, paddedHeight / 2);
+      ctx.rotate(this.rotationAngle);
+      ctx.translate(-paddedWidth / 2, -paddedHeight / 2);
+    } else {
+      const classicRotate = this.playerIndex === 1;
+      if (classicRotate) {
+        ctx.translate(paddedWidth, paddedHeight);
+        ctx.rotate(Math.PI);
+      }
+    }
+  }
+
+  private applyCanvasTransformation(shouldRotate: boolean): void {
+    this.applyCanvasTransformationToContext(this.ctx, shouldRotate);
   }
 }
 
