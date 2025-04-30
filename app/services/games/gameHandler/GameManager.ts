@@ -13,6 +13,7 @@ import saveGameResultInDb from "./saveGameResultInDb";
 import type { GameOrigin } from "../../../types/games/gameHandler/GameOrigin";
 import terminateGame from "./terminateGame";
 import { GameResult } from "../../../types/strategy/ITournamentBracketGenerator";
+import { PongMinimalGameState } from "../../../types/games/pong/gameState";
 
 class GameManager {
   private id: string = randomUUID();
@@ -71,7 +72,7 @@ class GameManager {
 
   public sendMessageToAll(
     type: string,
-    data: string,
+    data: PongMinimalGameState,
     referenceTable: string[],
   ): void {
     for (const player of this.players.values()) {

@@ -23,6 +23,10 @@ interface ChatClient {
 
 const chatClients: ChatClient[] = [];
 
+export function getCountOnlineChatUsers(): number {
+  return chatClients.length;
+}
+
 export function addChatClient(fastify: FastifyInstance, client: ChatClient) {
   chatClients.push(client);
 
@@ -178,6 +182,7 @@ async function updateRoomAndSendMessage(
     client.socket.send(JSON.stringify(response));
   }
 
+  fastify.customMetrics.countChatMsg(roomId);
   saveMessage(fastify, roomId, userId, message, type);
 }
 

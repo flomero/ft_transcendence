@@ -102,8 +102,6 @@ export class ModifierBase {
   }
 
   getState(): Record<string, any> {
-    return {
-      status: this.status.toString(),
-    };
+    return {};
   }
 }

@@ -7,9 +7,13 @@ const addGameToDatabase = async (
   db: Database,
   gameSettings: GameSettings,
 ) => {
-  await addMatchToDatabase(gameManager, db, gameSettings);
-  await addUserMatchesToDB(gameManager, db);
-  await addAIToDatabase(gameManager, db);
+  try {
+    await addMatchToDatabase(gameManager, db, gameSettings);
+    await addUserMatchesToDB(gameManager, db);
+    await addAIToDatabase(gameManager, db);
+  } catch (error) {
+    console.error("[addGameToDatabase] Error adding game to DB:", error);
+  }
 };
 
 const addUserMatchesToDB = async (gameManager: GameManager, db: Database) => {
