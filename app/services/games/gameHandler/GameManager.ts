@@ -50,7 +50,7 @@ class GameManager {
 
     const newAiOpponent = new PongAIOpponent(this.game, {
       playerId: -1,
-      strategyName: "improvedNaive",
+      strategyName: "foresight",
     });
     this.aiOpponent.set(aiOpponentId, newAiOpponent);
     this.playerIdReferenceTable.push(aiOpponentId);
