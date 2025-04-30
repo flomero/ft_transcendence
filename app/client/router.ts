@@ -3,6 +3,7 @@ import LobbyHandler from "./lobby.js";
 import TournamentBracket from "./tournament.js";
 import MatchmakingHandler from "./matchmaking.js";
 import { initPongGame, type PongGame } from "./pong.js";
+import { closeSidebar } from "./sidebar.js";
 
 // Route handler interface with lifecycle hooks
 interface RouteHandler {
@@ -489,17 +490,11 @@ document.addEventListener("DOMContentLoaded", () => {
     },
   });
 
-  // window.router.addRoute("/login", {
-  //   onEnter: () => {
-  //     // Check if the referrer is from Google accounts
-  //     const referrer = document.referrer;
-  //     if (referrer && referrer.startsWith("https://accounts.google.com/")) {
-  //       console.log("Detected Google OAuth redirect, performing full page reload");
-  //       // Force a full page reload to ensure cookies are properly set
-  //       window.location.reload();
-  //     }
-  //   }
-  // });
+  window.router.addRoute("/login", {
+    onEnter: () => {
+      closeSidebar();
+    },
+  });
 
   window.router.init();
 });
