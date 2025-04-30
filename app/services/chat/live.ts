@@ -126,12 +126,7 @@ async function updateRoomAndSendMessage(
   type: ChatMessageType,
 ) {
   const userIdsBlacklist = chatClients
-    .filter((client) => {
-      if (type === ChatMessageType.invite) {
-        return client.currentRoomId === roomId || client.userId === userId;
-      }
-      return client.currentRoomId === roomId || client.userId === userId;
-    })
+    .filter((client) => client.currentRoomId === roomId || client.userId === userId)
     .map((client) => client.userId);
 
   await setRoomReadForAllUsersBlacklist(
