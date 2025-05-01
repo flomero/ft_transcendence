@@ -32,7 +32,7 @@ async function startLobbyHandler(
       JSON.stringify({ type: "gameStarted", data: newGameManager.getId }),
     );
     request.server.customMetrics.countGameStarted();
-    lobby.disconnectMembersFromSockets();
+    lobby.disconnectAllMembers();
     return reply.code(200).send({ gameId: newGameManager.getId });
   } catch (error) {
     if (error instanceof Error) return reply.badRequest(error.message);
