@@ -210,10 +210,13 @@ class Lobby {
   }
 
   public disconnectAllMembers(): void {
+    this.sendMessageToAllMembers(
+      JSON.stringify({ type: "disconnect", data: "owner leaved the lobby" }),
+    );
     for (const member of this.lobbyMembers.values()) {
-      this.sendMessageToMember(member.id, "Lobby is closed");
       if (member.socket !== undefined) {
         member.socket.close();
+        member.socket = undefined;
       }
     }
   }
