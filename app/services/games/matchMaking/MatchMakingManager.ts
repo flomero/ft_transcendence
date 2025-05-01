@@ -73,6 +73,13 @@ class MatchMakingManager {
     return Array.from(this.members.values());
   }
 
+  public getWaitingSizeGameMode(gameMode: GameModeType): number {
+    return this.members
+      .entries()
+      .filter((entry) => entry[1].gameMode === gameMode)
+      .toArray().length;
+  }
+
   private sendWaitingMessage(gameMode: GameModeType) {
     const membersGameMode = this.members
       .entries()
