@@ -3,14 +3,16 @@ import { isFriend } from "../../../services/database/friend/friends";
 import {
   sendGameInvite,
   sendGameInviteToUser,
+  updateRoomAndSendMessage,
 } from "../../../services/chat/live";
 import { userIsInRoom } from "../../../services/database/chat/room";
+import { ChatMessageType } from "../../../services/chat/message";
 
 const inviteLobby: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.post("/:lobbyId/invite/friend/:friendId", async (request, reply) => {
     const { friendId, lobbyId } = request.params as {
       friendId: string;
-      lobbyId: number;
+      lobbyId: string;
     };
     if (!friendId || !lobbyId) return reply.badRequest("No friendId");
 
@@ -30,7 +32,7 @@ const inviteLobby: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.post("/:lobbyId/invite/room/:roomId", async (request, reply) => {
     const { lobbyId, roomId } = request.params as {
       roomId: number;
-      lobbyId: number;
+      lobbyId: string;
     };
     if (!lobbyId || !roomId) return reply.badRequest("No lobbyId or roomId");
 
@@ -39,7 +41,18 @@ const inviteLobby: FastifyPluginAsync = async (fastify): Promise<void> => {
     }
 
     try {
-      await sendGameInvite(fastify, request, roomId, lobbyId);
+      if (lobbyId === "rr") {
+        await updateRoomAndSendMessage(
+          fastify,
+          request.userName,
+          request.userId,
+          "https://tiny.cc/v8di001",
+          roomId,
+          ChatMessageType.invite,
+        );
+      } else {
+        await sendGameInvite(fastify, request, roomId, lobbyId);
+      }
     } catch (error) {
       if (error instanceof Error) return reply.badRequest(error.message);
       return reply.badRequest("Error sending invite");
