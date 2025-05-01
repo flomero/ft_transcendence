@@ -239,15 +239,6 @@ class Lobby {
     return this.lobbyMembers.get(memberId)!.userState;
   }
 
-  public disconnectMembersFromSockets(): void {
-    for (const member of this.lobbyMembers.values()) {
-      if (member.socket !== undefined) {
-        member.socket.close();
-        member.socket = undefined;
-      }
-    }
-  }
-
   public allMembersConnectedToSocket(): boolean {
     for (const member of this.lobbyMembers.values()) {
       if (member.socket === undefined && member.isAi === false) {
