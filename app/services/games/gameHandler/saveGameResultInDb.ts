@@ -7,6 +7,7 @@ import type GameManager from "./GameManager";
 const saveGameResultInDb = async (gameManager: GameManager, db: Database) => {
   await savePlayerScoresToDatabase(gameManager, db);
   await saveAIScoresToDatabase(gameManager, db);
+  await saveGameResultInRUserMatches(gameManager, db);
 };
 
 /**
@@ -57,6 +58,21 @@ const saveAIScoresToDatabase = async (
         console.error(`Error updating AI score for ${aiUuid}:`, err.message);
     }
   }
+};
+
+const saveGameResultInRUserMatches = async (
+  gameManager: GameManager,
+  db: Database,
+): Promise<void> => {
+  const orderedRsultWithUUIDs = gameManager.getOrderedResultsWithUUIDs();
+  const gameId = gameManager.getId;
+  const sql = `UPDATE r_users_matches SET result = ? WHERE userId = ? AND matchId = ?`;
+  console.log("Game results:", inGameResults);
+  for (const player of gameManager.getPlayersAsArray) {
+    const playerId = player.playerUUID;
+    console.log("Player ID:", playerId, "Score:", score);
+  }
+  const query = db.prepare(sql, [orderedRsultWithUUIDs, gameId]);
 };
 
 export default saveGameResultInDb;
