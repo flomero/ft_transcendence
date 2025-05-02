@@ -1,7 +1,7 @@
-import { UserInput } from "../../types/games/userInput";
+import type { UserInput } from "../../types/games/userInput";
 import { ConfigManager } from "./configManager";
 import type { GameBase } from "./gameBase";
-import { Pong } from "./pong/pong";
+import type { Pong } from "./pong/pong";
 
 export enum ModifierStatus {
   INACTIVE,
@@ -79,7 +79,10 @@ export class ModifierBase {
   onPaddleBounce(game: Pong, args: { playerId: number }): void {}
   onWallBounce(game: Pong, args: { wallID: number }): void {}
   onPlayerElimination(game: Pong, args: { playerId: number }): void {}
+  onResultUpdate(game: Pong, args: { playerId: number }): void {}
+  onArenaModification(game: Pong): void {}
   onBallReset(game: Pong): void {}
+  onBallOutOfBounds(game: Pong, args: { ballID: number }): void {}
 
   // Getters & Setters
   getName(): string {
@@ -96,5 +99,9 @@ export class ModifierBase {
 
   getActivationMode(): ModifierActivationMode {
     return this.activationMode;
+  }
+
+  getState(): Record<string, any> {
+    return {};
   }
 }

@@ -1,6 +1,6 @@
-import { MatchmakingGameModes } from "../../../config";
 import type MemberMatchMaking from "../../../interfaces/games/matchMaking/MemberMatchMaking";
 import type WebSocket from "ws";
+import { GameModeType } from "../../config/gameModes";
 
 class MatchMakingManager {
   private members: Map<string, MemberMatchMaking> = new Map<
@@ -8,7 +8,7 @@ class MatchMakingManager {
     MemberMatchMaking
   >();
 
-  public addMember(memberId: string, gameMode: MatchmakingGameModes) {
+  public addMember(memberId: string, gameMode: GameModeType) {
     let member = this.members.get(memberId);
     if (member) {
       member.gameMode = gameMode;
@@ -73,11 +73,9 @@ export const matchMakingManager = new MatchMakingManager();
 /**
  * Check if a user is in match making
  * @param userId
- * @returns {MatchmakingGameModes | null} The game mode if the user is in match making, null otherwise
+ * @returns {GameModeType | null} The game mode if the user is in match making, null otherwise
  */
-export const isUserInMatchMaking = (
-  userId: string,
-): MatchmakingGameModes | null => {
+export const isUserInMatchMaking = (userId: string): GameModeType | null => {
   const member = matchMakingManager
     .getAllMembers()
     .find((member) => member.memberId === userId);

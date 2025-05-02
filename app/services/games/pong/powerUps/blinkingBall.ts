@@ -1,7 +1,7 @@
 import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
 import { TimeLimitedModifierBase } from "../../timeLimitedModifierBase";
 import { ModifierActivationMode, ModifierStatus } from "../../modifierBase";
-import { type Pong } from "../pong";
+import type { Pong } from "../pong";
 
 export class BlinkingBall extends TimeLimitedModifierBase {
   name = "blinkingBall";
@@ -65,8 +65,8 @@ export class BlinkingBall extends TimeLimitedModifierBase {
   }
 
   onUpdate(game: Pong): void {
-    if (this.status !== ModifierStatus.ACTIVE) return;
     super.onUpdate(game);
+    if (this.status !== ModifierStatus.ACTIVE) return;
 
     const gameState = game.getState();
     if (!(gameState.balls.length > 0)) {
@@ -82,9 +82,7 @@ export class BlinkingBall extends TimeLimitedModifierBase {
     ) {
       gameState.balls[0].isVisible = true;
       this.isVisible = true;
-    }
-
-    if (this.ticks % this.blinkInterval == 0) {
+    } else if (this.ticks % this.blinkInterval == 0) {
       gameState.balls[0].isVisible = false;
       this.isVisible = false;
     }

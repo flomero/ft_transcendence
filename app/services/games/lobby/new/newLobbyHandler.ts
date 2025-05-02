@@ -4,128 +4,26 @@ import type NewLobbyRequestBody from "../../../../interfaces/games/lobby/NewLobb
 import { isUserInAnyLobby } from "../lobbyVaidation/isUserInAnyLobby";
 import validateGameModifierCheck from "../lobbyVaidation/validateGameModifierCheck";
 import { setLobby } from "./setLobby";
+import { GAMEMODE_REGISTRY } from "../../../../config";
+import type { GameSettings } from "../../../../interfaces/games/lobby/GameSettings";
 
 export const PublicLobbies = new Map<string, Lobby>();
 export const PrivateLobbies = new Map<string, Lobby>();
 
 function initializeSampleLobbies() {
-  const sampleUserIds = ["103562899409920461542", "user456", "user789"];
+  const sampleUserIds = Array.from<string>({
+    length: Object.values(GAMEMODE_REGISTRY).length,
+  }).fill("user123");
+  sampleUserIds[4] = "103562899409920461542";
 
-  const lobbyConfigs: NewLobbyRequestBody[] = [
-    {
-      lobbyMode: "public",
-      gameName: "pong",
-      gameModeName: "classicPong",
-      playerCount: 2,
-      gameModeConfig: {
-        powerUpRadius: 5,
-        powerUpCapacities: {
-          speedBoost: 50000,
-        },
-      },
-      modifierNames: {
-        powerUpSpawner: {
-          meanDelayS: 0.005,
-          delaySpanS: 0.0001,
-        },
-        scoredGame: {
-          goalObjective: 5,
-        },
-        goalReset: {
-          delayS: 1,
-        },
-      },
-      powerUpNames: {
-        speedBoost: {
-          totalRampUpStrength: 20,
-        },
-      },
-    },
-    {
-      lobbyMode: "public",
-      gameName: "pong",
-      gameModeName: "multiplayerPong",
-      playerCount: 4,
-      gameModeConfig: {
-        ballSpeedWidthPercentS: 2.0,
-        ballRadius: 12,
-        paddleCoveragePercent: 25,
-        paddleSpeedWidthPercentS: 1.5,
-        powerUpRadius: 6,
-        powerUpCapacities: {
-          speedBoost: 5,
-        },
-      },
-      modifierNames: {
-        powerUpSpawner: {
-          meanDelayS: 8,
-          delaySpanS: 4,
-        },
-        timedGame: {
-          durationS: 600,
-        },
-        scoredGame: {
-          goalObjective: 10,
-        },
-        survivalGame: [],
-        elimination: {
-          threshold: 5,
-        },
-        arenaShrink: [],
-      },
-      powerUpNames: {
-        speedBoost: {
-          spawnWeight: 2,
-          selfActivation: false,
-          durationS: 8,
-          totalRampUpStrength: 3,
-          rampUpFrequencyS: 2,
-        },
-      },
-    },
-    {
-      lobbyMode: "public",
-      gameName: "pong",
-      gameModeName: "classicPong",
-      playerCount: 2,
-      gameModeConfig: {
-        ballSpeedWidthPercentS: 1.2,
-        ballRadius: 8,
-        paddleCoveragePercent: 15,
-        paddleSpeedWidthPercentS: 1.0,
-        powerUpRadius: 4,
-        powerUpCapacities: {
-          speedBoost: 2,
-        },
-      },
-      modifierNames: {
-        powerUpSpawner: {
-          meanDelayS: 12,
-          delaySpanS: 6,
-        },
-        timedGame: {
-          durationS: 180,
-        },
-        scoredGame: {
-          goalObjective: 3,
-        },
-        survivalGame: [],
-        elimination: {
-          threshold: 2,
-        },
-        arenaShrink: [],
-      },
-      powerUpNames: {
-        speedBoost: {
-          spawnWeight: 1,
-          selfActivation: true,
-          durationS: 4,
-          totalRampUpStrength: 1,
-          rampUpFrequencyS: 0.5,
-        },
-      },
-    },
-  ];
+  const lobbyConfigs: NewLobbyRequestBody[] = Object.values(GAMEMODE_REGISTRY)
+    .filter((_, index) => index < sampleUserIds.length)
+    .map((gamemodeSettings: GameSettings) => {
+      return {
+        lobbyMode: "public",
+        ...gamemodeSettings,
+      };
+    });
 
   // Create and add sample lobbies
   lobbyConfigs.forEach((config, index) => {
@@ -152,7 +50,8 @@ async function newLobbyHandler(
     setLobby(lobby, body.lobbyMode);
     reply.send({ lobbyId: lobby.getLobbyId });
   } catch (error) {
-    if (error instanceof Error) reply.code(400).send({ error: error.message });
+    if (error instanceof Error) return reply.badRequest(error.message);
+    return reply.badRequest("Error creating lobby");
   }
 }
 

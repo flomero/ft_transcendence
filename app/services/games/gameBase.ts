@@ -1,22 +1,13 @@
 import { ModifierManager } from "./modifierManager";
 import { ConfigManager } from "./configManager";
-
-export enum GameStatus {
-  CREATED,
-  RUNNING,
-  PAUSED,
-  FINISHED,
-}
-
-export interface GameBaseState {
-  startDate: number;
-  lastUpdate: number;
-  status: GameStatus;
-}
+import {
+  GameStatus,
+  type GameBaseState,
+} from "../../types/games/gameBaseState";
 
 export abstract class GameBase {
   protected gameBaseState: GameBaseState;
-  protected serverTickrateS: number = 20;
+  protected serverTickrateS = 20;
 
   protected modifierManager: ModifierManager;
   protected configManager: ConfigManager;
@@ -42,9 +33,9 @@ export abstract class GameBase {
 
   getStateSnapshot(): Record<string, any> {
     const state = {
-      startDate: this.gameBaseState.startDate,
-      lastUpdate: this.gameBaseState.lastUpdate,
-      status: this.gameBaseState.status,
+      // startDate: this.gameBaseState.startDate,
+      // lastUpdate: this.gameBaseState.lastUpdate,
+      // status: this.gameBaseState.status,
       modifiersState: this.modifierManager.getStateSnapshot(),
     };
 
@@ -71,6 +62,8 @@ export abstract class GameBase {
   getModifierManager(): ModifierManager {
     return this.modifierManager;
   }
+
+  abstract eliminate(playerID: number): void;
 
   abstract getResults(): number[];
   abstract getScores(): number[];

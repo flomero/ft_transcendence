@@ -1,7 +1,7 @@
 <div class="mt-8 flex flex-col gap-4">
   <h1>Play Pong</h1>
   <h2>Quick Play Matchmaking</h2>
-  <div class="flex flex-row gap-2">
+  <div class="flex flex-row flex-wrap gap-2">
 	  {{#each matchmakingmodes}}
       {{#with this as |gameMode|}}
         {{#> components/button variant="primary" url=(add "/games/matchmaking/join/" gameMode)}}
@@ -12,7 +12,7 @@
   </div>
   <h2>Lobbys</h2>
 	<div class="flex flex-row gap-2">
-	{{#> components/button variant="outline"}}
+	{{#> components/button variant="outline" url="/play/lobby"}}
 		Create New
 	{{/components/button}}
 	{{#> components/button variant="outline" url="/play/join/code"}}
@@ -24,7 +24,7 @@
       {{#each lobbies}}
         {{> components/lobby/lobby
           gameModeName=this.gameSettings.gameModeName
-          ownerName=this.ownerName 
+          ownerName=this.ownerName
           lobbyId=this.lobbyId
         }}
       {{/each}}

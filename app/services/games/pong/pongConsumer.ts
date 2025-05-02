@@ -1,8 +1,9 @@
 import type { FastifyRequest } from "fastify";
 import type { WebSocket } from "ws";
-import { type GameBase, GameStatus } from "../gameBase";
+import type { GameBase } from "../gameBase";
 import { GAME_REGISTRY } from "../../../types/games/gameRegistry";
 import { PongAIOpponent } from "./pongAIOpponent";
+import { GameStatus } from "../../../types/games/gameBaseState";
 
 export const pongConsumer = async (
   ws: WebSocket,
@@ -12,6 +13,7 @@ export const pongConsumer = async (
   let gameLoopInterval: NodeJS.Timeout | null = null;
 
   let aiOpponent: PongAIOpponent | null = null;
+  let aiOpponent2: PongAIOpponent | null = null;
   let aiLoopInterval: NodeJS.Timeout | null = null;
 
   // Helper function to sleep
@@ -33,8 +35,6 @@ export const pongConsumer = async (
 
       // Send the updated state to clients
       const gameState = game.getStateSnapshot();
-      // console.log(`State snapshot:`);
-      // console.dir(gameState.modifiersState);
       ws.send(
         JSON.stringify({
           type: "gameState",
@@ -46,17 +46,17 @@ export const pongConsumer = async (
       await sleep(sleepIntervalMs);
       loopCounter++;
 
-      // if (loopCounter >= 1)
-      //     break;
+      // if (loopCounter % 300 === 0)
+      //   currentGame?.eliminate(loopCounter / 300 - 1);
     }
   };
 
-  const startAILoop = async (game: GameBase, ai: PongAIOpponent) => {
+  const startAILoop = async (game: GameBase, ais: PongAIOpponent[]) => {
     if (aiLoopInterval) clearInterval(aiLoopInterval);
 
     const sleepIntervalMs: number = 1000.0;
     while (game.getStatus() === GameStatus.RUNNING) {
-      ai.update();
+      ais.forEach((ai) => ai.update());
       await sleep(sleepIntervalMs);
     }
   };
@@ -82,8 +82,13 @@ export const pongConsumer = async (
           currentGame = new GameClass(data || {});
 
           aiOpponent = new PongAIOpponent(currentGame, {
+            playerId: 0,
+            strategyName: "foresight",
+          });
+
+          aiOpponent2 = new PongAIOpponent(currentGame, {
             playerId: 1,
-            strategyName: "improvedNaive",
+            strategyName: "foresight",
           });
 
           // Send confirmation back to client
@@ -112,7 +117,8 @@ export const pongConsumer = async (
           if (currentGame.getStatus() === GameStatus.RUNNING) {
             startGameLoop(currentGame);
 
-            if (aiOpponent) startAILoop(currentGame, aiOpponent);
+            if (aiOpponent && aiOpponent2)
+              startAILoop(currentGame, [aiOpponent, aiOpponent2]);
           }
 
           break;

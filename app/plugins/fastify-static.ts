@@ -3,8 +3,15 @@ import fastifyStatic from "@fastify/static";
 import path from "node:path";
 
 export default fp(async (fastify) => {
-  fastify.register(fastifyStatic, {
+  await fastify.register(fastifyStatic, {
     root: path.resolve(__dirname, "../../public"),
     prefix: "/public/",
+    decorateReply: false,
+  });
+
+  await fastify.register(fastifyStatic, {
+    root: path.resolve(__dirname, "../../dist/client/client"),
+    prefix: "/js/",
+    decorateReply: false,
   });
 });

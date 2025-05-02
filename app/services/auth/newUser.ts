@@ -12,6 +12,8 @@ export async function insertUser(
     return;
   }
 
+  fastify.customMetrics.newUser();
+
   const base64Image = await downloadImageAsBase64(userInfo.picture);
   const imageUUID = await saveImage(fastify, base64Image);
 

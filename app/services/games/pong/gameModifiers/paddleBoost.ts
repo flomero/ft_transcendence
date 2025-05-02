@@ -1,14 +1,14 @@
-import { UserInput } from "../../../../types/games/userInput";
+import type { UserInput } from "../../../../types/games/userInput";
 import { PongModifierBase } from "../pongModifierBase";
-import { Pong } from "../pong";
+import type { Pong } from "../pong";
 import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
-import { Paddle } from "../../../../types/games/pong/paddle";
+import type { Paddle } from "../../../../types/games/pong/paddle";
 
 enum AnimationStatus {
-  IDLE,
-  EXTENDING,
-  RETRACTING,
-  EXTENDED,
+  IDLE = 0,
+  EXTENDING = 1,
+  RETRACTING = 2,
+  EXTENDED = 3,
 }
 
 type MovementDirection = "UP" | "DOWN" | "STOP";
@@ -19,19 +19,20 @@ interface PaddleInfos {
   animationStatus: AnimationStatus;
   bufferedAnimationStatus?: AnimationStatus;
   lastMovementDirection: MovementDirection; // Track last movement input
+  didBoost: boolean;
 }
 
 export class PaddleBoost extends PongModifierBase {
   name = "paddleBoost";
 
-  protected maxDisplacement: number = 50;
-  protected extendedSpeedMultiplier: number = 0;
+  protected maxDisplacement = 50;
+  protected extendedSpeedMultiplier = 0;
 
   protected paddlesInfos: PaddleInfos[] = [];
-  protected paddleExtensionLength: number = 0;
-  protected paddleExtensionVelocity: number = 0;
-  protected paddleRetractionVelocity: number = 0;
-  protected extensionVelocityTransmissionFactor: number = 0;
+  protected paddleExtensionLength = 0;
+  protected paddleExtensionVelocity = 0;
+  protected paddleRetractionVelocity = 0;
+  protected extensionVelocityTransmissionFactor = 0;
 
   constructor(customConfig?: Record<string, any>) {
     super();
@@ -92,7 +93,12 @@ export class PaddleBoost extends PongModifierBase {
 
     this.configManager.registerPropertyConfig(
       "extensionVelocityTransmissionFactor",
-      (value) => value,
+      (_, context) => {
+        const extensionVelocityTransmissionPercent =
+          context.extensionVelocityTransmissionFactor ||
+          defaultRegistry.extensionVelocityTransmissionPercent;
+        return extensionVelocityTransmissionPercent / 100.0;
+      },
       undefined,
     );
 
@@ -113,6 +119,7 @@ export class PaddleBoost extends PongModifierBase {
         displacement: -this.maxDisplacement,
         animationStatus: AnimationStatus.IDLE,
         lastMovementDirection: "STOP", // Initialize with no movement
+        didBoost: false,
       });
     });
   }
@@ -153,7 +160,24 @@ export class PaddleBoost extends PongModifierBase {
         }
         break;
 
-      case "STOP":
+      case "STOP_DOWN":
+        // Reset movement only if the player isn't pressing the other direction
+        paddleInfos.lastMovementDirection = "STOP";
+        // Only apply velocity immediately if we're in a state that allows movement
+        if (
+          [AnimationStatus.IDLE, AnimationStatus.EXTENDED].includes(
+            paddleInfos.animationStatus,
+          )
+        ) {
+          this.applyMovementDirection(
+            game.getState().paddles[args.input.playerId],
+            paddleInfos,
+          );
+        }
+        break;
+
+      // Quick fix, TODO: maybe fix this in the future
+      case "STOP_UP":
         // Reset movement only if the player isn't pressing the other direction
         paddleInfos.lastMovementDirection = "STOP";
         // Only apply velocity immediately if we're in a state that allows movement
@@ -262,67 +286,24 @@ export class PaddleBoost extends PongModifierBase {
 
   onPaddleBounce(game: Pong, args: { ballId: number; playerId: number }): void {
     const ball = game.getState().balls[args.ballId];
-    const paddle = game.getState().paddles[args.playerId];
     const paddleInfos = this.paddlesInfos[args.playerId];
 
     // Only apply additional effects if the paddle is extending
-    if (paddleInfos.animationStatus === AnimationStatus.EXTENDING) {
-      // Calculate extension velocity based on the paddle's normal vector and extension velocity
-      const extensionVx =
-        (paddle.nx *
-          this.paddleExtensionVelocity *
-          this.paddleExtensionLength) /
-        100;
-      const extensionVy =
-        (paddle.ny *
-          this.paddleExtensionVelocity *
-          this.paddleExtensionLength) /
-        100;
-
-      // Calculate extension speed
-      const extensionSpeed = Math.sqrt(
-        extensionVx * extensionVx + extensionVy * extensionVy,
+    if (
+      paddleInfos.animationStatus === AnimationStatus.EXTENDING &&
+      !paddleInfos.didBoost
+    ) {
+      console.log(
+        `Extended paddle collision! Initial ball speed: ${ball.speed.toFixed(2)}`,
       );
 
-      if (extensionSpeed > 0) {
-        // Calculate how much of the extension direction aligns with the normal vector
-        // For a extending paddle, this is mostly just the extension direction itself
-        const boostStrength =
-          (paddleInfos.displacement / this.maxDisplacement + 1) *
-          this.extensionVelocityTransmissionFactor;
+      // Add to ball speed
+      ball.speed *= 1 + this.extensionVelocityTransmissionFactor;
+      paddleInfos.didBoost = true;
 
-        // Add velocity component in the paddle's normal direction
-        ball.dx += paddle.nx * boostStrength;
-        ball.dy += paddle.ny * boostStrength;
-
-        // Normalize the direction vector
-        const norm = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
-        ball.dx /= norm;
-        ball.dy /= norm;
-
-        // Apply speed boost proportional to how far extended the paddle is
-        // The closer to full extension, the more powerful the boost
-        const extensionPercent =
-          (paddleInfos.displacement + this.maxDisplacement) /
-          (2 * this.maxDisplacement);
-        const speedBoost =
-          extensionSpeed *
-          this.extensionVelocityTransmissionFactor *
-          extensionPercent;
-
-        // Add to ball speed
-        ball.speed += speedBoost;
-
-        // Cap the maximum speed if necessary
-        const maxSpeed = game.getSettings().ballMaxSpeed || 20;
-        if (ball.speed > maxSpeed) {
-          ball.speed = maxSpeed;
-        }
-
-        console.log(
-          `Extended paddle collision! Ball speed: ${ball.speed.toFixed(2)}, direction: [${ball.dx.toFixed(2)}, ${ball.dy.toFixed(2)}]`,
-        );
-      }
+      console.log(
+        `Extended paddle collision! Ball speed: ${ball.speed.toFixed(2)}, direction: [${ball.dx.toFixed(2)}, ${ball.dy.toFixed(2)}]`,
+      );
     }
   }
 
@@ -364,6 +345,7 @@ export class PaddleBoost extends PongModifierBase {
         nextAnimation === AnimationStatus.EXTENDING
       ) {
         paddleInfos.animationStatus = AnimationStatus.EXTENDING;
+        paddleInfos.didBoost = false;
       } else if (
         paddleInfos.animationStatus === AnimationStatus.EXTENDED &&
         nextAnimation === AnimationStatus.RETRACTING

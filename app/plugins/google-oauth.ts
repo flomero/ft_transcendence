@@ -5,6 +5,7 @@ import type { OAuth2Namespace } from "@fastify/oauth2";
 import { signJWT } from "../services/auth/jwt";
 import { getGoogleProfile } from "../services/auth/google-api";
 import { insertUser } from "../services/auth/newUser";
+import { getUserById } from "../services/database/user";
 
 declare module "fastify" {
   interface FastifyInstance {
@@ -40,16 +41,23 @@ const googleOAuthPlugin: FastifyPluginAsync = async (fastify, opts) => {
       if (!token || !token.token) {
         throw new Error("Invalid or null token received");
       }
-      const userInfo = await getGoogleProfile(token.token.access_token);
-      if (!userInfo.verified_email) {
+      const googleUserInfo = await getGoogleProfile(token.token.access_token);
+      if (!googleUserInfo.verified_email) {
         throw new Error("Google account not verified");
       }
 
-      await insertUser(fastify, userInfo);
+      await insertUser(fastify, googleUserInfo);
+      const user = await getUserById(fastify, googleUserInfo.id);
+      if (!user) {
+        reply.internalServerError(
+          "User could not be inserted into the database",
+        );
+        return;
+      }
 
       const jwtToken = await signJWT(fastify, {
-        id: userInfo.id,
-        name: userInfo.name,
+        id: user.id,
+        name: user.username,
         token: token.token,
       });
 
@@ -57,9 +65,13 @@ const googleOAuthPlugin: FastifyPluginAsync = async (fastify, opts) => {
         path: "/",
       });
       reply.redirect("/login/reload");
+      fastify.customMetrics.googleLogin("success");
     } catch (error) {
       fastify.log.error(error);
-      return reply.status(500).send(error);
+      fastify.customMetrics.googleLogin("failure");
+      if (error instanceof Error)
+        return reply.internalServerError(error.message);
+      return reply.internalServerError();
     }
   });
 };

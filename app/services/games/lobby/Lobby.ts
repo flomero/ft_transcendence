@@ -280,6 +280,11 @@ class Lobby {
   }
 
   private getMemberLimits(): { min: number; max: number } {
+    if (this.gameSettings.playerCount)
+      return {
+        min: this.gameSettings.playerCount,
+        max: this.gameSettings.playerCount,
+      };
     if (MinAndMaxPlayers[this.gameSettings.gameModeName] !== undefined)
       return MinAndMaxPlayers[this.gameSettings.gameModeName];
     throw new Error("Game mode not found: " + this.gameSettings.gameModeName);

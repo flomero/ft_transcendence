@@ -1,4 +1,4 @@
-import { Collision } from "../../../services/games/physicsEngine";
+import type { Collision } from "../../../services/games/physicsEngine";
 
 export interface ExtendedCollisionData {
   tick: number;

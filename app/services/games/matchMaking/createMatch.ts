@@ -5,14 +5,18 @@ import GameManager from "../gameHandler/GameManager";
 import type { Database } from "sqlite";
 import addGameToDatabase from "../lobby/start/addGameToDatabase";
 import { GAMEMODE_REGISTRY } from "../../../config";
+import { GameModeType } from "../../config/gameModes";
+import { GameOrigin } from "../../../types/games/gameHandler/GameOrigin";
 
 /**
  * Creates a match based on the specified game mode and player ids
  */
 export const createMatch = async (
   playerIds: string[],
-  gameMode: string,
+  gameMode: GameModeType,
   db: Database,
+  gameOrigin?: GameOrigin,
+  aiOpponentIds?: string[],
 ): Promise<string> => {
   const gameModeSettings = GAMEMODE_REGISTRY[
     gameMode as keyof typeof GAMEMODE_REGISTRY
@@ -28,10 +32,13 @@ export const createMatch = async (
   if (gameClass === null) throw new Error("Game class not found");
   const game = new gameClass(gameModeSettings);
 
-  const gameManager = new GameManager(game);
+  const gameManager = new GameManager(game, gameOrigin);
 
   playerIds.forEach((playerId) => {
     gameManager.addPlayer(playerId);
+  });
+  aiOpponentIds?.forEach((aiOpponentId) => {
+    gameManager.addAiOpponent(aiOpponentId);
   });
 
   gameManagers.set(gameManager.getId, gameManager);

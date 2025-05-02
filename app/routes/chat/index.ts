@@ -19,7 +19,7 @@ const chat: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.get("/:roomId", async (request, reply) => {
     const { roomId } = request.params as { roomId: number };
     if (!roomId) {
-      return reply.status(400).send({ error: "Room ID is required" });
+      return reply.badRequest("Room ID is required");
     }
 
     if (roomId == -1) {
@@ -28,7 +28,7 @@ const chat: FastifyPluginAsync = async (fastify): Promise<void> => {
     }
 
     if (!(await userIsInRoom(fastify, roomId, request.userId))) {
-      return reply.status(403).send({ error: "You are not in this room" });
+      return reply.forbidden("You are not in this room");
     }
 
     await setCurrentRoomId(fastify, request.userId, roomId);
@@ -49,20 +49,19 @@ const chat: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.post("/:roomId", async (request, reply) => {
     const { roomId } = request.params as { roomId: number };
     if (!roomId) {
-      return reply.status(400).send({ error: "Room ID is required" });
+      return reply.badRequest("Room ID is required");
     }
 
     const message = request.body as string;
     if (!message) {
-      return reply.status(400).send({ error: "Message is required" });
+      return reply.badRequest("Message is required");
     }
 
     if (!(await userIsInRoom(fastify, roomId, request.userId))) {
-      return reply.status(403).send({ error: "You are not in this room" });
+      return reply.forbidden("You are not in this room");
     }
 
     await sendMessage(fastify, request, message, roomId);
-    // await addRoom(fastify, "Room " + roomId, [request.userId]);
 
     return reply.status(200).send({ message: "Message sent" });
   });

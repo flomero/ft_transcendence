@@ -1,3 +1,4 @@
+import { MatchmakingGameModes } from "../../../../config";
 import { gameModeFromString } from "../../../config/gameModes";
 import { matchMakingManager } from "../MatchMakingManager";
 import type { FastifyRequest, FastifyReply } from "fastify";
@@ -7,7 +8,7 @@ const joinMatchMakingHandler = async (
   reply: FastifyReply,
 ) => {
   const gameModeString = request.params.gameMode;
-  const gameMode = gameModeFromString(gameModeString);
+  const gameMode = gameModeFromString(gameModeString, MatchmakingGameModes);
   if (gameMode === null) {
     return reply.notFound("Game mode does not exist");
   }

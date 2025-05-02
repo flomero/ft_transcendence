@@ -1,36 +1,25 @@
-import { GameBase, GameBaseState, GameStatus } from "../gameBase";
+import { GameBase } from "../gameBase";
+import { GameStatus } from "../../../types/games/gameBaseState";
 import { PhysicsEngine, type Collision } from "../physicsEngine";
 import {
   GAME_REGISTRY,
-  GameModeCombinedSettings,
+  type GameModeCombinedSettings,
 } from "../../../types/games/gameRegistry";
 import type { Paddle } from "../../../types/games/pong/paddle";
 import type { Ball } from "../../../types/games/pong/ball";
 import type { Rectangle } from "../../../types/games/pong/rectangle";
 import { UserInputManager } from "../userInputManager";
-import { type UserInput } from "../../../types/games/userInput";
+import type { UserInput } from "../../../types/games/userInput";
 import { RNG } from "../rng";
-import { ExtendedCollisionData } from "../../../types/games/pong/extendedCollisionData";
+import type { ExtendedCollisionData } from "../../../types/games/pong/extendedCollisionData";
+import type {
+  BallState,
+  PaddleState,
+  PongGameState,
+  WallState,
+} from "../../../types/games/pong/gameState";
 
 const EPSILON = 1e-2;
-
-// Combined GameState interface w/ GameBaseState + <GameSpecific>State
-export type PongGameState = GameBaseState & {
-  // gameObjects
-  balls: Ball[];
-  paddles: Paddle[];
-  walls: Rectangle[];
-
-  // utils
-  rng: RNG;
-  lastHit: number;
-  lastGoal: number;
-  scores: number[];
-  results: number[];
-
-  // const additionalData
-  playerCount: number;
-};
 
 export abstract class Pong extends GameBase {
   static readonly name = "pong";
@@ -71,8 +60,10 @@ export abstract class Pong extends GameBase {
       lastGoal: -1,
       scores: Array(gameData.playerCount).fill(0),
       results: Array(gameData.playerCount).fill(0),
+      eliminatedPlayers: [],
       playerCount: gameData.playerCount,
     };
+    this.tickData.push(this.gameState);
 
     // Initialize UserInputManager
     this.inputManager = new UserInputManager();
@@ -96,6 +87,9 @@ export abstract class Pong extends GameBase {
         this.modifierManager.trigger("onPaddleUpdate", {
           playerId: index,
         });
+        paddle.velocity =
+          (paddle.keyPressed["UP"] ? paddle.speed : 0) -
+          (paddle.keyPressed["DOWN"] ? paddle.speed : 0);
         if (paddle.velocity !== 0) this.updatePaddle(paddle, true);
       });
 
@@ -106,7 +100,8 @@ export abstract class Pong extends GameBase {
 
       // Verify that no balls went out of bounds
       this.gameState.balls.forEach((ball, id) => {
-        if (this.isOutOfBounds(ball)) this.resetBall(this.gameState, id, false);
+        if (this.isOutOfBounds(ball)) this.resetBall(this.gameState, id, true);
+        // this.modifierManager.trigger("onBallOutOfBounds", { ballID: id });
       });
 
       // Trigger modifiers
@@ -114,8 +109,8 @@ export abstract class Pong extends GameBase {
     }
 
     // Save the current state for potential rewinding
-    const snapshot = this.getStateSnapshot();
-    this.saveStateSnapshot(snapshot);
+    // const snapshot = this.getStateSnapshot();
+    this.saveStateSnapshot(this.gameState);
   }
 
   protected updatePaddle(paddle: Paddle, doTriggers: boolean): void {
@@ -213,13 +208,19 @@ export abstract class Pong extends GameBase {
 
     switch (action.type) {
       case "UP":
-        paddle.velocity = paddle.speed;
+        paddle.keyPressed["UP"] = true;
         break;
+
+      case "STOP_UP":
+        paddle.keyPressed["UP"] = false;
+        break;
+
       case "DOWN":
-        paddle.velocity = -paddle.speed;
+        paddle.keyPressed["DOWN"] = true;
         break;
-      case "STOP":
-        paddle.velocity = 0.0;
+
+      case "STOP_DOWN":
+        paddle.keyPressed["DOWN"] = false;
         break;
     }
   }
@@ -233,37 +234,73 @@ export abstract class Pong extends GameBase {
   getStateSnapshot(): Record<string, any> {
     const gameBaseState = super.getStateSnapshot();
 
+    const balls: BallState[] = this.gameState.balls
+      .filter((ball) => ball.isVisible)
+      .map((ball) => {
+        return {
+          r: parseFloat(ball.radius.toFixed(3)),
+          x: parseFloat(ball.x.toFixed(3)),
+          y: parseFloat(ball.y.toFixed(3)),
+        };
+      });
+
+    const paddles: PaddleState[] = this.gameState.paddles
+      .filter((paddle) => paddle.isVisible)
+      .map((paddle) => {
+        return {
+          a: paddle.alpha,
+          x: parseFloat(paddle.x.toFixed(3)),
+          y: parseFloat(paddle.y.toFixed(3)),
+          w: parseFloat(paddle.width.toFixed(3)),
+          h: parseFloat(paddle.height.toFixed(3)),
+        };
+      });
+
+    const walls: WallState[] = this.gameState.walls
+      .filter((wall) => wall.isVisible)
+      .map((wall) => {
+        return {
+          x: parseFloat(wall.x.toFixed(3)),
+          y: parseFloat(wall.y.toFixed(3)),
+          dx: parseFloat(wall.dx.toFixed(3)),
+          dy: parseFloat(wall.dy.toFixed(3)),
+          w: parseFloat(wall.width.toFixed(3)),
+          h: parseFloat(wall.height.toFixed(3)),
+          doRot: wall.doRotation,
+        };
+      });
+
     const snapshot = {
-      startDate: gameBaseState.startDate,
-      lastUpdate: gameBaseState.lastUpdate,
-      status: gameBaseState.status,
+      // startDate: gameBaseState.startDate,
+      // lastUpdate: gameBaseState.lastUpdate,
+      // status: gameBaseState.status,
       modifiersState: gameBaseState.modifiersState,
 
-      balls: this.gameState.balls,
-      paddles: this.gameState.paddles,
-      walls: this.gameState.walls,
+      balls: balls, // this.gameState.balls,
+      paddles: paddles, // this.gameState.paddles,
+      walls: walls, // this.gameState.walls,
 
-      rng: this.gameState.rng.getState(),
-      lastHit: this.gameState.lastHit,
-      lastGoal: this.gameState.lastGoal,
+      // rng: this.gameState.rng.getState(),
+      // lastHit: this.gameState.lastHit,
+      // lastGoal: this.gameState.lastGoal,
       scores: this.gameState.scores,
-      results: this.gameState.results,
-      playerCount: this.gameState.playerCount,
+      // results: this.gameState.results,
+      // playerCount: this.gameState.playerCount,
     };
 
     return snapshot;
   }
 
   loadStateSnapshot(snapshot: Record<string, any>): void {
-    this.gameState.balls = snapshot.balls; //.map(ball => ({...ball}));
-    this.gameState.paddles = snapshot.paddles; //.map(paddle => ({...paddle}));
-    this.gameState.walls = snapshot.walls; //.map(wall => ({...wall}));
-    this.gameState.scores = [...snapshot.scores];
-    this.gameState.lastHit = snapshot.lastHit;
+    this.gameState.balls = snapshot?.balls; //.map(ball => ({...ball}));
+    this.gameState.paddles = snapshot?.paddles; //.map(paddle => ({...paddle}));
+    this.gameState.walls = snapshot?.walls; //.map(wall => ({...wall}));
+    this.gameState.scores = [...(snapshot?.scores || [])];
+    this.gameState.lastHit = snapshot?.lastHit;
 
-    this.modifierManager.loadStateSnapshot(snapshot.modifiersData);
+    this.modifierManager.loadStateSnapshot(snapshot?.modifiersData || {});
 
-    this.gameState.rng.setState(snapshot.rng);
+    if (snapshot?.rng) this.gameState.rng.setState(snapshot.rng);
   }
 
   protected async saveStateSnapshot(
@@ -325,9 +362,9 @@ export abstract class Pong extends GameBase {
       if (ball.doCollision) this.doCollisionChecks(gameState, ball, doTriggers);
 
     // Verify that no balls went out of bounds
-    gameState.balls.forEach((ball, id) => {
-      if (this.isOutOfBounds(ball)) this.resetBall(gameState, id, doTriggers);
-    });
+    // gameState.balls.forEach((ball, id) => {
+    //   if (this.isOutOfBounds(ball)) this.resetBall(gameState, id, doTriggers);
+    // });
 
     // Trigger modifiers
     if (doTriggers) this.modifierManager.trigger("onUpdate");
@@ -562,4 +599,13 @@ export abstract class Pong extends GameBase {
   }
 
   abstract getSettings(): GameModeCombinedSettings;
+
+  isEliminated(playerID: number): boolean {
+    if (playerID < 0 || playerID >= this.gameState.playerCount) return true;
+    return this.gameState.eliminatedPlayers.includes(playerID);
+  }
+
+  eliminate(playerID: number): void {
+    this.modifierManager.trigger("onPlayerElimination", { playerId: playerID });
+  }
 }

@@ -7,7 +7,8 @@ import {
   type GameModeCombinedSettings,
 } from "../../../../types/games/gameRegistry";
 import { StrategyManager } from "../../../strategy/strategyManager";
-import { IPongBallResetSampler } from "../../../../types/strategy/IPongBallResetSampler";
+import type { IPongBallResetSampler } from "../../../../types/strategy/IPongBallResetSampler";
+import { pongUserInputs } from "../../../../types/games/userInput";
 
 export class MultiplayerPong extends Pong {
   name = "multiplayerPong";
@@ -72,35 +73,28 @@ export class MultiplayerPong extends Pong {
       ))
         this.settings.powerUpCapacities[key] = value;
 
-    console.log("Loaded settings:");
-    console.dir(this.settings, { depth: null });
-
     this.ballResetSampler = new StrategyManager(
       this.settings.ballResetSampler,
       "pongBallResetSampler",
       "sampleDirection",
     );
 
-    this.initPaddles();
     this.initWalls();
+    this.initPaddles();
     this.resetBall(this.gameState, -1, true);
   }
 
   startGame(): void {
-    console.log("Starting Game");
     super.startGame();
     console.log("Game Started");
-
-    console.log(`Balls: ${this.gameState.balls.length}`);
-    console.log(`Paddles: ${this.gameState.paddles.length}`);
-    console.log(`Walls: ${this.gameState.walls.length}`);
   }
 
   initPaddles(): void {
     // Calculate paddleAmplitude - the maximum possible distance the paddle can travel
     const paddleAmplitude =
-      (this.settings.arenaRadius - this.settings.paddleOffset) *
-      Math.sin(Math.PI / this.gameState.playerCount);
+      (this.gameState.walls[0].width *
+        (this.settings.arenaRadius - this.settings.paddleOffset)) /
+      this.settings.arenaRadius;
 
     // Calculate the coverage percentage (0 to 1)
     const coverage = this.settings.paddleCoveragePercent / 100.0;
@@ -138,7 +132,13 @@ export class MultiplayerPong extends Pong {
         dx: 0,
         dy: 0,
         doCollision: true,
+        doRotation: true,
         maxDisplacement: maxDisplacement,
+        keyPressed: {
+          ...Object.fromEntries(
+            Object.keys(pongUserInputs).map((key) => [key, false]),
+          ),
+        },
       };
 
       const tmp: number = Math.sqrt(paddle.x ** 2 + paddle.y ** 2);
@@ -164,9 +164,8 @@ export class MultiplayerPong extends Pong {
     // Initialize walls, rotate by alpha
     const wallWidth =
       2.0 *
-      Math.sin(Math.PI / (2.0 * this.gameState.playerCount)) *
-      (this.settings.arenaRadius *
-        (1 + 1 / (this.gameState.playerCount + 0.5)));
+      this.settings.arenaRadius *
+      Math.sin(Math.PI / (2.0 * this.gameState.playerCount));
 
     for (let index = 0; index < 2 * this.gameState.playerCount; index++) {
       const wall: Rectangle = {
@@ -199,6 +198,7 @@ export class MultiplayerPong extends Pong {
         dy: 0,
         isGoal: index % 2 == 0,
         doCollision: true,
+        doRotation: true,
       };
 
       const tmp = Math.sqrt(wall.x ** 2 + wall.y ** 2);
@@ -217,6 +217,81 @@ export class MultiplayerPong extends Pong {
       wall.dy = -wall.nx;
 
       this.gameState.walls.push(wall);
+    }
+
+    // Calculate proper widths for walls to ensure they overlap correctly
+    const totalWalls = this.gameState.walls.length;
+    const newWidths: number[] = new Array(totalWalls);
+
+    // First compute all new widths without modifying the walls
+    for (let i = 0; i < totalWalls; i++) {
+      const currentWall = this.gameState.walls[i];
+      const nextWallIndex = (i + 1) % totalWalls;
+      const nextWall = this.gameState.walls[nextWallIndex];
+
+      const currentWallInfos = {
+        x: currentWall.x - (currentWall.nx * currentWall.height) / 2.0,
+        y: currentWall.y - (currentWall.ny * currentWall.height) / 2.0,
+        vectorX: currentWall.dx,
+        vectorY: currentWall.dy,
+      };
+
+      const nextWallInfos = {
+        x: nextWall.x - (nextWall.nx * nextWall.height) / 2.0,
+        y: nextWall.y - (nextWall.ny * nextWall.height) / 2.0,
+        vectorX: -nextWall.dx,
+        vectorY: -nextWall.dy,
+      };
+
+      // Compute intersection point between the two lines
+      // Line 1: currentWallInfos.x + t * currentWallInfos.vectorX, currentWallInfos.y + t * currentWallInfos.vectorY
+      // Line 2: nextWallInfos.x + s * nextWallInfos.vectorX, nextWallInfos.y + s * nextWallInfos.vectorY
+
+      // Using the formula for line intersection:
+      // det = cross(v1, v2) = v1.x * v2.y - v1.y * v2.x
+      const det =
+        currentWallInfos.vectorX * nextWallInfos.vectorY -
+        currentWallInfos.vectorY * nextWallInfos.vectorX;
+
+      // If det is close to 0, lines are parallel and won't intersect properly
+      if (Math.abs(det) < 1e-10) {
+        // Fallback to default width if no intersection
+        newWidths[i] = wallWidth;
+        continue;
+      }
+
+      // Calculate vector between starting points
+      const dx = nextWallInfos.x - currentWallInfos.x;
+      const dy = nextWallInfos.y - currentWallInfos.y;
+
+      // Calculate parameters t and s
+      const t = (dx * nextWallInfos.vectorY - dy * nextWallInfos.vectorX) / det;
+
+      // We only need t for the current wall to determine its width
+      // The intersection point
+      const intersectionX = currentWallInfos.x + t * currentWallInfos.vectorX;
+      const intersectionY = currentWallInfos.y + t * currentWallInfos.vectorY;
+
+      // Calculate distance from the wall's center to the intersection point
+      const centerToIntersectionX = intersectionX - currentWall.x;
+      const centerToIntersectionY = intersectionY - currentWall.y;
+
+      // Project this vector onto the wall's direction vector
+      const projectionLength =
+        centerToIntersectionX * currentWallInfos.vectorX +
+        centerToIntersectionY * currentWallInfos.vectorY;
+
+      // The new width should be twice this projection (to extend from center)
+      newWidths[i] = Math.abs(projectionLength) * 2;
+
+      // Add a small margin to ensure walls overlap
+      const overlapMargin = 0.01; // Small overlap to prevent gaps
+      newWidths[i] += overlapMargin;
+    }
+
+    // Now update all walls with their new widths
+    for (let i = 0; i < totalWalls; i++) {
+      this.gameState.walls[i].width = newWidths[i];
     }
   }
 
@@ -367,12 +442,15 @@ export class MultiplayerPong extends Pong {
   // Implementation of isOutOfBounds method
   isOutOfBounds(ball: Ball): boolean {
     const tolerance: number =
-      this.settings.wallsHeight + this.settings.paddleOffset;
-    this.settings.wallsHeight + this.settings.paddleOffset;
+      this.settings.wallsHeight +
+      this.settings.wallOffset +
+      this.settings.paddleOffset;
+
+    if (ball.x <= 0 || ball.y <= 0) return true;
 
     const distance =
-      (ball.x - this.settings.arenaRadius) ** 2 +
-      (ball.y - this.settings.arenaRadius) ** 2;
+      Math.pow(ball.x - this.settings.arenaRadius, 2) +
+      Math.pow(ball.y - this.settings.arenaRadius, 2);
     return (
       distance >= tolerance + this.settings.arenaRadius ** 2 + ball.radius ** 2
     );

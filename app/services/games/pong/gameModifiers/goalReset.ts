@@ -1,6 +1,6 @@
 import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
 import { ModifierBase, ModifierStatus } from "../../modifierBase";
-import { Pong } from "../pong";
+import type { Pong } from "../pong";
 
 export class GoalReset extends ModifierBase {
   name = "goalReset";
@@ -41,6 +41,18 @@ export class GoalReset extends ModifierBase {
   }
 
   onGoal(game: Pong, args: { playerId: number }): void {
+    if (this.status !== ModifierStatus.ACTIVE) return;
+    this.ticks = this.delay;
+    this.status = ModifierStatus.PAUSED;
+
+    const gameState = game.getState();
+
+    game.resetBall(gameState, -1, true);
+    this.ballSpeed = gameState.balls[0].speed;
+    gameState.balls[0].speed = 0;
+  }
+
+  onBallOutOfBounds(game: Pong, args: { ballID: number }): void {
     if (this.status !== ModifierStatus.ACTIVE) return;
     this.ticks = this.delay;
     this.status = ModifierStatus.PAUSED;

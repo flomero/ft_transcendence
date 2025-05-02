@@ -1,11 +1,12 @@
-import { AIData, AIOpponent } from "../aiOpponent";
+import { type AIData, AIOpponent } from "../aiOpponent";
 import { StrategyManager } from "../../strategy/strategyManager";
-import {
+import type {
   IPongPaddlePositionSampler,
   PongPaddlePosition,
 } from "../../../types/strategy/IPongPaddlePositionSampler";
-import { UserInput } from "../../../types/games/userInput";
-import { Pong, PongGameState } from "./pong";
+import type { UserInput } from "../../../types/games/userInput";
+import type { Pong } from "./pong";
+import type { PongGameState } from "../../../types/games/pong/gameState";
 
 interface MovementInterval {
   type: "UP" | "DOWN";
@@ -97,7 +98,12 @@ export class PongAIOpponent extends AIOpponent {
         timestamp: intv.start,
       });
       inputs.push({
-        type: "STOP",
+        type: "STOP_UP",
+        playerId: this.data.playerId,
+        timestamp: intv.stop,
+      });
+      inputs.push({
+        type: "STOP_DOWN",
         playerId: this.data.playerId,
         timestamp: intv.stop,
       });

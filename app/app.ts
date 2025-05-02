@@ -22,6 +22,7 @@ const envSchema = {
     GOOGLE_CLIENT_ID: { type: "string" },
     PUBLIC_URL: { type: "string" },
     NODE_ENV: { type: "string", default: "production" },
+    DB_PATH: { type: "string", default: "./database/db.sqlite" },
   },
 };
 
@@ -34,6 +35,7 @@ declare module "fastify" {
       GOOGLE_CLIENT_ID: string;
       PUBLIC_URL: string;
       NODE_ENV: string;
+      DB_PATH: string;
     };
   }
 }

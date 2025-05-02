@@ -1,8 +1,8 @@
 import GameManager from "../../gameHandler/GameManager";
 import { createNewGameClass } from "./createNewGameClass";
 import { getLobby } from "../lobbyWebsocket/getLobby";
-import { LobbyMember } from "../../../../types/games/lobby/LobbyMember";
-import { GameOrigin } from "../../../../types/games/gameHandler/GameOrigin";
+import type { LobbyMember } from "../../../../types/games/lobby/LobbyMember";
+import type { GameOrigin } from "../../../../types/games/gameHandler/GameOrigin";
 
 const gameManagerCreate = (lobbyId: string) => {
   const game = createNewGameClass(lobbyId);

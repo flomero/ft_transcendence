@@ -1,10 +1,10 @@
-import { ExtendedCollisionData } from "../../../types/games/pong/extendedCollisionData";
-import {
+import type { ExtendedCollisionData } from "../../../types/games/pong/extendedCollisionData";
+import type {
   IPongPaddlePositionSampler,
   PongPaddlePosition,
 } from "../../../types/strategy/IPongPaddlePositionSampler";
-import { PongGameState } from "../../games/pong/pong";
-import { PongAIOpponent } from "../../games/pong/pongAIOpponent";
+import type { PongGameState } from "../../../types/games/pong/gameState";
+import type { PongAIOpponent } from "../../games/pong/pongAIOpponent";
 
 export class Naive implements IPongPaddlePositionSampler {
   name = "naive";

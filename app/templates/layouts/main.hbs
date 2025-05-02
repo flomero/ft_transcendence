@@ -12,15 +12,15 @@
     {{> partials/header}}
 
     <div class="flex flex-1 relative">
-        <div class="layout">
+        <div class="layout pt-14">
             <main id="app-content" class="flex-1 transition-all duration-300">
                 {{{body}}}
             </main>
         </div>
-        
+
         <!-- Sidebar Overlay (for mobile) -->
         <div id="sidebar-overlay" class="fixed inset-0 bg-bg/50 opacity-0 transition-opacity duration-300 ease-in-out pointer-events-none z-10 md:hidden"></div>
-        
+
         <!-- Right Sidebar -->
         <aside id="sidebar" class="flex flex-col bg-bg fixed top-0 right-0 w-[300px] h-screen overflow-hidden bg-background border-l border-border shadow-lg translate-x-full transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] z-20 text-sidebar-foreground">
                 <div id="sidebar-content" class="pt-14 flex h-full flex-col">
@@ -30,9 +30,9 @@
     </div>
 
     {{> partials/footer}}
-    <script type="module" src="/public/js/router.js"></script>
-    <script type="module" src="/public/js/sidebar.js"></script>
-    <script type="module" src="/public/js/logout.js"></script>
+    <script type="module" src="/js/router.js"></script>
+    <script type="module" src="/js/sidebar.js"></script>
+    <script type="module" src="/js/logout.js"></script>
 </body>
 
 </html>
