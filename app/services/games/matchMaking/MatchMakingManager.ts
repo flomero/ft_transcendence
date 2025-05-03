@@ -85,13 +85,13 @@ class MatchMakingManager {
       .entries()
       .filter((entry) => entry[1].gameMode === gameMode)
       .toArray();
-    const cueSize = membersGameMode.length;
+    const queueSize = membersGameMode.length;
     membersGameMode.forEach((entry) => {
       this.sendMessageToMember(
         entry[0],
         JSON.stringify({
           type: "updateText",
-          data: "Players waiting: " + cueSize,
+          data: queueSize,
         }),
       );
     });

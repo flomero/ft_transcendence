@@ -19,8 +19,7 @@ const joinMatchMakingHandler = async (
   const data = {
     title: "Matchmaking | ft_transcendence",
     gameMode: gameMode,
-    matchmakingStatus:
-      "Players waiting: " + matchMakingManager.getWaitingSizeGameMode(gameMode),
+    matchmakingStatus: matchMakingManager.getWaitingSizeGameMode(gameMode),
   };
   reply.header("X-Page-Title", "Matchmaking | ft_transcendence");
   const viewOptions = request.isAjax() ? {} : { layout: "layouts/main" };
