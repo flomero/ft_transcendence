@@ -3,11 +3,18 @@ import { GameStatus } from "../../../types/games/gameBaseState";
 import type { Database } from "sqlite";
 
 const connectionTimeoutHandler = (gameManager: GameManager, db: Database) => {
+  setTimeout(() => startAiGame(gameManager, db), 2000);
   setTimeout(() => startGameIfNotAllPlayerConnected(gameManager, db), 15000);
   setTimeout(
     () => disqualifyNotConnectedPlayersIfOnePlayer(gameManager),
     50000,
   );
+};
+
+const startAiGame = (gameManager: GameManager, db: Database) => {
+  if (gameManager.justAisInGame() === true) {
+    gameManager.startGame(db);
+  }
 };
 
 const startGameIfNotAllPlayerConnected = (

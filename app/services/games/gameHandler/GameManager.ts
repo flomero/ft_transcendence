@@ -256,6 +256,13 @@ class GameManager {
   public getPlayersAsArray(): Player[] {
     return Array.from(this.players.values());
   }
+
+  public justAisInGame(): boolean {
+    if (this.players.size === 0 && this.aiOpponents.size > 0) {
+      return true;
+    }
+    return false;
+  }
 }
 
 export default GameManager;
