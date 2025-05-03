@@ -3,7 +3,6 @@ import type { FastifyRequest } from "fastify";
 import { WebSocket } from "ws";
 import gameValidationCheck from "./gameValidationCheck";
 import handleGameMessage from "./handleGameMessage";
-import connectionTimeoutHandler from "./connectionTimeoutHandler";
 
 const gameWebsocketHandler = async (
   connection: WebSocket,
