@@ -23,6 +23,10 @@ interface ChatClient {
 
 const chatClients: ChatClient[] = [];
 
+export function getCountOnlineChatUsers(): number {
+  return chatClients.length;
+}
+
 export function addChatClient(fastify: FastifyInstance, client: ChatClient) {
   chatClients.push(client);
 
@@ -113,7 +117,7 @@ export async function setCurrentRoomId(
   sendRoomUpdate(fastify, roomId, userId);
 }
 
-async function updateRoomAndSendMessage(
+export async function updateRoomAndSendMessage(
   fastify: FastifyInstance,
   userName: string,
   userId: string,
@@ -122,7 +126,9 @@ async function updateRoomAndSendMessage(
   type: ChatMessageType,
 ) {
   const userIdsBlacklist = chatClients
-    .filter((client) => client.currentRoomId === roomId)
+    .filter(
+      (client) => client.currentRoomId === roomId || client.userId === userId,
+    )
     .map((client) => client.userId);
 
   await setRoomReadForAllUsersBlacklist(
@@ -133,7 +139,7 @@ async function updateRoomAndSendMessage(
   );
 
   for (const client of chatClients) {
-    if (client.currentRoomId != roomId) {
+    if (client.currentRoomId != roomId && client.userId != userId) {
       let room = client.roomIds.find((id) => id == roomId);
       if (!room) {
         continue;
@@ -178,6 +184,7 @@ async function updateRoomAndSendMessage(
     client.socket.send(JSON.stringify(response));
   }
 
+  fastify.customMetrics.countChatMsg(roomId);
   saveMessage(fastify, roomId, userId, message, type);
 }
 
@@ -217,9 +224,9 @@ export async function sendGameInvite(
   fastify: FastifyInstance,
   request: FastifyRequest,
   roomId: number,
-  gameId: number,
+  lobbyId: string,
 ) {
-  const message: string = "/games/lobby/join/" + gameId;
+  const message: string = "/games/lobby/join/" + lobbyId;
 
   await updateRoomAndSendMessage(
     fastify,
@@ -235,10 +242,10 @@ export async function sendGameInviteToUser(
   fastify: FastifyInstance,
   request: FastifyRequest,
   friendId: string,
-  gameId: number,
+  lobbyId: string,
 ) {
   const roomId = await getChatRoomTwoUsers(fastify, request.userId, friendId);
-  await sendGameInvite(fastify, request, roomId, gameId);
+  await sendGameInvite(fastify, request, roomId, lobbyId);
 }
 
 export async function addRoom(

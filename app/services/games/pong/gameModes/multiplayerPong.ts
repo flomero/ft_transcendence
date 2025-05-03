@@ -446,9 +446,11 @@ export class MultiplayerPong extends Pong {
       this.settings.wallOffset +
       this.settings.paddleOffset;
 
+    if (ball.x <= 0 || ball.y <= 0) return true;
+
     const distance =
-      (ball.x - this.settings.arenaRadius) ** 2 +
-      (ball.y - this.settings.arenaRadius) ** 2;
+      Math.pow(ball.x - this.settings.arenaRadius, 2) +
+      Math.pow(ball.y - this.settings.arenaRadius, 2);
     return (
       distance >= tolerance + this.settings.arenaRadius ** 2 + ball.radius ** 2
     );

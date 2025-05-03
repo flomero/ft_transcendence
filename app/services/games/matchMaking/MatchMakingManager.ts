@@ -12,6 +12,7 @@ class MatchMakingManager {
     let member = this.members.get(memberId);
     if (member) {
       member.gameMode = gameMode;
+      this.sendWaitingMessage(gameMode);
       return;
     }
     member = {
@@ -19,6 +20,8 @@ class MatchMakingManager {
       gameMode: gameMode,
     };
     this.members.set(member.memberId, member);
+
+    this.sendWaitingMessage(gameMode);
   }
 
   public removeMemberSocket(memberId: string) {
@@ -44,7 +47,12 @@ class MatchMakingManager {
     if (this.members.has(memberId) === false) {
       throw new Error(`[ removeMember ] Member with id ${memberId} not found`);
     }
+    const gameMode = this.members.get(memberId)?.gameMode;
     this.members.delete(memberId);
+
+    if (gameMode !== undefined) {
+      this.sendWaitingMessage(gameMode);
+    }
   }
 
   public get memberSize(): number {
@@ -63,6 +71,30 @@ class MatchMakingManager {
 
   public getAllMembers(): MemberMatchMaking[] {
     return Array.from(this.members.values());
+  }
+
+  public getWaitingSizeGameMode(gameMode: GameModeType): number {
+    return this.members
+      .entries()
+      .filter((entry) => entry[1].gameMode === gameMode)
+      .toArray().length;
+  }
+
+  private sendWaitingMessage(gameMode: GameModeType) {
+    const membersGameMode = this.members
+      .entries()
+      .filter((entry) => entry[1].gameMode === gameMode)
+      .toArray();
+    const queueSize = membersGameMode.length;
+    membersGameMode.forEach((entry) => {
+      this.sendMessageToMember(
+        entry[0],
+        JSON.stringify({
+          type: "updateText",
+          data: queueSize,
+        }),
+      );
+    });
   }
 }
 
