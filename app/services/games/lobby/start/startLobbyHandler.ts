@@ -22,18 +22,18 @@ async function startLobbyHandler(
     canLobbyBeStartedCheck(lobbyId);
     setLobbyStateToStart(userId, lobbyId);
     const newGameManager = gameManagerCreate(lobbyId);
-    gameManagers.set(newGameManager.getId, newGameManager);
+    gameManagers.set(newGameManager.getId(), newGameManager);
     await addGameToDatabase(
       newGameManager,
       request.server.sqlite,
       lobby.getGameSettings,
     );
     lobby.sendMessageToAllMembers(
-      JSON.stringify({ type: "gameStarted", data: newGameManager.getId }),
+      JSON.stringify({ type: "gameStarted", data: newGameManager.getId() }),
     );
     request.server.customMetrics.countGameStarted();
     lobby.disconnectMembersFromSockets();
-    return reply.code(200).send({ gameId: newGameManager.getId });
+    return reply.code(200).send({ gameId: newGameManager.getId() });
   } catch (error) {
     if (error instanceof Error) return reply.badRequest(error.message);
     return reply.badRequest("Error starting lobby");

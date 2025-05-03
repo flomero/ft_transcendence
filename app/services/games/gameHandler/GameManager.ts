@@ -20,7 +20,7 @@ class GameManager {
   private gameOrigin: GameOrigin | undefined;
   game: GameBase;
   players: Map<string, Player> = new Map();
-  aiOpponent: Map<string, PongAIOpponent> = new Map();
+  aiOpponents: Map<string, PongAIOpponent> = new Map();
   playerIdReferenceTable: Array<string> = [];
 
   constructor(game: GameBase, gameOrigin?: GameOrigin) {
@@ -52,7 +52,7 @@ class GameManager {
       playerId: -1,
       strategyName: "foresight",
     });
-    this.aiOpponent.set(aiOpponentId, newAiOpponent);
+    this.aiOpponents.set(aiOpponentId, newAiOpponent);
     this.playerIdReferenceTable.push(aiOpponentId);
   }
 
@@ -119,8 +119,8 @@ class GameManager {
   }
 
   public async startGame(db: Database): Promise<void> {
-    if (this.allPlayersAreConnected() === false)
-      throw new Error("Not all players are connected");
+    //if (this.allPlayersAreConnected() === false)
+    //  throw new Error("[start Game] Not all players are connected");
     if (this.game.getStatus() !== GameStatus.CREATED) return;
 
     this.shuffleReferenceTable();
@@ -151,9 +151,9 @@ class GameManager {
     for (let i = 0; i < this.playerIdReferenceTable.length; i++) {
       const playerOrAiId = this.playerIdReferenceTable[i];
 
-      const aiOpponent = this.aiOpponent.get(playerOrAiId);
-      if (aiOpponent) {
-        aiOpponent.setPlayerId(i);
+      const aiOpponents = this.aiOpponents.get(playerOrAiId);
+      if (aiOpponents) {
+        aiOpponents.setPlayerId(i);
       }
 
       const player = this.players.get(playerOrAiId);
@@ -200,20 +200,42 @@ class GameManager {
     }
   }
 
-  public get getId() {
+  public disqualifyNotConnectedPlayers(): void {
+    for (const player of this.players.values()) {
+      if (player.ws === undefined || player.ws.readyState !== WebSocket.OPEN) {
+        this.game.eliminate(player.id);
+      }
+    }
+  }
+
+  public getPlayerSize() {
+    return this.players.size + this.aiOpponents.size;
+  }
+
+  public getId() {
     return this.id;
   }
 
-  public get getGame() {
+  public getGame() {
     return this.game;
   }
 
-  public get getScores(): number[] {
+  public getScores(): number[] {
     return this.game.getScores();
   }
 
-  public get getAiIdsAsArray() {
-    return Array.from(this.aiOpponent.keys());
+  public getAiIdsAsArray() {
+    return Array.from(this.aiOpponents.keys());
+  }
+
+  public connectedNumberOfPlayersInGame() {
+    let count = 0;
+    for (const player of this.players.values()) {
+      if (player.ws !== undefined && player.ws.readyState === WebSocket.OPEN) {
+        count++;
+      }
+    }
+    return count + this.aiOpponents.size;
   }
 
   public getPlayer(playerId: string) {
@@ -223,7 +245,7 @@ class GameManager {
     return this.players.get(playerId);
   }
 
-  public get gameStatus(): GameStatus {
+  public gameStatus(): GameStatus {
     return this.game.getStatus();
   }
 
@@ -231,7 +253,7 @@ class GameManager {
     this.game.handleAction(data.options);
   }
 
-  public get getPlayersAsArray(): Player[] {
+  public getPlayersAsArray(): Player[] {
     return Array.from(this.players.values());
   }
 }

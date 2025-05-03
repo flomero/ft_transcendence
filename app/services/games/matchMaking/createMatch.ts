@@ -41,9 +41,9 @@ export const createMatch = async (
     gameManager.addAiOpponent(aiOpponentId);
   });
 
-  gameManagers.set(gameManager.getId, gameManager);
+  gameManagers.set(gameManager.getId(), gameManager);
 
   await addGameToDatabase(gameManager, db, gameModeSettings);
 
-  return gameManager.getId;
+  return gameManager.getId();
 };
