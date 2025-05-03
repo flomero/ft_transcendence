@@ -6,6 +6,7 @@ import type GameManager from "../../gameHandler/GameManager";
 import addGameToDatabase from "./addGameToDatabase";
 import { getLobby } from "../lobbyWebsocket/getLobby";
 import { canLobbyBeStartedCheck } from "./canLobbyBeStartedCheck";
+import connectionTimeoutHandler from "../../gameHandler/connectionTimeoutHandler";
 
 export const gameManagers = new Map<string, GameManager>();
 
@@ -21,7 +22,10 @@ async function startLobbyHandler(
     validConnectionCheck(userId, lobbyId);
     canLobbyBeStartedCheck(lobbyId);
     setLobbyStateToStart(userId, lobbyId);
+
     const newGameManager = gameManagerCreate(lobbyId);
+    const db = request.server.sqlite;
+
     gameManagers.set(newGameManager.getId(), newGameManager);
     await addGameToDatabase(
       newGameManager,
@@ -33,6 +37,7 @@ async function startLobbyHandler(
     );
     request.server.customMetrics.countGameStarted();
     lobby.disconnectMembersFromSockets();
+    connectionTimeoutHandler(newGameManager, db);
     return reply.code(200).send({ gameId: newGameManager.getId() });
   } catch (error) {
     if (error instanceof Error) return reply.badRequest(error.message);

@@ -12,12 +12,10 @@ const gameWebsocketHandler = async (
   const gameId = request.params.gameId;
   const userId = request.userId;
   const gameManager = gameManagers.get(gameId);
-  const db = request.server.sqlite;
 
   try {
     gameValidationCheck(userId, gameId);
     gameManager!.addSocketToPlayer(userId, connection);
-    connectionTimeoutHandler(gameManager!, db);
 
     if (gameManager!.allPlayersAreConnected() === true) {
       await gameManager!.startGame(request.server.sqlite);

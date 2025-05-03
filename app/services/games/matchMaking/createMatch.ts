@@ -7,6 +7,7 @@ import addGameToDatabase from "../lobby/start/addGameToDatabase";
 import { GAMEMODE_REGISTRY } from "../../../config";
 import { GameModeType } from "../../config/gameModes";
 import { GameOrigin } from "../../../types/games/gameHandler/GameOrigin";
+import connectionTimeoutHandler from "../gameHandler/connectionTimeoutHandler";
 
 /**
  * Creates a match based on the specified game mode and player ids
@@ -44,6 +45,6 @@ export const createMatch = async (
   gameManagers.set(gameManager.getId(), gameManager);
 
   await addGameToDatabase(gameManager, db, gameModeSettings);
-
+  connectionTimeoutHandler(gameManager, db);
   return gameManager.getId();
 };
