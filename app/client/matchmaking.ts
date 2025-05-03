@@ -54,6 +54,13 @@ class MatchmakingHandler {
       case "matchFound":
         this.handleMatchFound(message.data);
         break;
+      case "updateText":
+        const matchmakingStatusElement =
+          document.getElementById("matchmaking-status");
+        if (matchmakingStatusElement) {
+          matchmakingStatusElement.textContent = message.data;
+        }
+        break;
       default:
         console.log("Unknown message type:", message.type);
     }
