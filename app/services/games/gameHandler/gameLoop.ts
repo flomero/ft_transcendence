@@ -24,7 +24,7 @@ const gameLoop = async (gameManagerId: string, fastify: FastifyInstance) => {
     loopCounter++;
   }
   sendGameState(gameManager, game, playerIdReferenceTable);
-  sendGameWinner(gameManager, playerIdReferenceTable, fastify);
+  await sendGameWinner(gameManager, playerIdReferenceTable, fastify);
   return;
 };
 
@@ -54,7 +54,7 @@ const sendGameWinner = async (
   const user = await getUserById(fastify, winnerId);
   if (user === null || user === undefined) return;
   const userWithImage = userToUserWithImage(user);
-  const html = await fastify.view("components/games/winner", {
+  const html = await fastify.view("components/game/winner", {
     user: userWithImage,
   });
   gameManager.sendMessageToAll(

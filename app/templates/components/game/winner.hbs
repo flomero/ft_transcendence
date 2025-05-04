@@ -1,10 +1,14 @@
-<div class="flex flex-col gap-2">
+<div class="flex flex-col gap-2 justify-center items-center min-h">
+  <p class="text-fg-muted">Game Over</p>
   <h2>
-    game over: {{user.userName}} won!
+    {{user.userName}} won!
   </h2>
   <img
   src="{{user.imageUrl}}"
   alt="User Avatar"
   class="bg-bg-muted size-12 rounded-full border object-cover"
   />
+  {{#> components/button url="/play" variant="fancy" class="mt-6"}}
+    Play again!
+  {{/components/button}}
 </div>
