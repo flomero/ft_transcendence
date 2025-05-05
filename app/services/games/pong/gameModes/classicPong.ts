@@ -320,7 +320,7 @@ export class ClassicPong extends Pong {
 
   getResults(): number[] {
     const scores = this.gameState.scores;
-    const p1result: number = scores[0] > scores[1] ? 1 : 2;
+    const p1result: number = scores[0] > scores[1] ? 2 : 1;
     const p2result: number = (p1result % 2) + 1;
 
     return [p1result, p2result];
