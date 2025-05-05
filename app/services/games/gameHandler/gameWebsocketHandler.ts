@@ -3,6 +3,7 @@ import type { FastifyRequest } from "fastify";
 import { WebSocket } from "ws";
 import gameValidationCheck from "./gameValidationCheck";
 import handleGameMessage from "./handleGameMessage";
+import sendTheInitialGameStateToEveryone from "./sendTheInitialGameStateToEveryone";
 
 const gameWebsocketHandler = async (
   connection: WebSocket,
@@ -15,6 +16,7 @@ const gameWebsocketHandler = async (
   try {
     gameValidationCheck(userId, gameId);
     gameManager!.addSocketToPlayer(userId, connection);
+    sendTheInitialGameStateToEveryone(gameManager!);
 
     if (gameManager!.allPlayersAreConnected() === true) {
       await gameManager!.startGame(request.server.sqlite);

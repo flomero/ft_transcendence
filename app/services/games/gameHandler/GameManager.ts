@@ -263,6 +263,10 @@ class GameManager {
     }
     return false;
   }
+
+  public getStateSnapshot(): PongMinimalGameState {
+    return this.game.getStateSnapshot() as PongMinimalGameState;
+  }
 }
 
 export default GameManager;
