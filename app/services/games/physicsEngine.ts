@@ -106,36 +106,26 @@ export class PhysicsEngine {
       r_by >= -rh / 2.0 - EPSILON &&
       r_by <= rh / 2.0 + EPSILON
     ) {
-      // Use the object's existing normal (already pointing toward the center of the arena)
-      // Transform the object's normal from global to local coordinates
-      const normalLocal: [number, number] = [
-        obj.nx * ca + obj.ny * sa,
-        -obj.nx * sa + obj.ny * ca,
-      ];
+      console.log(`\nball in object: ${objId}`);
+      console.log(`Ball pos in object's base:`);
+      console.log(`  |- x: ${r_bx}`);
+      console.log(`  |- y: ${r_by}`);
 
-      // Calculate how far to move along the normal direction
-      // We need to find the distance to move out of the rectangle along the normal
-      // Project current position onto the normal to find the distance
-      // const dotProduct = r_bx * normalLocal[0] + r_by * normalLocal[1];
+      // Required distance to move the ball out (along the normal)
+      const distanceToMove = obj.height - r_by + Math.PI * EPSILON;
 
-      // Calculate the penetration depth
-      let distanceToMove: number;
-      if (Math.abs(normalLocal[0]) > Math.abs(normalLocal[1])) {
-        // Normal is more horizontal
-        distanceToMove =
-          (normalLocal[0] > 0 ? rw / 2.0 - r_bx : r_bx + rw / 2.0) +
-          2 * EPSILON;
-      } else {
-        // Normal is more vertical
-        distanceToMove =
-          (normalLocal[1] > 0 ? rh / 2.0 - r_by : r_by + rh / 2.0) +
-          2 * EPSILON;
-      }
-
-      // Transform normal back to global coordinates
+      // Use original normal in global space
       const normalGlobal: [number, number] = [obj.nx, obj.ny];
 
-      // Return collision with out-of-bounds flag set
+      const newX = bx + distanceToMove * obj.nx;
+      const newY = by + distanceToMove * obj.ny;
+      const newRBX = (newX - rx) * ca + (newY - ry) * sa;
+      const newRBY = -(newX - rx) * sa + (newY - ry) * ca;
+
+      console.log(`After resolution position:`);
+      console.log(`  |- x: ${newRBX}`);
+      console.log(`  |- y: ${newRBY}`);
+
       return {
         distance: distanceToMove,
         objectId: objId,
@@ -181,10 +171,10 @@ export class PhysicsEngine {
     // Now add the corner collision check
     // Define the four corners in the object's local space
     const corners: Array<[number, number]> = [
-      [rw / 2.0, rh / 2.0],
-      [-rw / 2.0, rh / 2.0],
-      [-rw / 2.0, -rh / 2.0],
-      [rw / 2.0, -rh / 2.0],
+      [rw / 2.0, rh / 2.0], // TOP LEFT
+      [-rw / 2.0, rh / 2.0], // TOP RIGHT
+      [-rw / 2.0, -rh / 2.0], // BOTTOM RIGHT
+      [rw / 2.0, -rh / 2.0], // BOTTOM LEFT
     ];
 
     let cornerCollisionT = Infinity;
@@ -213,8 +203,12 @@ export class PhysicsEngine {
           const collisionX = r_bx + tCandidate * r_bdx;
           const collisionY = r_by + tCandidate * r_bdy;
           // Local normal is from the corner to the collision point
-          const normalLocalX = collisionX - cx;
-          const normalLocalY = collisionY - cy;
+          const contactX =
+            collisionX - br * (r_bdx / Math.sqrt(r_bdx ** 2 + r_bdy ** 2));
+          const contactY =
+            collisionY - br * (r_bdy / Math.sqrt(r_bdx ** 2 + r_bdy ** 2));
+          const normalLocalX = contactX - cx;
+          const normalLocalY = contactY - cy;
           const normLength = Math.sqrt(normalLocalX ** 2 + normalLocalY ** 2);
 
           if (normLength > EPSILON) {

@@ -435,8 +435,10 @@ export abstract class Pong extends GameBase {
       ]);
 
       if (!tmpCollision) {
-        ball.x += Math.round(ball.dx * remainingDistance * 100) / 100;
-        ball.y += Math.round(ball.dy * remainingDistance * 100) / 100;
+        ball.x +=
+          Math.round(ball.dx * remainingDistance * (100 - EPSILON)) / 100;
+        ball.y +=
+          Math.round(ball.dy * remainingDistance * (100 - EPSILON)) / 100;
         break;
       }
 
@@ -444,10 +446,18 @@ export abstract class Pong extends GameBase {
 
       // Handle out-of-bounds case
       if (collision.outOfBounds && collision.normal) {
+        // console.log(`Distance to sole ball in rectangle: ${collision.distance}`);
+        // console.log(`Ball position before resolution:`);
+        // console.log(`  |- x: ${ball.x}`);
+        // console.log(`  |- y: ${ball.y}`);
+
         // Move the ball back in bounds using the collision normal
         ball.x += collision.normal[0] * (collision.distance + EPSILON * 10);
         ball.y += collision.normal[1] * (collision.distance + EPSILON * 10);
 
+        // console.log(`Ball position after resolution :`);
+        // console.log(`  |- x: ${ball.x}`);
+        // console.log(`  |- y: ${ball.y}`);
         // Don't reduce remainingDistance since this isn't a normal movement
         continue;
       }
