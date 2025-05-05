@@ -304,7 +304,8 @@ export class ClassicPong extends Pong {
       };
     }
 
-    if (doTriggers) this.modifierManager.trigger("onBallReset");
+    if (doTriggers)
+      this.modifierManager.trigger("onBallReset", { ballID: ballId });
   }
 
   isOutOfBounds(ball: Ball): boolean {

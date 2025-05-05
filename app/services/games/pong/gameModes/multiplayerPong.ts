@@ -340,7 +340,8 @@ export class MultiplayerPong extends Pong {
       };
     }
 
-    if (doTriggers) this.modifierManager.trigger("onBallReset");
+    if (doTriggers)
+      this.modifierManager.trigger("onBallReset", { ballID: ballId });
   }
 
   rotatePaddles(alpha: number = 0.0): void {
@@ -446,14 +447,20 @@ export class MultiplayerPong extends Pong {
       this.settings.wallOffset +
       this.settings.paddleOffset;
 
-    if (ball.x <= 0 || ball.y <= 0) return true;
+    if (
+      ball.x <= 0 ||
+      ball.y <= 0 ||
+      ball.x >= this.settings.arenaWidth ||
+      ball.y >= this.settings.arenaHeight
+    )
+      return true;
 
-    const distance =
-      Math.pow(ball.x - this.settings.arenaRadius, 2) +
-      Math.pow(ball.y - this.settings.arenaRadius, 2);
-    return (
-      distance >= tolerance + this.settings.arenaRadius ** 2 + ball.radius ** 2
-    );
+    const dx = ball.x - this.settings.arenaRadius;
+    const dy = ball.y - this.settings.arenaRadius;
+    const distanceSquared = dx * dx + dy * dy;
+
+    const allowedRadius = this.settings.arenaRadius + tolerance - ball.radius;
+    return distanceSquared > allowedRadius * allowedRadius;
   }
 
   getResults(): number[] {
