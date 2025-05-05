@@ -468,8 +468,8 @@ export abstract class Pong extends GameBase {
           PhysicsEngine.resolveCollision(ball, collision);
 
           const playerId = collision.objectId;
-          if (gameState.lastHit !== playerId)
-            console.log(`Last hit: ${playerId}`);
+          // if (gameState.lastHit !== playerId)
+          //   console.log(`Last hit: ${playerId}`);
           gameState.lastHit = playerId;
 
           const paddle = this.gameState.paddles[playerId];

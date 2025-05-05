@@ -65,7 +65,7 @@
               modifierNames: {
                 timedStart: {},
                 timedGame: {
-                  duration: 360,
+                  duration: 600,
                 },
                 survivalGame: {},
                 elimination: { threshold: 11 },
@@ -158,7 +158,7 @@
             ctx.arc(
               ball.x * ratio,
               ball.y * ratio,
-              ball.radius * ratio,
+              ball.r * ratio,
               0,
               Math.PI * 2,
             );
@@ -178,15 +178,14 @@
             ctx.translate(paddle.x * ratio, paddle.y * ratio);
 
             // Rotate using the paddle's direction
-            let angle = Math.atan2(paddle.dy, paddle.dx);
-            ctx.rotate(angle);
+            ctx.rotate(paddle.alpha + Math.PI / 2.0);
 
             // Draw the paddle (centered at the new origin)
             ctx.fillRect(
-              -(paddle.width * ratio) / 2, // Center along width
-              -(paddle.height * ratio) / 2, // Center along height
-              paddle.width * ratio,
-              paddle.height * ratio,
+              -(paddle.w * ratio) / 2, // Center along width
+              -(paddle.h * ratio) / 2, // Center along height
+              paddle.w * ratio,
+              paddle.h * ratio,
             );
 
             ctx.restore(); // Restore the previous transformation state
@@ -203,10 +202,10 @@
 
             ctx.strokeStyle = "red";
             ctx.strokeRect(
-              (-wall.width * ratio) / 2,
-              (-wall.height * ratio) / 2,
-              wall.width * ratio,
-              wall.height * ratio,
+              (-wall.w * ratio) / 2,
+              (-wall.h * ratio) / 2,
+              wall.w * ratio,
+              wall.h * ratio,
             );
 
             ctx.restore();
@@ -215,10 +214,13 @@
 
         // Draw the powerUps
 
-        if (gameState.modifiersState) {
-          gameState.modifiersState.spawnedPowerUps?.forEach((entry) => {
-            const type = entry[0];
-            const powerUp = entry[1];
+        if (
+          gameState.modifiersState &&
+          gameState.modifiersState.spawnedPowerUps
+        ) {
+          for (const [type, powerUp] of Object.entries(
+            this.gameState.modifiersState.spawnedPowerUps,
+          )) {
             if (powerUp.isVisible) {
               switch (type) {
                 case "speedBoost":
@@ -256,13 +258,13 @@
               ctx.arc(
                 powerUp.x * ratio,
                 powerUp.y * ratio,
-                powerUp.radius * ratio,
+                powerUp.r * ratio,
                 0,
                 Math.PI * 2,
               );
               ctx.fill();
             }
-          });
+          }
         }
 
         // Draw scores if available
