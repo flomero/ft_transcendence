@@ -33,6 +33,7 @@ export class MultiplayerPong extends Pong {
       paddleHeight: registry.fixedSettings.paddleHeight,
       wallsHeight: registry.fixedSettings.wallsHeight,
       wallsOffset: registry.fixedSettings.wallsOffset,
+      minBallSpeed: registry.fixedSettings.wallsOffset,
 
       // Customizable settings
       ballSpeedWidthPercentS:
@@ -65,6 +66,11 @@ export class MultiplayerPong extends Pong {
       (this.settings.arenaWidth *
         (this.settings.ballSpeedWidthPercentS / 100)) /
       this.serverTickrateS;
+
+    // Minimum ball speed defined as a percentage of the initial ball speed
+    this.settings.minBallSpeed =
+      (this.settings.minBallSpeed * this.settings.ballSpeed) / 100.0;
+
     this.settings.arenaRadius = this.settings.arenaWidth / 2.0;
 
     if (customConfig.powerUpCapacities)
@@ -106,6 +112,9 @@ export class MultiplayerPong extends Pong {
     const serverTickrateS = GAME_REGISTRY.pong.serverTickrateS;
     const paddleSpeed =
       100 / (serverTickrateS * this.settings.paddleSpeedWidthPercentS);
+
+    console.log(`Paddle amplitude: ${paddleAmplitude}`);
+    console.log(`Paddle speed: ${paddleSpeed}`);
 
     for (let index = 0; index < this.gameState.playerCount; ++index) {
       const angle =
