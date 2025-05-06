@@ -145,6 +145,22 @@ export abstract class Pong extends GameBase {
     paddle.y +=
       direction * (deltaDisplacement / 100.0) * paddle.amplitude * paddle.dy;
     paddle.displacement = newDisplacement;
+
+    this.gameState.balls.forEach((ball) => {
+      const inObjectCollision = PhysicsEngine.resolveBallInsideObject(
+        ball,
+        paddle as Rectangle,
+        this.gameState.paddles.indexOf(paddle),
+        [direction * paddle.dx, direction * paddle.dy],
+        false,
+      );
+
+      if (!inObjectCollision || !inObjectCollision.outOfBounds) return;
+
+      ball.x = inObjectCollision.outOfBounds.position[0];
+      ball.y = inObjectCollision.outOfBounds.position[1];
+      PhysicsEngine.resolveCollision(ball, inObjectCollision);
+    });
   }
 
   // Process all queued user inputs
@@ -446,21 +462,42 @@ export abstract class Pong extends GameBase {
 
       // Handle out-of-bounds case
       if (collision.outOfBounds && collision.normal) {
-        // console.log(`Distance to sole ball in rectangle: ${collision.distance}`);
-        // console.log(`Ball position before resolution:`);
-        // console.log(`  |- x: ${ball.x}`);
-        // console.log(`  |- y: ${ball.y}`);
+        if (
+          collision.type === "wall" &&
+          this.gameState.walls[collision.objectId].isGoal &&
+          doTriggers
+        ) {
+          this.resolveWallCollision(ball, collision.objectId, doTriggers);
+          break;
+        }
 
-        // Move the ball back in bounds using the collision normal
-        ball.x += collision.normal[0] * (collision.distance + EPSILON * 10);
-        ball.y += collision.normal[1] * (collision.distance + EPSILON * 10);
+        // Move the ball directly to the resolved collision position
+        const [newX, newY] = collision.outOfBounds.position;
+        ball.x = newX;
+        ball.y = newY;
 
-        // console.log(`Ball position after resolution :`);
-        // console.log(`  |- x: ${ball.x}`);
-        // console.log(`  |- y: ${ball.y}`);
-        // Don't reduce remainingDistance since this isn't a normal movement
+        // Reflect direction and slightly nudge ball out to avoid sticking
+        PhysicsEngine.resolveCollision(ball, collision);
+
+        // Don't reduce remainingDistance since this is a corrective step
         continue;
       }
+      // if (collision.outOfBounds && collision.normal) {
+      //   // console.log(`Distance to sole ball in rectangle: ${collision.distance}`);
+      //   // console.log(`Ball position before resolution:`);
+      //   // console.log(`  |- x: ${ball.x}`);
+      //   // console.log(`  |- y: ${ball.y}`);
+
+      //   // Move the ball back in bounds using the collision normal
+      //   ball.x += collision.normal[0] * (collision.distance + EPSILON * 10);
+      //   ball.y += collision.normal[1] * (collision.distance + EPSILON * 10);
+
+      //   // console.log(`Ball position after resolution :`);
+      //   // console.log(`  |- x: ${ball.x}`);
+      //   // console.log(`  |- y: ${ball.y}`);
+      //   // Don't reduce remainingDistance since this isn't a normal movement
+      //   continue;
+      // }
 
       const travelDistance = collision.distance;
       ball.x +=
@@ -470,7 +507,7 @@ export abstract class Pong extends GameBase {
 
       switch (collision.type) {
         case "powerUp":
-          console.log(`\nPlayer ${gameState.lastHit} picked up a powerUp\n`);
+          console.log(`\nPlayer ${gameState.lastHit} picked up a powerUp`);
           this.modifierManager.pickupPowerUp(collision.objectId);
           break;
 
@@ -478,35 +515,35 @@ export abstract class Pong extends GameBase {
           PhysicsEngine.resolveCollision(ball, collision);
 
           const playerId = collision.objectId;
-          if (gameState.lastHit !== playerId)
-            console.log(`Last hit: ${playerId}`);
+          // if (gameState.lastHit !== playerId)
+          //   console.log(`Last hit: ${playerId}`);
           gameState.lastHit = playerId;
 
-          const paddle = this.gameState.paddles[playerId];
+          // const paddle = this.gameState.paddles[playerId];
 
           // Compute the dot product between the ball's direction and the paddle's movement direction.
           // A high |dot| means the ball is moving almost aligned with the paddle's direction.
-          const dot = ball.dx * paddle.dx + ball.dy * paddle.dy;
+          // const dot = ball.dx * paddle.dx + ball.dy * paddle.dy;
 
-          // Multiply by |dot| so that the influence is higher when the ball is aligned with the paddle's direction.
-          const angularInfluence =
-            (dot *
-              this.getSettings().paddleVelocityAngularTransmissionPercent) /
-            100.0;
+          // // Multiply by |dot| so that the influence is higher when the ball is aligned with the paddle's direction.
+          // const angularInfluence =
+          //   (dot *
+          //     this.getSettings().paddleVelocityAngularTransmissionPercent) /
+          //   100.0;
 
-          // Adjust the ball's velocity using the paddle's velocity.
-          ball.dx += angularInfluence * paddle.dx;
-          ball.dy += angularInfluence * paddle.dy;
+          // // Adjust the ball's velocity using the paddle's velocity.
+          // ball.dx += angularInfluence * paddle.dx;
+          // ball.dy += angularInfluence * paddle.dy;
 
-          const speedInfluence =
-            (dot * this.getSettings().paddleVelocitySpeedTransmissionPercent) /
-            100.0;
-          ball.speed += speedInfluence * paddle.velocity;
+          // const speedInfluence =
+          //   (dot * this.getSettings().paddleVelocitySpeedTransmissionPercent) /
+          //   100.0;
+          // ball.speed += speedInfluence * paddle.velocity;
 
-          // Normalize the ball's direction vector to avoid unintended scaling.
-          const norm = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
-          ball.dx /= norm;
-          ball.dy /= norm;
+          // // Normalize the ball's direction vector to avoid unintended scaling.
+          // const norm = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+          // ball.dx /= norm;
+          // ball.dy /= norm;
 
           this.modifierManager.trigger("onPaddleBounce", {
             ballId: this.gameState.balls.indexOf(ball),
@@ -516,21 +553,7 @@ export abstract class Pong extends GameBase {
 
         case "wall":
           PhysicsEngine.resolveCollision(ball, collision);
-          const wall: Rectangle = gameState.walls[collision.objectId];
-          if (wall.isGoal && ball.doGoal) {
-            const goalPlayerId = Math.floor(collision.objectId / 2);
-            gameState.scores[goalPlayerId]++;
-            gameState.lastGoal = goalPlayerId;
-            if (doTriggers)
-              this.modifierManager.trigger("onGoal", {
-                playerId: goalPlayerId,
-              });
-          } else {
-            if (doTriggers)
-              this.modifierManager.trigger("onWallBounce", {
-                wallID: collision.objectId,
-              });
-          }
+          this.resolveWallCollision(ball, collision.objectId, doTriggers);
           break;
 
         default:
@@ -542,6 +565,28 @@ export abstract class Pong extends GameBase {
       if (loopCounter > ball.speed * 3.0 + 1) {
         break;
       }
+    }
+  }
+
+  protected resolveWallCollision(
+    ball: Ball,
+    wallID: number,
+    doTriggers: boolean,
+  ) {
+    const wall: Rectangle = this.gameState.walls[wallID];
+    if (wall.isGoal && ball.doGoal) {
+      const goalPlayerId = Math.floor(wallID / 2);
+      this.gameState.scores[goalPlayerId]++;
+      this.gameState.lastGoal = goalPlayerId;
+      if (doTriggers)
+        this.modifierManager.trigger("onGoal", {
+          playerId: goalPlayerId,
+        });
+    } else {
+      if (doTriggers)
+        this.modifierManager.trigger("onWallBounce", {
+          wallID: wallID,
+        });
     }
   }
 

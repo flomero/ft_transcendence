@@ -445,13 +445,14 @@ export class MultiplayerPong extends Pong {
     const tolerance: number =
       this.settings.wallsHeight +
       this.settings.wallOffset +
-      this.settings.paddleOffset;
+      this.settings.paddleOffset +
+      this.settings.paddleHeight;
 
     if (
-      ball.x <= 0 ||
-      ball.y <= 0 ||
-      ball.x >= this.settings.arenaWidth ||
-      ball.y >= this.settings.arenaHeight
+      ball.x <= -tolerance ||
+      ball.y <= -tolerance ||
+      ball.x >= this.settings.arenaWidth + tolerance ||
+      ball.y >= this.settings.arenaHeight + tolerance
     )
       return true;
 
