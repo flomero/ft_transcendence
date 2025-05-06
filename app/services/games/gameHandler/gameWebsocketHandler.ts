@@ -23,6 +23,12 @@ const gameWebsocketHandler = async (
     connection.on("message", (message: string) => {
       handleGameMessage(message, userId, gameId);
     });
+    connection.on("close", () => {
+      // call connection timeout check
+    });
+    connection.on("error", (error: Error) => {
+      // call connection timeout check
+    });
   } catch (error) {
     if (error instanceof Error) {
       connection.send(
