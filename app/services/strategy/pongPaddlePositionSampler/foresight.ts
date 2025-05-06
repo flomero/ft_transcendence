@@ -45,10 +45,10 @@ export class Foresight implements IPongPaddlePositionSampler {
     const paddle = gameState.paddles[aiId];
 
     // Mark balls as not scoring to avoid simulation side effects
-    gameState.balls.forEach((ball) => {
-      ball.doGoal = false;
-      // Removed ball speed acceleration
-    });
+    // gameState.balls.forEach((ball) => {
+    // ball.doGoal = false;
+    // Removed ball speed acceleration
+    // });
 
     // Look ahead for wall collisions with the ball at normal speed
     const wallCollisions: ExtendedCollisionData[] = ai
@@ -56,7 +56,7 @@ export class Foresight implements IPongPaddlePositionSampler {
       .findNextCollisions(
         gameState,
         this.lookAheadTimeS * serverTickrateS,
-        2 * aiId,
+        aiId,
         "wall",
       );
 

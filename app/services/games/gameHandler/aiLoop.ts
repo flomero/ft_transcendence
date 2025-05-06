@@ -19,9 +19,11 @@ const aiLoop = async (gameManagerId: string) => {
 };
 
 const updateAllAis = (gameManager: GameManager) => {
+  console.time("updateAllAis");
   for (const aiOpponent of gameManager.aiOpponent.values()) {
     aiOpponent.update();
   }
+  console.timeEnd("updateAllAis");
 };
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

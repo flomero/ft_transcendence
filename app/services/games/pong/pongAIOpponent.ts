@@ -38,7 +38,7 @@ export class PongAIOpponent extends AIOpponent {
   }
 
   update(): void {
-    this.gameState = JSON.parse(JSON.stringify((this.game as Pong).getState()));
+    this.gameState = (this.game as Pong).getState();
 
     const absoluteSamples: PongPaddlePosition[] =
       this.paddlePositionSampler.executeStrategy(this, this.gameState);
