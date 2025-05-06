@@ -103,8 +103,9 @@ export class MultiplayerPong extends Pong {
     // Calculate actual paddle width based on amplitude and coverage
     const paddleWidth = paddleAmplitude * coverage;
 
-    // paddleSpeed is percentage of width per second (independent of tickrate)
-    const paddleSpeedPercent = this.settings.paddleSpeedWidthPercentS / 100.0;
+    const serverTickrateS = GAME_REGISTRY.pong.serverTickrateS;
+    const paddleSpeed =
+      100 / (serverTickrateS * this.settings.paddleSpeedWidthPercentS);
 
     for (let index = 0; index < this.gameState.playerCount; ++index) {
       const angle =
@@ -120,7 +121,7 @@ export class MultiplayerPong extends Pong {
         amplitude: paddleAmplitude,
         width: paddleWidth,
         height: this.settings.paddleHeight,
-        speed: paddleSpeedPercent,
+        speed: paddleSpeed,
         doMove: true,
         isVisible: true,
         velocity: 0.0,
