@@ -13,6 +13,8 @@ export enum MatchmakingGameModes {
 }
 
 export enum LobbyGameModes {
+  TestLobby = "testLobby",
+
   ClassicPong = "classicPong",
   BasicPowerUpClassicPong = "basicPowerUpClassicPong",
   MultiplayerPong5 = "multiplayerPong5",
@@ -63,6 +65,22 @@ export type GAMEMODE_REGISTRY_TYPE = {
 };
 
 export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
+  testLobby: {
+    gameName: "pong",
+    gameModeName: "classicPong",
+    gameModeConfig: {
+      powerUpRadius: 10,
+    },
+    modifierNames: {
+      powerUpSpawner: {},
+      goalReset: {},
+    },
+    powerUpNames: {
+      shooter: {},
+    },
+    playerCount: 2,
+  },
+
   // Quick 1v1, no powerUps
   classicPong: {
     gameName: "pong",
@@ -213,8 +231,6 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       bumper: {},
       shooter: {
         chargeDuration: 1,
-        shootInitialVelocityFactor: 200,
-        shootAcceleration: 100,
       },
     },
     playerCount: 2,
@@ -260,8 +276,6 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       },
       shooter: {
         chargeDuration: 1,
-        shootInitialVelocityFactor: 200,
-        shootAcceleration: 100,
       },
     },
     playerCount: 5,
@@ -307,8 +321,6 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       },
       shooter: {
         chargeDuration: 1,
-        shootInitialVelocityFactor: 200,
-        shootAcceleration: 100,
       },
     },
     playerCount: 8,
@@ -417,10 +429,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
         bumperJunctionDistanceFromCenter: 12,
         bumperWallJunctionDistance: 95,
       },
-      shooter: {
-        shootInitialVelocityFactor: 225,
-        shootAcceleration: 100,
-      },
+      shooter: {},
     },
     playerCount: 2,
   },
@@ -492,10 +501,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
         bumperJunctionDistanceFromCenter: 12,
         bumperWallJunctionDistance: 95,
       },
-      shooter: {
-        shootInitialVelocityFactor: 250,
-        shootAcceleration: 125,
-      },
+      shooter: {},
     },
     playerCount: 5,
   },

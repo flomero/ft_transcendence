@@ -76,9 +76,8 @@ interface Shooter {
   duration?: number;
   chargeDuration?: number;
   chargeRadius?: number;
-  shootInitialVelocityFactor?: number;
-  shootAcceleration?: number;
-  shootDirectionSamplerStrategyName?: string;
+  shootAdditionalVelocity?: number;
+  playerSamplerStrategyName?: string;
 }
 
 interface MultiBall {

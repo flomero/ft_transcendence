@@ -155,9 +155,11 @@
         "durationS": 5,
         "chargeDurationS": 2,
         "chargeRadius": 5,
-        "shootInitialVelocityPercent": 140,
-        "shootFinalVelocityPercent": 100,
-        "shootDirectionSamplerStrategyName": "biasedQuadrantGaussianRA"
+        "shootAdditionalVelocityPercent": 40,
+        "shootAngularOffsetPercent": 45,
+        "shootStandardAngularDeviationPercent": 22.5,
+        "shootTargetWidthPercent": 90,
+        "playerSamplerStrategyName": "lowestScoreBiased"
       },
 
       "bumper": {

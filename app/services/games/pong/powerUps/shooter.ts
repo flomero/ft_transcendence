@@ -3,7 +3,7 @@ import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
 import { ModifierActivationMode } from "../../modifierBase";
 import type { Pong } from "../pong";
 import { StrategyManager } from "../../../strategy/strategyManager";
-import type { IPongBallResetSampler } from "../../../../types/strategy/IPongBallResetSampler";
+import type { IPongPlayerSampler } from "../../../../types/strategy/IPongPlayerSampler";
 
 enum ShooterStatus {
   CREATED,
@@ -19,14 +19,13 @@ export class Shooter extends TimeLimitedModifierBase {
   protected shooterStatus: ShooterStatus = ShooterStatus.CREATED;
   protected chargeDuration: number = 0;
   protected chargeRadius: number = 0;
-  protected shootInitialVelocityFactor: number = 0;
-  protected shootAcceleration: number = 0;
+  protected shootAdditionalVelocity: number = 0;
+  protected shootAngularOffsetFactor: number = 0;
+  protected shootStandardAngularDeviationFactor: number = 0;
+  protected shootTargetWidthFactor: number = 0;
 
-  protected shootDirectionSampler: StrategyManager<
-    IPongBallResetSampler,
-    "sampleDirection"
-  >;
-  protected shootDirectionSamplerStrategyName: string = "";
+  protected playerSampler: StrategyManager<IPongPlayerSampler, "samplePlayer">;
+  protected playerSamplerStrategyName: string = "";
 
   protected chargeCenter: { x: number; y: number } = { x: 0, y: 0 };
 
@@ -80,36 +79,51 @@ export class Shooter extends TimeLimitedModifierBase {
     );
 
     this.configManager.registerPropertyConfig(
-      "shootInitialVelocityFactor",
+      "shootAdditionalVelocity",
       (_, context) => {
-        const shootInitialVelocityPercent =
-          context.shootInitialVelocityFactor ||
-          defaultRegistry.shootInitialVelocityPercent;
-        return shootInitialVelocityPercent / 100.0;
+        const shootAdditionalVelocityPercent =
+          context.shootAdditionalVelocity ||
+          defaultRegistry.shootAdditionalVelocityPercent;
+        return shootAdditionalVelocityPercent / 100.0;
       },
       undefined,
     );
 
     this.configManager.registerPropertyConfig(
-      "shootAcceleration",
+      "shootAngularOffsetFactor",
       (_, context) => {
-        const shootFinalVelocityPercent =
-          context.shootAcceleration ||
-          defaultRegistry.shootFinalVelocityPercent;
-        const shootAccelerationDuration = this.duration - this.chargeDuration;
-
-        return (
-          (shootFinalVelocityPercent / 100.0 -
-            this.shootInitialVelocityFactor) /
-          shootAccelerationDuration
-        );
+        const shootAngularOffsetPercent =
+          context.shootAngularOffsetFactor ||
+          defaultRegistry.shootAngularOffsetPercent;
+        return shootAngularOffsetPercent / 100.0;
       },
       undefined,
-      ["duration", "chargeDuration", "shootInitialVelocityFactor"],
     );
 
     this.configManager.registerPropertyConfig(
-      "shootDirectionSamplerStrategyName",
+      "shootStandardAngularDeviationFactor",
+      (_, context) => {
+        const shootStandardAngularDeviationPercent =
+          context.shootStandardAngularDeviationFactor ||
+          defaultRegistry.shootStandardAngularDeviationPercent;
+        return shootStandardAngularDeviationPercent / 100.0;
+      },
+      undefined,
+    );
+
+    this.configManager.registerPropertyConfig(
+      "shootTargetWidthFactor",
+      (_, context) => {
+        const shootTargetWidthPercent =
+          context.shootTargetWidthFactor ||
+          defaultRegistry.shootTargetWidthPercent;
+        return shootTargetWidthPercent / 100.0;
+      },
+      undefined,
+    );
+
+    this.configManager.registerPropertyConfig(
+      "playerSamplerStrategyName",
       (value) => value,
       undefined,
     );
@@ -122,10 +136,10 @@ export class Shooter extends TimeLimitedModifierBase {
 
     this.configManager.loadComplexConfigIntoContainer(mergedConfig, this);
 
-    this.shootDirectionSampler = new StrategyManager(
-      this.shootDirectionSamplerStrategyName,
-      "pongBallResetSampler",
-      "sampleDirection",
+    this.playerSampler = new StrategyManager(
+      this.playerSamplerStrategyName,
+      "pongPlayerSampler",
+      "samplePlayer",
     );
   }
 
@@ -198,8 +212,7 @@ export class Shooter extends TimeLimitedModifierBase {
         const mainBall = game.getState().balls[0];
         mainBall.dx = shootingDirection.dx;
         mainBall.dy = shootingDirection.dy;
-        mainBall.speed =
-          shootingDirection.magnitude * this.shootInitialVelocityFactor;
+        mainBall.speed += this.shootAdditionalVelocity * mainBall.speed;
 
         // Transition to shooting phase
         this.shooterStatus = ShooterStatus.SHOT;
@@ -207,63 +220,75 @@ export class Shooter extends TimeLimitedModifierBase {
         // Still in charging phase, make the ball orbit
         this.updateChargingBall(game);
       }
-    } else if (this.shooterStatus === ShooterStatus.SHOT) {
-      // In shooting phase, accelerate the ball
-      this.updateShootingBall(game);
     }
   }
 
   protected computeShootingDirection(game: Pong): {
     dx: number;
     dy: number;
-    magnitude: number;
   } {
     // Get the main ball
     if (game.getState().balls.length === 0) {
-      return { dx: 0, dy: 0, magnitude: 0 };
+      return { dx: 0, dy: 0 };
     }
     const mainBall = game.getState().balls[0];
 
-    // Get the arena center
-    const arenaCenter = {
-      x: game.getSettings().arenaWidth / 2.0,
-      y: game.getSettings().arenaHeight / 2.0,
-    };
-
     // Sample direction as if ball was at center
-    const directionFromCenter =
-      this.shootDirectionSampler.executeStrategy(game);
+    const targetPlayer = this.playerSampler.executeStrategy(game);
 
-    // Calculate the vector from arena center to sampled target point
-    const targetVectorFromCenter = {
-      x: Math.cos(directionFromCenter.angularDirection),
-      y: Math.sin(directionFromCenter.angularDirection),
-    };
-
-    // Calculate the hypothetical target point (if ball was at center)
-    const targetPointFromCenter = {
+    // Generate the direction to shoot to
+    // Compute the total angle from the ball to the selected player's goal
+    const playerWall = game.getState().walls[2 * targetPlayer];
+    const ballToCorner = {
       x:
-        arenaCenter.x +
-        targetVectorFromCenter.x * game.getSettings().arenaWidth,
+        playerWall.x +
+        (playerWall.dx * (this.shootTargetWidthFactor * playerWall.width)) /
+          2.0 -
+        mainBall.x,
       y:
-        arenaCenter.y +
-        targetVectorFromCenter.y * game.getSettings().arenaHeight,
+        playerWall.y +
+        (playerWall.dy * (this.shootTargetWidthFactor * playerWall.width)) /
+          2.0 -
+        mainBall.y,
     };
 
-    // Calculate the direction from ball's actual position to the target point
-    const dx = targetPointFromCenter.x - mainBall.x;
-    const dy = targetPointFromCenter.y - mainBall.y;
-
-    // Normalize to get a unit vector
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    const normalizedDx = distance > 0 ? dx / distance : 0;
-    const normalizedDy = distance > 0 ? dy / distance : 0;
-
-    return {
-      dx: normalizedDx,
-      dy: normalizedDy,
-      magnitude: directionFromCenter.magnitude,
+    const ballToWall = {
+      x: playerWall.x - mainBall.x,
+      y: playerWall.y - mainBall.y,
     };
+
+    const dotProduct =
+      ballToCorner.x * ballToWall.x + ballToCorner.y * ballToWall.y;
+    const ballToCornerMag = Math.sqrt(
+      ballToCorner.x ** 2 + ballToCorner.y ** 2,
+    );
+    const ballToWallMag = Math.sqrt(ballToWall.x ** 2 + ballToWall.y ** 2);
+
+    const halfAngle = Math.acos(dotProduct / (ballToCornerMag * ballToWallMag));
+
+    // Generate the random angle
+    const rndAngle = game
+      .getRNG()
+      .randomGaussian(
+        halfAngle * this.shootAngularOffsetFactor,
+        halfAngle * this.shootStandardAngularDeviationFactor,
+      );
+    const rndSign = game.getRNG().randomSign();
+
+    const clampedRndAngle = Math.min(halfAngle, Math.max(rndAngle, 0));
+
+    // Compute the final direction
+    const ca = Math.cos(clampedRndAngle * rndSign);
+    const sa = Math.sin(clampedRndAngle * rndSign);
+
+    ballToWall.x /= ballToWallMag;
+    ballToWall.y /= ballToWallMag;
+    const finalDirection = {
+      dx: ballToWall.x * ca - ballToWall.y * sa,
+      dy: ballToWall.x * sa + ballToWall.y * ca,
+    };
+
+    return finalDirection;
   }
 
   protected updateChargingBall(game: Pong): void {
@@ -297,14 +322,7 @@ export class Shooter extends TimeLimitedModifierBase {
     mainBall.dy = tangent.y * orbitSpeed;
   }
 
-  protected updateShootingBall(game: Pong): void {
-    const mainBall = game.getState().balls[0];
-    mainBall.speed += this.shootAcceleration;
-  }
-
   onDeactivation(game: Pong): void {
-    if (game.getState().balls.length > 0 && this.ticks <= 0)
-      game.getState().balls[0].speed = this.ballInitialSpeed;
     game.getModifierManager().deletePowerUp(this);
   }
 
