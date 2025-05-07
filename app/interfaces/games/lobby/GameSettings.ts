@@ -60,7 +60,7 @@ interface ModifierNames {
 interface SpeedBoost {
   spawnWeight?: number;
   duration?: number;
-  rampUpFrequency?: number;
+  rampUpStrengthFactor?: number;
   rampUpStrength?: number;
 }
 

@@ -72,11 +72,15 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       powerUpRadius: 10,
     },
     modifierNames: {
-      powerUpSpawner: {},
+      powerUpSpawner: {
+        meanDelay: 1,
+        delaySpan: 0.01,
+      },
       goalReset: {},
     },
     powerUpNames: {
       shooter: {},
+      speedBoost: {},
     },
     playerCount: 2,
   },

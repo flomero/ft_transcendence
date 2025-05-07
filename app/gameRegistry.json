@@ -125,8 +125,8 @@
         "spawnWeight": 2.0,
         "selfActivation": false,
         "durationS": 5,
-        "totalRampUpStrength": 1.15,
-        "rampUpFrequencyS": 0.25
+        "rampUpStrengthPercent": 4,
+        "rampUpFrequencyS": 0.33
       },
 
       "blinkingBall": {
