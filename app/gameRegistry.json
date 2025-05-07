@@ -38,9 +38,9 @@
         "fixedSettings": {
           "arenaWidth": 100,
           "arenaHeight": 100,
-          "paddleOffset": 3,
-          "paddleHeight": 1,
-          "wallsHeight": 2,
+          "paddleOffset": 2.4,
+          "paddleHeight": 0.6,
+          "wallsHeight": 1.5,
           "wallsOffset": 0
         },
 
@@ -48,8 +48,8 @@
           "ballSpeedWidthPercentS": 60,
           "ballRadius": 0.7,
           "ballResetSampler": "biasedGaussianCA",
-          "paddleCoveragePercent": 22,
-          "paddleSpeedWidthPercentS": 0.825,
+          "paddleCoveragePercent": 25,
+          "paddleSpeedWidthPercentS": 0.8,
           "paddleVelocityAngularTransmissionPercent": 55,
           "paddleVelocitySpeedTransmissionPercent": 10,
           "powerUpRadius": 3.25,
@@ -107,9 +107,10 @@
 
       "paceBreaker": {
         "className": "PaceBreaker",
-        "noResetThresholdS": 7,
+        "noResetThresholdS": 12,
         "noPaddleBounceThreshold": 14,
-        "twoPaddlesBounceThreshold": 7
+        "twoPaddlesBounceThreshold": 7,
+        "onePaddleBounceThreshold": 14
       },
 
       "paddleBoost": {
@@ -118,7 +119,7 @@
         "paddleExtendedSpeedMultiplierPercent": 30,
         "paddleExtensionDurationS": 0.08,
         "paddleRetractionDurationS": 0.12,
-        "extensionVelocityTransmissionPercent": 10
+        "extensionVelocityTransmissionPercent": 12
       },
 
       "timedStart": {

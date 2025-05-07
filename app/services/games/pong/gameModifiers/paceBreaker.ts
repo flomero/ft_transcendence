@@ -7,6 +7,11 @@ interface TwoPaddlesBounce {
   paddles: Array<number>;
 }
 
+interface OnePaddleBounce {
+  count: number;
+  paddle: number;
+}
+
 export class PaceBreaker extends TimeLimitedModifierBase {
   name = "paceBreaker";
 
@@ -14,8 +19,13 @@ export class PaceBreaker extends TimeLimitedModifierBase {
   protected noPaddleBounceThreshold: number = 0;
   protected noPaddleBounceCount: number = 0;
 
+  // 3+ players - 2 player loop detection
   protected twoPaddlesBounceThreshold: number = 0;
   protected twoPaddlesBounce: TwoPaddlesBounce = { count: 0, paddles: [] };
+
+  // 1v1 vertical loop detection
+  protected onePaddleBounceThreshold: number = 0;
+  protected onePaddleBounceCount: OnePaddleBounce = { count: 0, paddle: -1 };
 
   constructor(customConfig?: Record<string, any>) {
     super();
@@ -45,10 +55,16 @@ export class PaceBreaker extends TimeLimitedModifierBase {
       undefined,
     );
 
+    this.configManager.registerPropertyConfig(
+      "onePaddleBounceThreshold",
+      (value) => value,
+      undefined,
+    );
+
     const mergedConfig = { ...defaultRegistry };
     if (customConfig)
-      Object.entries(customConfig).forEach((entry) => {
-        mergedConfig[entry[0]] = entry[1];
+      Object.entries(customConfig).forEach(([key, value]) => {
+        mergedConfig[key] = value;
       });
 
     this.configManager.loadComplexConfigIntoContainer(mergedConfig, this);
@@ -60,54 +76,71 @@ export class PaceBreaker extends TimeLimitedModifierBase {
     this.resetTrackers();
   }
 
-  onPaddleBounce(game: Pong, args: { playerId: number }): void {
+  onPaddleBounce(game: Pong, args: { ballId: number; playerId: number }): void {
+    if (args.ballId !== 0) return;
     const gameState = game.getState();
 
-    // only track 3+ player games
-    if (gameState.playerCount < 3) {
-      this.resetTrackers();
-      return;
-    }
-
+    // refresh timeouts
     this.ticks = this.duration;
     this.noPaddleBounceCount = 0;
+
+    // ignore duplicate collision events
     if (
       this.twoPaddlesBounce.paddles.length > 1 &&
       this.twoPaddlesBounce.paddles[
         this.twoPaddlesBounce.paddles.length - 1
       ] === args.playerId
-    )
-      return;
-
-    if (this.twoPaddlesBounce.paddles.length < 2) {
-      // build up the first two entries
-      this.twoPaddlesBounce.paddles.push(args.playerId);
-    } else if (
-      this.twoPaddlesBounce.paddles[
-        this.twoPaddlesBounce.paddles.length - 2
-      ] === args.playerId
     ) {
-      // hit matches the one two steps ago → a continued ABAB pattern
-      this.twoPaddlesBounce.count++;
-      this.twoPaddlesBounce.paddles.push(args.playerId);
-    } else {
-      // pattern broke (new paddle or 3rd paddle); start a new pair with the last hit + this one
-      this.twoPaddlesBounce.count = 0;
-      const last =
-        this.twoPaddlesBounce.paddles[this.twoPaddlesBounce.paddles.length - 1];
-      this.twoPaddlesBounce.paddles = [last, args.playerId];
+      return;
     }
 
-    if (this.twoPaddlesBounce.count >= this.twoPaddlesBounceThreshold) {
-      this.nudgeBall(game);
-      this.resetTrackers();
+    // 3+ players: two-paddle loop detection
+    if (gameState.playerCount > 2) {
+      if (this.twoPaddlesBounce.paddles.length < 2) {
+        this.twoPaddlesBounce.paddles.push(args.playerId);
+      } else if (
+        this.twoPaddlesBounce.paddles[
+          this.twoPaddlesBounce.paddles.length - 2
+        ] === args.playerId
+      ) {
+        this.twoPaddlesBounce.count++;
+        this.twoPaddlesBounce.paddles.push(args.playerId);
+      } else {
+        this.twoPaddlesBounce.count = 0;
+        const last =
+          this.twoPaddlesBounce.paddles[
+            this.twoPaddlesBounce.paddles.length - 1
+          ];
+        this.twoPaddlesBounce.paddles = [last, args.playerId];
+      }
+
+      if (this.twoPaddlesBounce.count >= this.twoPaddlesBounceThreshold) {
+        this.deactivate(game);
+        return;
+      }
+    }
+
+    // 1v1 vertical wall-loop detection
+    if (gameState.playerCount === 2) {
+      // if bouncing after a wall and same paddle, count it
+      if (this.onePaddleBounceCount.paddle === args.playerId)
+        this.onePaddleBounceCount.count++;
+      else this.onePaddleBounceCount.count = 0;
+
+      this.onePaddleBounceCount.paddle = args.playerId;
+
+      if (this.onePaddleBounceCount.count >= this.onePaddleBounceThreshold)
+        this.deactivate(game);
     }
   }
 
   onWallBounce(game: Pong, args: { wallID: number; ballID: number }): void {
+    if (args.ballID !== 0) return;
     this.noPaddleBounceCount++;
-    if (this.noPaddleBounceCount >= this.noPaddleBounceThreshold)
+    if (this.noPaddleBounceCount >= this.noPaddleBounceThreshold) {
       this.deactivate(game);
+      return;
+    }
   }
 
   onDeactivation(game: Pong): void {
@@ -117,6 +150,7 @@ export class PaceBreaker extends TimeLimitedModifierBase {
   }
 
   protected nudgeBall(game: Pong) {
+    console.log(`Nudging the ball`);
     const gameState = game.getState();
 
     let maxEntry: { dir: { x: number; y: number }; mag: number } | null = null;
@@ -142,9 +176,7 @@ export class PaceBreaker extends TimeLimitedModifierBase {
   protected resetTrackers() {
     this.ticks = this.duration;
     this.noPaddleBounceCount = 0;
-    this.twoPaddlesBounce = {
-      count: 0,
-      paddles: [],
-    };
+    this.twoPaddlesBounce = { count: 0, paddles: [] };
+    this.onePaddleBounceCount = { count: 0, paddle: -1 };
   }
 }

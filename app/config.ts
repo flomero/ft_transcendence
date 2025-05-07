@@ -90,6 +90,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
     gameModeName: "classicPong",
     gameModeConfig: {},
     modifierNames: {
+      paceBreaker: {},
       timedStart: {},
       timedGame: { duration: 360 },
       scoredGame: { goalObjective: 7 },
@@ -108,6 +109,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
     gameModeName: "classicPong",
     gameModeConfig: {},
     modifierNames: {
+      paceBreaker: {},
       timedStart: {},
       timedGame: { duration: 360 },
       scoredGame: { goalObjective: 7 },
@@ -136,6 +138,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
     gameModeName: "multiplayerPong",
     gameModeConfig: {},
     modifierNames: {
+      paceBreaker: {},
       timedStart: {},
       timedGame: { duration: 360 },
       survivalGame: {},
@@ -154,6 +157,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
     gameModeName: "multiplayerPong",
     gameModeConfig: {},
     modifierNames: {
+      paceBreaker: {},
       timedStart: {},
       timedGame: { duration: 360 },
       survivalGame: {},
@@ -174,6 +178,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       powerUpRadius: 3.5,
     },
     modifierNames: {
+      paceBreaker: {},
       timedStart: {},
       timedGame: {
         duration: 360,
@@ -205,18 +210,17 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       powerUpRadius: 5,
     },
     modifierNames: {
+      paceBreaker: {},
       timedStart: {},
       timedGame: { duration: 600 },
       scoredGame: { goalObjective: 7 },
       survivalGame: {},
       elimination: { threshold: 8 },
       goalReset: {},
-      idleWallBounceAcceleration: {
-        bumperVelocityFactor: 0.35,
-      },
+      idleWallBounceAcceleration: {},
       powerUpSpawner: {
-        meanDelay: 10,
-        delaySpan: 2.5,
+        meanDelay: 9.25,
+        delaySpan: 2.25,
       },
     },
     powerUpNames: {
@@ -227,14 +231,12 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
         blinkInterval: 0.6,
       },
       multiBall: {
-        ballCount: 179,
+        ballCount: 17,
         totalAngle: 360,
-        radiusFactor: 75,
+        radiusFactor: 72.5,
       },
       bumper: {},
-      shooter: {
-        chargeDuration: 1,
-      },
+      shooter: {},
     },
     playerCount: 2,
   },
@@ -246,18 +248,17 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       powerUpRadius: 5,
     },
     modifierNames: {
+      paceBreaker: {},
       timedStart: {},
       timedGame: { duration: 600 },
       survivalGame: {},
       elimination: { threshold: 5 },
       arenaShrink: {},
       goalReset: {},
-      idleWallBounceAcceleration: {
-        bumperVelocityFactor: 0.35,
-      },
+      idleWallBounceAcceleration: {},
       powerUpSpawner: {
-        meanDelay: 10,
-        delaySpan: 2.5,
+        meanDelay: 9.25,
+        delaySpan: 2.25,
       },
     },
     powerUpNames: {
@@ -268,18 +269,14 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
         blinkInterval: 0.6,
       },
       multiBall: {
-        ballCount: 179,
+        ballCount: 17,
         totalAngle: 360,
-        radiusFactor: 75,
+        radiusFactor: 72.5,
       },
       bumper: {
         bumperJunctionDistanceFromCenter: 6,
-        bumperVelocityFactor: 25,
-        bumperAcceleration: -20,
       },
-      shooter: {
-        chargeDuration: 1,
-      },
+      shooter: {},
     },
     playerCount: 5,
   },
@@ -291,18 +288,17 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       powerUpRadius: 5,
     },
     modifierNames: {
+      paceBreaker: {},
       timedStart: {},
       timedGame: { duration: 600 },
       survivalGame: {},
       elimination: { threshold: 5 },
       arenaShrink: {},
       goalReset: {},
-      idleWallBounceAcceleration: {
-        bumperVelocityFactor: 0.35,
-      },
+      idleWallBounceAcceleration: {},
       powerUpSpawner: {
-        meanDelay: 10,
-        delaySpan: 2.5,
+        meanDelay: 9.25,
+        delaySpan: 2.25,
       },
     },
     powerUpNames: {
@@ -313,18 +309,14 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
         blinkInterval: 0.6,
       },
       multiBall: {
-        ballCount: 179,
+        ballCount: 17,
         totalAngle: 360,
-        radiusFactor: 75,
+        radiusFactor: 72.5,
       },
       bumper: {
         bumperJunctionDistanceFromCenter: 6,
-        bumperVelocityFactor: 25,
-        bumperAcceleration: -20,
       },
-      shooter: {
-        chargeDuration: 1,
-      },
+      shooter: {},
     },
     playerCount: 8,
   },
@@ -337,6 +329,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       powerUpRadius: 3.5,
     },
     modifierNames: {
+      paceBreaker: {},
       timedStart: {},
       timedGame: {
         duration: 360,
@@ -357,8 +350,6 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       multiBall: {},
       bumper: {
         bumperJunctionDistanceFromCenter: 6,
-        bumperVelocityFactor: 25,
-        bumperAcceleration: -20,
       },
       shooter: {},
     },
@@ -372,12 +363,13 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
     gameModeConfig: {
       ballRadius: 0.85,
       ballSpeedWidthPercentS: 62.5,
-      paddleCoveragePercent: 20,
-      paddleSpeedWidthPercentS: 160,
+      paddleCoveragePercent: 22.5,
+      paddleSpeedWidthPercentS: 0.825,
       paddleVelocityAngularTransmissionPercent: 90,
       paddleVelocitySpeedTransmissionPercent: 12.5,
     },
     modifierNames: {
+      paceBreaker: {},
       timedStart: {},
       timedGame: { duration: 600 },
       scoredGame: { goalObjective: 11 },
@@ -397,13 +389,14 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
     gameModeConfig: {
       ballRadius: 0.85,
       ballSpeedWidthPercentS: 62.5,
-      paddleCoveragePercent: 20,
-      paddleSpeedWidthPercentS: 160,
+      paddleCoveragePercent: 22.5,
+      paddleSpeedWidthPercentS: 0.825,
       paddleVelocityAngularTransmissionPercent: 90,
       paddleVelocitySpeedTransmissionPercent: 12.5,
       powerUpRadius: 3.75,
     },
     modifierNames: {
+      paceBreaker: {},
       timedStart: {},
       timedGame: { duration: 600 },
       scoredGame: { goalObjective: 11 },
@@ -420,7 +413,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       speedBoost: {},
       multiBall: {
         ballCount: 10,
-        totalAngle: 60,
+        totalAngle: 35,
         radiusFactor: 80,
       },
       blinkingBall: {
@@ -442,14 +435,15 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
     gameName: "pong",
     gameModeName: "multiplayerPong",
     gameModeConfig: {
-      ballRadius: 0.7,
+      ballRadius: 0.65,
       ballSpeedWidthPercentS: 70,
-      paddleCoveragePercent: 20,
-      paddleSpeedWidthPercentS: 100,
+      paddleCoveragePercent: 22.5,
+      paddleSpeedWidthPercentS: 0.78,
       paddleVelocityAngularTransmissionPercent: 90,
       paddleVelocitySpeedTransmissionPercent: 12.5,
     },
     modifierNames: {
+      paceBreaker: {},
       timedStart: {},
       timedGame: { duration: 960 },
       survivalGame: {},
@@ -467,15 +461,16 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
     gameName: "pong",
     gameModeName: "multiplayerPong",
     gameModeConfig: {
-      ballRadius: 0.7,
+      ballRadius: 0.65,
       ballSpeedWidthPercentS: 70,
-      paddleCoveragePercent: 20,
-      paddleSpeedWidthPercentS: 100,
+      paddleCoveragePercent: 22.5,
+      paddleSpeedWidthPercentS: 0.78,
       paddleVelocityAngularTransmissionPercent: 90,
       paddleVelocitySpeedTransmissionPercent: 12.5,
       powerUpRadius: 2.75,
     },
     modifierNames: {
+      paceBreaker: {},
       timedStart: {},
       timedGame: { duration: 960 },
       survivalGame: {},
@@ -492,7 +487,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       speedBoost: {},
       multiBall: {
         ballCount: 10,
-        totalAngle: 60,
+        totalAngle: 35,
         radiusFactor: 80,
       },
       blinkingBall: {
