@@ -192,8 +192,32 @@ class GameManager {
     return this.game;
   }
 
+  public get getResults(): number[] {
+    return this.game.getResults();
+  }
+
   public get getScores(): number[] {
     return this.game.getScores();
+  }
+
+  public getOrderedResultsWithUUIDs(): string[] {
+    const results = this.game.getResults();
+    const referenceTable = this.playerIdReferenceTable;
+    const orderedResults: string[] = [];
+
+    for (let i = 0; i < results.length; i++) {
+      const indexOfPlayer = results.indexOf(i + 1); // because results are 1-indexed
+
+      if (indexOfPlayer !== -1) {
+        const playerId = referenceTable[indexOfPlayer];
+        orderedResults.push(playerId);
+      }
+    }
+    return orderedResults;
+  }
+
+  public getGameResults(): number[] {
+    return this.game.getResults();
   }
 
   public get getAiIdsAsArray() {
