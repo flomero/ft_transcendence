@@ -267,8 +267,10 @@ export class ClassicPong extends Pong {
   ): void {
     const sampledDirection = this.ballResetSampler.executeStrategy(this);
 
-    const ca = Math.cos(sampledDirection.angularDirection);
-    const sa = Math.sin(sampledDirection.angularDirection);
+    // const ca = Math.cos(sampledDirection.angularDirection);
+    // const sa = Math.sin(sampledDirection.angularDirection);
+    const ca = Math.cos(0);
+    const sa = Math.sin(0);
 
     const x = this.settings.arenaWidth / 2.0 + sampledDirection.magnitude * ca;
     const y = this.settings.arenaHeight / 2.0 + sampledDirection.magnitude * sa;

@@ -1,7 +1,11 @@
 import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
 import { Pong } from "../pong";
 import { TimeLimitedModifierBase } from "../../timeLimitedModifierBase";
-import { GameBase } from "../../gameBase";
+
+interface TwoPaddlesBounce {
+  count: number;
+  paddles: Array<number>;
+}
 
 export class PaceBreaker extends TimeLimitedModifierBase {
   name = "paceBreaker";
@@ -9,6 +13,9 @@ export class PaceBreaker extends TimeLimitedModifierBase {
   protected noResetThreshold: number = 0;
   protected noPaddleBounceThreshold: number = 0;
   protected noPaddleBounceCount: number = 0;
+
+  protected twoPaddlesBounceThreshold: number = 0;
+  protected twoPaddlesBounce: TwoPaddlesBounce = { count: 0, paddles: [] };
 
   constructor(customConfig?: Record<string, any>) {
     super();
@@ -32,6 +39,12 @@ export class PaceBreaker extends TimeLimitedModifierBase {
       undefined,
     );
 
+    this.configManager.registerPropertyConfig(
+      "twoPaddlesBounceThreshold",
+      (value) => value,
+      undefined,
+    );
+
     const mergedConfig = { ...defaultRegistry };
     if (customConfig)
       Object.entries(customConfig).forEach((entry) => {
@@ -44,13 +57,51 @@ export class PaceBreaker extends TimeLimitedModifierBase {
   }
 
   onBallReset(game: Pong, args: { ballID: number }): void {
-    this.ticks = this.duration;
-    this.noPaddleBounceCount = 0;
+    this.resetTrackers();
   }
 
   onPaddleBounce(game: Pong, args: { playerId: number }): void {
+    const gameState = game.getState();
+
+    // only track 3+ player games
+    if (gameState.playerCount < 3) {
+      this.resetTrackers();
+      return;
+    }
+
     this.ticks = this.duration;
     this.noPaddleBounceCount = 0;
+    if (
+      this.twoPaddlesBounce.paddles.length > 1 &&
+      this.twoPaddlesBounce.paddles[
+        this.twoPaddlesBounce.paddles.length - 1
+      ] === args.playerId
+    )
+      return;
+
+    if (this.twoPaddlesBounce.paddles.length < 2) {
+      // build up the first two entries
+      this.twoPaddlesBounce.paddles.push(args.playerId);
+    } else if (
+      this.twoPaddlesBounce.paddles[
+        this.twoPaddlesBounce.paddles.length - 2
+      ] === args.playerId
+    ) {
+      // hit matches the one two steps ago → a continued ABAB pattern
+      this.twoPaddlesBounce.count++;
+      this.twoPaddlesBounce.paddles.push(args.playerId);
+    } else {
+      // pattern broke (new paddle or 3rd paddle); start a new pair with the last hit + this one
+      this.twoPaddlesBounce.count = 0;
+      const last =
+        this.twoPaddlesBounce.paddles[this.twoPaddlesBounce.paddles.length - 1];
+      this.twoPaddlesBounce.paddles = [last, args.playerId];
+    }
+
+    if (this.twoPaddlesBounce.count >= this.twoPaddlesBounceThreshold) {
+      this.nudgeBall(game);
+      this.resetTrackers();
+    }
   }
 
   onWallBounce(game: Pong, args: { wallID: number; ballID: number }): void {
@@ -61,17 +112,8 @@ export class PaceBreaker extends TimeLimitedModifierBase {
 
   onDeactivation(game: Pong): void {
     this.nudgeBall(game);
-    this.noPaddleBounceCount = 0;
+    this.resetTrackers();
     this.activate(game);
-  }
-
-  onUpdate(game: GameBase): void {
-    super.onUpdate(game);
-
-    if (this.ticks % 30 === 0)
-      console.log(
-        `${this.ticks} / ${this.duration}  |  ${this.noPaddleBounceCount} / ${this.noPaddleBounceThreshold}`,
-      );
   }
 
   protected nudgeBall(game: Pong) {
@@ -95,5 +137,14 @@ export class PaceBreaker extends TimeLimitedModifierBase {
       gameState.balls[0].dx = maxEntry.dir.x / (maxEntry.mag || 1);
       gameState.balls[0].dy = maxEntry.dir.y / (maxEntry.mag || 1);
     }
+  }
+
+  protected resetTrackers() {
+    this.ticks = this.duration;
+    this.noPaddleBounceCount = 0;
+    this.twoPaddlesBounce = {
+      count: 0,
+      paddles: [],
+    };
   }
 }

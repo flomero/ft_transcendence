@@ -108,7 +108,8 @@
       "paceBreaker": {
         "className": "PaceBreaker",
         "noResetThresholdS": 7,
-        "noPaddleBounceThreshold": 14
+        "noPaddleBounceThreshold": 14,
+        "twoPaddlesBounceThreshold": 7
       },
 
       "paddleBoost": {
