@@ -11,6 +11,11 @@ enum ShooterStatus {
   SHOT,
 }
 
+enum OrbitDirection {
+  CW = -1,
+  CCW = 1,
+}
+
 export class Shooter extends TimeLimitedModifierBase {
   name = "shooter";
 
@@ -19,6 +24,7 @@ export class Shooter extends TimeLimitedModifierBase {
   protected shooterStatus: ShooterStatus = ShooterStatus.CREATED;
   protected chargeDuration: number = 0;
   protected chargeRadius: number = 0;
+  protected orbitDirection: OrbitDirection = OrbitDirection.CCW;
   protected shootAdditionalVelocity: number = 0;
   protected shootAngularOffsetFactor: number = 0;
   protected shootStandardAngularDeviationFactor: number = 0;
@@ -148,6 +154,8 @@ export class Shooter extends TimeLimitedModifierBase {
       this.deactivate(game);
       return;
     }
+
+    this.orbitDirection = game.getRNG().randomSign();
 
     const mainBall = game.getState().balls[0];
     this.ballInitialSpeed = mainBall.speed;
@@ -293,33 +301,32 @@ export class Shooter extends TimeLimitedModifierBase {
 
   protected updateChargingBall(game: Pong): void {
     const mainBall = game.getState().balls[0];
-    // Calculate current relative position of ball to charge center
-    const relativePos = {
-      x: mainBall.x - this.chargeCenter.x,
-      y: mainBall.y - this.chargeCenter.y,
-    };
+    const cx = this.chargeCenter.x;
+    const cy = this.chargeCenter.y;
+    const r = this.chargeRadius;
 
-    // Distance from ball to charge center
-    const distance = Math.sqrt(relativePos.x ** 2 + relativePos.y ** 2);
+    // Compute current angle on orbit
+    const dx = mainBall.x - cx;
+    const dy = mainBall.y - cy;
+    const angle = Math.atan2(dy, dx);
 
-    // Normalize to get direction
-    const direction = {
-      x: relativePos.x / distance,
-      y: relativePos.y / distance,
-    };
+    // Compute angular increment (speed = arc length = r * Δθ)
+    const speed = mainBall.speed;
+    const deltaTheta = speed / r;
 
-    // Calculate the tangent direction (rotate by 90 degrees)
-    const tangent = {
-      x: -direction.y,
-      y: direction.x,
-    };
+    const nextAngle = angle + this.orbitDirection * deltaTheta;
 
-    // Move ball along the tangent to create an orbit
-    // Adjust velocity based on the circumference and chargeDuration
-    const orbitSpeed = (2 * Math.PI * distance) / this.chargeDuration;
+    // Compute next desired position on the circle
+    const nextX = cx + r * Math.cos(nextAngle);
+    const nextY = cy + r * Math.sin(nextAngle);
 
-    mainBall.dx = tangent.x * orbitSpeed;
-    mainBall.dy = tangent.y * orbitSpeed;
+    // Compute direction to move toward that next position
+    const dirX = nextX - mainBall.x;
+    const dirY = nextY - mainBall.y;
+    const mag = Math.sqrt(dirX * dirX + dirY * dirY);
+
+    mainBall.dx = dirX / mag;
+    mainBall.dy = dirY / mag;
   }
 
   onDeactivation(game: Pong): void {
