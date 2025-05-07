@@ -33,6 +33,7 @@ export class ClassicPong extends Pong {
       paddleOffset: registry.fixedSettings.paddleOffset,
       paddleHeight: registry.fixedSettings.paddleHeight,
       wallsHeight: registry.fixedSettings.wallsHeight,
+      minBallSpeed: registry.fixedSettings.minBallSpeed,
 
       // Customizable settings
       ballSpeedWidthPercentS:
@@ -65,6 +66,10 @@ export class ClassicPong extends Pong {
       (this.settings.arenaWidth *
         (this.settings.ballSpeedWidthPercentS / 100)) /
       this.serverTickrateS;
+
+    // Minimum ball speed defined as a percentage of the initial ball speed
+    this.settings.minBallSpeed =
+      (this.settings.minBallSpeed * this.settings.ballSpeed) / 100.0;
 
     if (customConfig.powerUpCapacities)
       for (const [key, value] of Object.entries(

@@ -34,6 +34,7 @@ export class GoalReset extends ModifierBase {
     if (this.status !== ModifierStatus.PAUSED) return;
 
     --this.ticks;
+    game.getState().balls[0].speed = 0;
     if (this.ticks < 0) {
       game.getState().balls[0].speed = this.ballSpeed;
       this.status = ModifierStatus.ACTIVE;
