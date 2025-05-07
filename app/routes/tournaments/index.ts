@@ -61,6 +61,7 @@ const tournamentsRoute: FastifyPluginAsync = async (fastify) => {
       },
       {
         name: "Semifinals",
+        isCurrent: true,
         matches: [
           {
             name: "Match 1",
@@ -186,6 +187,8 @@ const tournamentsRoute: FastifyPluginAsync = async (fastify) => {
         })),
       }));
     });
+
+    // console.dir(tournaments[0], {depth: null});
 
     /* ---------- connection strategy ---------- */
     const auto = request.query.auto !== "false";

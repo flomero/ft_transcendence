@@ -251,11 +251,11 @@ export class SingleElimination implements ITournamentBracketGenerator {
         // Create placeholder player IDs for this match
         const placeholderPlayers: string[] = [];
         for (let j = 0; j < this.playersPerMatch; j++) {
-          placeholderPlayers.push(`TBD_R${roundIndex + 1}_M${i}_P${j}`);
+          placeholderPlayers.push(`TBD_r${roundIndex + 1}m${i}_P${j}`);
         }
 
         // Create a match ID
-        const matchID = `R${roundIndex + 1}_M${i}`;
+        const matchID = `r${roundIndex + 1}m${i}`;
 
         // Initialize results for each player
         const results: Record<string, number[]> = {};
@@ -296,7 +296,7 @@ export class SingleElimination implements ITournamentBracketGenerator {
       Object.keys(currentRound).forEach((matchID, matchIndex) => {
         // Calculate the next match ID (halving the index for next round)
         const nextMatchIndex = Math.floor(matchIndex / 2);
-        const nextMatchID = `R${nextRoundIndex + 1}_M${nextMatchIndex}`;
+        const nextMatchID = `r${nextRoundIndex + 1}m${nextMatchIndex}`;
 
         // In single elimination, only the winner advances
         this.nextMatchSeeding.set(matchID, [nextMatchID]);

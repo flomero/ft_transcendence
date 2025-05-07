@@ -23,61 +23,73 @@
 </style>
 
 <div id="{{match.id}}" class="match border bg-black-200 mt-2 mb-2 p-2 rounded-lg">
-  <table class="w-full table-auto text-sm font-mono">
-    <tbody>
-      {{#each match.players as |player playerIndex|}}
-        <tr>
-          <!-- Player name -->
-          <td class="pr-2 font-semibold text-left whitespace-nowrap">
-            {{player.name}}
-          </td>
-
-          {{#if player.isReady}}
-            <!-- Win count with lead highlight -->
-            <td class="px-2 text-center font-bold rounded
-              {{#if (eq match.additionalData.leadPlayer playerIndex)}}
-                bg-green-500 text-white
-              {{else if (eq match.additionalData.leadPlayer -1)}}
-                bg-gray-400
-              {{else}}
-                bg-gray-600 text-white
-              {{/if}}">
-              {{player.winCount}}
+  {{#with match.additionalData as |ad|}}
+    <table class="w-full table-auto text-sm font-mono">
+      <tbody>
+        {{#each ../match.players as |player playerIndex|}}
+          <tr>
+            <!-- Player name -->
+            <td style="padding-right:0.5rem;font-weight:600;white-space:nowrap;">
+              {{player.name}}
             </td>
 
-            <!-- Separator -->
-            <td class="px-2 text-gray-500">|</td>
-
-            <!-- Game scores -->
-            {{#each player.score as |score gameIndex|}}
-              <td class="px-1 text-center rounded
-                {{#if (eq match.additionalData.gameWinners.[gameIndex] playerIndex)}}
-                  bg-blue-300
+            {{#if player.isReady}}
+              <!-- Win count with proper leadPlayer logic -->
+              {{#if (eq ad.leadPlayer playerIndex)}}
+                <td style="padding:0.25rem 0.5rem;text-align:center;font-weight:bold;
+                          background:#399b5d;color:white;border-radius:0.25rem;">
+                  {{player.winCount}}
+                </td>
+              {{else}}
+                {{#if (eq ad.leadPlayer -1)}}
+                  <td style="padding:0.25rem 0.5rem;text-align:center;font-weight:bold;
+                            background:#9ca3af;color:white;border-radius:0.25rem;">
+                    {{player.winCount}}
+                  </td>
                 {{else}}
-                  bg-gray-200
-                {{/if}}">
-                {{score}}
-              </td>
-            {{/each}}
-          {{/if}}
-        </tr>
-      {{/each}}
-    </tbody>
-  </table>
+                  <td style="padding:0.25rem 0.5rem;text-align:center;font-weight:bold;
+                            background:#4b5563;color:white;border-radius:0.25rem;">
+                    {{player.winCount}}
+                  </td>
+                {{/if}}
+              {{/if}}
 
-  {{#if (eq match.status "ONGOING")}}
-    <div class="mt-4">
-      <h3 class="text-lg font-bold text-yellow-300">Game {{add match.additionalData.currentGame 1}} in progress</h3>
-      <p class="text-sm">Started at: {{formatDate match.startTime "HH:mm"}}</p>
-      <p class="text-sm">
-        Duration: <span class="elapsed-time" data-start="{{match.startTime}}"></span>
-      </p>
-    </div>
-  {{/if}}
-  {{!-- {{else if (eq match.status "NOT_STARTED")}}
-    <div class="mt-4">
-      <h3 class="text-lg font-bold text-gray-400">Not Started</h3>
-      <p class="text-sm">From: {{match.previousRoundInfo}}</p>
-    </div>
-  {{/if}} --}}
+              <!-- Separator -->
+              <td style="padding:0 0.5rem;color:#6b7280;">|</td>
+
+              <!-- Game scores, using lookup to pull the winner index -->
+              {{#each player.score as |score gameIndex|}}
+                {{#if (eq (lookup ad.gameWinners gameIndex) playerIndex)}}
+                  <td style="padding:0.25rem 0.5rem;text-align:center;border-radius:0.25rem;
+                            background:#399b5d;">
+                    {{score}}
+                  </td>
+                {{else}}
+                  <td style="padding:0.25rem 0.5rem;text-align:center;border-radius:0.25rem;
+                            background:#4b5563;">
+                    {{score}}
+                  </td>
+                {{/if}}
+              {{/each}}
+            {{/if}}
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+
+    {{#if (eq ../match.status "ONGOING")}}
+      <div style="margin-top:1rem;">
+        <h3 style="font-size:1.125rem;font-weight:700;color:#facc15;">
+          Game {{add ad.currentGame 1}} in progress
+        </h3>
+        <p style="font-size:0.875rem;">
+          Started at: {{formatDate ../match.startTime "HH:mm"}}
+        </p>
+        <p style="font-size:0.875rem;">
+          Duration:
+          <span class="elapsed-time" data-start="{{../match.startTime}}"></span>
+        </p>
+      </div>
+    {{/if}}
+  {{/with}}
 </div>
