@@ -14,9 +14,12 @@
     {{#unless message.isOwnMessage}}
         <span class="text-xs text-fg-muted truncate">{{message.userName}}</span>
     {{/unless}}
-    {{#> components/button url=message.message class="bg-color-blue" }}
-      Join Game
-    {{/components/button}}
+    <div class="flex flex-row items-center gap-3">
+        <p>Game invite</p>
+        {{#> components/button variant="outline" url=message.message}}
+            <p class="{{#if message.isOwnMessage}}text-bg{{else}}text-fg{{/if}}">Accept</p>
+        {{/components/button}}
+    </div>
 </div>
 {{/ifeq}}
 

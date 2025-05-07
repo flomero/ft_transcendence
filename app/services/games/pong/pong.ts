@@ -12,7 +12,12 @@ import { UserInputManager } from "../userInputManager";
 import type { UserInput } from "../../../types/games/userInput";
 import { RNG } from "../rng";
 import type { ExtendedCollisionData } from "../../../types/games/pong/extendedCollisionData";
-import type { PongGameState } from "../../../types/games/pong/gameState";
+import type {
+  BallState,
+  PaddleState,
+  PongGameState,
+  WallState,
+} from "../../../types/games/pong/gameState";
 
 const EPSILON = 1e-2;
 
@@ -58,6 +63,7 @@ export abstract class Pong extends GameBase {
       eliminatedPlayers: [],
       playerCount: gameData.playerCount,
     };
+    this.tickData.push(this.gameState);
 
     // Initialize UserInputManager
     this.inputManager = new UserInputManager();
@@ -94,7 +100,10 @@ export abstract class Pong extends GameBase {
 
       // Verify that no balls went out of bounds
       this.gameState.balls.forEach((ball, id) => {
-        if (this.isOutOfBounds(ball)) this.resetBall(this.gameState, id, true);
+        if (this.isOutOfBounds(ball)) {
+          console.log(`Ball out of bounds --> resetting it`);
+          this.resetBall(this.gameState, id, true);
+        }
         // this.modifierManager.trigger("onBallOutOfBounds", { ballID: id });
       });
 
@@ -103,8 +112,8 @@ export abstract class Pong extends GameBase {
     }
 
     // Save the current state for potential rewinding
-    const snapshot = this.getStateSnapshot();
-    this.saveStateSnapshot(snapshot);
+    // const snapshot = this.getStateSnapshot();
+    this.saveStateSnapshot(this.gameState);
   }
 
   protected updatePaddle(paddle: Paddle, doTriggers: boolean): void {
@@ -228,37 +237,73 @@ export abstract class Pong extends GameBase {
   getStateSnapshot(): Record<string, any> {
     const gameBaseState = super.getStateSnapshot();
 
+    const balls: BallState[] = this.gameState.balls
+      .filter((ball) => ball.isVisible)
+      .map((ball) => {
+        return {
+          r: parseFloat(ball.radius.toFixed(3)),
+          x: parseFloat(ball.x.toFixed(3)),
+          y: parseFloat(ball.y.toFixed(3)),
+        };
+      });
+
+    const paddles: PaddleState[] = this.gameState.paddles
+      .filter((paddle) => paddle.isVisible)
+      .map((paddle) => {
+        return {
+          a: paddle.alpha,
+          x: parseFloat(paddle.x.toFixed(3)),
+          y: parseFloat(paddle.y.toFixed(3)),
+          w: parseFloat(paddle.width.toFixed(3)),
+          h: parseFloat(paddle.height.toFixed(3)),
+        };
+      });
+
+    const walls: WallState[] = this.gameState.walls
+      .filter((wall) => wall.isVisible)
+      .map((wall) => {
+        return {
+          x: parseFloat(wall.x.toFixed(3)),
+          y: parseFloat(wall.y.toFixed(3)),
+          dx: parseFloat(wall.dx.toFixed(3)),
+          dy: parseFloat(wall.dy.toFixed(3)),
+          w: parseFloat(wall.width.toFixed(3)),
+          h: parseFloat(wall.height.toFixed(3)),
+          doRot: wall.doRotation,
+        };
+      });
+
     const snapshot = {
-      startDate: gameBaseState.startDate,
-      lastUpdate: gameBaseState.lastUpdate,
-      status: gameBaseState.status,
+      // startDate: gameBaseState.startDate,
+      // lastUpdate: gameBaseState.lastUpdate,
+      // status: gameBaseState.status,
       modifiersState: gameBaseState.modifiersState,
 
-      balls: this.gameState.balls,
-      paddles: this.gameState.paddles,
-      walls: this.gameState.walls,
+      balls: balls, // this.gameState.balls,
+      paddles: paddles, // this.gameState.paddles,
+      walls: walls, // this.gameState.walls,
 
-      rng: this.gameState.rng.getState(),
-      lastHit: this.gameState.lastHit,
-      lastGoal: this.gameState.lastGoal,
+      // rng: this.gameState.rng.getState(),
+      // lastHit: this.gameState.lastHit,
+      // lastGoal: this.gameState.lastGoal,
       scores: this.gameState.scores,
-      results: this.gameState.results,
-      playerCount: this.gameState.playerCount,
+      // results: this.gameState.results,
+      // playerCount: this.gameState.playerCount,
     };
 
     return snapshot;
   }
 
   loadStateSnapshot(snapshot: Record<string, any>): void {
-    this.gameState.balls = snapshot.balls; //.map(ball => ({...ball}));
-    this.gameState.paddles = snapshot.paddles; //.map(paddle => ({...paddle}));
-    this.gameState.walls = snapshot.walls; //.map(wall => ({...wall}));
-    this.gameState.scores = [...snapshot.scores];
-    this.gameState.lastHit = snapshot.lastHit;
+    this.gameState.balls = snapshot?.balls; //.map(ball => ({...ball}));
+    this.gameState.paddles = snapshot?.paddles; //.map(paddle => ({...paddle}));
+    this.gameState.walls = snapshot?.walls; //.map(wall => ({...wall}));
+    this.gameState.scores = [...(snapshot?.scores || [])];
+    this.gameState.lastHit = snapshot?.lastHit;
 
-    this.modifierManager.loadStateSnapshot(snapshot.modifiersData);
+    this.modifierManager.loadStateSnapshot(snapshot?.modifiersData || {});
 
-    this.gameState.rng.setState(snapshot.rng);
+    if (snapshot?.rng) this.gameState.rng.setState(snapshot.rng);
   }
 
   protected async saveStateSnapshot(
@@ -423,8 +468,8 @@ export abstract class Pong extends GameBase {
           PhysicsEngine.resolveCollision(ball, collision);
 
           const playerId = collision.objectId;
-          if (gameState.lastHit !== playerId)
-            console.log(`Last hit: ${playerId}`);
+          // if (gameState.lastHit !== playerId)
+          //   console.log(`Last hit: ${playerId}`);
           gameState.lastHit = playerId;
 
           const paddle = this.gameState.paddles[playerId];

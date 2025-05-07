@@ -138,15 +138,27 @@ export class ModifierManager {
       }
     };
 
-    // Trigger method on all modifiers
-    for (const modifier of this.modifiers)
-      if (modifier.getStatus() !== ModifierStatus.INACTIVE)
-        safeInvoke(modifier, method);
+    for (let i = this.modifiers.length - 1; i >= 0; --i) {
+      if (this.modifiers[i].getStatus() !== ModifierStatus.INACTIVE) {
+        safeInvoke(this.modifiers[i], method);
+      }
+    }
   }
 
   getStateSnapshot(): Record<string, any> {
     const state = {
-      spawnedPowerUps: this.spawnedPowerUps,
+      spawnedPowerUps: {
+        ...Object.fromEntries(
+          this.spawnedPowerUps.map((powerUp) => [
+            powerUp[0],
+            {
+              r: powerUp[1].radius,
+              x: parseFloat(powerUp[1].x.toFixed(3)),
+              y: parseFloat(powerUp[1].y.toFixed(3)),
+            },
+          ]),
+        ),
+      },
       modifiersState: {
         ...Object.fromEntries(
           this.modifiers.map((modifiers) => [
@@ -161,7 +173,7 @@ export class ModifierManager {
   }
 
   loadStateSnapshot(snapshot: Record<string, any>): void {
-    this.spawnedPowerUps = snapshot.spawnedPowerUps || [];
+    this.spawnedPowerUps = snapshot?.spawnedPowerUps || [];
   }
 
   sampleRandomPowerUp(rng: RNG): string | null {

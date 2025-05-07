@@ -124,6 +124,8 @@ class Chat {
 
     if (!message) return;
 
+    inputElement.value = "";
+
     fetch(`/chat/${this.currentRoomId}`, {
       method: "POST",
       body: message,
@@ -215,6 +217,56 @@ class Chat {
       })
       .catch((error) => console.error("Error fetching room:", error));
   }
+
+  sendInvite = (event: Event): void => {
+    event.stopPropagation();
+
+    const button = event.currentTarget as HTMLElement;
+    if (!button) return;
+
+    const roomDiv = button.closest("[data-room-id]");
+    if (!roomDiv) {
+      console.error("No room element found");
+      return;
+    }
+    const roomId = roomDiv.getAttribute("data-room-id");
+    if (!roomId) {
+      console.error("No room ID found");
+      return;
+    }
+
+    const svgs = button.querySelectorAll("svg");
+    if (svgs.length < 2) {
+      console.error("SVG icons not found");
+      return;
+    }
+    const inviteIcon = svgs[0];
+    const inviteSuccessIcon = svgs[1];
+
+    const lobby = window.location.pathname.match(
+      /\/games\/lobby\/join\/([a-f0-9-]+)/i,
+    );
+    const lobbyId = lobby ? lobby[1] : null;
+    if (!lobbyId) {
+      console.error("No match UUID found");
+      return;
+    }
+
+    if (inviteIcon.classList.contains("hidden")) {
+      return;
+    }
+
+    inviteIcon.classList.add("hidden");
+    inviteSuccessIcon.classList.remove("hidden");
+    setTimeout(() => {
+      inviteIcon.classList.remove("hidden");
+      inviteSuccessIcon.classList.add("hidden");
+    }, 3000);
+
+    fetch("/games/lobby/" + lobbyId + "/invite/room/" + roomId, {
+      method: "POST",
+    });
+  };
 }
 
 const chat = new Chat();

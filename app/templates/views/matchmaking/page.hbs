@@ -3,6 +3,9 @@
     {{hrGameModeName gameMode}}
   </h1>
   <p class="text-fg-muted">Searching for opponents...</p>
+  <p  class="text-fg-muted">
+    Players waiting: <span id="matchmaking-status">{{matchmakingStatus}}</span>
+  </p>
   {{#> components/button variant="outline" class="text-fg-muted" onclick="matchmakingHandler.cancelMatchmaking"}}
   Leave Matchmaking
   {{/components/button}}

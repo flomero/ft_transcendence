@@ -274,9 +274,10 @@ export class Bumper extends TimeLimitedModifierBase {
     game.getModifierManager().deletePowerUp(this);
   }
 
-  onGoal(game: Pong, args: { playerId: number }): void {
-    // On goal reset the currently stored velocityFactor
-    this.velocityFactor = 0.0;
+  onBallReset(game: Pong, args: { ballID: number }): void {
+    if (args.ballID <= 0)
+      // -1: resetting all balls, 0: mainBall -> don't reset on non-main ball reset
+      this.velocityFactor = 0.0;
   }
 
   onArenaModification(game: Pong): void {

@@ -47,9 +47,9 @@ const addTournamentToDB = async (
   try {
     db.run(
       `
-           INSERT INTO tournaments
-           (id, status, mode)
-           VALUES (?, ?, ?)`,
+        INSERT INTO tournaments
+        (id, status, mode)
+        VALUES (?, ?, ?)`,
       [tournamentId, tournamentStatus, gameMode],
     );
   } catch (error) {

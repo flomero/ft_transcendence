@@ -16,7 +16,12 @@ async function getLobbyById(
     })
   | null
 > {
-  const lobby = PrivateLobbies.get(lobbyId) || PublicLobbies.get(lobbyId);
+  let isPrivate = false;
+  let lobby = PublicLobbies.get(lobbyId);
+  if (!lobby) {
+    lobby = PrivateLobbies.get(lobbyId);
+    isPrivate = true;
+  }
   if (!lobby) return null;
   if (!expand) return lobby;
   const owner = await getUserById(fastify, lobby.lobbyOwner);
@@ -32,9 +37,11 @@ async function getLobbyById(
   const result = {
     ...lobby,
     ownerName: owner ? owner.username : "Unknown User",
+    isPrivate,
     members,
   } as unknown as Lobby & {
     ownerName: string;
+    isPrivate: boolean;
     members: Array<LobbyMember & User>;
   };
 

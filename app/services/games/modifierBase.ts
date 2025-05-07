@@ -76,12 +76,12 @@ export class ModifierBase {
   onCDFComputation(game: GameBase): void {}
 
   onGoal(game: Pong, args: { playerId: number }): void {}
+  onBallReset(game: Pong, args: { ballID: number }): void {}
   onPaddleBounce(game: Pong, args: { playerId: number }): void {}
   onWallBounce(game: Pong, args: { wallID: number }): void {}
   onPlayerElimination(game: Pong, args: { playerId: number }): void {}
   onResultUpdate(game: Pong, args: { playerId: number }): void {}
   onArenaModification(game: Pong): void {}
-  onBallReset(game: Pong): void {}
   onBallOutOfBounds(game: Pong, args: { ballID: number }): void {}
 
   // Getters & Setters
@@ -102,8 +102,6 @@ export class ModifierBase {
   }
 
   getState(): Record<string, any> {
-    return {
-      status: this.status.toString(),
-    };
+    return {};
   }
 }

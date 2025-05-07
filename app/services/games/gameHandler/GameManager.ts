@@ -13,6 +13,7 @@ import saveGameResultInDb from "./saveGameResultInDb";
 import type { GameOrigin } from "../../../types/games/gameHandler/GameOrigin";
 import terminateGame from "./terminateGame";
 import { GameResult } from "../../../types/strategy/ITournamentBracketGenerator";
+import { PongMinimalGameState } from "../../../types/games/pong/gameState";
 
 class GameManager {
   private id: string = randomUUID();
@@ -49,7 +50,7 @@ class GameManager {
 
     const newAiOpponent = new PongAIOpponent(this.game, {
       playerId: -1,
-      strategyName: "improvedNaive",
+      strategyName: "foresight",
     });
     this.aiOpponent.set(aiOpponentId, newAiOpponent);
     this.playerIdReferenceTable.push(aiOpponentId);
@@ -71,7 +72,7 @@ class GameManager {
 
   public sendMessageToAll(
     type: string,
-    data: string,
+    data: PongMinimalGameState,
     referenceTable: string[],
   ): void {
     for (const player of this.players.values()) {
@@ -189,6 +190,10 @@ class GameManager {
 
   public get getGame() {
     return this.game;
+  }
+
+  public get getResults(): number[] {
+    return this.game.getResults();
   }
 
   public get getScores(): number[] {

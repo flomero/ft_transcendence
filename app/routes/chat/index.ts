@@ -22,7 +22,7 @@ const chat: FastifyPluginAsync = async (fastify): Promise<void> => {
       return reply.badRequest("Room ID is required");
     }
 
-    if (roomId === -1) {
+    if (roomId == -1) {
       await setCurrentRoomId(fastify, request.userId, -1);
       return reply.code(200).send();
     }
