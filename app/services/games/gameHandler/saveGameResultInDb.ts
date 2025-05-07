@@ -21,8 +21,6 @@ const savePlayerScoresAndResultToDatabase = async (
   const players = gameManager.getPlayersAsArray;
   const gameResults = gameManager.getResults;
   const query = `UPDATE r_users_matches SET score = ?, result = ? WHERE userId = ? AND matchId = ?`;
-  console.log("ReferenceTable", gameManager.getReferenceTable());
-  console.log("gameResults", gameResults);
 
   for (const player of players) {
     const score = gameScores[player.id];
@@ -58,7 +56,6 @@ const saveAIScoresAndResultToDatabase = async (
 
   for (const aiOpponent of gameManager.aiOpponent.values()) {
     const playerId = aiOpponent.getId();
-    console.log("[saveAIScoresAndResultToDatabase] AI opponent ID:", playerId);
     const score = gameScores[playerId];
     const result = gameResults[playerId];
 
