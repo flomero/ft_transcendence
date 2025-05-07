@@ -519,6 +519,7 @@ export abstract class Pong extends GameBase {
             if (doTriggers)
               this.modifierManager.trigger("onWallBounce", {
                 wallID: collision.objectId,
+                ballID: this.gameState.balls.indexOf(ball),
               });
           }
           break;

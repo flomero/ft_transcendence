@@ -31,11 +31,16 @@ export class IdleWallBounceAcceleration extends ModifierBase {
     this.configManager.loadComplexConfigIntoContainer(mergedConfig, this);
   }
 
-  onWallBounce(game: Pong, args: { wallID: number }): void {
-    if (args.wallID % 2 !== 0 || game.isEliminated(args.wallID / 2)) return;
+  onWallBounce(game: Pong, args: { wallID: number; ballID: number }): void {
+    if (args.wallID % 2 === 0 && !game.isEliminated(args.wallID / 2)) return;
 
     const gameState = game.getState();
-    if (gameState.balls.length !== 0)
-      gameState.balls[0].speed *= 1 + this.bumperVelocityFactor;
+    if (
+      gameState.balls.length !== 0 &&
+      args.ballID >= 0 &&
+      args.ballID < gameState.balls.length
+    )
+      gameState.balls[args.ballID].speed +=
+        this.bumperVelocityFactor * gameState.balls[args.ballID].speed;
   }
 }

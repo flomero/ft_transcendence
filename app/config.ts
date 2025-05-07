@@ -77,9 +77,13 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
         delaySpan: 0.01,
       },
       goalReset: {},
+      idleWallBounceAcceleration: {},
     },
     powerUpNames: {
-      bumper: {},
+      multiBall: {
+        ballCount: 180,
+        totalAngle: 360,
+      },
     },
     playerCount: 2,
   },
