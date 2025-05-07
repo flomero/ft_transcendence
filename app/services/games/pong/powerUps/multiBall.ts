@@ -131,7 +131,9 @@ export class MultiBall extends TimeLimitedModifierBase {
     game.getModifierManager().deletePowerUp(this);
   }
 
-  onGoal(game: Pong, args: { playerId: number }): void {
-    this.deactivate(game);
+  onBallReset(game: Pong, args: { ballID: number }): void {
+    if (args.ballID <= 0)
+      // -1: resetting all balls, 0: mainBall -> don't deactivate on non-main ball reset
+      this.deactivate(game);
   }
 }

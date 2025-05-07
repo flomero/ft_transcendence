@@ -103,8 +103,9 @@ export class MultiplayerPong extends Pong {
     // Calculate actual paddle width based on amplitude and coverage
     const paddleWidth = paddleAmplitude * coverage;
 
-    // paddleSpeed is percentage of width per second (independent of tickrate)
-    const paddleSpeedPercent = this.settings.paddleSpeedWidthPercentS / 100.0;
+    const serverTickrateS = GAME_REGISTRY.pong.serverTickrateS;
+    const paddleSpeed =
+      100 / (serverTickrateS * this.settings.paddleSpeedWidthPercentS);
 
     for (let index = 0; index < this.gameState.playerCount; ++index) {
       const angle =
@@ -120,7 +121,7 @@ export class MultiplayerPong extends Pong {
         amplitude: paddleAmplitude,
         width: paddleWidth,
         height: this.settings.paddleHeight,
-        speed: paddleSpeedPercent,
+        speed: paddleSpeed,
         doMove: true,
         isVisible: true,
         velocity: 0.0,
@@ -340,7 +341,8 @@ export class MultiplayerPong extends Pong {
       };
     }
 
-    if (doTriggers) this.modifierManager.trigger("onBallReset");
+    if (doTriggers)
+      this.modifierManager.trigger("onBallReset", { ballID: ballId });
   }
 
   rotatePaddles(alpha: number = 0.0): void {
@@ -446,14 +448,20 @@ export class MultiplayerPong extends Pong {
       this.settings.wallOffset +
       this.settings.paddleOffset;
 
-    if (ball.x <= 0 || ball.y <= 0) return true;
+    if (
+      ball.x <= 0 ||
+      ball.y <= 0 ||
+      ball.x >= this.settings.arenaWidth ||
+      ball.y >= this.settings.arenaHeight
+    )
+      return true;
 
-    const distance =
-      Math.pow(ball.x - this.settings.arenaRadius, 2) +
-      Math.pow(ball.y - this.settings.arenaRadius, 2);
-    return (
-      distance >= tolerance + this.settings.arenaRadius ** 2 + ball.radius ** 2
-    );
+    const dx = ball.x - this.settings.arenaRadius;
+    const dy = ball.y - this.settings.arenaRadius;
+    const distanceSquared = dx * dx + dy * dy;
+
+    const allowedRadius = this.settings.arenaRadius + tolerance - ball.radius;
+    return distanceSquared > allowedRadius * allowedRadius;
   }
 
   getResults(): number[] {

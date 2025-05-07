@@ -43,19 +43,21 @@ const saveAIScoresToDatabase = async (
   db: Database,
 ) => {
   const gameScores = gameManager.getScores;
-  const query = `UPDATE r_users_matches SET score = ? WHERE userId = ? AND matchId = ?`;
+  const gameResults = gameManager.getResults;
+  const query = `UPDATE r_users_matches SET score = ?, result = ? WHERE userId = ? AND matchId = ?`;
 
   if (!gameManager.aiOpponent || gameManager.aiOpponent.size === 0) return;
 
-  for (const [aiUuid, aiOpponent] of gameManager.aiOpponent.entries()) {
+  for (const aiOpponent of gameManager.aiOpponent.values()) {
     const playerId = aiOpponent.getId();
     const score = gameScores[playerId];
+    const result = gameResults[playerId];
 
     try {
-      await db.run(query, [score, aiUuid, gameManager.getId]);
+      await db.run(query, [score, result, playerId, gameManager.getId]);
     } catch (err) {
       if (err instanceof Error)
-        console.error(`Error updating AI score for ${aiUuid}:`, err.message);
+        console.error(`Error updating AI score for ${playerId}:`, err.message);
     }
   }
 };

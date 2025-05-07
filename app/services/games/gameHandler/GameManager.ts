@@ -192,6 +192,10 @@ class GameManager {
     return this.game;
   }
 
+  public get getResults(): number[] {
+    return this.game.getResults();
+  }
+
   public get getScores(): number[] {
     return this.game.getScores();
   }
