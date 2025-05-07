@@ -105,6 +105,12 @@
         "bumperVelocityPercent": 0.2
       },
 
+      "paceBreaker": {
+        "className": "PaceBreaker",
+        "noResetThresholdS": 7,
+        "noPaddleBounceThreshold": 14
+      },
+
       "paddleBoost": {
         "className": "PaddleBoost",
         "paddleExtensionLength": 2.5,

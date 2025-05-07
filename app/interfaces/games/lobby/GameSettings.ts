@@ -44,6 +44,11 @@ interface IdleWallBounceAcceleration {
   bumperVelocityFactor?: number;
 }
 
+interface PaceBreaker {
+  noResetThreshold?: number;
+  noPaddleBounceThreshold?: number;
+}
+
 interface ModifierNames {
   powerUpSpawner?: PowerUpSpawner;
   timedGame?: TimedGame;
@@ -55,6 +60,7 @@ interface ModifierNames {
   paddleBoost?: {};
   timedStart?: {};
   idleWallBounceAcceleration?: IdleWallBounceAcceleration;
+  paceBreaker?: PaceBreaker;
 }
 
 interface SpeedBoost {
