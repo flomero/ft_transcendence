@@ -167,11 +167,11 @@
         "spawnWeight": 1.0,
         "selfActivation": false,
         "durationS": 10,
-        "bumperJunctionDistanceFromCenterPercent": 13.5,
-        "bumperWallJunctionDistancePercent": 80,
-        "bumperVelocityPercent": 20,
-        "bumperMaxVelocityPercent": 150,
-        "bumperAccelerationPercentS": -12.5
+        "bumperJunctionDistanceFromCenterPercent": 12,
+        "bumperWallJunctionDistancePercent": 90,
+        "bumperVelocityPercent": 12.5,
+        "bumperMaxVelocityPercent": 12.5,
+        "bumperAccelerationPercentS": -8.5
       }
     }
   }

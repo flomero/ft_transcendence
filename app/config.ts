@@ -79,8 +79,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       goalReset: {},
     },
     powerUpNames: {
-      shooter: {},
-      speedBoost: {},
+      bumper: {},
     },
     playerCount: 2,
   },
