@@ -205,7 +205,6 @@ class GameManager {
     const referenceTable = this.playerIdReferenceTable;
     const orderedResults: string[] = [];
 
-    console.log("Game results:", results);
     for (let i = 0; i < results.length; i++) {
       const indexOfPlayer = results.indexOf(i + 1); // because results are 1-indexed
 
