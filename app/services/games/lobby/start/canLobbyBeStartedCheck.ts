@@ -1,3 +1,4 @@
+import isUserInGame from "../../gameHandler/isUserInGame";
 import { getLobby } from "../lobbyWebsocket/getLobby";
 
 const canLobbyBeStartedCheck = (lobbyId: string): void => {
@@ -8,6 +9,8 @@ const canLobbyBeStartedCheck = (lobbyId: string): void => {
     throw new Error("Not all members are connected to the socket");
   else if (lobby.allMembersReady() === false)
     throw new Error("Not all members are ready");
+  else if (isUserInGame(lobby.lobbyOwner) !== null)
+    throw new Error("Lobby already started");
 };
 
 export { canLobbyBeStartedCheck };
