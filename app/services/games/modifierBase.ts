@@ -77,8 +77,11 @@ export class ModifierBase {
 
   onGoal(game: Pong, args: { playerId: number }): void {}
   onBallReset(game: Pong, args: { ballID: number }): void {}
-  onPaddleBounce(game: Pong, args: { playerId: number }): void {}
-  onWallBounce(game: Pong, args: { wallID: number }): void {}
+  onPaddleBounce(
+    game: Pong,
+    args: { ballId: number; playerId: number },
+  ): void {}
+  onWallBounce(game: Pong, args: { wallID: number; ballID: number }): void {}
   onPlayerElimination(game: Pong, args: { playerId: number }): void {}
   onResultUpdate(game: Pong, args: { playerId: number }): void {}
   onArenaModification(game: Pong): void {}

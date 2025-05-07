@@ -102,9 +102,9 @@ export abstract class Pong extends GameBase {
       this.gameState.balls.forEach((ball, id) => {
         if (this.isOutOfBounds(ball)) {
           console.log(`Ball out of bounds --> resetting it`);
-          this.resetBall(this.gameState, id, true);
+          // this.resetBall(this.gameState, id, true);
+          this.modifierManager.trigger("onBallOutOfBounds", { ballID: id });
         }
-        // this.modifierManager.trigger("onBallOutOfBounds", { ballID: id });
       });
 
       // Trigger modifiers
@@ -498,10 +498,11 @@ export abstract class Pong extends GameBase {
           ball.dx /= norm;
           ball.dy /= norm;
 
-          this.modifierManager.trigger("onPaddleBounce", {
-            ballId: this.gameState.balls.indexOf(ball),
-            playerId: collision.objectId,
-          });
+          if (doTriggers)
+            this.modifierManager.trigger("onPaddleBounce", {
+              ballId: this.gameState.balls.indexOf(ball),
+              playerId: collision.objectId,
+            });
           break;
 
         case "wall":
@@ -519,6 +520,7 @@ export abstract class Pong extends GameBase {
             if (doTriggers)
               this.modifierManager.trigger("onWallBounce", {
                 wallID: collision.objectId,
+                ballID: this.gameState.balls.indexOf(ball),
               });
           }
           break;
