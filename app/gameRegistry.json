@@ -136,7 +136,7 @@
         "spawnWeight": 2.0,
         "selfActivation": false,
         "durationS": 5,
-        "rampUpStrengthPercent": 4,
+        "rampUpStrengthPercent": 4.5,
         "rampUpFrequencyS": 0.33
       },
 
@@ -166,7 +166,7 @@
         "durationS": 5,
         "chargeDurationS": 2,
         "chargeRadius": 7.5,
-        "shootAdditionalVelocityPercent": 40,
+        "shootAdditionalVelocityPercent": 20,
         "shootAngularOffsetPercent": 45,
         "shootStandardAngularDeviationPercent": 22.5,
         "shootTargetWidthPercent": 90,

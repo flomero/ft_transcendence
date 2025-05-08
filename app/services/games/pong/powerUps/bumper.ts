@@ -237,9 +237,11 @@ export class Bumper extends TimeLimitedModifierBase {
     gameState.walls.push(...this.bumpers);
   }
 
-  onWallBounce(game: Pong, args: { wallID: number }): void {
+  onWallBounce(game: Pong, args: { wallID: number; ballID: number }): void {
     const isBumper = this.bumpers.includes(game.getState().walls[args.wallID]);
     if (!isBumper) return;
+
+    if (args.ballID < 0 || args.ballID > game.getState().balls.length) return;
 
     // Add velocity (clamped to max)
     this.velocityFactor = Math.min(
@@ -248,8 +250,8 @@ export class Bumper extends TimeLimitedModifierBase {
     );
 
     if (game.getState().balls.length === 0) return;
-    game.getState().balls[0].speed +=
-      this.velocityFactor * game.getState().balls[0].speed;
+    game.getState().balls[args.ballID].speed +=
+      this.velocityFactor * game.getState().balls[args.ballID].speed;
   }
 
   onUpdate(game: Pong): void {

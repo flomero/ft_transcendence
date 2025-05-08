@@ -333,7 +333,10 @@ export class Portals extends TimeLimitedModifierBase {
     ball.dx = outDir.x;
     ball.dy = outDir.y;
 
-    if (this.teleportationCount++ >= this.teleportationCountThrehsold)
+    if (
+      args.ballID === 0 &&
+      this.teleportationCount++ >= this.teleportationCountThrehsold
+    )
       this.deactivate(game);
   }
 
