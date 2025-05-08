@@ -130,6 +130,7 @@ export class MultiplayerPong extends Pong {
         amplitude: paddleAmplitude,
         width: paddleWidth,
         height: this.settings.paddleHeight,
+        doBoundsProtection: true,
         speed: paddleSpeed,
         doMove: true,
         isVisible: true,
@@ -209,6 +210,7 @@ export class MultiplayerPong extends Pong {
         isGoal: index % 2 == 0,
         doCollision: true,
         doRotation: true,
+        doBoundsProtection: true,
       };
 
       const tmp = Math.sqrt(wall.x ** 2 + wall.y ** 2);

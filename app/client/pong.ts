@@ -432,6 +432,8 @@ class PongGame {
         return "#ffff33"; // bright yellow
       case "bumper":
         return "#bf00ff"; // vivid purple
+      case "portals":
+        return "#7fff00"; // vivid purple
       default:
         return "#7fff00"; // chartreuse
     }

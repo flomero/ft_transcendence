@@ -67,21 +67,47 @@ export type GAMEMODE_REGISTRY_TYPE = {
 export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
   testLobby: {
     gameName: "pong",
-    gameModeName: "classicPong",
+    gameModeName: "multiplayerPong",
     gameModeConfig: {
-      powerUpRadius: 10,
+      powerUpRadius: 5,
     },
     modifierNames: {
-      powerUpSpawner: {
-        meanDelay: 1,
-        delaySpan: 0.01,
-      },
-      goalReset: {},
       paceBreaker: {},
+      timedStart: {},
+      timedGame: { duration: 600 },
+      survivalGame: {},
+      elimination: { threshold: 5 },
+      arenaShrink: {},
+      goalReset: {},
       idleWallBounceAcceleration: {},
+      powerUpSpawner: {
+        meanDelay: 9.25,
+        delaySpan: 2.25,
+      },
     },
-    powerUpNames: {},
-    playerCount: 2,
+    powerUpNames: {
+      speedBoost: {},
+      blinkingBall: {
+        duration: 6,
+        blinkDuration: 75,
+        blinkInterval: 0.6,
+      },
+      multiBall: {
+        ballCount: 17,
+        totalAngle: 360,
+        radiusFactor: 72.5,
+      },
+      bumper: {
+        bumperJunctionDistanceFromCenter: 6,
+      },
+      shooter: {
+        chargeRadius: 5,
+      },
+      portals: {
+        portalWallWidthHeightFactor: 30,
+      },
+    },
+    playerCount: 5,
   },
 
   // Quick 1v1, no powerUps

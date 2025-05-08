@@ -104,12 +104,26 @@ interface Bumper {
   bumperAcceleration?: number;
 }
 
+interface Portals {
+  spawnWeight?: number;
+  duration?: number;
+  portalWallWidthHeightFactor?: number;
+  directionalOffsetFactor?: number;
+  directionalOffsetStandardDeviationFactor?: number;
+  normalOffsetFactor?: number;
+  normalOffsetStandardDeviationFactor?: number;
+  useWallSide?: boolean;
+  useBothSides?: boolean;
+  teleportationCountThrehsold?: number;
+}
+
 interface PowerUp {
   speedBoost?: SpeedBoost;
   blinkingBall?: BlinkingBall;
   shooter?: Shooter;
   multiBall?: MultiBall;
   bumper?: Bumper;
+  portals?: Portals;
 }
 
 interface GameSettings {

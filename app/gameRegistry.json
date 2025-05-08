@@ -29,7 +29,8 @@
             "blinkingBall": 1,
             "multiBall": 1,
             "shooter": 1,
-            "bumper": 1
+            "bumper": 1,
+            "portals": 1
           }
         }
       },
@@ -50,7 +51,7 @@
           "ballRadius": 0.6,
           "ballResetSampler": "biasedGaussianCA",
           "paddleCoveragePercent": 25,
-          "paddleSpeedWidthPercentS": 0.8,
+          "paddleSpeedWidthPercentS": 0.78,
           "paddleVelocityAngularTransmissionPercent": 55,
           "paddleVelocitySpeedTransmissionPercent": 10,
           "powerUpRadius": 3.25,
@@ -59,7 +60,8 @@
             "blinkingBall": 1,
             "multiBall": 1,
             "shooter": 1,
-            "bumper": 1
+            "bumper": 1,
+            "portals": 1
           }
         }
       }
@@ -181,6 +183,21 @@
         "bumperVelocityPercent": 12.5,
         "bumperMaxVelocityPercent": 12.5,
         "bumperAccelerationPercentS": -8.5
+      },
+
+      "portals": {
+        "className": "Portals",
+        "spawnWeight": 1.0,
+        "selfActivation": false,
+        "durationS": 60,
+        "portalWallWidthHeightPercent": 40,
+        "directionalOffsetPercent": 30,
+        "directionalOffsetStandardDeviationPercent": 3.5,
+        "normalOffsetPercent": 30,
+        "normalOffsetStandardDeviationPercent": 3.5,
+        "useNaturalSide": true,
+        "useBothSides": true,
+        "teleportationCountThrehsold": 5
       }
     }
   }

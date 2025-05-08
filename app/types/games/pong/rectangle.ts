@@ -11,5 +11,6 @@ export interface Rectangle extends GameObject {
   isVisible: boolean;
   doCollision: boolean;
   doRotation: boolean;
+  doBoundsProtection: boolean;
   [key: string]: any; // For addition data such as isGoal for Walls.
 }
