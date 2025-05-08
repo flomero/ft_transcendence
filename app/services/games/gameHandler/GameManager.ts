@@ -7,13 +7,13 @@ import gameLoop from "./gameLoop";
 import type { GameMessage } from "../../../types/games/userInput";
 import { PongAIOpponent } from "../pong/pongAIOpponent";
 import aiLoop from "./aiLoop";
-import type { Database } from "sqlite";
 import { RNG } from "../rng";
 import saveGameResultInDb from "./saveGameResultInDb";
 import type { GameOrigin } from "../../../types/games/gameHandler/GameOrigin";
 import terminateGame from "./terminateGame";
 import { GameResult } from "../../../types/strategy/ITournamentBracketGenerator";
 import { PongMinimalGameState } from "../../../types/games/pong/gameState";
+import { FastifyInstance } from "fastify";
 
 class GameManager {
   private id: string = randomUUID();
@@ -72,7 +72,7 @@ class GameManager {
 
   public sendMessageToAll(
     type: string,
-    data: PongMinimalGameState,
+    data: PongMinimalGameState | { html: string },
     referenceTable: string[],
   ): void {
     for (const player of this.players.values()) {
@@ -118,15 +118,15 @@ class GameManager {
     this.playerIdReferenceTable = [];
   }
 
-  public async startGame(db: Database): Promise<void> {
-    //if (this.allPlayersAreConnected() === false)
-    //  throw new Error("[start Game] Not all players are connected");
+  public async startGame(fastify: FastifyInstance): Promise<void> {
+    if (this.allPlayersAreConnected() === false)
+      throw new Error("Not all players are connected");
     if (this.game.getStatus() !== GameStatus.CREATED) return;
 
     this.shuffleReferenceTable();
     this.addIngameIdToPlayerAndAiOpponent();
     this.game.startGame();
-    this.startGameAndAiLoop(db);
+    this.startGameAndAiLoop(fastify);
   }
 
   private shuffleReferenceTable(): void {
@@ -136,10 +136,10 @@ class GameManager {
     );
   }
 
-  private async startGameAndAiLoop(db: Database) {
+  private async startGameAndAiLoop(fastify: FastifyInstance): Promise<void> {
     if (this.game.getStatus() === GameStatus.RUNNING) {
-      gameLoop(this.id).then(async () => {
-        await saveGameResultInDb(this, db);
+      gameLoop(this.id, fastify).then(async () => {
+        await saveGameResultInDb(this, fastify.sqlite);
         this.handleGameCompletion();
         terminateGame(this);
       });

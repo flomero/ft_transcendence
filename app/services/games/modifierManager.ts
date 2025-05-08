@@ -138,10 +138,11 @@ export class ModifierManager {
       }
     };
 
-    // Trigger method on all modifiers
-    for (const modifier of this.modifiers)
-      if (modifier.getStatus() !== ModifierStatus.INACTIVE)
-        safeInvoke(modifier, method);
+    for (let i = this.modifiers.length - 1; i >= 0; --i) {
+      if (this.modifiers[i].getStatus() !== ModifierStatus.INACTIVE) {
+        safeInvoke(this.modifiers[i], method);
+      }
+    }
   }
 
   getStateSnapshot(): Record<string, any> {
