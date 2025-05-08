@@ -187,7 +187,7 @@
 
       "portals": {
         "className": "Portals",
-        "spawnWeight": 1.0,
+        "spawnWeight": 5.0,
         "selfActivation": false,
         "durationS": 60,
         "portalWallWidthHeightPercent": 40,
