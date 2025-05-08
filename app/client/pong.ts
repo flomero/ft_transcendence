@@ -119,6 +119,9 @@ class PongGame {
           }
         }
       }
+      if (message.type === "gameFinished") {
+        this.displayGameFinishedMessage(message.data.html);
+      }
     } catch (error) {
       if (this.debug)
         console.error("Error processing WebSocket message:", error);
@@ -144,8 +147,22 @@ class PongGame {
         return true;
       }
     }
-
     return false;
+  }
+
+  private displayGameFinishedMessage(html: string): void {
+    this.canvas.style.opacity = "0.5";
+
+    const messageContainer = document.createElement("div");
+    messageContainer.innerHTML = html;
+    messageContainer.className =
+      "absolute inset-0 flex flex-col items-center justify-center text-white animate-fade-in";
+
+    const parent = this.canvas.parentElement;
+    if (parent) {
+      parent.style.position = "relative";
+      parent.appendChild(messageContainer);
+    }
   }
 
   private calculateRotationAngle(): void {
