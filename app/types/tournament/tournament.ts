@@ -39,12 +39,10 @@ export interface AdditionalMatchData {
 
 export interface Match {
   id?: string; // Assigned dynamically
-  name?: string; // Optional name for the match
   players: Player[];
   additionalData?: AdditionalMatchData;
   status: MatchStatus;
   startTime?: string; // ISO date string for match start time
-  previousRoundInfo?: string; // Info about previous matches for NOT_STARTED matches
 }
 
 export interface Round {

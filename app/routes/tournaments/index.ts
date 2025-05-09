@@ -22,7 +22,6 @@ const tournamentsRoute: FastifyPluginAsync = async (fastify) => {
         name: "Round 1",
         matches: [
           {
-            name: "Match 1",
             players: [
               { id: "1", name: "Player 1", score: [11, 3, 11], winCount: 2 },
               { id: "2", name: "Player 2", score: [5, 11, 9], winCount: 1 },
@@ -31,7 +30,6 @@ const tournamentsRoute: FastifyPluginAsync = async (fastify) => {
             startTime: "2024-03-20T10:00:00Z",
           },
           {
-            name: "Match 2",
             players: [
               { id: "3", name: "Player 3", score: [0, 0], winCount: 0 },
               { id: "4", name: "Player 4", score: [11, 11], winCount: 2 },
@@ -40,7 +38,6 @@ const tournamentsRoute: FastifyPluginAsync = async (fastify) => {
             startTime: "2024-03-20T10:00:00Z",
           },
           {
-            name: "Match 3",
             players: [
               { id: "5", name: "Player 5", score: [1, 11, 3], winCount: 1 },
               { id: "6", name: "Player 6", score: [11, 9, 11], winCount: 2 },
@@ -49,7 +46,6 @@ const tournamentsRoute: FastifyPluginAsync = async (fastify) => {
             startTime: "2024-03-20T11:00:00Z",
           },
           {
-            name: "Match 4",
             players: [
               { id: "7", name: "Player 7", score: [6, 11, 11], winCount: 2 },
               { id: "8", name: "Player 8", score: [11, 8, 7], winCount: 0 },
@@ -64,24 +60,20 @@ const tournamentsRoute: FastifyPluginAsync = async (fastify) => {
         isCurrent: true,
         matches: [
           {
-            name: "Match 1",
             players: [
               { id: "1", name: "Player 1", score: [11], winCount: 1 },
               { id: "4", name: "Player 4", score: [2], winCount: 0 },
             ],
             status: MatchStatus.ONGOING,
             startTime: "2025-04-28T12:00:00Z",
-            previousRoundInfo: "Winner M1 vs Winner M2",
           },
           {
-            name: "Match 2",
             players: [
               { id: "5", name: "Player 5", score: [11, 11], winCount: 2 },
               { id: "8", name: "Player 8", score: [8, 5], winCount: 0 },
             ],
             status: MatchStatus.COMPLETED,
             startTime: "2025-04-12T00:00:00Z",
-            previousRoundInfo: "Winner M3 vs Winner M4",
           },
         ],
       },
@@ -89,13 +81,11 @@ const tournamentsRoute: FastifyPluginAsync = async (fastify) => {
         name: "Final",
         matches: [
           {
-            name: "Match 1",
             players: [
               { id: "0", name: "Winner SF-1", score: [], winCount: 0 },
               { id: "5", name: "Player 5", score: [], winCount: 0 },
             ],
             status: MatchStatus.NOT_STARTED,
-            previousRoundInfo: "Winner SF-1 vs Winner SF-2",
           },
         ],
       },
