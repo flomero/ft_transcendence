@@ -19,8 +19,8 @@ const aiLoop = async (gameManagerId: string) => {
 };
 
 const updateAllAis = (gameManager: GameManager) => {
-  const game: GameBase = gameManager.getGame;
-  for (const aiOpponent of gameManager.aiOpponent.values()) {
+  const game: GameBase = gameManager.getGame();
+  for (const aiOpponent of gameManager.aiOpponents.values()) {
     if (game.isEliminated(aiOpponent.getId()) === false) {
       aiOpponent.update();
     }
