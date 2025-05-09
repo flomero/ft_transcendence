@@ -14,6 +14,7 @@ declare global {
     drawTournamentLines?: () => void;
 
     TournamentBracket: typeof TournamentBracket;
+    tournamentHandler: TournamentHandler;
   }
 }
 
@@ -101,4 +102,106 @@ class TournamentBracket {
   }
 }
 
-export default TournamentBracket;
+class TournamentHandler {
+  public socket: WebSocket | null = null;
+
+  public connect(): void {
+    console.log("Connecting to tournament...");
+    const tournamentId = window.location.pathname.split("/").pop();
+    if (!tournamentId) {
+      console.error("Tournament ID not found in URL");
+      return;
+    }
+
+    this.socket = new WebSocket(
+      `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/games/tournament/${tournamentId}`,
+    );
+
+    this.socket.onopen = () => {
+      console.log("Tournament WebSocket connected");
+    };
+
+    this.socket.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      this.handleMessage(message);
+    };
+
+    this.socket.onclose = () => {
+      console.log("Tournament WebSocket disconnected");
+    };
+
+    this.socket.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+  }
+
+  private handleMessage(message: any): void {
+    console.log("Received tournament message:", message);
+
+    switch (message.type) {
+      case "error":
+        this.displayError(message.data);
+        break;
+      case "update":
+        this.updateTournament(message.data);
+        break;
+      default:
+        console.log("Unknown message type:", message.type);
+    }
+  }
+
+  private displayError(errorMessage: string): void {
+    const errorElement = document.getElementById("tournament-error");
+    if (errorElement) {
+      errorElement.textContent = errorMessage;
+      errorElement.style.display = "block";
+    }
+  }
+
+  private updateTournament(data: any): void {
+    const container = document.getElementById("tournament-container");
+    if (container) {
+      container.innerHTML = data.html;
+    }
+  }
+
+  public leaveTournament(event: Event): void {
+    event.preventDefault();
+    fetch(
+      `/games/tournament/leave/${window.location.pathname.split("/").pop()}`,
+      {
+        method: "POST",
+      },
+    ).then(() => {
+      window.location.href = "/play";
+    });
+  }
+
+  public setReady(): void {
+    fetch(
+      `/games/tournament/ready/${window.location.pathname.split("/").pop()}/true`,
+      {
+        method: "POST",
+      },
+    );
+  }
+
+  public addAiOpponent(): void {
+    fetch(
+      `/games/tournament/add-ai/${window.location.pathname.split("/").pop()}`,
+      {
+        method: "POST",
+      },
+    );
+  }
+
+  public startTournament(): void {
+    fetch(
+      `/games/tournament/start/${window.location.pathname.split("/").pop()}`,
+      {
+        method: "POST",
+      },
+    );
+  }
+}
+export { TournamentHandler, TournamentBracket };

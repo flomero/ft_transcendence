@@ -1,6 +1,6 @@
 import { TransitionManager } from "./transitions.js";
 import LobbyHandler from "./lobby.js";
-import TournamentBracket from "./tournament.js";
+import { TournamentBracket, TournamentHandler } from "./tournament.js";
 import MatchmakingHandler from "./matchmaking.js";
 import { initPongGame, type PongGame } from "./pong.js";
 import { closeSidebar } from "./sidebar.js";
@@ -22,6 +22,8 @@ declare global {
     lobbyHandler: LobbyHandler;
     MatchmakingHandler: typeof MatchmakingHandler;
     matchmakingHandler: MatchmakingHandler;
+    TournamentHandler: typeof TournamentHandler;
+    tournamentHandler: TournamentHandler;
     // TournamentBracket: TournamentBracket | undefined
   }
 }
@@ -486,6 +488,19 @@ document.addEventListener("DOMContentLoaded", () => {
         if (window.matchmakingHandler.socket) {
           window.matchmakingHandler.socket.close();
         }
+      }
+    },
+  });
+
+  window.router.addRoute("/games/tournament/join/:id", {
+    onEnter: () => {
+      const tournamentHandler = new TournamentHandler();
+      tournamentHandler.connect();
+      window.tournamentHandler = tournamentHandler;
+    },
+    onExit: () => {
+      if (window.tournamentHandler?.socket) {
+        window.tournamentHandler.socket.close();
       }
     },
   });

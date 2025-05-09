@@ -13,12 +13,16 @@ async function joinTournamentHandler(
     canMemberJoinTournamentCheck(memberId, tournamentId);
     tournaments.get(tournamentId)?.addMember(memberId);
 
-    return reply.code(200).send({ tournamentId: tournamentId });
+    const data = {
+      title: "Tournament Lobby | ft_transcendence",
+      id: tournamentId,
+    };
+    reply.header("X-Page-Title", "Tournament Lobby | ft_transcendence");
+    const viewOptions = request.isAjax() ? {} : { layout: "layouts/main" };
+    return reply.view("views/tournament/lobby", data, viewOptions);
   } catch (error) {
-    if (error instanceof Error) {
-      return reply.code(400).send({ message: error.message });
-    }
-    return reply.code(500).send({ message: "Internal server error" });
+    if (error instanceof Error) return reply.badRequest(error.message);
+    return reply.internalServerError();
   }
 }
 

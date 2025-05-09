@@ -10,7 +10,7 @@ export function initializeSampleTournaments(db: Database) {
   const sampleUserIds = Array.from<string>({
     length: Object.values(TOURNAMENT_CONFIGS_REGISTRY).length,
   }).fill("user123");
-  sampleUserIds[0] = "107576203838928819270";
+  // sampleUserIds[0] = "107576203838928819270";
 
   const tournamentConfigs = Object.values(TOURNAMENT_CONFIGS_REGISTRY)
     .filter((_, index) => index < sampleUserIds.length)
