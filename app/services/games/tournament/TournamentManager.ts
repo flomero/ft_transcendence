@@ -15,6 +15,10 @@ import {
 import { createMatch } from "../matchMaking/createMatch";
 import { GameOrigin } from "../../../types/games/gameHandler/GameOrigin";
 import aiOpponents from "../aiOpponent/aiOpponents";
+import {
+  MatchStatus,
+  TournamentInfos,
+} from "../../../types/tournament/tournament";
 
 class TournamentManager {
   public tournamentId: string = randomUUID();
@@ -377,6 +381,23 @@ class TournamentManager {
       if (member.isAI === true) numberOfAiOpponents++;
     }
     return numberOfAiOpponents;
+  }
+
+  public getCurrentTournamentInfos(): TournamentInfos | undefined {
+    if (!this.tournament) return;
+
+    const tournamentInfos = this.tournament.getCurrentTournamentInfos();
+
+    tournamentInfos.rounds.forEach((round) => {
+      round.matches.forEach((match) => {
+        if (match.status === MatchStatus.NOT_STARTED) return;
+        const gameManagerIds =
+          this.gameManagerIdToTorunGameId.get(match.id) || [];
+        match.gameIDs = gameManagerIds;
+      });
+    });
+
+    return tournamentInfos;
   }
 }
 

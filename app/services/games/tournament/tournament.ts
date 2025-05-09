@@ -329,6 +329,7 @@ export class Tournament {
                 const matchData = matchesData.get(matchID);
                 if (!matchData)
                   return {
+                    id: "",
                     players: [],
                     status: MatchStatus.NOT_STARTED,
                   };
@@ -341,6 +342,7 @@ export class Tournament {
                       id: playerID,
                       score: matchData.results[playerID] || [],
                       winCount: matchData.winCounts.get(playerID) || 0,
+                      isReady: roundID === 0, // Other rounds will be propagated from seeding
                     };
                   });
 
@@ -384,6 +386,35 @@ export class Tournament {
           ]),
       ),
     };
+
+    // 1) Build a quick map so we can find any match by its ID
+    // const matchPosition = new Map<string, { roundIndex: number; matchIndex: number }>();
+    // tournamentInfos.rounds.forEach((round, ri) => {
+    //   round.matches.forEach((match, mi) => {
+    //     matchPosition.set(match.id, { roundIndex: ri, matchIndex: mi });
+    //   });
+    // });
+
+    // // 2) For each target match, count how many times we’ve assigned a slot already
+    // const slotCounter = new Map<string, number>();
+
+    // // 3) Walk the seeding list and flip on isReady where appropriate
+    // tournamentInfos.seeding.forEach(([, fromMatchID, toMatchID]) => {
+    //   const slot = slotCounter.get(toMatchID) || 0;       // 0 = first player, 1 = second player
+    //   slotCounter.set(toMatchID, slot + 1);
+
+    //   const srcPos = matchPosition.get(fromMatchID);
+    //   const dstPos = matchPosition.get(toMatchID);
+    //   if (!srcPos || !dstPos) return;  // safety
+
+    //   const srcMatch = tournamentInfos.rounds[srcPos.roundIndex].matches[srcPos.matchIndex];
+    //   const dstMatch = tournamentInfos.rounds[dstPos.roundIndex].matches[dstPos.matchIndex];
+
+    //   // Only propagate readiness if the source match is complete
+    //   if (srcMatch.status === MatchStatus.COMPLETED) {
+    //     dstMatch.players[slot].isReady = true;
+    //   }
+    // });
 
     return tournamentInfos;
   }
