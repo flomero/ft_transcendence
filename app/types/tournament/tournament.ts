@@ -51,7 +51,7 @@ export interface Round {
   isCurrent?: boolean; // Optional flag to indicate if this is the current round
 }
 
-export interface Tournament {
+export interface TournamentInfos {
   id: string;
   state: TournamentStatus;
   playerCount: number;

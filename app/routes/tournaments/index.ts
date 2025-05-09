@@ -3,7 +3,7 @@ import type {
   AdditionalMatchData,
   Edge,
   Round,
-  Tournament,
+  TournamentInfos,
 } from "../../types/tournament/tournament";
 import {
   MatchStatus,
@@ -91,7 +91,7 @@ const tournamentsRoute: FastifyPluginAsync = async (fastify) => {
       },
     ];
 
-    const tournaments: Tournament[] = [
+    const tournaments: TournamentInfos[] = [
       {
         id: "t1",
         state: TournamentStatus.ON_GOING,

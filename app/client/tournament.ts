@@ -1,4 +1,4 @@
-import type { Edge, Tournament } from "../types/tournament/tournament";
+import type { Edge, TournamentInfos } from "../types/tournament/tournament";
 
 type Connections =
   | { auto: true; edges: never[] }
@@ -6,7 +6,7 @@ type Connections =
 
 declare global {
   interface Window {
-    __TOURNAMENTS__: Tournament[];
+    __TOURNAMENTS__: TournamentInfos[];
     __CONNECTIONS__: Connections;
     tournamentBracket?: TournamentBracket;
     drawTournamentLines?: () => void;
@@ -16,7 +16,7 @@ declare global {
 
 class TournamentBracket {
   /* ---------- state ---------- */
-  private tournaments: Tournament[];
+  private tournaments: TournamentInfos[];
   private connections: Connections;
   private edges: Edge[];
 
