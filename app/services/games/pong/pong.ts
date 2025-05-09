@@ -497,38 +497,41 @@ export abstract class Pong extends GameBase {
           break;
 
         case "paddle":
-          PhysicsEngine.resolveCollision(ball, collision);
+          if (this.gameState.paddles[collision.objectId].doResolveCollision) {
+            PhysicsEngine.resolveCollision(ball, collision);
 
-          const playerId = collision.objectId;
-          // if (gameState.lastHit !== playerId)
-          //   console.log(`Last hit: ${playerId}`);
-          gameState.lastHit = playerId;
+            const playerId = collision.objectId;
+            // if (gameState.lastHit !== playerId)
+            //   console.log(`Last hit: ${playerId}`);
+            gameState.lastHit = playerId;
 
-          const paddle = this.gameState.paddles[playerId];
+            const paddle = this.gameState.paddles[playerId];
 
-          // Compute the dot product between the ball's direction and the paddle's movement direction.
-          // A high |dot| means the ball is moving almost aligned with the paddle's direction.
-          const dot = ball.dx * paddle.dx + ball.dy * paddle.dy;
+            // Compute the dot product between the ball's direction and the paddle's movement direction.
+            // A high |dot| means the ball is moving almost aligned with the paddle's direction.
+            const dot = ball.dx * paddle.dx + ball.dy * paddle.dy;
 
-          // Multiply by |dot| so that the influence is higher when the ball is aligned with the paddle's direction.
-          const angularInfluence =
-            (dot *
-              this.getSettings().paddleVelocityAngularTransmissionPercent) /
-            100.0;
+            // Multiply by |dot| so that the influence is higher when the ball is aligned with the paddle's direction.
+            const angularInfluence =
+              (dot *
+                this.getSettings().paddleVelocityAngularTransmissionPercent) /
+              100.0;
 
-          // Adjust the ball's velocity using the paddle's velocity.
-          ball.dx += angularInfluence * paddle.dx;
-          ball.dy += angularInfluence * paddle.dy;
+            // Adjust the ball's velocity using the paddle's velocity.
+            ball.dx += angularInfluence * paddle.dx;
+            ball.dy += angularInfluence * paddle.dy;
 
-          const speedInfluence =
-            (dot * this.getSettings().paddleVelocitySpeedTransmissionPercent) /
-            100.0;
-          ball.speed += speedInfluence * paddle.velocity;
+            const speedInfluence =
+              (dot *
+                this.getSettings().paddleVelocitySpeedTransmissionPercent) /
+              100.0;
+            ball.speed += speedInfluence * paddle.velocity;
 
-          // Normalize the ball's direction vector to avoid unintended scaling.
-          const norm = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
-          ball.dx /= norm;
-          ball.dy /= norm;
+            // Normalize the ball's direction vector to avoid unintended scaling.
+            const norm = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+            ball.dx /= norm;
+            ball.dy /= norm;
+          }
 
           if (doTriggers)
             this.modifierManager.trigger("onPaddleBounce", {
@@ -538,7 +541,8 @@ export abstract class Pong extends GameBase {
           break;
 
         case "wall":
-          PhysicsEngine.resolveCollision(ball, collision);
+          if (this.gameState.walls[collision.objectId].doResolveCollision)
+            PhysicsEngine.resolveCollision(ball, collision);
           this.resolveWallCollision(ball, collision.objectId, doTriggers);
           break;
 
@@ -562,8 +566,10 @@ export abstract class Pong extends GameBase {
     const wall: Rectangle = this.gameState.walls[wallID];
     if (wall.isGoal && ball.doGoal) {
       const goalPlayerId = Math.floor(wallID / 2);
-      this.gameState.scores[goalPlayerId]++;
-      this.gameState.lastGoal = goalPlayerId;
+      if (wall.doResolveCollision) {
+        this.gameState.scores[goalPlayerId]++;
+        this.gameState.lastGoal = goalPlayerId;
+      }
       if (doTriggers)
         this.modifierManager.trigger("onGoal", {
           playerId: goalPlayerId,

@@ -227,6 +227,7 @@ export class Portals extends TimeLimitedModifierBase {
       isVisible: true,
       doGoal: false,
       doBoundsProtection: false,
+      doResolveCollision: true,
     };
 
     const portalWall2: Rectangle = {
@@ -248,6 +249,7 @@ export class Portals extends TimeLimitedModifierBase {
       isVisible: true,
       doGoal: false,
       doBoundsProtection: false,
+      doResolveCollision: false,
     };
 
     this.portalWalls = [portalWall1, portalWall2];

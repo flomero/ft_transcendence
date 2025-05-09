@@ -42,6 +42,7 @@ export class VerticalStrip implements IPong7segmentMaker {
         doRotation: false,
         isVisible: true,
         doBoundsProtection: true,
+        doResolveCollision: true,
       },
 
       // TOP END
@@ -62,6 +63,7 @@ export class VerticalStrip implements IPong7segmentMaker {
         doRotation: false,
         isVisible: true,
         doBoundsProtection: true,
+        doResolveCollision: true,
       },
 
       // BOTTOM END
@@ -82,6 +84,7 @@ export class VerticalStrip implements IPong7segmentMaker {
         doRotation: false,
         isVisible: true,
         doBoundsProtection: true,
+        doResolveCollision: true,
       },
     ];
 

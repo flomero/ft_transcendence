@@ -191,6 +191,7 @@ export class Bumper extends TimeLimitedModifierBase {
           isVisible: true,
           doRotation: true,
           doBoundsProtection: true,
+          doResolveCollision: true,
         };
 
         // 'RIGHT' BUMPER - Fixed the angle calculation
@@ -227,6 +228,7 @@ export class Bumper extends TimeLimitedModifierBase {
           isVisible: true,
           doRotation: true,
           doBoundsProtection: true,
+          doResolveCollision: true,
         };
 
         // Add both bumpers to the bumpers array
