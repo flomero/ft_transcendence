@@ -450,7 +450,9 @@ class PongGame {
       case "bumper":
         return "#bf00ff"; // vivid purple
       case "portals":
-        return "#7fff00"; // vivid purple
+        return "#ff6ec7"; // Magenta pink
+      case "speedGate":
+        return "#00ffcc"; // Aqua teal
       default:
         return "#7fff00"; // chartreuse
     }

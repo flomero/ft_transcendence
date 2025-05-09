@@ -17,7 +17,7 @@
 
         "customizableSettings": {
           "ballSpeedWidthPercentS": 55,
-          "ballRadius": 0.95,
+          "ballRadius": 1,
           "ballResetSampler": "biasedQuadrantGaussianRA",
           "paddleCoveragePercent": 25,
           "paddleSpeedWidthPercentS": 0.85,
@@ -30,7 +30,8 @@
             "multiBall": 1,
             "shooter": 1,
             "bumper": 1,
-            "portals": 1
+            "portals": 1,
+            "speedGate": 1
           }
         }
       },
@@ -61,7 +62,8 @@
             "multiBall": 1,
             "shooter": 1,
             "bumper": 1,
-            "portals": 1
+            "portals": 1,
+            "speedGate": 1
           }
         }
       }
@@ -198,6 +200,21 @@
         "useNaturalSide": true,
         "useBothSides": true,
         "teleportationCountThrehsold": 5
+      },
+
+      "speedGate": {
+        "className": "SpeedGate",
+        "spawnWeight": 5.0,
+        "selfActivation": false,
+        "durationS": 60,
+        "initialBallSizeSmallPortalWidthPercent": 700,
+        "initialBallSizeBigPortalWidthPercent": 1000,
+        "portalWidthArenaHeightPercent": 12.5,
+        "meanSpeedGateDstFromCenterPercent": 35,
+        "stdDevSpeedGateDstFromCenterPercent": 5,
+        "portalUseThreshold": 3,
+        "sizeFactor": 1.5,
+        "speedFactor": 1.15
       }
     }
   }

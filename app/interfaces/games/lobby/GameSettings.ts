@@ -117,6 +117,19 @@ interface Portals {
   teleportationCountThrehsold?: number;
 }
 
+interface SpeedGate {
+  spawnWeight?: number;
+  duration?: number;
+  initialBallSizeSmallPortalWidthFactor?: number;
+  initialBallSizeBigPortalWidthFactor?: number;
+  portalWidthArenaHeightFactor?: number;
+  portalUseThreshold?: number;
+  meanSpeedGateDstFromCenterFactor?: number;
+  stdDevSpeedGateDstFromCenterFactor?: number;
+  sizeFactor?: number;
+  speedFactor?: number;
+}
+
 interface PowerUp {
   speedBoost?: SpeedBoost;
   blinkingBall?: BlinkingBall;
@@ -124,6 +137,7 @@ interface PowerUp {
   multiBall?: MultiBall;
   bumper?: Bumper;
   portals?: Portals;
+  speedGate?: SpeedGate;
 }
 
 interface GameSettings {

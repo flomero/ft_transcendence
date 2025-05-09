@@ -106,6 +106,10 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       portals: {
         portalWallWidthHeightFactor: 30,
       },
+      speedGate: {
+        initialBallSizeSmallPortalWidthFactor: 600,
+        initialBallSizeBigPortalWidthFactor: 850,
+      },
     },
     playerCount: 5,
   },

@@ -162,25 +162,17 @@ export class Portals extends TimeLimitedModifierBase {
     const N = { x: -D.y, y: D.x };
 
     // 3. Random offsets (using uniform or normal approximation)
-
-    // MOVE TO REGISTRY
-    const directionalOffsetFactor = 55 / 100.0;
-    const normalOffsetFactor = 55 / 100.0;
-
-    const directionalOffsetStandardDeviationFactor = 5 / 100.0;
-    const normalOffsetStandardDeviationFactor = 5 / 100.0;
-
     let Od = game
       .getRNG()
       .randomGaussian(
-        directionalOffsetFactor * R,
-        directionalOffsetStandardDeviationFactor * R,
+        this.directionalOffsetFactor * R,
+        this.directionalOffsetStandardDeviationFactor * R,
       );
     let On = game
       .getRNG()
       .randomGaussian(
-        normalOffsetFactor * R,
-        normalOffsetStandardDeviationFactor * R,
+        this.normalOffsetFactor * R,
+        this.normalOffsetStandardDeviationFactor * R,
       );
 
     Od = Math.min(R, Math.max(Od, 0));
@@ -337,7 +329,7 @@ export class Portals extends TimeLimitedModifierBase {
 
     if (
       args.ballID === 0 &&
-      this.teleportationCount++ >= this.teleportationCountThrehsold
+      ++this.teleportationCount >= this.teleportationCountThrehsold
     )
       this.deactivate(game);
   }
