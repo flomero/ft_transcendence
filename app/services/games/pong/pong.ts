@@ -268,6 +268,7 @@ export abstract class Pong extends GameBase {
       .filter((paddle) => paddle.isVisible)
       .map((paddle) => {
         return {
+          id: paddle.id,
           a: paddle.alpha,
           x: parseFloat(paddle.x.toFixed(3)),
           y: parseFloat(paddle.y.toFixed(3)),
