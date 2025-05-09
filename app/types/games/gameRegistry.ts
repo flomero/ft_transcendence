@@ -23,6 +23,9 @@ export interface FixedSettings {
   // Wall Settings
   wallsHeight: number;
 
+  // Ball Settings
+  minBallSpeed: number;
+
   [key: string]: any; // any gameMode specific additional fixedSettings
 }
 

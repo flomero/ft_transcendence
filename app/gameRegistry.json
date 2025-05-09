@@ -11,7 +11,8 @@
           "arenaHeight": 100,
           "paddleOffset": 2.5,
           "paddleHeight": 1,
-          "wallsHeight": 2
+          "wallsHeight": 2,
+          "minBallSpeed": 40
         },
 
         "customizableSettings": {
@@ -19,7 +20,7 @@
           "ballRadius": 0.95,
           "ballResetSampler": "biasedQuadrantGaussianRA",
           "paddleCoveragePercent": 25,
-          "paddleSpeedWidthPercentS": 0.875,
+          "paddleSpeedWidthPercentS": 0.85,
           "paddleVelocityAngularTransmissionPercent": 55,
           "paddleVelocitySpeedTransmissionPercent": 10,
           "powerUpRadius": 4.5,
@@ -38,18 +39,18 @@
         "fixedSettings": {
           "arenaWidth": 100,
           "arenaHeight": 100,
-          "paddleOffset": 3,
-          "paddleHeight": 1,
-          "wallsHeight": 2,
+          "paddleOffset": 2.4,
+          "paddleHeight": 0.6,
+          "wallsHeight": 1.5,
           "wallsOffset": 0
         },
 
         "customizableSettings": {
           "ballSpeedWidthPercentS": 60,
-          "ballRadius": 0.7,
+          "ballRadius": 0.6,
           "ballResetSampler": "biasedGaussianCA",
-          "paddleCoveragePercent": 22,
-          "paddleSpeedWidthPercentS": 0.825,
+          "paddleCoveragePercent": 25,
+          "paddleSpeedWidthPercentS": 0.8,
           "paddleVelocityAngularTransmissionPercent": 55,
           "paddleVelocitySpeedTransmissionPercent": 10,
           "powerUpRadius": 3.25,
@@ -105,13 +106,21 @@
         "bumperVelocityPercent": 0.2
       },
 
+      "paceBreaker": {
+        "className": "PaceBreaker",
+        "noResetThresholdS": 12,
+        "noPaddleBounceThreshold": 14,
+        "twoPaddlesBounceThreshold": 7,
+        "onePaddleBounceThreshold": 14
+      },
+
       "paddleBoost": {
         "className": "PaddleBoost",
         "paddleExtensionLength": 2.5,
         "paddleExtendedSpeedMultiplierPercent": 30,
         "paddleExtensionDurationS": 0.08,
         "paddleRetractionDurationS": 0.12,
-        "extensionVelocityTransmissionPercent": 10
+        "extensionVelocityTransmissionPercent": 12
       },
 
       "timedStart": {
@@ -125,8 +134,8 @@
         "spawnWeight": 2.0,
         "selfActivation": false,
         "durationS": 5,
-        "totalRampUpStrength": 1.15,
-        "rampUpFrequencyS": 0.25
+        "rampUpStrengthPercent": 4,
+        "rampUpFrequencyS": 0.33
       },
 
       "blinkingBall": {
@@ -154,10 +163,12 @@
         "selfActivation": false,
         "durationS": 5,
         "chargeDurationS": 2,
-        "chargeRadius": 5,
-        "shootInitialVelocityPercent": 140,
-        "shootFinalVelocityPercent": 100,
-        "shootDirectionSamplerStrategyName": "biasedQuadrantGaussianRA"
+        "chargeRadius": 7.5,
+        "shootAdditionalVelocityPercent": 40,
+        "shootAngularOffsetPercent": 45,
+        "shootStandardAngularDeviationPercent": 22.5,
+        "shootTargetWidthPercent": 90,
+        "playerSamplerStrategyName": "lowestScoreBiased"
       },
 
       "bumper": {
@@ -165,11 +176,11 @@
         "spawnWeight": 1.0,
         "selfActivation": false,
         "durationS": 10,
-        "bumperJunctionDistanceFromCenterPercent": 13.5,
-        "bumperWallJunctionDistancePercent": 80,
-        "bumperVelocityPercent": 20,
-        "bumperMaxVelocityPercent": 150,
-        "bumperAccelerationPercentS": -12.5
+        "bumperJunctionDistanceFromCenterPercent": 12,
+        "bumperWallJunctionDistancePercent": 90,
+        "bumperVelocityPercent": 12.5,
+        "bumperMaxVelocityPercent": 12.5,
+        "bumperAccelerationPercentS": -8.5
       }
     }
   }
