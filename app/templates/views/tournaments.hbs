@@ -8,13 +8,11 @@
         <span>Status: {{tournament.state}}</span>
       </div>
     </div>
-    {{> components/tournament-view/tournament-bracket
-      rounds=tournament.rounds
-    }}
+
+    {{> components/tournament-view/tournament-bracket tournament=tournament}}
   </div>
 {{/each}}
 
 <script>
   window.__TOURNAMENTS__ = {{{json tournaments}}};
-  window.__CONNECTIONS__ = {{{json connectionConfig}}};
 </script>

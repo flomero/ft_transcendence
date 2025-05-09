@@ -1,9 +1,5 @@
 import type { FastifyPluginAsync } from "fastify";
-import type {
-  Edge,
-  RoundInfos,
-  TournamentInfos,
-} from "../../types/tournament/tournament";
+import type { Edge, TournamentInfos } from "../../types/tournament/tournament";
 import {
   MatchStatus,
   TournamentStatus,
@@ -16,191 +12,240 @@ interface BracketQuery {
 
 const tournamentsRoute: FastifyPluginAsync = async (fastify) => {
   fastify.get<{ Querystring: BracketQuery }>("/", async (request, reply) => {
-    // const rawRounds: RoundInfos[] = [
-    //   {
-    //     name: "Round 1",
-    //     matches: [
-    //       {
-    //         players: [
-    //           { id: "1", name: "Player 1", score: [11, 3, 11], winCount: 2 },
-    //           { id: "2", name: "Player 2", score: [5, 11, 9], winCount: 1 },
-    //         ],
-    //         status: MatchStatus.COMPLETED,
-    //         startTime: "2024-03-20T10:00:00Z",
-    //       },
-    //       {
-    //         players: [
-    //           { id: "3", name: "Player 3", score: [0, 0], winCount: 0 },
-    //           { id: "4", name: "Player 4", score: [11, 11], winCount: 2 },
-    //         ],
-    //         status: MatchStatus.COMPLETED,
-    //         startTime: "2024-03-20T10:00:00Z",
-    //       },
-    //       {
-    //         players: [
-    //           { id: "5", name: "Player 5", score: [1, 11, 3], winCount: 1 },
-    //           { id: "6", name: "Player 6", score: [11, 9, 11], winCount: 2 },
-    //         ],
-    //         status: MatchStatus.COMPLETED,
-    //         startTime: "2024-03-20T11:00:00Z",
-    //       },
-    //       {
-    //         players: [
-    //           { id: "7", name: "Player 7", score: [6, 11, 11], winCount: 2 },
-    //           { id: "8", name: "Player 8", score: [11, 8, 7], winCount: 0 },
-    //         ],
-    //         status: MatchStatus.COMPLETED,
-    //         startTime: "2024-03-20T11:00:00Z",
-    //       },
-    //     ],
-    //   },
-    //   {
-    //     name: "Semifinals",
-    //     isCurrent: true,
-    //     matches: [
-    //       {
-    //         players: [
-    //           { id: "1", name: "Player 1", score: [11], winCount: 1 },
-    //           { id: "4", name: "Player 4", score: [2], winCount: 0 },
-    //         ],
-    //         status: MatchStatus.ONGOING,
-    //         startTime: "2025-04-28T12:00:00Z",
-    //       },
-    //       {
-    //         players: [
-    //           { id: "5", name: "Player 5", score: [11, 11], winCount: 2 },
-    //           { id: "8", name: "Player 8", score: [8, 5], winCount: 0 },
-    //         ],
-    //         status: MatchStatus.COMPLETED,
-    //         startTime: "2025-04-12T00:00:00Z",
-    //       },
-    //     ],
-    //   },
-    //   {
-    //     name: "Final",
-    //     matches: [
-    //       {
-    //         players: [
-    //           { id: "0", name: "Winner SF-1", score: [], winCount: 0 },
-    //           { id: "5", name: "Player 5", score: [], winCount: 0 },
-    //         ],
-    //         status: MatchStatus.NOT_STARTED,
-    //       },
-    //     ],
-    //   },
-    // ];
+    const tournaments: TournamentInfos[] = [
+      {
+        id: "t1",
+        state: TournamentStatus.ON_GOING,
+        playerCount: 8,
+        type: "SINGLE_ELIMINATION",
+        rounds: [
+          /* ──────────────────────────  ROUND 1  ────────────────────────── */
+          {
+            name: "Round 1",
+            matches: [
+              {
+                id: "t1-r1-m1",
+                players: [
+                  {
+                    id: "1",
+                    name: "Player 1",
+                    isReady: true,
+                    score: [11, 3, 11],
+                    winCount: 2,
+                  },
+                  {
+                    id: "2",
+                    name: "Player 2",
+                    isReady: true,
+                    score: [5, 11, 9],
+                    winCount: 1,
+                  },
+                ],
+                gameIDs: ["t1-g1", "t1-g2", "t1-g3"],
+                gameWinners: [1, 2, 1], // playerId’s as numbers
+                leadPlayer: 1,
+                status: MatchStatus.COMPLETED,
+                startTime: "2024-03-20T10:00:00Z",
+              },
+              {
+                id: "t1-r1-m2",
+                players: [
+                  {
+                    id: "3",
+                    name: "Player 3",
+                    isReady: true,
+                    score: [0, 0],
+                    winCount: 0,
+                  },
+                  {
+                    id: "4",
+                    name: "Player 4",
+                    isReady: true,
+                    score: [11, 11],
+                    winCount: 2,
+                  },
+                ],
+                gameIDs: ["t1-g4", "t1-g5"],
+                gameWinners: [4, 4],
+                leadPlayer: 4,
+                status: MatchStatus.COMPLETED,
+                startTime: "2024-03-20T10:00:00Z",
+              },
+              {
+                id: "t1-r1-m3",
+                players: [
+                  {
+                    id: "5",
+                    name: "Player 5",
+                    isReady: true,
+                    score: [1, 11, 3],
+                    winCount: 1,
+                  },
+                  {
+                    id: "6",
+                    name: "Player 6",
+                    isReady: true,
+                    score: [11, 9, 11],
+                    winCount: 2,
+                  },
+                ],
+                gameIDs: ["t1-g6", "t1-g7", "t1-g8"],
+                gameWinners: [6, 5, 6],
+                leadPlayer: 6,
+                status: MatchStatus.COMPLETED,
+                startTime: "2024-03-20T11:00:00Z",
+              },
+              {
+                id: "t1-r1-m4",
+                players: [
+                  {
+                    id: "7",
+                    name: "Player 7",
+                    isReady: true,
+                    score: [6, 11, 11],
+                    winCount: 2,
+                  },
+                  {
+                    id: "8",
+                    name: "Player 8",
+                    isReady: true,
+                    score: [11, 8, 7],
+                    winCount: 1,
+                  },
+                ],
+                gameIDs: ["t1-g9", "t1-g10", "t1-g11"],
+                gameWinners: [8, 7, 7],
+                leadPlayer: 7,
+                status: MatchStatus.COMPLETED,
+                startTime: "2024-03-20T11:00:00Z",
+              },
+            ],
+          },
 
-    // const tournaments: TournamentInfos[] = [
-    //   {
-    //     id: "t1",
-    //     state: TournamentStatus.ON_GOING,
-    //     playerCount: 8,
-    //     type: "SINGLE_ELIMINATION",
-    //     rounds: rawRounds,
-    //   },
-    //   {
-    //     id: "t2",
-    //     state: TournamentStatus.CREATED,
-    //     playerCount: 16,
-    //     type: "DOUBLE_ELIMINATION",
-    //     rounds: [],
-    //   },
-    //   {
-    //     id: "t3",
-    //     state: TournamentStatus.FINISHED,
-    //     playerCount: 4,
-    //     type: "SINGLE_ELIMINATION",
-    //     rounds: [],
-    //   },
-    // ];
+          /* ─────────────────────────  SEMI-FINALS  ─────────────────────── */
+          {
+            name: "Semifinals",
+            isCurrent: true,
+            matches: [
+              {
+                id: "t1-sf-m1",
+                players: [
+                  {
+                    id: "1",
+                    name: "Player 1",
+                    isReady: true,
+                    score: [11],
+                    winCount: 1,
+                  },
+                  {
+                    id: "4",
+                    name: "Player 4",
+                    isReady: true,
+                    score: [2],
+                    winCount: 0,
+                  },
+                ],
+                gameIDs: ["t1-g12"],
+                gameWinners: [1],
+                leadPlayer: 1,
+                currentGame: 1, // second game about to start
+                status: MatchStatus.ONGOING,
+                startTime: "2025-04-28T12:00:00Z",
+              },
+              {
+                id: "t1-sf-m2",
+                players: [
+                  {
+                    id: "5",
+                    name: "Player 5",
+                    isReady: false,
+                    score: [11, 11],
+                    winCount: 2,
+                  },
+                  {
+                    id: "8",
+                    name: "Player 8",
+                    isReady: false,
+                    score: [8, 5],
+                    winCount: 0,
+                  },
+                ],
+                gameIDs: ["t1-g13", "t1-g14"],
+                gameWinners: [5, 5],
+                leadPlayer: 5,
+                status: MatchStatus.COMPLETED,
+                startTime: "2025-04-12T00:00:00Z",
+              },
+            ],
+          },
 
-    // function getPreviousMatch(
-    //   roundID: number,
-    //   matchID: number,
-    //   playerID: number,
-    // ): { roundID: number; matchID: number } {
-    //   if (roundID === 0) return { roundID: -1, matchID: 0 }; // No previous round
+          /* ────────────────────────────  FINAL  ────────────────────────── */
+          {
+            name: "Final",
+            matches: [
+              {
+                id: "t1-f-m1",
+                players: [
+                  {
+                    id: "0",
+                    name: "Winner SF-1",
+                    isReady: false,
+                    score: [],
+                    winCount: 0,
+                  },
+                  {
+                    id: "5",
+                    name: "Player 5",
+                    isReady: false,
+                    score: [],
+                    winCount: 0,
+                  },
+                ],
+                gameIDs: [], // best-of-X not started yet
+                gameWinners: [],
+                leadPlayer: -1, // tie/no leader
+                currentGame: 0,
+                status: MatchStatus.NOT_STARTED,
+              },
+            ],
+          },
+        ],
 
-    //   const prevRoundID = roundID - 1;
-    //   const matchIndexInPrevRound = matchID * 2 + playerID;
+        /* edges that tie the bracket together */
+        seeding: <Edge[]>[
+          ["t1", "r1-m1", "sf-m1"],
+          ["t1", "r1-m2", "sf-m1"],
+          ["t1", "r1-m3", "sf-m2"],
+          ["t1", "r1-m4", "sf-m2"],
+          ["t1", "sf-m1", "f-m1"],
+          ["t1", "sf-m2", "f-m1"],
+        ],
+      },
 
-    //   return { roundID: prevRoundID, matchID: matchIndexInPrevRound };
-    // }
+      /* ─────────────────────────────  EMPTY SKELETONS  ───────────────────────────── */
+      {
+        id: "t2",
+        state: TournamentStatus.CREATED,
+        playerCount: 16,
+        type: "DOUBLE_ELIMINATION",
+        rounds: [],
+        seeding: [],
+      },
+      {
+        id: "t3",
+        state: TournamentStatus.FINISHED,
+        playerCount: 4,
+        type: "SINGLE_ELIMINATION",
+        rounds: [],
+        seeding: [],
+      },
+    ];
 
-    // tournaments.forEach((tournament) => {
-    //   tournament.rounds.forEach((round, roundID) => {
-    //     round.matches.forEach((match, matchID) => {
-    //       const player0WinCount = match.players[0].winCount;
-    //       const player1WinCount = match.players[1].winCount;
-
-    //       const leadPlayer =
-    //         player0WinCount > player1WinCount
-    //           ? 0
-    //           : player1WinCount > player0WinCount
-    //             ? 1
-    //             : -1;
-
-    //       // const playersWinCount = [player1WinCount, player0WinCount]; // so index matches playerIndex
-
-    //       match.players.forEach((player, playerID) => {
-    //         const prevMatch = getPreviousMatch(roundID, matchID, playerID);
-    //         player.isReady =
-    //           prevMatch.roundID === -1
-    //             ? true
-    //             : tournament.rounds[prevMatch.roundID].matches[
-    //                 prevMatch.matchID
-    //               ].status === MatchStatus.COMPLETED;
-    //       });
-    //       match.gameWinners = match.players[0].score.map((_, index) =>
-    //         match.players[0].score[index] > match.players[1].score[index]
-    //           ? 0
-    //           : 1,
-    //       );
-    //       match.currentGame = match.players[0].score.length;
-    //       match.leadPlayer = leadPlayer;
-    //     });
-    //   });
-    // });
-
-    // tournaments.forEach((tournament) => {
-    //   tournament.rounds = tournament.rounds.map((round, r) => ({
-    //     ...round,
-    //     matches: round.matches.map((match, i) => ({
-    //       ...match,
-    //       id: `${tournament.id}-r${r}m${i}`, // Add tournament ID prefix
-    //     })),
-    //   }));
-    // });
-
-    // console.dir(tournaments[0], {depth: null});
-
-    /* ---------- connection strategy ---------- */
-    const auto = request.query.auto !== "false";
-
-    let connectionConfig: { auto: true } | { auto: false; edges: Edge[] };
-
-    if (auto) {
-      connectionConfig = { auto: true };
-    } else {
-      // manual edges for tournament t1 only
-      const edges: Edge[] = [
-        ["t1", "r0m0", "r1m0", -10],
-        ["t1", "r0m1", "r1m0", -10],
-        ["t1", "r0m2", "r1m1", 10],
-        ["t1", "r0m3", "r1m1", 10],
-        ["t1", "r1m0", "r2m0"],
-        ["t1", "r1m1", "r2m0"],
-      ];
-      connectionConfig = { auto: false, edges };
-    }
+    console.dir(tournaments[0], { depth: null });
 
     /* ---------- render ---------- */
     const viewOptions = request.isAjax() ? {} : { layout: "layouts/main" };
-    return reply.view(
-      "views/tournaments",
-      { tournaments: [], connectionConfig },
-      viewOptions,
-    );
+    return reply.view("views/tournaments", { tournaments }, viewOptions);
   });
 };
 

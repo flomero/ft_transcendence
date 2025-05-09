@@ -1,13 +1,10 @@
 import type { Edge, TournamentInfos } from "../types/tournament/tournament";
 
-type Connections =
-  | { auto: true; edges: never[] }
-  | { auto: false; edges: Edge[] };
-
 declare global {
   interface Window {
     __TOURNAMENTS__: TournamentInfos[];
-    __CONNECTIONS__: Connections;
+
+    /* optional helpers the app sets/clears elsewhere */
     tournamentBracket?: TournamentBracket;
     drawTournamentLines?: () => void;
     TournamentBracket: typeof TournamentBracket;
@@ -16,77 +13,43 @@ declare global {
 
 class TournamentBracket {
   /* ---------- state ---------- */
-  private tournaments: TournamentInfos[];
-  private connections: Connections;
-  private edges: Edge[];
+  private readonly tournaments: TournamentInfos[];
+  private readonly edges: Edge[];
 
-  private svg: SVGSVGElement;
-  private bracket: HTMLElement;
+  private readonly svg: SVGSVGElement;
+  private readonly bracket: HTMLElement;
 
   private timerInterval: number | null = null;
   private resizeObserver!: ResizeObserver;
 
   /* ---------- bootstrap ---------- */
   constructor() {
-    /* the server now exposes tournaments instead of plain rounds */
+    /* server now ships fully-hydrated tournaments with .seeding in place */
     this.tournaments = window.__TOURNAMENTS__;
-    this.connections = window.__CONNECTIONS__;
 
     this.bracket = document.querySelector<HTMLElement>("#bracket")!;
     this.svg = this.bracket.querySelector<SVGSVGElement>("#lines")!;
 
-    /* build the edge list once */
-    this.edges = this.connections.auto
-      ? this.buildAutoEdges()
-      : this.connections.edges;
+    /* collect every edge from every tournament */
+    this.edges = this.tournaments.flatMap((t) => t.seeding ?? []);
 
-    /* make sure `this` is preserved when used as a callback */
+    /* make sure `this` survives when used as a callback */
     this.drawLines = this.drawLines.bind(this);
 
     this.init();
   }
 
-  /* ---------- edge helpers ---------- */
-  /**
-   * Auto-generate edges for **every** tournament that was rendered
-   * (classic «winner-moves-on» single-elimination pairing).
-   */
-  private buildAutoEdges(): Edge[] {
-    const list: Edge[] = [];
-
-    this.tournaments.forEach((tournament) => {
-      const rounds = tournament.rounds;
-
-      for (let r = 0; r < rounds.length - 1; r++) {
-        const currentMatches = rounds[r].matches;
-        const nextMatches = rounds[r + 1].matches;
-
-        currentMatches.forEach((match, i) => {
-          const target = nextMatches[Math.floor(i / 2)];
-
-          if (match.id && target.id) {
-            list.push([tournament.id, match.id, target.id]);
-          }
-        });
-      }
-    });
-
-    return list;
-  }
-
   /* ---------- timers ---------- */
-  private updateElapsedTime(element: Element) {
-    const startTime = element.getAttribute("data-start");
-    if (!startTime) return;
+  private updateElapsedTime(el: Element) {
+    const start = el.getAttribute("data-start");
+    if (!start) return;
 
-    const diff = Math.floor(
-      (Date.now() - new Date(startTime).getTime()) / 1000,
-    );
+    const diff = Math.floor((Date.now() - new Date(start).getTime()) / 1000);
     const h = Math.floor(diff / 3600);
     const m = Math.floor((diff % 3600) / 60);
     const s = diff % 60;
 
-    element.textContent = `${h ? `${h}h ` : ""}${m ? `${m}m ` : ""}${s}s`;
+    el.textContent = `${h ? `${h}h ` : ""}${m ? `${m}m ` : ""}${s}s`;
   }
 
   private startLiveTimers() {
@@ -121,6 +84,8 @@ class TournamentBracket {
 
   /* ---------- SVG rendering ---------- */
   private drawLines() {
+    console.log("Drawing tournament lines...");
+    console.dir(this.edges, { depth: null });
     const width = this.bracket.scrollWidth;
     const height = this.bracket.scrollHeight;
 
@@ -131,9 +96,13 @@ class TournamentBracket {
 
     const bracketBox = this.bracket.getBoundingClientRect();
 
+    /* seeding edges already have the form [tid, fromId, toId, offset?] */
     this.edges.forEach(([tid, from, to, offset = 0]) => {
       const fromId = `${tid}-${from}`;
       const toId = `${tid}-${to}`;
+
+      console.log(`drawing tournament lines for ${fromId}`);
+      console.log(`drawing tournament lines for ${toId}`);
 
       const aEl = document.getElementById(fromId);
       const bEl = document.getElementById(toId);
