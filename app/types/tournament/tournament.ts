@@ -38,6 +38,7 @@ export interface MatchInfos {
   currentGame?: number; // ID of the current game being played -> 0 by default (first game)
   status: MatchStatus;
   startTime?: string; // ISO date string for match start time
+  gameIDs?: number[]; // Stores [game1ID, game2ID, ...] with DB game UUID
 }
 
 export interface RoundInfos {
