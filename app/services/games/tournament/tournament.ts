@@ -387,34 +387,24 @@ export class Tournament {
       ),
     };
 
-    // 1) Build a quick map so we can find any match by its ID
-    // const matchPosition = new Map<string, { roundIndex: number; matchIndex: number }>();
-    // tournamentInfos.rounds.forEach((round, ri) => {
-    //   round.matches.forEach((match, mi) => {
-    //     matchPosition.set(match.id, { roundIndex: ri, matchIndex: mi });
-    //   });
-    // });
+    const matchesMap = new Map<string, MatchInfos>();
+    tournamentInfos.rounds.forEach((round) => {
+      round.matches.forEach((match) => matchesMap.set(match.id, match));
+    });
 
-    // // 2) For each target match, count how many times we’ve assigned a slot already
-    // const slotCounter = new Map<string, number>();
+    let counter: number = 0;
+    (tournamentInfos.seeding || []).forEach(
+      ([_, fromMatchID, toMatchID]: Edge) => {
+        const fromMatch = matchesMap.get(fromMatchID);
+        const toMatch = matchesMap.get(toMatchID);
 
-    // // 3) Walk the seeding list and flip on isReady where appropriate
-    // tournamentInfos.seeding.forEach(([, fromMatchID, toMatchID]) => {
-    //   const slot = slotCounter.get(toMatchID) || 0;       // 0 = first player, 1 = second player
-    //   slotCounter.set(toMatchID, slot + 1);
+        if (!fromMatch || !toMatch) return;
+        toMatch.players[counter].isReady =
+          fromMatch.status === MatchStatus.COMPLETED;
 
-    //   const srcPos = matchPosition.get(fromMatchID);
-    //   const dstPos = matchPosition.get(toMatchID);
-    //   if (!srcPos || !dstPos) return;  // safety
-
-    //   const srcMatch = tournamentInfos.rounds[srcPos.roundIndex].matches[srcPos.matchIndex];
-    //   const dstMatch = tournamentInfos.rounds[dstPos.roundIndex].matches[dstPos.matchIndex];
-
-    //   // Only propagate readiness if the source match is complete
-    //   if (srcMatch.status === MatchStatus.COMPLETED) {
-    //     dstMatch.players[slot].isReady = true;
-    //   }
-    // });
+        counter = (counter + 1) % 2;
+      },
+    );
 
     return tournamentInfos;
   }
