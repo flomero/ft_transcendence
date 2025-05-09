@@ -136,6 +136,13 @@ export class PaceBreaker extends TimeLimitedModifierBase {
 
   onWallBounce(game: Pong, args: { wallID: number; ballID: number }): void {
     if (args.ballID !== 0) return;
+    if (args.wallID >= 2 * game.getState().playerCount) {
+      // on powerUp walls
+      this.ticks = this.duration;
+      this.noPaddleBounceCount = 0;
+      return;
+    }
+
     this.noPaddleBounceCount++;
     if (this.noPaddleBounceCount >= this.noPaddleBounceThreshold) {
       this.deactivate(game);
