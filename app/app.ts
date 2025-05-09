@@ -4,7 +4,8 @@ import type { FastifyPluginAsync, FastifyServerOptions } from "fastify";
 import { loadGameRegistry } from "./services/games/gameRegistryLoader";
 import { loadStrategyRegistry } from "./services/strategy/strategyRegistryLoader";
 import fastifyEnv from "@fastify/env";
-// import { Tournament } from "./services/tournament/tournament";
+import { Tournament } from "./services/games/tournament/tournament";
+import { BracketTypeSettings } from "./interfaces/games/tournament/TournamentSettings";
 
 const envSchema = {
   type: "object",
@@ -63,21 +64,39 @@ const app: FastifyPluginAsync<AppOptions> = async (
   await loadGameRegistry();
   await loadStrategyRegistry();
 
-  // const tournamentData = {
-  //   bracketType: "swissRound",
-  //   matchWinnerType: "bestOfX",
-  //   playerCount: 16,
-  //   players: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15'],
-  //   gameData:{
-  //     playerCount: 2
-  //   }
-  // }
-  // const tournament = new Tournament(tournamentData);
+  const tournamentData = {
+    bracketType: "singleElimination" as BracketTypeSettings,
+    matchWinner: "bestOfX",
+    initialSeedingMethod: "random",
+    playerCount: 16,
+    players: [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12",
+      "13",
+      "14",
+      "15",
+    ],
+    gameData: {
+      playerCount: 2,
+    },
+  };
+  const tournament = new Tournament(tournamentData);
 
-  // tournament.startTournament();
+  tournament.startTournament();
 
-  // console.log(`Results:`);
-  // console.dir(tournament.getResults(), {depth: null});
+  console.log(`Results:`);
+  console.dir(tournament.getResults(), { depth: null });
 
   // console.log(`Final Ranking:`);
   // console.dir(tournament.getFinalRankings(), {depth: null});

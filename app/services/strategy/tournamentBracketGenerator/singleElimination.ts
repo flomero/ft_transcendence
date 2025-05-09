@@ -214,7 +214,7 @@ export class SingleElimination implements ITournamentBracketGenerator {
     const firstRoundMatches = Math.ceil(totalPlayers / this.playersPerMatch);
 
     // Calculate total rounds needed
-    const totalRounds = Math.ceil(Math.log2(firstRoundMatches));
+    const totalRounds = Math.ceil(Math.log2(firstRoundMatches) + 1);
 
     // Generate placeholder structure for all rounds
     this.generateRoundStructure(totalRounds, firstRoundMatches);

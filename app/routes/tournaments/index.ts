@@ -1,6 +1,5 @@
 import type { FastifyPluginAsync } from "fastify";
 import type {
-  AdditionalMatchData,
   Edge,
   RoundInfos,
   TournamentInfos,
@@ -141,18 +140,7 @@ const tournamentsRoute: FastifyPluginAsync = async (fastify) => {
                 ? 1
                 : -1;
 
-          const playersWinCount = [player1WinCount, player0WinCount]; // so index matches playerIndex
-
-          const data: AdditionalMatchData = {
-            gameWinners: match.players[0].score.map((_, index) =>
-              match.players[0].score[index] > match.players[1].score[index]
-                ? 0
-                : 1,
-            ),
-            currentGame: match.players[0].score.length,
-            leadPlayer,
-            playersWinCount,
-          };
+          // const playersWinCount = [player1WinCount, player0WinCount]; // so index matches playerIndex
 
           match.players.forEach((player, playerID) => {
             const prevMatch = getPreviousMatch(roundID, matchID, playerID);
@@ -163,7 +151,13 @@ const tournamentsRoute: FastifyPluginAsync = async (fastify) => {
                     prevMatch.matchID
                   ].status === MatchStatus.COMPLETED;
           });
-          match.additionalData = data;
+          match.gameWinners = match.players[0].score.map((_, index) =>
+            match.players[0].score[index] > match.players[1].score[index]
+              ? 0
+              : 1,
+          );
+          match.currentGame = match.players[0].score.length;
+          match.leadPlayer = leadPlayer;
         });
       });
     });

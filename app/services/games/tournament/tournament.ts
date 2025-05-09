@@ -11,9 +11,15 @@ import type {
   TournamentRankings,
   GameResult,
 } from "../../../types/strategy/ITournamentBracketGenerator";
-import type {
-  TournamentResults,
-  PlayerResults,
+import {
+  type TournamentResults,
+  type PlayerResults,
+  type TournamentInfos,
+  type RoundInfos,
+  MatchInfos,
+  PlayerInfos,
+  MatchStatus,
+  Edge,
 } from "../../../types/tournament/tournament";
 
 export enum TournamentStatus {
@@ -22,6 +28,14 @@ export enum TournamentStatus {
   FINISHED,
 }
 import { TournamentSettings } from "../../../interfaces/games/tournament/TournamentSettings";
+
+const singleEliminationRoundNames: string[] = [
+  "Final",
+  "1/2 Final",
+  "1/4 Final",
+  "1/8 Final",
+  "1/16 Final",
+];
 
 export class Tournament {
   // All tournament related data given at creation
@@ -53,6 +67,9 @@ export class Tournament {
   protected status: TournamentStatus = TournamentStatus.CREATED;
   protected tournamentResults: TournamentResults = {};
 
+  // DEBUG
+  counter: number = 0;
+
   constructor(tournamentData: TournamentSettings) {
     this.tournamentData = tournamentData;
 
@@ -82,6 +99,49 @@ export class Tournament {
 
   startTournament(): void {
     this.status = TournamentStatus.ON_GOING;
+
+    // DEBUG
+
+    // Start tournament with no previous round results
+    let currentRound = this.bracketManager.executeStrategy();
+    let roundNumber = 1;
+
+    // Continue until there are no more matches to play
+    while (Object.keys(currentRound).length > 0) {
+      this.currentRound = currentRound;
+      this.completedMatches.clear();
+
+      console.log(`\n ---- ROUND ${roundNumber} ----`);
+      console.log(`Round ${roundNumber} matches:`);
+
+      // Initialize matches in the match winner strategy
+      Object.entries(currentRound).forEach(([matchID, match]) => {
+        const playerIDs = Object.keys(match.results);
+        // Initialize match in the match winner strategy
+        this.matchWinnerManager.execute(
+          "initializeMatch",
+          matchID,
+          playerIDs,
+          match.gamesCount,
+        );
+
+        console.log(
+          `  |->  ${matchID}: ${playerIDs.join(" vs ")} (Best of ${match.gamesCount})`,
+        );
+      });
+
+      // Simulate playing all games in this round
+      this.simulateRound(currentRound);
+
+      // Get matches for the next round
+      currentRound = this.bracketManager.executeStrategy();
+      roundNumber++;
+    }
+
+    console.log("\n ---- TOURNAMENT COMPLETED ----");
+    this.status = TournamentStatus.FINISHED;
+
+    this.tournamentResults = this.getResults();
   }
 
   /**
@@ -130,6 +190,14 @@ export class Tournament {
       }
 
       gameNum++;
+      console.log(`COUNTER: ${this.counter}`);
+      if (++this.counter === 24) {
+        console.log(`\n--------------\n`);
+        console.log(`Tournament infos after 24 games`);
+        const tournamentInfos = this.getCurrentTournamentInfos();
+        console.dir(tournamentInfos, { depth: null });
+        console.log(`\n--------------\n`);
+      }
     }
 
     // Mark this match as completed
@@ -232,5 +300,91 @@ export class Tournament {
       "computeFinalRankings",
       this.getResults(),
     );
+  }
+
+  getCurrentTournamentInfos(): TournamentInfos {
+    const completeBracket = this.bracketManager.execute("getCompleteBracket");
+    const matchesData: Map<string, MatchData> =
+      this.matchWinnerManager.execute("getMatches");
+
+    const roundCount = completeBracket.rounds.length;
+
+    // TMP
+    const tournamentID = "0";
+
+    const tournamentInfos: TournamentInfos = {
+      id: tournamentID,
+      state: this.status,
+      playerCount: this.tournamentData.players?.length || 0,
+      type: "Single Elimination",
+      rounds: Array.from<RoundInfos>(
+        // Compute each RoundInfos from bracketRounds & matchWinner matchesData
+        completeBracket.rounds.map((round, roundID) => {
+          return {
+            name: singleEliminationRoundNames[roundCount - (roundID + 1)],
+            isCurrent: this.currentRound === round,
+            matches: Array.from<MatchInfos>(
+              // Compute each MatchInfos from rounds
+              Object.entries(round).map(([matchID, match]: [string, Match]) => {
+                const matchData = matchesData.get(matchID);
+                if (!matchData)
+                  return {
+                    players: [],
+                    status: MatchStatus.NOT_STARTED,
+                  };
+
+                const playerIDs: string[] = matchData.playerIDs || [];
+                const playersInfos: PlayerInfos[] =
+                  // Compute each PlayerInfos from matchData
+                  playerIDs.map((playerID) => {
+                    return {
+                      id: playerID,
+                      score: matchData.results[playerID] || [],
+                      winCount: matchData.winCounts.get(playerID) || 0,
+                    };
+                  });
+
+                const winCounts: [number, number] = [
+                  matchData.winCounts.get(playerIDs[0]) || 0,
+                  matchData.winCounts.get(playerIDs[1]) || 0,
+                ];
+
+                return {
+                  id: matchID,
+                  players: playersInfos,
+                  gameWinners: Array.from<number>(
+                    matchData.results[playerIDs[0]].map((p0rank) =>
+                      p0rank === 1 ? 0 : 1,
+                    ),
+                  ),
+                  leadPlayer:
+                    winCounts[0] >= winCounts[1]
+                      ? winCounts[0] === winCounts[1]
+                        ? -1
+                        : 0
+                      : 1,
+                  currentGame: winCounts.reduce((prev, curr) => prev + curr),
+                  status: matchData.isComplete
+                    ? MatchStatus.COMPLETED
+                    : MatchStatus.NOT_STARTED,
+                };
+              }),
+            ),
+          };
+        }),
+      ),
+
+      seeding: Array.from<Edge>(
+        Array.from(completeBracket.seeding.entries())
+          .filter(([, toList]) => toList.length > 0)
+          .map(([from, toList]: [string, string[]]) => [
+            tournamentID,
+            from,
+            toList[0],
+          ]),
+      ),
+    };
+
+    return tournamentInfos;
   }
 }
