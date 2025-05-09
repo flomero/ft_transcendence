@@ -2,12 +2,12 @@ import type { GameSettings } from "../../../interfaces/games/lobby/GameSettings"
 import { GAME_REGISTRY } from "../../../types/games/gameRegistry";
 import { gameManagers } from "../lobby/start/startLobbyHandler";
 import GameManager from "../gameHandler/GameManager";
-import type { Database } from "sqlite";
 import addGameToDatabase from "../lobby/start/addGameToDatabase";
 import { GAMEMODE_REGISTRY } from "../../../config";
 import { GameModeType } from "../../config/gameModes";
 import { GameOrigin } from "../../../types/games/gameHandler/GameOrigin";
 import connectionTimeoutHandler from "../gameHandler/connectionTimeoutHandler";
+import { FastifyInstance } from "fastify";
 
 /**
  * Creates a match based on the specified game mode and player ids
@@ -15,7 +15,7 @@ import connectionTimeoutHandler from "../gameHandler/connectionTimeoutHandler";
 export const createMatch = async (
   playerIds: string[],
   gameMode: GameModeType,
-  db: Database,
+  fastify: FastifyInstance,
   gameOrigin?: GameOrigin,
   aiOpponentIds?: string[],
 ): Promise<string> => {
@@ -44,7 +44,7 @@ export const createMatch = async (
 
   gameManagers.set(gameManager.getId(), gameManager);
 
-  await addGameToDatabase(gameManager, db, gameModeSettings);
-  connectionTimeoutHandler(gameManager, db);
+  await addGameToDatabase(gameManager, fastify.sqlite, gameModeSettings);
+  connectionTimeoutHandler(gameManager, fastify);
   return gameManager.getId();
 };

@@ -13,7 +13,7 @@ const matchMakingSocketHandler = async (
     if (matchMakingManager.memberExists(userId) === false)
       throw new Error("User is not in the match making queue");
     matchMakingManager.setMemberSocket(userId, connection);
-    await matchPlayers(request.server.sqlite);
+    await matchPlayers(request.server);
   } catch (error) {
     if (error instanceof Error)
       connection.send(JSON.stringify({ error: error.message }));

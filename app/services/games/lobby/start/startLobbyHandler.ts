@@ -24,7 +24,7 @@ async function startLobbyHandler(
     setLobbyStateToStart(userId, lobbyId);
 
     const newGameManager = gameManagerCreate(lobbyId);
-    const db = request.server.sqlite;
+    const fastify = request.server;
 
     gameManagers.set(newGameManager.getId(), newGameManager);
     await addGameToDatabase(
@@ -37,7 +37,7 @@ async function startLobbyHandler(
     );
     request.server.customMetrics.countGameStarted();
     lobby.disconnectMembersFromSockets();
-    connectionTimeoutHandler(newGameManager, db);
+    connectionTimeoutHandler(newGameManager, fastify);
     return reply.code(200).send({ gameId: newGameManager.getId() });
   } catch (error) {
     if (error instanceof Error) return reply.badRequest(error.message);

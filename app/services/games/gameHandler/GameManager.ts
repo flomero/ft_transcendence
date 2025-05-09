@@ -245,6 +245,10 @@ class GameManager {
     return this.players.get(playerId);
   }
 
+  public getResults() {
+    return this.game.getResults();
+  }
+
   public gameStatus(): GameStatus {
     return this.game.getStatus();
   }
