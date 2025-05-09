@@ -2,7 +2,7 @@ import { Database } from "sqlite";
 import { Tournament } from "../tournament";
 import TournamentManager from "../TournamentManager";
 import {
-  bracketTypeSettings,
+  BracketTypeSettings,
   TournamentSettings,
 } from "../../../../interfaces/games/tournament/TournamentSettings";
 import {
@@ -21,7 +21,7 @@ const createTournament = async (
   const playersUUIDs = tournamentManager.getPlayersUUIDs();
 
   const tournamentSettings: TournamentSettings = {
-    bracketType: tournamentRegistry.bracketType as bracketTypeSettings,
+    bracketType: tournamentRegistry.bracketType as BracketTypeSettings,
     matchWinner: tournamentRegistry.matchWinner,
     players: playersUUIDs,
     gameData: {

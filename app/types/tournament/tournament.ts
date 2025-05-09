@@ -15,7 +15,7 @@ export enum TournamentStatus {
   FINISHED,
 }
 
-export interface Player {
+export interface PlayerInfos {
   id: string;
   name: string;
   isReady?: boolean;
@@ -37,17 +37,17 @@ export interface AdditionalMatchData {
   playersWinCount: number[];
 }
 
-export interface Match {
+export interface MatchInfos {
   id?: string; // Assigned dynamically
-  players: Player[];
+  players: PlayerInfos[];
   additionalData?: AdditionalMatchData;
   status: MatchStatus;
   startTime?: string; // ISO date string for match start time
 }
 
-export interface Round {
-  name: string;
-  matches: Match[];
+export interface RoundInfos {
+  name?: string;
+  matches: MatchInfos[];
   isCurrent?: boolean; // Optional flag to indicate if this is the current round
 }
 
@@ -56,7 +56,8 @@ export interface TournamentInfos {
   state: TournamentStatus;
   playerCount: number;
   type: string; // e.g., "SINGLE_ELIMINATION", "DOUBLE_ELIMINATION", etc.
-  rounds: Round[];
+  rounds: RoundInfos[];
+  seeding?: Edge[];
 }
 
 /** ────────────────────────────────────────────────────────────────

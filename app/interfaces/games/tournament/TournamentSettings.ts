@@ -1,14 +1,15 @@
-export type bracketTypeSettings =
+export type BracketTypeSettings =
   | "singleElimination"
   | "doubleElimination"
   | "roundRobin"
   | "swissRound";
 
 export interface TournamentSettings {
-  bracketType: bracketTypeSettings;
+  bracketType: BracketTypeSettings;
   matchWinner: string;
   players?: string[];
   playerCount?: number;
+  initialSeedingMethod?: string;
   gameData: {
     playerCount: number;
   };

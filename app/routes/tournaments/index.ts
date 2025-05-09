@@ -2,7 +2,7 @@ import type { FastifyPluginAsync } from "fastify";
 import type {
   AdditionalMatchData,
   Edge,
-  Round,
+  RoundInfos,
   TournamentInfos,
 } from "../../types/tournament/tournament";
 import {
@@ -17,7 +17,7 @@ interface BracketQuery {
 
 const tournamentsRoute: FastifyPluginAsync = async (fastify) => {
   fastify.get<{ Querystring: BracketQuery }>("/", async (request, reply) => {
-    const rawRounds: Round[] = [
+    const rawRounds: RoundInfos[] = [
       {
         name: "Round 1",
         matches: [
