@@ -1,26 +1,26 @@
-import { TournamentMember } from "../../../interfaces/games/tournament/TournamentMember";
+import type { TournamentMember } from "../../../interfaces/games/tournament/TournamentMember";
 import { randomUUID } from "node:crypto";
-import { WebSocket } from "ws";
-import { GameModeType } from "../../config/gameModes";
-import { TournamentConfigKey } from "../../config/tournamentConfig";
-import { Tournament, TournamentStatus } from "./tournament";
+import type { WebSocket } from "ws";
+import type { GameModeType } from "../../config/gameModes";
+import type { TournamentConfigKey } from "../../config/tournamentConfig";
+import { type Tournament, TournamentStatus } from "./tournament";
 import createTournament from "./websocket/createTournament";
-import { Database } from "sqlite";
-import {
+import type { Database } from "sqlite";
+import type {
   Round,
   MatchResults,
   GameResult,
   Match,
 } from "../../../types/strategy/ITournamentBracketGenerator";
 import { createMatch } from "../matchMaking/createMatch";
-import { GameOrigin } from "../../../types/games/gameHandler/GameOrigin";
+import type { GameOrigin } from "../../../types/games/gameHandler/GameOrigin";
 import aiOpponents from "../aiOpponent/aiOpponents";
 
 class TournamentManager {
   public tournamentId: string = randomUUID();
-  public ownerId: string | undefined; // Make private
+  public ownerId: string;
   private tournamentMembers: Map<string, TournamentMember> = new Map();
-  public tournamentConfigKey: TournamentConfigKey; // Make private
+  public tournamentConfigKey: TournamentConfigKey;
   public gameModeType: GameModeType;
   public tournament: Tournament | undefined;
   public tournamentSize: number;
@@ -126,7 +126,6 @@ class TournamentManager {
       this.ownerId = memberIds[0];
       return;
     }
-    this.ownerId = undefined;
   }
 
   public async startTournament(db: Database): Promise<void> {

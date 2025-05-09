@@ -15,13 +15,13 @@ import type {
   TournamentResults,
   PlayerResults,
 } from "../../../types/tournament/tournament";
+import type { TournamentSettings } from "../../../interfaces/games/tournament/TournamentSettings";
 
 export enum TournamentStatus {
-  CREATED,
-  ON_GOING,
-  FINISHED,
+  CREATED = 0,
+  ON_GOING = 1,
+  FINISHED = 2,
 }
-import { TournamentSettings } from "../../../interfaces/games/tournament/TournamentSettings";
 
 export class Tournament {
   // All tournament related data given at creation

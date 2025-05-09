@@ -1,5 +1,5 @@
-import { FastifyReply, FastifyRequest } from "fastify";
-import { tournaments } from "../new/newTournamentHandler";
+import type { FastifyReply, FastifyRequest } from "fastify";
+import { tournaments } from "../tournaments";
 import validTournamentConnectionCheck from "../tournamentValidation/validTournamentConnectionCheck";
 import { TournamentStatus } from "../tournament";
 

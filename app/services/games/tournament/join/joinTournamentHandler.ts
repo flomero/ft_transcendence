@@ -1,6 +1,6 @@
-import { FastifyRequest, FastifyReply } from "fastify";
+import type { FastifyRequest, FastifyReply } from "fastify";
 import canMemberJoinTournamentCheck from "./canMemberJoinTournamentCheck";
-import { tournaments } from "../new/newTournamentHandler";
+import { tournaments } from "../tournaments";
 
 async function joinTournamentHandler(
   request: FastifyRequest<{ Params: { lobbyId: string } }>,
