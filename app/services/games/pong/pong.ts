@@ -101,7 +101,7 @@ export abstract class Pong extends GameBase {
       // Verify that no balls went out of bounds
       this.gameState.balls.forEach((ball, id) => {
         if (this.isOutOfBounds(ball)) {
-          console.log(`Ball out of bounds --> resetting it`);
+          // console.log(`Ball out of bounds --> resetting it`);
           // this.resetBall(this.gameState, id, true);
           this.modifierManager.trigger("onBallOutOfBounds", { ballID: id });
         } else
@@ -492,7 +492,7 @@ export abstract class Pong extends GameBase {
 
       switch (collision.type) {
         case "powerUp":
-          console.log(`\nPlayer ${gameState.lastHit} picked up a powerUp`);
+          // console.log(`\nPlayer ${gameState.lastHit} picked up a powerUp`);
           this.modifierManager.pickupPowerUp(collision.objectId);
           break;
 

@@ -308,6 +308,12 @@ class TournamentManager {
     } else {
       this.createOneGame(gameManagerId);
     }
+
+    this.sendMessageToAll(
+      JSON.stringify({
+        type: "update",
+      }),
+    );
   }
 
   private notifyMatchWinnder(

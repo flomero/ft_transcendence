@@ -150,7 +150,7 @@ export class PaceBreaker extends TimeLimitedModifierBase {
   }
 
   protected nudgeBall(game: Pong) {
-    console.log(`Nudging the ball`);
+    // console.log(`Nudging the ball`);
     const gameState = game.getState();
 
     let maxEntry: { dir: { x: number; y: number }; mag: number } | null = null;

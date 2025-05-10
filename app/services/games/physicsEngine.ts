@@ -355,7 +355,7 @@ export class PhysicsEngine {
       ly >= -halfH - EPSILON &&
       ly <= halfH + EPSILON
     ) {
-      console.log(`Ball inside object ${objID}`);
+      // console.log(`Ball inside object ${objID}`);
 
       // 4) Get object's normal (in global space), and reverse if object is the mover
       const normal: [number, number] = isBallMovementStep
@@ -382,7 +382,7 @@ export class PhysicsEngine {
       const contactX = ball.x - relVel[0] * t;
       const contactY = ball.y - relVel[1] * t;
 
-      console.log(`Contact point: (${contactX}, ${contactY})`);
+      // console.log(`Contact point: (${contactX}, ${contactY})`);
 
       return {
         objectId: objID,

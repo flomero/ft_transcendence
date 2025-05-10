@@ -266,9 +266,6 @@ export class Tournament {
     const matchesData: Map<string, MatchData> =
       this.matchWinnerManager.execute("getMatches");
 
-    console.log(`Semi-final:`);
-    console.dir(completeBracket.rounds[2], { depth: null });
-
     const roundCount = completeBracket.rounds.length;
 
     // TMP
@@ -300,9 +297,6 @@ export class Tournament {
                       status: MatchStatus.NOT_STARTED,
                     };
 
-                  console.log(`matchDataFromBracket:`);
-                  console.dir(matchDataFromBracket, { depth: null });
-
                   const playerIDs: string[] = Array.from<string>(
                     Object.keys(matchDataFromBracket.results),
                   );
@@ -311,13 +305,14 @@ export class Tournament {
                   const playersInfos: PlayerInfos[] = playerIDs.map(
                     (playerID) => {
                       const playerInfos: PlayerInfos = {
-                        id: playerID.startsWith("TBD_") ? "" : playerID,
+                        id: playerID.startsWith("TBD") ? "" : playerID,
                         isReady: playerID !== "",
                         score: [],
                         winCount: 0,
                       };
 
-                      if (playerID === "") playerInfos.name = "TBD";
+                      if (playerID.startsWith("TBD") || playerID === "")
+                        playerInfos.name = "TBD";
                       return playerInfos;
                     },
                   );
