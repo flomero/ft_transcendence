@@ -7,6 +7,7 @@ import {
   ModifierStatus,
 } from "./modifierBase";
 import type { RNG } from "./rng";
+import { fastifyInstance } from "../../app";
 
 export class ModifierManager {
   // Arrays that maintain the allowed names and their definitions.
@@ -125,11 +126,11 @@ export class ModifierManager {
           obj[methodName](this.game, args);
         }
       } catch (error) {
-        console.error(
+        fastifyInstance.log.error(
           `Error triggering method ${methodName} on object:`,
           error,
         );
-        console.log("Object details:", {
+        fastifyInstance.log.error("Object details:", {
           objectType: obj.constructor.name,
           availableMethods: Object.getOwnPropertyNames(
             Object.getPrototypeOf(obj),
@@ -193,7 +194,7 @@ export class ModifierManager {
   spawnRandomPowerUp(rng: RNG, position: { x: number; y: number }): boolean {
     const powerUpName: string | null = this.sampleRandomPowerUp(rng);
     if (!powerUpName) {
-      console.log("Can't spawn any power up");
+      fastifyInstance.log.debug("Can't spawn any power up");
       this.trigger("onFailedPowerUpSpawn", {
         reason: "NONE_AVAILABLE",
       });
@@ -249,7 +250,7 @@ export class ModifierManager {
       GAME_REGISTRY[this.game.gameData.gameName].powerUps[powerUpName].class;
 
     if (!powerUpClass) {
-      console.log(`Unknown powerUpClass: ${powerUpName}`);
+      fastifyInstance.log.warn(`Unknown powerUpClass: ${powerUpName}`);
       return;
     }
 

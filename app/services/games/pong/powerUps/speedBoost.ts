@@ -2,6 +2,7 @@ import { TimeLimitedModifierBase } from "../../timeLimitedModifierBase";
 import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
 import type { Pong } from "../pong";
 import { ModifierActivationMode } from "../../modifierBase";
+import { fastifyInstance } from "../../../../app";
 
 export class SpeedBoost extends TimeLimitedModifierBase {
   name = "speedBoost";
@@ -77,7 +78,9 @@ export class SpeedBoost extends TimeLimitedModifierBase {
     if (this.ticks % this.rampUpFrequency == 0) {
       const gameState = game.getState();
       if (!(gameState.balls.length > 0)) {
-        console.log(`Can't speed up if there's no balls: ${gameState.balls}`);
+        fastifyInstance.log.warn(
+          `Can't speed up if there's no balls: ${gameState.balls}`,
+        );
         return;
       }
 

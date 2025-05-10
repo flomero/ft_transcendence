@@ -6,6 +6,7 @@ import validateGameModifierCheck from "../lobbyVaidation/validateGameModifierChe
 import { setLobby } from "./setLobby";
 import { GAMEMODE_REGISTRY } from "../../../../config";
 import type { GameSettings } from "../../../../interfaces/games/lobby/GameSettings";
+import { fastifyInstance } from "../../../../app";
 
 export const PublicLobbies = new Map<string, Lobby>();
 export const PrivateLobbies = new Map<string, Lobby>();
@@ -33,7 +34,7 @@ function initializeSampleLobbies() {
 }
 
 if (process.env.NODE_ENV === "development") {
-  console.log("Initializing sample lobbies...");
+  fastifyInstance.log.debug("Initializing sample lobbies...");
   initializeSampleLobbies();
 }
 

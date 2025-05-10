@@ -13,6 +13,7 @@ import type {
 import { STRATEGY_REGISTRY } from "../strategyRegistryLoader";
 import { StrategyManager } from "../strategyManager";
 import type { IUserSampler } from "../../../types/strategy/IUserSampler";
+import { fastifyInstance } from "../../../app";
 
 type Bracket = "upper" | "lower" | "final";
 
@@ -87,16 +88,22 @@ export class DoubleElimination implements ITournamentBracketGenerator {
     // Generate the entire bracket with proper seeding
     this.generateEntireBracket();
 
-    console.log("Generated rounds:");
-    console.log(`Upper bracket rounds: ${this.upperRounds.length}`);
-    console.log(`Lower bracket rounds: ${this.lowerRounds.length}`);
-    console.log(
+    fastifyInstance.log.debug("Generated rounds:");
+    fastifyInstance.log.debug(
+      `Upper bracket rounds: ${this.upperRounds.length}`,
+    );
+    fastifyInstance.log.debug(
+      `Lower bracket rounds: ${this.lowerRounds.length}`,
+    );
+    fastifyInstance.log.debug(
       `Final rounds: ${Object.keys(this.finalRound).length > 0 ? 1 : 0}`,
     );
 
     // Log details for each round
     this.allRounds.forEach((round, index) => {
-      console.log(`Round ${index + 1}: ${Object.keys(round).length} matches`);
+      fastifyInstance.log.debug(
+        `Round ${index + 1}: ${Object.keys(round).length} matches`,
+      );
     });
   }
 
@@ -235,14 +242,16 @@ export class DoubleElimination implements ITournamentBracketGenerator {
       targetMatch.results[playerId] = [];
     }
 
-    console.log(`Pushed player ${playerId} to next match ${nextMatchId}`);
+    fastifyInstance.log.debug(
+      `Pushed player ${playerId} to next match ${nextMatchId}`,
+    );
   }
 
   /**
    * Generate the entire bracket with proper seeding
    */
   protected generateEntireBracket(): void {
-    console.log("Generating complete Bracket");
+    fastifyInstance.log.debug("Generating complete Bracket");
     // Calculate total players and determine rounds needed
     const players = [...this.tournamentData.players];
     const totalPlayers = players.length;
@@ -506,8 +515,8 @@ export class DoubleElimination implements ITournamentBracketGenerator {
       });
     });
 
-    console.log(`Seeding:`);
-    console.dir(this.nextMatchSeeding, { depth: null });
+    fastifyInstance.log.debug(`Seeding:`);
+    fastifyInstance.log.debug(this.nextMatchSeeding);
   }
 
   /**

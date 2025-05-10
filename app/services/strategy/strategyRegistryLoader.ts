@@ -1,6 +1,7 @@
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import type { StrategyRegistry } from "../../types/strategy/strategyRegistry";
+import type { FastifyInstance } from "fastify";
 
 // Export the global strategy registry
 export const STRATEGY_REGISTRY: StrategyRegistry = {};
@@ -9,7 +10,9 @@ export const STRATEGY_REGISTRY: StrategyRegistry = {};
  * Loads the strategy registry from a JSON file and dynamically imports
  * each strategy module, storing both the class and any additional parameters.
  */
-export async function loadStrategyRegistry(): Promise<void> {
+export async function loadStrategyRegistry(
+  fastify: FastifyInstance,
+): Promise<void> {
   const jsonPath = path.resolve(__dirname, "../../../strategyRegistry.json");
 
   let jsonData: string;
@@ -64,5 +67,5 @@ export async function loadStrategyRegistry(): Promise<void> {
 
   // Populate the exported registry
   Object.assign(STRATEGY_REGISTRY, registry);
-  console.log("Loaded STRATEGY_REGISTRY:", STRATEGY_REGISTRY);
+  fastify.log.info("Loaded STRATEGY_REGISTRY");
 }

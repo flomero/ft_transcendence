@@ -21,7 +21,7 @@ async function joinLobbyHandler(
     return reply.badRequest("User is already in a lobby");
   }
   if (isLobbyRegistered(lobbyId) === false) {
-    return reply.badRequest("Lobby does not exist 1");
+    return reply.badRequest("Lobby does not exist");
   }
   if (isLobbyOpen(lobbyId) === false) {
     return reply.badRequest("Lobby is not open");

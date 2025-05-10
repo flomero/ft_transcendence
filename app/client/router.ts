@@ -266,7 +266,7 @@ class Router {
       if (!response.ok) {
         console.error("Fetch error:", response.status, response.statusText);
         // this.displayError(response.status, response.statusText);
-        return null;
+        // return null;
       }
 
       const pageTitle = response.headers.get("X-Page-Title");
