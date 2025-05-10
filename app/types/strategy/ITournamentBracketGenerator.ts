@@ -1,4 +1,4 @@
-import type { TournamentResults } from "../../types/tournament/tournament";
+import type { TournamentResults } from "../tournament/tournament";
 
 export type GameResult = {
   [playerID: string]: number;
@@ -22,6 +22,11 @@ export type TournamentRankings = {
   [playedID: string]: number;
 };
 
+export type TournamentBracket = {
+  rounds: Round[]; // Complete bracket organized by rounds
+  seeding: Map<string, string[]>; // Complete match seeding
+};
+
 // Bracket Generators will keep track internally of all the rounds
 // Thus they only need the last round results to keep it up to date
 export interface ITournamentBracketGenerator {
@@ -30,5 +35,5 @@ export interface ITournamentBracketGenerator {
   computeFinalRankings(
     allMatchesResults: TournamentResults,
   ): TournamentRankings;
-  getCompleteBracket(): Round[];
+  getCompleteBracket(): TournamentBracket;
 }

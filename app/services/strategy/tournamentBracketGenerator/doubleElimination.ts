@@ -9,6 +9,7 @@ import type {
   TournamentRankings,
   ITournamentBracketGenerator,
   GameResult,
+  TournamentBracket,
 } from "../../../types/strategy/ITournamentBracketGenerator";
 import { STRATEGY_REGISTRY } from "../strategyRegistryLoader";
 import { StrategyManager } from "../strategyManager";
@@ -675,7 +676,10 @@ export class DoubleElimination implements ITournamentBracketGenerator {
     return this.activeMatches.has(matchID);
   }
 
-  getCompleteBracket(): Round[] {
-    return this.allRounds;
+  getCompleteBracket(): TournamentBracket {
+    return {
+      rounds: this.allRounds,
+      seeding: this.nextMatchSeeding,
+    };
   }
 }

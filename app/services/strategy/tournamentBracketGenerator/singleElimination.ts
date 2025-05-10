@@ -9,6 +9,7 @@ import type {
   TournamentRankings,
   ITournamentBracketGenerator,
   GameResult,
+  TournamentBracket,
 } from "../../../types/strategy/ITournamentBracketGenerator";
 import { STRATEGY_REGISTRY } from "../strategyRegistryLoader";
 import { StrategyManager } from "../strategyManager";
@@ -213,7 +214,7 @@ export class SingleElimination implements ITournamentBracketGenerator {
     const firstRoundMatches = Math.ceil(totalPlayers / this.playersPerMatch);
 
     // Calculate total rounds needed
-    const totalRounds = Math.ceil(Math.log2(firstRoundMatches));
+    const totalRounds = Math.ceil(Math.log2(firstRoundMatches) + 1);
 
     // Generate placeholder structure for all rounds
     this.generateRoundStructure(totalRounds, firstRoundMatches);
@@ -250,11 +251,11 @@ export class SingleElimination implements ITournamentBracketGenerator {
         // Create placeholder player IDs for this match
         const placeholderPlayers: string[] = [];
         for (let j = 0; j < this.playersPerMatch; j++) {
-          placeholderPlayers.push(`TBD_R${roundIndex + 1}_M${i}_P${j}`);
+          placeholderPlayers.push(`TBD_r${roundIndex + 1}m${i}_P${j}`);
         }
 
         // Create a match ID
-        const matchID = `R${roundIndex + 1}_M${i}`;
+        const matchID = `r${roundIndex + 1}m${i}`;
 
         // Initialize results for each player
         const results: Record<string, number[]> = {};
@@ -295,7 +296,7 @@ export class SingleElimination implements ITournamentBracketGenerator {
       Object.keys(currentRound).forEach((matchID, matchIndex) => {
         // Calculate the next match ID (halving the index for next round)
         const nextMatchIndex = Math.floor(matchIndex / 2);
-        const nextMatchID = `R${nextRoundIndex + 1}_M${nextMatchIndex}`;
+        const nextMatchID = `r${nextRoundIndex + 1}m${nextMatchIndex}`;
 
         // In single elimination, only the winner advances
         this.nextMatchSeeding.set(matchID, [nextMatchID]);
@@ -448,7 +449,10 @@ export class SingleElimination implements ITournamentBracketGenerator {
     return this.activeMatches.has(matchID);
   }
 
-  getCompleteBracket(): Round[] {
-    return this.rounds;
+  getCompleteBracket(): TournamentBracket {
+    return {
+      rounds: this.rounds,
+      seeding: this.nextMatchSeeding,
+    };
   }
 }

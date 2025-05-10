@@ -12,42 +12,50 @@
       Size: {{tournament.tournamentSize}}
     </p>
   </div>
-  <button class="text-sm text-fg-muted underline italic cursor-pointer" onclick="tournamentHandler.leaveTournament(event)">Leave</button>
-  <div class="flex flex-wrap justify-center gap-8 mt-8">
-    {{#each members}}
-      {{#with this}}
-        {{#> components/lobby/user
-          userId=userId
-          imageUrl=(add "/image/" image_id)
-          userName=username
-          ready=isReady
-          owner=isOwner
-        }}
-        {{/components/lobby/user}}
-      {{/with}}
-    {{/each}}
-  </div>
-
-  {{#if isOwner}}
-    <div class="flex flex-col items-center justify-center gap-4">
-      {{#> components/button onclick="tournamentHandler.addAiOpponent" variant="outline" disabled=canStart}}
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bot-icon lucide-bot"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
-        Add AI Opponent 
-      {{/components/button}}
+  {{#unless info}}
+    <button class="text-sm text-fg-muted underline italic cursor-pointer" onclick="tournamentHandler.leaveTournament(event)">Leave</button>
+    <div class="flex flex-wrap justify-center gap-8 mt-8">
+      {{#each members}}
+        {{#with this}}
+          {{#> components/lobby/user
+            userId=userId
+            imageUrl=(add "/image/" image_id)
+            userName=username
+            ready=isReady
+            owner=isOwner
+          }}
+          {{/components/lobby/user}}
+        {{/with}}
+      {{/each}}
     </div>
-    {{#if canStart}}
-      {{#> components/button onclick="tournamentHandler.startTournament"}}
-        Start Tournament
-      {{/components/button}}
+
+    {{#if isOwner}}
+      <div class="flex flex-col items-center justify-center gap-4">
+        {{#> components/button onclick="tournamentHandler.addAiOpponent" variant="outline" disabled=canStart}}
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bot-icon lucide-bot"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+          Add AI Opponent 
+        {{/components/button}}
+      </div>
+      {{#if canStart}}
+        {{#> components/button onclick="tournamentHandler.startTournament"}}
+          Start Tournament
+        {{/components/button}}
+      {{/if}}
     {{/if}}
-  {{/if}}
-  <div class="hidden border-error border text-error p-4 rounded text-xs" id="tournament-error">
-  </div>
-  {{#if lobbyString}}
-    <pre class="mt-8 p-1 bg-bg-muted rounded w-full text-wrap break-words">
-      {{lobbyString}}
-    </pre>
+    <div class="hidden border-error border text-error p-4 rounded text-xs" id="tournament-error">
+    </div>
+    {{#if lobbyString}}
+      <pre class="mt-8 p-1 bg-bg-muted rounded w-full text-wrap break-words">
+        {{lobbyString}}
+      </pre>
+    {{/if}}
+  {{/unless}}
+  {{#if info}}
+    {{> components/tournament-view/tournament-bracket rounds=info.rounds}}
   {{/if}}
 </div>
 
-<script type="module" src="/js/lobby.js"></script>
+
+<script>
+  window.__TOURNAMENTS__ = [{{{json info}}}];
+</script>

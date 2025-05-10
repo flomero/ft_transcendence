@@ -10,10 +10,12 @@
 
 <body class="min-h-lvh flex flex-col bg-bg text-fg">
     {{> partials/header}}
+    <div class="w-full min-h-lvh backdrop-blur-[1px]">
+
 
     <div class="flex flex-1 relative">
         <div class="layout pt-14">
-            <main id="app-content" class="flex-1 transition-all duration-300">
+            <main id="app-content" class="flex-1 transition-all duration-300 bg-bg">
                 {{{body}}}
             </main>
         </div>
@@ -33,6 +35,10 @@
     <script type="module" src="/js/router.js"></script>
     <script type="module" src="/js/sidebar.js"></script>
     <script type="module" src="/js/logout.js"></script>
+    </div>
 </body>
 
+
 </html>
+
+

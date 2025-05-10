@@ -35,6 +35,7 @@ export enum TournamentGameModes {
   CompetitiveClassicPongPowerUps = "competitiveClassicPongPowerUps",
   CompetitiveMultiplayerPong = "competitiveMultiplayerPong",
   CompetitiveMultiplayerPongPowerUps = "competitiveMultiplayerPongPowerUps",
+  TestTournamentConfig = "testTournamentConfig",
 }
 
 export const TournamentGameModesPerBracketType: {
@@ -49,6 +50,7 @@ export const TournamentGameModesPerBracketType: {
   singleElimination: [
     TournamentGameModes.CompetitiveClassicPong,
     TournamentGameModes.CompetitiveClassicPongPowerUps,
+    TournamentGameModes.TestTournamentConfig,
   ],
   doubleElimination: [
     TournamentGameModes.CompetitiveClassicPong,
@@ -373,6 +375,32 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       timedStart: {},
       timedGame: { duration: 600 },
       scoredGame: { goalObjective: 11 },
+      survivalGame: {},
+      elimination: { threshold: 12 },
+      goalReset: { delay: 2 },
+      idleWallBounceAcceleration: {},
+    },
+    powerUpNames: {},
+    playerCount: 2,
+  },
+
+  // Competitive 1v1
+  testTournamentConfig: {
+    gameName: "pong",
+    gameModeName: "classicPong",
+    gameModeConfig: {
+      ballRadius: 0.85,
+      ballSpeedWidthPercentS: 62.5,
+      paddleCoveragePercent: 22.5,
+      paddleSpeedWidthPercentS: 0.825,
+      paddleVelocityAngularTransmissionPercent: 90,
+      paddleVelocitySpeedTransmissionPercent: 12.5,
+    },
+    modifierNames: {
+      paceBreaker: {},
+      timedStart: {},
+      timedGame: { duration: 600 },
+      scoredGame: { goalObjective: 2 },
       survivalGame: {},
       elimination: { threshold: 12 },
       goalReset: { delay: 2 },

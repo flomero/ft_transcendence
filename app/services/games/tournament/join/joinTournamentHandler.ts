@@ -2,6 +2,7 @@ import type { FastifyRequest, FastifyReply } from "fastify";
 import canMemberJoinTournamentCheck from "./canMemberJoinTournamentCheck";
 import { tournaments } from "../tournaments";
 import { getUserById } from "../../../database/user";
+import { getCurrentTournamentInfo } from "../tournamentVisualizer";
 
 async function joinTournamentHandler(
   request: FastifyRequest<{ Params: { lobbyId: string } }>,
@@ -30,6 +31,8 @@ async function joinTournamentHandler(
       }),
     );
 
+    const info = await getCurrentTournamentInfo(request.server, tournament);
+
     const data = {
       title: "Tournament Lobby | ft_transcendence",
       id: tournamentId,
@@ -37,7 +40,8 @@ async function joinTournamentHandler(
       members: members,
       isOwner: tournament.ownerId === request.userId,
       canStart: tournament.canTournamentBeStarted(),
-      // lobbyString: JSON.stringify(members),
+      info: info,
+      lobbyString: JSON.stringify(info),
     };
     reply.header("X-Page-Title", "Tournament Lobby | ft_transcendence");
     const viewOptions = request.isAjax() ? {} : { layout: "layouts/main" };
