@@ -100,8 +100,12 @@ export abstract class Pong extends GameBase {
 
       // Verify that no balls went out of bounds
       this.gameState.balls.forEach((ball, id) => {
-        if (this.isOutOfBounds(ball)) this.resetBall(this.gameState, id, true);
-        // this.modifierManager.trigger("onBallOutOfBounds", { ballID: id });
+        if (this.isOutOfBounds(ball)) {
+          console.log(`Ball out of bounds --> resetting it`);
+          // this.resetBall(this.gameState, id, true);
+          this.modifierManager.trigger("onBallOutOfBounds", { ballID: id });
+        } else
+          ball.speed = Math.max(this.getSettings().minBallSpeed, ball.speed);
       });
 
       // Trigger modifiers
@@ -142,6 +146,22 @@ export abstract class Pong extends GameBase {
     paddle.y +=
       direction * (deltaDisplacement / 100.0) * paddle.amplitude * paddle.dy;
     paddle.displacement = newDisplacement;
+
+    this.gameState.balls.forEach((ball) => {
+      const inObjectCollision = PhysicsEngine.resolveBallInsideObject(
+        ball,
+        paddle as Rectangle,
+        this.gameState.paddles.indexOf(paddle),
+        [direction * paddle.dx, direction * paddle.dy],
+        false,
+      );
+
+      if (!inObjectCollision || !inObjectCollision.outOfBounds) return;
+
+      ball.x = inObjectCollision.outOfBounds.position[0];
+      ball.y = inObjectCollision.outOfBounds.position[1];
+      PhysicsEngine.resolveCollision(ball, inObjectCollision);
+    });
   }
 
   // Process all queued user inputs
@@ -248,6 +268,7 @@ export abstract class Pong extends GameBase {
       .filter((paddle) => paddle.isVisible)
       .map((paddle) => {
         return {
+          id: paddle.id,
           a: paddle.alpha,
           x: parseFloat(paddle.x.toFixed(3)),
           y: parseFloat(paddle.y.toFixed(3)),
@@ -432,8 +453,10 @@ export abstract class Pong extends GameBase {
       ]);
 
       if (!tmpCollision) {
-        ball.x += Math.round(ball.dx * remainingDistance * 100) / 100;
-        ball.y += Math.round(ball.dy * remainingDistance * 100) / 100;
+        ball.x +=
+          Math.round(ball.dx * remainingDistance * (100 - EPSILON)) / 100;
+        ball.y +=
+          Math.round(ball.dy * remainingDistance * (100 - EPSILON)) / 100;
         break;
       }
 
@@ -441,11 +464,24 @@ export abstract class Pong extends GameBase {
 
       // Handle out-of-bounds case
       if (collision.outOfBounds && collision.normal) {
-        // Move the ball back in bounds using the collision normal
-        ball.x += collision.normal[0] * (collision.distance + EPSILON * 10);
-        ball.y += collision.normal[1] * (collision.distance + EPSILON * 10);
+        if (
+          collision.type === "wall" &&
+          this.gameState.walls[collision.objectId].isGoal &&
+          doTriggers
+        ) {
+          this.resolveWallCollision(ball, collision.objectId, doTriggers);
+          break;
+        }
 
-        // Don't reduce remainingDistance since this isn't a normal movement
+        // Move the ball directly to the resolved collision position
+        const [newX, newY] = collision.outOfBounds.position;
+        ball.x = newX;
+        ball.y = newY;
+
+        // Reflect direction and slightly nudge ball out to avoid sticking
+        PhysicsEngine.resolveCollision(ball, collision);
+
+        // Don't reduce remainingDistance since this is a corrective step
         continue;
       }
 
@@ -457,7 +493,7 @@ export abstract class Pong extends GameBase {
 
       switch (collision.type) {
         case "powerUp":
-          console.log(`\nPlayer ${gameState.lastHit} picked up a powerUp\n`);
+          console.log(`\nPlayer ${gameState.lastHit} picked up a powerUp`);
           this.modifierManager.pickupPowerUp(collision.objectId);
           break;
 
@@ -465,8 +501,8 @@ export abstract class Pong extends GameBase {
           PhysicsEngine.resolveCollision(ball, collision);
 
           const playerId = collision.objectId;
-          if (gameState.lastHit !== playerId)
-            console.log(`Last hit: ${playerId}`);
+          // if (gameState.lastHit !== playerId)
+          //   console.log(`Last hit: ${playerId}`);
           gameState.lastHit = playerId;
 
           const paddle = this.gameState.paddles[playerId];
@@ -495,29 +531,16 @@ export abstract class Pong extends GameBase {
           ball.dx /= norm;
           ball.dy /= norm;
 
-          this.modifierManager.trigger("onPaddleBounce", {
-            ballId: this.gameState.balls.indexOf(ball),
-            playerId: collision.objectId,
-          });
+          if (doTriggers)
+            this.modifierManager.trigger("onPaddleBounce", {
+              ballId: this.gameState.balls.indexOf(ball),
+              playerId: collision.objectId,
+            });
           break;
 
         case "wall":
           PhysicsEngine.resolveCollision(ball, collision);
-          const wall: Rectangle = gameState.walls[collision.objectId];
-          if (wall.isGoal && ball.doGoal) {
-            const goalPlayerId = Math.floor(collision.objectId / 2);
-            gameState.scores[goalPlayerId]++;
-            gameState.lastGoal = goalPlayerId;
-            if (doTriggers)
-              this.modifierManager.trigger("onGoal", {
-                playerId: goalPlayerId,
-              });
-          } else {
-            if (doTriggers)
-              this.modifierManager.trigger("onWallBounce", {
-                wallID: collision.objectId,
-              });
-          }
+          this.resolveWallCollision(ball, collision.objectId, doTriggers);
           break;
 
         default:
@@ -529,6 +552,28 @@ export abstract class Pong extends GameBase {
       if (loopCounter > ball.speed * 3.0 + 1) {
         break;
       }
+    }
+  }
+
+  protected resolveWallCollision(
+    ball: Ball,
+    wallID: number,
+    doTriggers: boolean,
+  ) {
+    const wall: Rectangle = this.gameState.walls[wallID];
+    if (wall.isGoal && ball.doGoal) {
+      const goalPlayerId = Math.floor(wallID / 2);
+      this.gameState.scores[goalPlayerId]++;
+      this.gameState.lastGoal = goalPlayerId;
+      if (doTriggers)
+        this.modifierManager.trigger("onGoal", {
+          playerId: goalPlayerId,
+        });
+    } else {
+      if (doTriggers)
+        this.modifierManager.trigger("onWallBounce", {
+          wallID: wallID,
+        });
     }
   }
 

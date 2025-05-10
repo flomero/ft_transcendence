@@ -1,4 +1,5 @@
 import type { Edge, Round } from "../types/tournament/tournament";
+import type Router from "./router.js";
 
 type Rounds = Round[];
 
@@ -14,6 +15,8 @@ declare global {
     drawTournamentLines?: () => void;
 
     TournamentBracket: typeof TournamentBracket;
+    tournamentHandler: TournamentHandler;
+    router: Router;
   }
 }
 
@@ -101,4 +104,134 @@ class TournamentBracket {
   }
 }
 
-export default TournamentBracket;
+class TournamentHandler {
+  public socket: WebSocket | null = null;
+
+  private getTournamentId(): string {
+    return document.location.pathname.split("/").pop() || "";
+  }
+
+  public connect(): void {
+    console.log("Connecting to tournament...");
+    const tournamentId = window.location.pathname.split("/").pop();
+    if (!tournamentId) {
+      console.error("Tournament ID not found in URL");
+      return;
+    }
+
+    this.socket = new WebSocket(
+      `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/games/tournament/${tournamentId}`,
+    );
+
+    this.socket.onopen = () => {
+      console.log("Tournament WebSocket connected");
+    };
+
+    this.socket.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      this.handleMessage(message);
+    };
+
+    this.socket.onclose = () => {
+      console.log("Tournament WebSocket disconnected");
+    };
+
+    this.socket.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+  }
+
+  private handleMessage(message: any): void {
+    console.log("Received tournament message:", message);
+
+    switch (message.type) {
+      case "error":
+        this.handleError(message.data);
+        break;
+      case "update":
+        this.refreshView();
+        break;
+      default:
+        console.log("Unknown message type:", message.type);
+    }
+  }
+
+  private refreshView(): void {
+    window.router.refresh(); // TODO: maybe make better
+  }
+
+  public leaveTournament(event: Event): void {
+    event.preventDefault();
+    fetch(
+      `/games/tournament/leave/${window.location.pathname.split("/").pop()}`,
+      {
+        method: "POST",
+      },
+    ).then(() => {
+      window.location.href = "/play";
+    });
+  }
+
+  public async addAiOpponent(): Promise<void> {
+    try {
+      const response = await fetch(
+        `/games/tournament/add-ai-opponent/${this.getTournamentId()}`,
+        {
+          method: "POST",
+        },
+      );
+
+      if (!response.ok) {
+        const msg = await response.text();
+        const data = JSON.parse(msg);
+        throw new Error(
+          data?.message || `Failed to add AI opponent: ${response.statusText}`,
+        );
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        this.handleError(error);
+      } else {
+        this.handleError(
+          new Error("Failed to add AI opponent. Please try again later."),
+        );
+      }
+    }
+  }
+
+  public async startTournament(): Promise<void> {
+    try {
+      const response = await fetch(
+        `/games/tournament/start/${this.getTournamentId()}`,
+        {
+          method: "POST",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to start Tournament: ${response.statusText}`);
+      }
+
+      // const data = await response.json();
+      // TODO: what happens here???
+      console.log("Tournament started");
+    } catch (error) {
+      if (error instanceof Error) {
+        this.handleError(error);
+      } else {
+        this.handleError(
+          new Error("Failed to start tournament. Please try again later."),
+        );
+      }
+    }
+  }
+
+  private handleError(error: Error): void {
+    const errorEl = document.getElementById("tournament-error");
+    if (errorEl) {
+      errorEl.textContent = error.message;
+      errorEl.style.display = "block";
+    }
+  }
+}
+export { TournamentHandler, TournamentBracket };

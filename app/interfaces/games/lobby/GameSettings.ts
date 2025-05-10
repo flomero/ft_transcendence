@@ -44,6 +44,11 @@ interface IdleWallBounceAcceleration {
   bumperVelocityFactor?: number;
 }
 
+interface PaceBreaker {
+  noResetThreshold?: number;
+  noPaddleBounceThreshold?: number;
+}
+
 interface ModifierNames {
   powerUpSpawner?: PowerUpSpawner;
   timedGame?: TimedGame;
@@ -55,12 +60,13 @@ interface ModifierNames {
   paddleBoost?: {};
   timedStart?: {};
   idleWallBounceAcceleration?: IdleWallBounceAcceleration;
+  paceBreaker?: PaceBreaker;
 }
 
 interface SpeedBoost {
   spawnWeight?: number;
   duration?: number;
-  rampUpFrequency?: number;
+  rampUpStrengthFactor?: number;
   rampUpStrength?: number;
 }
 
@@ -76,9 +82,8 @@ interface Shooter {
   duration?: number;
   chargeDuration?: number;
   chargeRadius?: number;
-  shootInitialVelocityFactor?: number;
-  shootAcceleration?: number;
-  shootDirectionSamplerStrategyName?: string;
+  shootAdditionalVelocity?: number;
+  playerSamplerStrategyName?: string;
 }
 
 interface MultiBall {

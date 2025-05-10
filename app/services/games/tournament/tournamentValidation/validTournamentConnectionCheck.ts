@@ -1,4 +1,4 @@
-import { tournaments } from "../new/newTournamentHandler";
+import { tournaments } from "../tournaments";
 
 const validTournamentConnectionCheck = (
   memberId: string,

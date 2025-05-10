@@ -33,6 +33,7 @@ export class ClassicPong extends Pong {
       paddleOffset: registry.fixedSettings.paddleOffset,
       paddleHeight: registry.fixedSettings.paddleHeight,
       wallsHeight: registry.fixedSettings.wallsHeight,
+      minBallSpeed: registry.fixedSettings.minBallSpeed,
 
       // Customizable settings
       ballSpeedWidthPercentS:
@@ -65,6 +66,10 @@ export class ClassicPong extends Pong {
       (this.settings.arenaWidth *
         (this.settings.ballSpeedWidthPercentS / 100)) /
       this.serverTickrateS;
+
+    // Minimum ball speed defined as a percentage of the initial ball speed
+    this.settings.minBallSpeed =
+      (this.settings.minBallSpeed * this.settings.ballSpeed) / 100.0;
 
     if (customConfig.powerUpCapacities)
       for (const [key, value] of Object.entries(
@@ -101,8 +106,9 @@ export class ClassicPong extends Pong {
     // Calculate actual paddle width based on amplitude and coverage
     const paddleWidth = paddleAmplitude * coverage;
 
-    // paddleSpeed is percentage of width per second (independent of tickrate)
-    const paddleSpeedPercent = this.settings.paddleSpeedWidthPercentS / 100.0;
+    const serverTickrateS = GAME_REGISTRY.pong.serverTickrateS;
+    const paddleSpeed =
+      100 / (serverTickrateS * this.settings.paddleSpeedWidthPercentS);
 
     this.gameState.paddles = [
       // LEFT PADDLE
@@ -122,7 +128,7 @@ export class ClassicPong extends Pong {
         amplitude: paddleAmplitude,
         width: paddleWidth,
         height: this.settings.paddleHeight,
-        speed: paddleSpeedPercent,
+        speed: paddleSpeed,
         velocity: 0.0,
         displacement: 0.0,
         doMove: true,
@@ -159,7 +165,7 @@ export class ClassicPong extends Pong {
         amplitude: paddleAmplitude,
         width: paddleWidth,
         height: this.settings.paddleHeight,
-        speed: paddleSpeedPercent,
+        speed: paddleSpeed,
         velocity: 0.0,
         displacement: 0.0,
         doMove: true,
@@ -304,7 +310,8 @@ export class ClassicPong extends Pong {
       };
     }
 
-    if (doTriggers) this.modifierManager.trigger("onBallReset");
+    if (doTriggers)
+      this.modifierManager.trigger("onBallReset", { ballID: ballId });
   }
 
   isOutOfBounds(ball: Ball): boolean {
@@ -320,7 +327,7 @@ export class ClassicPong extends Pong {
 
   getResults(): number[] {
     const scores = this.gameState.scores;
-    const p1result: number = scores[0] > scores[1] ? 1 : 2;
+    const p1result: number = scores[0] > scores[1] ? 2 : 1;
     const p2result: number = (p1result % 2) + 1;
 
     return [p1result, p2result];

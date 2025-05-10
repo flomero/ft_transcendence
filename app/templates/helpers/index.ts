@@ -62,9 +62,7 @@ export function registerHelpers(handlebars: typeof Handlebars) {
           .replace(/^\w/, (c) => c.toUpperCase()),
   );
 
-  handlebars.registerHelper("inc", function (value, options) {
-    return parseInt(value, 10) + 1;
-  });
+  handlebars.registerHelper("inc", (value) => Number.parseInt(value, 10) + 1);
 
   handlebars.registerHelper(
     "formatDate",
@@ -97,5 +95,11 @@ export function registerHelpers(handlebars: typeof Handlebars) {
   });
 
   handlebars.registerHelper("json", (v) => JSON.stringify(v));
+
+  handlebars.registerHelper("concat", (...args) => {
+    const strings = args.slice(0, -1).map(String);
+    return strings.join("");
+  });
+
   // Add other helpers here as needed
 }

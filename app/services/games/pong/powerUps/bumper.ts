@@ -11,7 +11,6 @@ export class Bumper extends TimeLimitedModifierBase {
   protected bumperJunctionDistanceFromCenter: number = 0;
   protected bumperWallJunctionDistance: number = 0;
 
-  protected initialVelocity: number = 0;
   protected velocityFactor: number = 0;
 
   protected bumperVelocityFactor: number = 0;
@@ -124,7 +123,6 @@ export class Bumper extends TimeLimitedModifierBase {
       this.deactivate(game);
       return;
     }
-    this.initialVelocity = gameState.balls[0].speed;
 
     // Convert percentages to actual distances based on arena dimensions
     const junctionDistanceFromCenter =
@@ -243,6 +241,10 @@ export class Bumper extends TimeLimitedModifierBase {
       this.velocityFactor + this.bumperVelocityFactor,
       this.bumperMaxVelocityFactor,
     );
+
+    if (game.getState().balls.length === 0) return;
+    game.getState().balls[0].speed +=
+      this.velocityFactor * game.getState().balls[0].speed;
   }
 
   onUpdate(game: Pong): void {
@@ -252,15 +254,15 @@ export class Bumper extends TimeLimitedModifierBase {
     }
     super.onUpdate(game);
 
-    if (game.getState().balls.length === 0) return;
-    if (this.velocityFactor !== 0.0)
-      game.getState().balls[0].speed =
-        this.initialVelocity * (1.0 + this.velocityFactor);
-
     this.velocityFactor = Math.max(
       0.0,
       this.velocityFactor + this.bumperAcceleration,
     );
+
+    if (game.getState().balls.length === 0) return;
+    if (this.velocityFactor > 0.0)
+      game.getState().balls[0].speed +=
+        this.bumperAcceleration * game.getState().balls[0].speed;
   }
 
   onDeactivation(game: Pong): void {
@@ -270,13 +272,13 @@ export class Bumper extends TimeLimitedModifierBase {
         if (wallID < 0) return;
         game.getState().walls.splice(wallID, 1);
       });
-    game.getState().balls[0].speed = this.initialVelocity;
     game.getModifierManager().deletePowerUp(this);
   }
 
-  onGoal(game: Pong, args: { playerId: number }): void {
-    // On goal reset the currently stored velocityFactor
-    this.velocityFactor = 0.0;
+  onBallReset(game: Pong, args: { ballID: number }): void {
+    if (args.ballID <= 0)
+      // -1: resetting all balls, 0: mainBall -> don't reset on non-main ball reset
+      this.velocityFactor = 0.0;
   }
 
   onArenaModification(game: Pong): void {

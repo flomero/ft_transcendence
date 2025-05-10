@@ -9,9 +9,7 @@ export class SpeedBoost extends TimeLimitedModifierBase {
   protected strength: number = 0;
 
   protected rampUpFrequency: number = 0; // Increment every X ticks
-  protected rampUpStrength: number = 0; // Increment by X every increment
-
-  protected initialSpeed: number = 0;
+  protected rampUpStrengthFactor: number = 0; // Increment by X every increment
 
   constructor(customConfig?: Record<string, any>) {
     super();
@@ -57,60 +55,45 @@ export class SpeedBoost extends TimeLimitedModifierBase {
     );
 
     this.configManager.registerPropertyConfig(
-      "rampUpStrength",
+      "rampUpStrengthFactor",
       (_, context) => {
-        const totalRampUpStrength =
-          context.rampUpStrength || defaultRegistry.totalRampUpStrength;
-        const rampUpFrequency = this.rampUpFrequency;
-        const duration = this.duration;
-        return (totalRampUpStrength * rampUpFrequency) / duration;
+        const rampUpStrengthPercent =
+          context.rampUpStrengthFactor || defaultRegistry.rampUpStrengthPercent;
+        return rampUpStrengthPercent / 100;
       },
       undefined,
-      ["rampUpFrequency", "duration"],
     );
 
     this.configManager.loadComplexConfigIntoContainer(customConfig || {}, this);
   }
 
-  onActivation(game: Pong): void {
-    super.onActivation(game);
-
-    const gameState = game.getState();
-    if (gameState.balls.length > 0) {
-      this.initialSpeed = gameState.balls[0].speed;
-    }
-  }
-
   onUpdate(game: Pong): void {
+    if (this.ticks < 0) {
+      this.deactivate(game);
+      return;
+    }
     super.onUpdate(game);
 
     if (this.ticks % this.rampUpFrequency == 0) {
-      this.strength += this.rampUpStrength;
-
       const gameState = game.getState();
       if (!(gameState.balls.length > 0)) {
         console.log(`Can't speed up if there's no balls: ${gameState.balls}`);
         return;
       }
 
-      const newSpeed = this.initialSpeed * (1 + this.strength);
-
-      gameState.balls[0].speed = newSpeed;
+      gameState.balls[0].speed +=
+        this.rampUpStrengthFactor * gameState.balls[0].speed;
     }
   }
 
   onDeactivation(game: Pong): void {
     super.onDeactivation(game);
-
-    // Reset ball speed back to initial when deactivating
-    const gameState = game.getState();
-    if (gameState.balls.length > 0 && this.ticks <= 0)
-      gameState.balls[0].speed = this.initialSpeed;
-
     game.getModifierManager().deletePowerUp(this);
   }
 
-  onGoal(game: Pong, args: { playerId: number }): void {
-    this.deactivate(game);
+  onBallReset(game: Pong, args: { ballID: number }): void {
+    if (args.ballID <= 0)
+      // -1: resetting all balls, 0: mainBall -> don't deactivate on non-main ball reset
+      this.deactivate(game);
   }
 }
