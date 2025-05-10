@@ -1,7 +1,5 @@
 import type { Database } from "sqlite";
 import type GameManager from "./GameManager";
-import { getGame } from "../../../types/games/gameRegistry";
-
 /**
  * Main function to save game results to the database
  */
