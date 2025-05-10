@@ -575,6 +575,7 @@ export type TOURNAMENT_CONFIGS_REGISTRY_TYPE = {
     bracketType: string;
     matchWinner: string;
     possiblePlayerCount: number[];
+    initialSeedingMethod?: string;
   };
 };
 
@@ -588,18 +589,21 @@ export const TOURNAMENT_CONFIGS_REGISTRY: TOURNAMENT_CONFIGS_REGISTRY_TYPE = {
   singleElimination: {
     bracketType: "singleElimination",
     matchWinner: "bestOfX",
+    initialSeedingMethod: "random",
     possiblePlayerCount: [4, 8, 16, 32],
   },
 
   doubleElimination: {
     bracketType: "singleElimination",
     matchWinner: "bestOfX",
+    initialSeedingMethod: "random",
     possiblePlayerCount: [4, 8, 16, 32],
   },
 
   swissRound: {
     bracketType: "singleElimination",
     matchWinner: "bestOfX",
+    initialSeedingMethod: "random",
     possiblePlayerCount: Array.from({ length: 15 }).map(
       (_, index) => 2 * (index + 1),
     ),

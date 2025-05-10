@@ -9,6 +9,7 @@ export interface TournamentSettings {
   matchWinner: string;
   players?: string[];
   playerCount?: number;
+  initialSeedingMethod?: string;
   gameData: {
     playerCount: number;
   };
