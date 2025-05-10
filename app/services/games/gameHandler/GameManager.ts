@@ -121,13 +121,12 @@ class GameManager {
   public async startGame(fastify: FastifyInstance): Promise<void> {
     if (this.game.getStatus() !== GameStatus.CREATED) return;
 
-    this.shuffleReferenceTable();
     this.addIngameIdToPlayerAndAiOpponent();
     this.game.startGame();
     this.startGameAndAiLoop(fastify);
   }
 
-  private shuffleReferenceTable(): void {
+  public shuffleReferenceTable(): void {
     const tmpRng = new RNG();
     this.playerIdReferenceTable = tmpRng.randomArray(
       this.playerIdReferenceTable,

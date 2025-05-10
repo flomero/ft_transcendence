@@ -15,11 +15,12 @@ const gameWebsocketHandler = async (
 
   try {
     gameValidationCheck(userId, gameId);
-    gameManager!.addSocketToPlayer(userId, connection);
+    gameManager?.addSocketToPlayer(userId, connection);
+    gameManager?.shuffleReferenceTable();
     sendTheInitialGameStateToEveryone(gameManager!);
 
     if (gameManager!.allPlayersAreConnected() === true) {
-      await gameManager!.startGame(request.server);
+      await gameManager?.startGame(request.server);
     }
 
     connection.on("message", (message: string) => {
