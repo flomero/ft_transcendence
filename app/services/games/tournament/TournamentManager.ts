@@ -184,6 +184,15 @@ class TournamentManager {
   }
 
   private async createMatches(brackets: Round): Promise<void> {
+    Object.entries(brackets).forEach(([matchID, match]: [string, Match]) => {
+      this.tournament?.matchWinnerManager.execute(
+        "initializeMatch",
+        matchID,
+        Object.keys(match.results),
+        match.gamesCount,
+      );
+    });
+
     const bracketKeys = Object.keys(brackets);
     const { PLAYER, AI } = TournamentManager.PlayerType;
 
@@ -274,6 +283,9 @@ class TournamentManager {
   ): void {
     const isMatchOver = this.notifyMatchWinnder(gameManagerId, gameResult);
 
+    console.log(`Game finished: ${gameManagerId}`);
+    console.dir(gameResult, { depth: null });
+
     if (isMatchOver === true) {
       this.notifyBracketManager(gameResult, gameManagerId);
     } else {
@@ -290,6 +302,8 @@ class TournamentManager {
       throw new Error(
         `[notifyMatchWinner] GameManagerId: ${gameManagerId} does not exist`,
       );
+
+    console.log(`matchWinner notif: ${matchId}`);
 
     const isMatchOver = this.tournament?.matchWinnerManager.executeStrategy(
       matchId,
