@@ -4,6 +4,7 @@ import type { GameBase } from "../gameBase";
 import { GAME_REGISTRY } from "../../../types/games/gameRegistry";
 import { PongAIOpponent } from "./pongAIOpponent";
 import { GameStatus } from "../../../types/games/gameBaseState";
+import { fastifyInstance } from "../../../app";
 
 export const pongConsumer = async (
   ws: WebSocket,
@@ -66,8 +67,8 @@ export const pongConsumer = async (
     try {
       const rawData: Record<string, any> = JSON.parse(message.toString());
 
-      console.log("Raw data received:");
-      console.dir(rawData);
+      fastifyInstance.log.debug("Raw data received:");
+      fastifyInstance.log.debug(rawData);
 
       const messageType = rawData.type;
       const data = rawData.options;

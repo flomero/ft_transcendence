@@ -2,6 +2,7 @@ import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
 import { TimeLimitedModifierBase } from "../../timeLimitedModifierBase";
 import { ModifierActivationMode, ModifierStatus } from "../../modifierBase";
 import type { Pong } from "../pong";
+import { fastifyInstance } from "../../../../app";
 
 export class BlinkingBall extends TimeLimitedModifierBase {
   name = "blinkingBall";
@@ -74,7 +75,7 @@ export class BlinkingBall extends TimeLimitedModifierBase {
 
     const gameState = game.getState();
     if (!(gameState.balls.length > 0)) {
-      console.log(
+      fastifyInstance.log.warn(
         `Can't make a ball blink if there's no balls: ${gameState.balls}`,
       );
       return;

@@ -2,6 +2,7 @@ import { GameStatus } from "../../../../types/games/gameBaseState";
 import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
 import type { Pong } from "../pong";
 import { ModifierBase } from "../../modifierBase";
+import { fastifyInstance } from "../../../../app";
 
 export class ScoredGame extends ModifierBase {
   name = "scoredGame";
@@ -20,7 +21,7 @@ export class ScoredGame extends ModifierBase {
 
   onGoal(game: Pong, args: { playerId: number }): void {
     if (args.playerId < 0 || args.playerId >= game.getState().playerCount) {
-      console.log(`${args.playerId} out of bounds`);
+      fastifyInstance.log.debug(`${args.playerId} out of bounds`);
       return;
     }
 

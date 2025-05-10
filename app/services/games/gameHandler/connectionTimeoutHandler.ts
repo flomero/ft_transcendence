@@ -31,14 +31,14 @@ const startAiGame = (gameManager: GameManager, fastiy: FastifyInstance) => {
 
 const startGameIfNotAllPlayerConnected = (
   gameManager: GameManager,
-  fastiy: FastifyInstance,
+  fastify: FastifyInstance,
 ) => {
   if (gameManager.allPlayersAreConnected() === true) return;
 
-  console.log("[connectionTimeoutHandler] Starting game");
+  fastify.log.info("[connectionTimeoutHandler] Starting game");
   try {
     if (gameManager.gameStatus() === GameStatus.CREATED) {
-      gameManager.startGame(fastiy);
+      gameManager.startGame(fastify);
     }
   } catch (err) {
     if (err instanceof Error) {
