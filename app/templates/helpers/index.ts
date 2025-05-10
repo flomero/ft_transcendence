@@ -101,5 +101,14 @@ export function registerHelpers(handlebars: typeof Handlebars) {
     return strings.join("");
   });
 
+  handlebars.registerHelper("get", (obj, path, prop) => {
+    if (!obj) return "";
+    if (Array.isArray(obj) && path !== undefined) {
+      const item = obj[parseInt(path, 10)];
+      return prop ? item?.[prop] : item;
+    }
+    return obj[path];
+  });
+
   // Add other helpers here as needed
 }
