@@ -189,16 +189,29 @@ class TournamentHandler {
     window.router.refresh(); // TODO: maybe make better
   }
 
-  public leaveTournament(event: Event): void {
-    event.preventDefault();
-    fetch(
-      `/games/tournament/leave/${window.location.pathname.split("/").pop()}`,
-      {
-        method: "POST",
-      },
-    ).then(() => {
-      window.location.href = "/play";
-    });
+  public async leaveTournament(): Promise<void> {
+    try {
+      const response = await fetch(
+        `/games/tournament/leave/${this.getTournamentId()}`,
+        {
+          method: "POST",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to leave tournament: ${response.statusText}`);
+      }
+
+      if (this.socket) {
+        this.socket.close();
+      }
+
+      window.router.navigateTo("/play");
+    } catch (error) {
+      this.handleError(
+        new Error("Failed to leave tournament. Please try again later."),
+      );
+    }
   }
 
   public async addAiOpponent(): Promise<void> {
