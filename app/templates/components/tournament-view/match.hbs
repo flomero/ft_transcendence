@@ -2,7 +2,7 @@
   id="{{match.id}}"
   class="match border bg-black-200 mt-2 mb-2 p-2 rounded-lg"
 >
-  <table class="w-full table-auto text-sm font-mono">
+  <table class=" table-auto text-sm font-mono border-separate border-spacing-x-2">
     <tbody>
     {{#each match.players as |player playerIndex|}}
       <tr>
@@ -11,36 +11,26 @@
           {{player.name}}
         </td>
 
-        {{#if player.isReady}}
+       {{#if player.isReady}}
           <!-- Win-count badge, colour depends on leadPlayer -->
           {{#if (eq ../match.leadPlayer playerIndex)}}
-            <td class="px-2 mx-2 font-bold text-center rounded bg-green-600 text-white">
-              {{player.winCount}}
-            </td>
+            {{> components/tournament-view/score-cell score=player.winCount isWinner=true}}
           {{else if (eq ../match.leadPlayer -1)}}
-            <td class="px-2 mx-2 font-bold text-center rounded bg-gray-400 text-white">
-              {{player.winCount}}
-            </td>
+            {{> components/tournament-view/score-cell score=player.winCount isWinner=false}}
           {{else}}
-            <td class="px-2 mx-2 font-bold text-center rounded bg-gray-700 text-white">
-              {{player.winCount}}
-            </td>
+            {{> components/tournament-view/score-cell score=player.winCount isWinner=false}}
           {{/if}}
 
           <!-- Separator -->
-          <td class="px-2 mx-2 text-gray-500">|</td>
+          <td class="px-2 text-gray-500">|</td>
 
           <!-- Per-game scores -->
           {{#each player.score as |score gameIndex|}}
-            {{#if (eq (lookup ../../match.gameWinners gameIndex) playerIndex)}}
-              <td class="px-2 mx-2 text-center rounded bg-green-600 text-white">
-                {{score}}
-              </td>
-            {{else}}
-              <td class="px-2 mx-2 text-center rounded bg-gray-700 text-white">
-                {{score}}
-              </td>
-            {{/if}}
+            {{> components/tournament-view/score-cell
+              score=score
+              isWinner=(eq (lookup ../../match.gameWinners gameIndex) playerIndex)
+            }}
+
           {{/each}}
         {{/if}}
       </tr>
