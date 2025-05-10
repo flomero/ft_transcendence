@@ -190,7 +190,7 @@ export class SpeedGate extends TimeLimitedModifierBase {
 
     // 2. Compute gateWalls
     const deltaWidth = (bigPortalWallWidth - smallPortalWallWidth) / 2.0;
-    const centralOffset = deltaWidth + portalWallsInnerWidth / 2.0;
+    const centralOffset = deltaWidth + smallPortalWallWidth / 2.0;
     const theta = Math.atan2(deltaWidth, portalWallsInnerWidth);
     const legWall1Dir = {
       x: -Math.cos(trapezoideAngle + theta),
@@ -202,17 +202,18 @@ export class SpeedGate extends TimeLimitedModifierBase {
     };
     const legWallWidth = Math.hypot(deltaWidth, portalWallsInnerWidth);
 
+    const gateWallHeight = gameSettings.paddleHeight / 4.0;
+    const legWallHeight = gateWallHeight * 2.0;
+
     // 3. Build walls.
     const smallPortalWall: Rectangle = {
       id: gameState.walls.length,
       x:
         trapezoideCenterPos.x +
-        trapezoideDir.x *
-          (portalWallsInnerWidth / 2.0 - gameSettings.wallsHeight / 2.0),
+        trapezoideDir.x * (portalWallsInnerWidth / 2.0 - 2 * gateWallHeight),
       y:
         trapezoideCenterPos.y +
-        trapezoideDir.y *
-          (portalWallsInnerWidth / 2.0 - gameSettings.wallsHeight / 2.0),
+        trapezoideDir.y * (portalWallsInnerWidth / 2.0 - 2 * gateWallHeight),
       alpha: trapezoideAngle - Math.PI / 2.0,
       dx: trapezoideDir.y,
       dy: -trapezoideDir.x,
@@ -220,14 +221,12 @@ export class SpeedGate extends TimeLimitedModifierBase {
       ny: trapezoideDir.y,
       absX:
         trapezoideCenterPos.x +
-        trapezoideDir.x *
-          (portalWallsInnerWidth / 2.0 - gameSettings.wallsHeight / 2.0),
+        trapezoideDir.x * (portalWallsInnerWidth / 2.0 - 2 * gateWallHeight),
       absY:
         trapezoideCenterPos.y +
-        trapezoideDir.y *
-          (portalWallsInnerWidth / 2.0 - gameSettings.wallsHeight / 2.0),
+        trapezoideDir.y * (portalWallsInnerWidth / 2.0 - 2 * gateWallHeight),
       width: smallPortalWallWidth,
-      height: gameSettings.paddleHeight / 2.25,
+      height: gateWallHeight,
       doCollision: true,
       doRotation: true,
       isVisible: true,
@@ -240,12 +239,10 @@ export class SpeedGate extends TimeLimitedModifierBase {
       id: gameState.walls.length + 1,
       x:
         trapezoideCenterPos.x -
-        trapezoideDir.x *
-          (portalWallsInnerWidth / 2.0 - gameSettings.wallsHeight / 2.0),
+        trapezoideDir.x * (portalWallsInnerWidth / 2.0 - 2 * gateWallHeight),
       y:
         trapezoideCenterPos.y -
-        trapezoideDir.y *
-          (portalWallsInnerWidth / 2.0 - gameSettings.wallsHeight / 2.0),
+        trapezoideDir.y * (portalWallsInnerWidth / 2.0 - 2 * gateWallHeight),
       alpha: trapezoideAngle + Math.PI / 2.0,
       dx: -trapezoideDir.y,
       dy: trapezoideDir.x,
@@ -253,14 +250,12 @@ export class SpeedGate extends TimeLimitedModifierBase {
       ny: -trapezoideDir.y,
       absX:
         trapezoideCenterPos.x -
-        trapezoideDir.x *
-          (portalWallsInnerWidth / 2.0 - gameSettings.wallsHeight / 2.0),
+        trapezoideDir.x * (portalWallsInnerWidth / 2.0 - 2 * gateWallHeight),
       absY:
         trapezoideCenterPos.y -
-        trapezoideDir.y *
-          (portalWallsInnerWidth / 2.0 - gameSettings.wallsHeight / 2.0),
+        trapezoideDir.y * (portalWallsInnerWidth / 2.0 - 2 * gateWallHeight),
       width: bigPortalWallWidth,
-      height: gameSettings.paddleHeight / 2.25,
+      height: gateWallHeight,
       doCollision: true,
       doRotation: true,
       isVisible: true,
@@ -273,12 +268,10 @@ export class SpeedGate extends TimeLimitedModifierBase {
       id: gameState.walls.length + 2,
       x:
         trapezoideCenterPos.x +
-        trapezoideDir.y *
-          (centralOffset + (gameSettings.wallsHeight * 6.0) / 5.0),
+        trapezoideDir.y * (centralOffset + 2 * legWallHeight),
       y:
         trapezoideCenterPos.y -
-        trapezoideDir.x *
-          (centralOffset + (gameSettings.wallsHeight * 6.0) / 5.0),
+        trapezoideDir.x * (centralOffset + 2 * legWallHeight),
       alpha: trapezoideAngle + theta,
       dx: legWall1Dir.x,
       dy: legWall1Dir.y,
@@ -286,14 +279,12 @@ export class SpeedGate extends TimeLimitedModifierBase {
       ny: legWall1Dir.x,
       absX:
         trapezoideCenterPos.x +
-        trapezoideDir.y *
-          (centralOffset + (gameSettings.wallsHeight * 6.0) / 5.0),
+        trapezoideDir.y * (centralOffset + 2 * legWallHeight),
       absY:
         trapezoideCenterPos.y -
-        trapezoideDir.x *
-          (centralOffset + (gameSettings.wallsHeight * 6.0) / 5.0),
-      width: legWallWidth + gameSettings.wallsHeight / 2.0,
-      height: gameSettings.wallsHeight / 2.0,
+        trapezoideDir.x * (centralOffset + 2 * legWallHeight),
+      width: (legWallWidth * 105) / 100,
+      height: legWallHeight,
       doCollision: true,
       doRotation: true,
       isVisible: true,
@@ -306,12 +297,10 @@ export class SpeedGate extends TimeLimitedModifierBase {
       id: gameState.walls.length + 3,
       x:
         trapezoideCenterPos.x -
-        trapezoideDir.y *
-          (centralOffset + (gameSettings.wallsHeight * 6.0) / 5.0),
+        trapezoideDir.y * (centralOffset + 2 * legWallHeight),
       y:
         trapezoideCenterPos.y +
-        trapezoideDir.x *
-          (centralOffset + (gameSettings.wallsHeight * 6.0) / 5.0),
+        trapezoideDir.x * (centralOffset + 2 * legWallHeight),
       alpha: trapezoideAngle - theta,
       dx: legWall2Dir.x,
       dy: legWall2Dir.y,
@@ -319,14 +308,12 @@ export class SpeedGate extends TimeLimitedModifierBase {
       ny: legWall2Dir.x,
       absX:
         trapezoideCenterPos.x -
-        trapezoideDir.y *
-          (centralOffset + (gameSettings.wallsHeight * 6.0) / 5.0),
+        trapezoideDir.y * (centralOffset + 2 * legWallHeight),
       absY:
         trapezoideCenterPos.y +
-        trapezoideDir.x *
-          (centralOffset + (gameSettings.wallsHeight * 6.0) / 5.0),
-      width: legWallWidth + gameSettings.wallsHeight / 2.0,
-      height: gameSettings.wallsHeight / 2.0,
+        trapezoideDir.x * (centralOffset + 2 * legWallHeight),
+      width: (legWallWidth * 105) / 100,
+      height: legWallHeight,
       doCollision: true,
       doRotation: true,
       isVisible: true,
