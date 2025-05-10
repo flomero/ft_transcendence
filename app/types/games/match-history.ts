@@ -12,4 +12,5 @@ export type MatchInfo = {
   matchDate: string; // keep as string from DB; parse only for sorting
   leaderboard: LeaderboardEntry[];
   result: MatchResult;
+  isFinished: boolean;
 };

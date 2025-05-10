@@ -34,15 +34,19 @@
       <span class="flex ml-1 text-sm text-gray-500 truncate">{{matchId}}</span>
     </span>
 
-    <span class="font-bold">
-      {{#if (eq result "win")}}
-        <span class="text-green-500">Win</span>
-      {{else if (eq result "draw")}}
-        <span class="text-yellow-500">Draw</span>
-      {{else}}
-        <span class="text-red-500">Loss</span>
-      {{/if}}
-    </span>
+    {{#if isFinished}}
+      <span class="font-bold">
+        {{#if (eq result "win")}}
+          <span class="text-green-500">Win</span>
+        {{else if (eq result "draw")}}
+          <span class="text-yellow-500">Draw</span>
+        {{else}}
+          <span class="text-red-500">Loss</span>
+        {{/if}}
+      </span>
+    {{else}}
+      <span class="elapsed-time font-mono" data-start="{{matchDate}}"></span>
+    {{/if}}
 
     <svg class="w-4 h-4 shrink-0 transition-transform group-open:rotate-180"
          viewBox="0 0 20 20" fill="currentColor">
