@@ -58,7 +58,7 @@
     {{#if (eq leaderboard.length 2)}}
       <li>
         <a
-          href="/users/{{userId}}"
+          href="/users/{{get leaderboard "0" "userId"}}"
           class="flex items-center justify-between gap-x-4
                py-1 px-2 w-full rounded-md
                transition-colors duration-150
@@ -73,7 +73,7 @@
       </li>
       <li>
         <a
-          href="/users/{{userId}}"
+          href="/users/{{get leaderboard "1" "userId"}}"
           class="flex items-center justify-between gap-x-4
                py-1 px-2 w-full rounded-md
                transition-colors duration-150
