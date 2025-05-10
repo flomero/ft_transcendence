@@ -104,46 +104,46 @@ export class Tournament {
 
     // DEBUG
 
-    // Start tournament with no previous round results
-    let currentRound = this.bracketManager.executeStrategy();
-    let roundNumber = 1;
+    // // Start tournament with no previous round results
+    // let currentRound = this.bracketManager.executeStrategy();
+    // let roundNumber = 1;
 
-    // Continue until there are no more matches to play
-    while (Object.keys(currentRound).length > 0) {
-      this.currentRound = currentRound;
-      this.completedMatches.clear();
+    // // Continue until there are no more matches to play
+    // while (Object.keys(currentRound).length > 0) {
+    //   this.currentRound = currentRound;
+    //   this.completedMatches.clear();
 
-      console.log(`\n ---- ROUND ${roundNumber} ----`);
-      console.log(`Round ${roundNumber} matches:`);
+    //   console.log(`\n ---- ROUND ${roundNumber} ----`);
+    //   console.log(`Round ${roundNumber} matches:`);
 
-      // Initialize matches in the match winner strategy
-      Object.entries(currentRound).forEach(([matchID, match]) => {
-        const playerIDs = Object.keys(match.results);
-        // Initialize match in the match winner strategy
-        this.matchWinnerManager.execute(
-          "initializeMatch",
-          matchID,
-          playerIDs,
-          match.gamesCount,
-        );
+    //   // Initialize matches in the match winner strategy
+    //   Object.entries(currentRound).forEach(([matchID, match]) => {
+    //     const playerIDs = Object.keys(match.results);
+    //     // Initialize match in the match winner strategy
+    //     this.matchWinnerManager.execute(
+    //       "initializeMatch",
+    //       matchID,
+    //       playerIDs,
+    //       match.gamesCount,
+    //     );
 
-        console.log(
-          `  |->  ${matchID}: ${playerIDs.join(" vs ")} (Best of ${match.gamesCount})`,
-        );
-      });
+    //     console.log(
+    //       `  |->  ${matchID}: ${playerIDs.join(" vs ")} (Best of ${match.gamesCount})`,
+    //     );
+    //   });
 
-      // Simulate playing all games in this round
-      this.simulateRound(currentRound);
+    //   // Simulate playing all games in this round
+    //   this.simulateRound(currentRound);
 
-      // Get matches for the next round
-      currentRound = this.bracketManager.executeStrategy();
-      roundNumber++;
-    }
+    //   // Get matches for the next round
+    //   currentRound = this.bracketManager.executeStrategy();
+    //   roundNumber++;
+    // }
 
-    console.log("\n ---- TOURNAMENT COMPLETED ----");
-    this.status = TournamentStatus.FINISHED;
+    // console.log("\n ---- TOURNAMENT COMPLETED ----");
+    // this.status = TournamentStatus.FINISHED;
 
-    this.tournamentResults = this.getResults();
+    // this.tournamentResults = this.getResults();
   }
 
   /**

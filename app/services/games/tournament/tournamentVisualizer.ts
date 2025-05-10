@@ -1,5 +1,4 @@
 import type { FastifyInstance } from "fastify";
-import { tournaments } from "./tournaments";
 import TournamentManager from "./TournamentManager";
 import type {
   PlayerInfos,
@@ -147,10 +146,11 @@ async function hydrateTournamentPlayers(
 
   /** 2 ─ Fetch them all at once */
   const ids = [...pendingIds];
+  console.dir(ids);
   const placeholders = ids.map(() => "?").join(",");
   type Row = {
     id: string;
-    name: string;
+    username: string;
   };
 
   const rows: Row[] = await db.all<Row[]>(
@@ -161,15 +161,16 @@ async function hydrateTournamentPlayers(
     `,
     ids,
   );
-
+  console.dir(rows);
   const byId = new Map(rows.map((r) => [r.id, r]));
+  console.dir(byId, { depth: null });
 
   /** 3 ─ Merge back into every player slot */
   const applyRow = (p: PlayerInfos) => {
     const row = byId.get(p.id);
     if (!row) return;
 
-    p.name = row.name;
+    p.name = row.username;
   };
 
   tourney.rounds.forEach((r) =>
@@ -181,15 +182,9 @@ async function hydrateTournamentPlayers(
 
 export const getCurrentTournamentInfo = async (
   fastify: FastifyInstance,
-  tournamentId: string,
+  manager: TournamentManager,
 ) => {
-  const tManager: TournamentManager | undefined = tournaments.get(tournamentId);
-
-  if (!tManager) {
-    return undefined;
-  }
-  let tournament: TournamentInfos | undefined =
-    tManager.getCurrentTournamentInfos();
+  let tournament = manager.getCurrentTournamentInfos();
   if (!tournament) {
     return undefined;
   }
@@ -199,4 +194,5 @@ export const getCurrentTournamentInfo = async (
   tournament = await hydratePlayerScores(tournament, fastify);
 
   console.dir(tournament, { depth: null });
+  return tournament;
 };

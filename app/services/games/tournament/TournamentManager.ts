@@ -75,9 +75,9 @@ class TournamentManager {
 
   public addMember(memberId: string): void {
     if (this.tournamentMembers.has(memberId) === true) {
-      console.warn(
-        `Member: ${memberId} already exists in tournament: ${this.tournamentId}`,
-      );
+      // console.warn(
+      //   `Member: ${memberId} already exists in tournament: ${this.tournamentId}`,
+      // );
       return;
     }
     const newMember: TournamentMember = {
@@ -160,10 +160,14 @@ class TournamentManager {
       throw new Error("[start Tournemant] Tournament cannot be started");
     }
 
-    console.log("BBBBBBBBBBB");
     this.tournament = await createTournament(db, this);
     this.tournament.startTournament();
     await this.generateRound();
+    this.sendMessageToAll(
+      JSON.stringify({
+        type: "update",
+      }),
+    );
   }
 
   public canTournamentBeStarted(): boolean {
