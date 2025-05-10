@@ -21,13 +21,13 @@ import {
   MatchStatus,
   Edge,
 } from "../../../types/tournament/tournament";
+import type { TournamentSettings } from "../../../interfaces/games/tournament/TournamentSettings";
 
 export enum TournamentStatus {
-  CREATED,
-  ON_GOING,
-  FINISHED,
+  CREATED = 0,
+  ON_GOING = 1,
+  FINISHED = 2,
 }
-import { TournamentSettings } from "../../../interfaces/games/tournament/TournamentSettings";
 
 const singleEliminationRoundNames: string[] = [
   "Final",
@@ -72,6 +72,8 @@ export class Tournament {
 
   constructor(tournamentData: TournamentSettings) {
     this.tournamentData = tournamentData;
+    if (!this.tournamentData.initialSeedingMethod)
+      this.tournamentData.initialSeedingMethod = "random";
 
     // Initialize bracket generator strategy
     this.bracketManager = new StrategyManager(

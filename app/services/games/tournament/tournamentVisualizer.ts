@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { tournaments } from "./new/newTournamentHandler";
+import { tournaments } from "./tournaments";
 import TournamentManager from "./TournamentManager";
 import type {
   PlayerInfos,
