@@ -1,10 +1,10 @@
 import { matchMakingManager } from "./MatchMakingManager";
 import { createMatch } from "./createMatch";
-import type { Database } from "sqlite";
 import { GAMEMODE_REGISTRY, MatchmakingGameModes } from "../../../config";
 import { GameModeType } from "../../config/gameModes";
+import { FastifyInstance } from "fastify";
 
-const matchPlayers = async (db: Database): Promise<void> => {
+const matchPlayers = async (fastify: FastifyInstance): Promise<void> => {
   // Group members by game mode
   const gameModeGroups = new Map<GameModeType, string[]>();
 
@@ -25,7 +25,7 @@ const matchPlayers = async (db: Database): Promise<void> => {
 
     while (players.length >= requiredPlayerCount) {
       const matchedPlayers = players.splice(0, requiredPlayerCount);
-      await matchPlayersForGame(matchedPlayers, gameMode, db);
+      await matchPlayersForGame(matchedPlayers, gameMode, fastify);
     }
   }
 };
@@ -33,9 +33,9 @@ const matchPlayers = async (db: Database): Promise<void> => {
 const matchPlayersForGame = async (
   playerIds: string[],
   gameMode: GameModeType,
-  db: Database,
+  fastify: FastifyInstance,
 ): Promise<void> => {
-  const matchId = await createMatch(playerIds, gameMode, db);
+  const matchId = await createMatch(playerIds, gameMode, fastify);
 
   playerIds.forEach((playerId) => {
     matchMakingManager.sendMessageToMember(
