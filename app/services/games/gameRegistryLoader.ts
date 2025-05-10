@@ -4,8 +4,11 @@ import {
   type GameRegistry,
   GAME_REGISTRY,
 } from "../../types/games/gameRegistry";
+import type { FastifyInstance } from "fastify";
 
-export async function loadGameRegistry(): Promise<void> {
+export async function loadGameRegistry(
+  fastify: FastifyInstance,
+): Promise<void> {
   const jsonPath = path.resolve(__dirname, "../../../gameRegistry.json");
 
   let jsonData: string;
@@ -102,5 +105,5 @@ export async function loadGameRegistry(): Promise<void> {
 
   // Save the processed registry to the exported variable.
   Object.assign(GAME_REGISTRY, registry);
-  console.log("Loaded GAME_REGISTRY:", GAME_REGISTRY);
+  fastify.log.info("Loaded GAME_REGISTRY");
 }

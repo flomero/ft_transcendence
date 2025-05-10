@@ -1,10 +1,15 @@
 import { join } from "node:path";
 import AutoLoad, { type AutoloadPluginOptions } from "@fastify/autoload";
-import type { FastifyPluginAsync, FastifyServerOptions } from "fastify";
+import type {
+  FastifyPluginAsync,
+  FastifyServerOptions,
+  FastifyInstance,
+} from "fastify";
 import { loadGameRegistry } from "./services/games/gameRegistryLoader";
 import { loadStrategyRegistry } from "./services/strategy/strategyRegistryLoader";
 import fastifyEnv from "@fastify/env";
-//import { initializeSampleTournaments } from "./services/games/tournament/tournaments";
+
+export let fastifyInstance: FastifyInstance;
 
 const envSchema = {
   type: "object",
@@ -60,27 +65,10 @@ const app: FastifyPluginAsync<AppOptions> = async (
     }
   });
 
-  await loadGameRegistry();
-  await loadStrategyRegistry();
+  await loadGameRegistry(fastify);
+  await loadStrategyRegistry(fastify);
 
-  // const tournamentData = {
-  //   bracketType: "swissRound",
-  //   matchWinnerType: "bestOfX",
-  //   playerCount: 16,
-  //   players: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15'],
-  //   gameData:{
-  //     playerCount: 2
-  //   }
-  // }
-  // const tournament = new Tournament(tournamentData);
-
-  // tournament.startTournament();
-
-  // console.log(`Results:`);
-  // console.dir(tournament.getResults(), {depth: null});
-
-  // console.log(`Final Ranking:`);
-  // console.dir(tournament.getFinalRankings(), {depth: null});
+  fastifyInstance = fastify;
 
   await fastify.register(require("@fastify/swagger"));
   await fastify.register(import("@fastify/swagger-ui"), {
@@ -110,12 +98,9 @@ const app: FastifyPluginAsync<AppOptions> = async (
     dir: join(__dirname, "middlewares"),
     options: opts,
   });
-  fastify.ready();
-
-  // if (process.env.NODE_ENV === "development") {
-  //   console.log("Initializing sample lobbies...");
-  //   initializeSampleTournaments(fastify.sqlite);
-  // }
+  fastify.ready(() => {
+    fastifyInstance = fastify;
+  });
 };
 
 export default app;

@@ -18,6 +18,7 @@ import type {
   PongGameState,
   WallState,
 } from "../../../types/games/pong/gameState";
+import { fastifyInstance } from "../../../app";
 
 const EPSILON = 1e-2;
 
@@ -101,7 +102,7 @@ export abstract class Pong extends GameBase {
       // Verify that no balls went out of bounds
       this.gameState.balls.forEach((ball, id) => {
         if (this.isOutOfBounds(ball)) {
-          console.log(`Ball out of bounds --> resetting it`);
+          fastifyInstance.log.warn(`Ball out of bounds --> resetting it`);
           // this.resetBall(this.gameState, id, true);
           this.modifierManager.trigger("onBallOutOfBounds", { ballID: id });
         } else
@@ -119,7 +120,7 @@ export abstract class Pong extends GameBase {
 
   protected updatePaddle(paddle: Paddle, doTriggers: boolean): void {
     if (!paddle.doMove) {
-      console.log(
+      fastifyInstance.log.warn(
         `Player ${this.gameState.paddles.indexOf(paddle)}'s paddle can't be moved`,
       );
       return;
@@ -178,7 +179,7 @@ export abstract class Pong extends GameBase {
     if (
       !(action.playerId >= 0 && action.playerId < this.gameState.playerCount)
     ) {
-      console.log(
+      fastifyInstance.log.warn(
         `Can't handle player ${action.playerId}'s action: game has ${this.gameState.playerCount} players`,
       );
       return;
@@ -188,7 +189,7 @@ export abstract class Pong extends GameBase {
     const delayTicks = Math.round(delayS / this.serverTickrateS);
 
     if (delayTicks > this.serverMaxDelayTicks) {
-      console.log(
+      fastifyInstance.log.warn(
         `Player ${action.playerId} has really high ping -> disconnecting`,
       );
       // TODO: Disconnection in case of high ping
@@ -197,7 +198,7 @@ export abstract class Pong extends GameBase {
 
     // Rewind game state if needed
     if (delayTicks > 0) {
-      console.log(`Rewinding ${delayTicks} ticks`);
+      fastifyInstance.log.debug(`Rewinding ${delayTicks} ticks`);
       await this.rewind(delayTicks);
     }
 
@@ -209,7 +210,7 @@ export abstract class Pong extends GameBase {
 
     // Fast-forward back to current state
     if (delayTicks > 0) {
-      console.log(`Fast-forwarding ${delayTicks} ticks`);
+      fastifyInstance.log.debug(`Fast-forwarding ${delayTicks} ticks`);
       await this.fastForward(delayTicks, this.gameState);
     }
   }
@@ -345,7 +346,9 @@ export abstract class Pong extends GameBase {
 
   async rewind(toTick: number): Promise<void> {
     if (toTick > this.tickData.length) {
-      console.log(`Can't rewind that far -> rewinding as much as possible`);
+      fastifyInstance.log.debug(
+        `Can't rewind that far -> rewinding as much as possible`,
+      );
       toTick = this.tickData.length;
     }
 
@@ -493,7 +496,9 @@ export abstract class Pong extends GameBase {
 
       switch (collision.type) {
         case "powerUp":
-          console.log(`\nPlayer ${gameState.lastHit} picked up a powerUp`);
+          fastifyInstance.log.debug(
+            `\nPlayer ${gameState.lastHit} picked up a powerUp`,
+          );
           this.modifierManager.pickupPowerUp(collision.objectId);
           break;
 
@@ -501,8 +506,7 @@ export abstract class Pong extends GameBase {
           PhysicsEngine.resolveCollision(ball, collision);
 
           const playerId = collision.objectId;
-          // if (gameState.lastHit !== playerId)
-          //   console.log(`Last hit: ${playerId}`);
+
           gameState.lastHit = playerId;
 
           const paddle = this.gameState.paddles[playerId];
@@ -544,7 +548,7 @@ export abstract class Pong extends GameBase {
           break;
 
         default:
-          console.log(`Unknown collision type: ${collision.type}`);
+          fastifyInstance.log.warn(`Unknown collision type: ${collision.type}`);
       }
 
       remainingDistance -= travelDistance * (100 - 2 * EPSILON);
