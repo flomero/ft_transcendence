@@ -30,7 +30,7 @@ const savePlayerScoresAndResultToDatabase = async (
         score,
         result,
         player.playerUUID,
-        gameManager.getId,
+        gameManager.getId(),
       ]);
     } catch (err) {
       if (err instanceof Error)
@@ -61,7 +61,7 @@ const saveAIScoresAndResultToDatabase = async (
     const result = gameResults[playerInGameId];
 
     try {
-      await db.run(query, [score, result, playerUUID, gameManager.getId]);
+      await db.run(query, [score, result, playerUUID, gameManager.getId()]);
     } catch (err) {
       if (err instanceof Error)
         console.error(
