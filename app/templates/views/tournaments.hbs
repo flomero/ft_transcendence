@@ -9,9 +9,11 @@
       </div>
     </div>
 
-    {{> components/tournament-view/tournament-bracket tournament=tournament}}
+    {{> components/tournament-view/tournament-bracket rounds=tournament.rounds}}
   </div>
 {{/each}}
+
+{{debug}}
 
 <script>
   window.__TOURNAMENTS__ = {{{json tournaments}}};

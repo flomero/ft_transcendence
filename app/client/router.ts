@@ -450,32 +450,6 @@ document.addEventListener("DOMContentLoaded", () => {
     },
   });
 
-  window.router.addRoute("/tournaments?auto=false", {
-    onEnter: () => {
-      console.log("Tournament");
-      window.tournamentBracket = new TournamentBracket();
-    },
-    onExit: () => {
-      if (window.tournamentBracket) {
-        window.tournamentBracket.destroy();
-        window.tournamentBracket = undefined;
-      }
-    },
-  });
-
-  window.router.addRoute("/tournaments", {
-    onEnter: () => {
-      console.log("Tournament");
-      window.tournamentBracket = new TournamentBracket();
-    },
-    onExit: () => {
-      if (window.tournamentBracket) {
-        window.tournamentBracket.destroy();
-        window.tournamentBracket = undefined;
-      }
-    },
-  });
-
   window.router.addRoute("/games/matchmaking/join/:gamemode", {
     onEnter: () => {
       console.log("Matchmaking handler initialized");
@@ -497,10 +471,15 @@ document.addEventListener("DOMContentLoaded", () => {
       const tournamentHandler = new TournamentHandler();
       tournamentHandler.connect();
       window.tournamentHandler = tournamentHandler;
+      window.tournamentBracket = new TournamentBracket();
     },
     onExit: () => {
       if (window.tournamentHandler?.socket) {
         window.tournamentHandler.socket.close();
+      }
+      if (window.tournamentBracket) {
+        window.tournamentBracket.destroy();
+        window.tournamentBracket = undefined;
       }
     },
   });
