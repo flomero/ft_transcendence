@@ -20,7 +20,7 @@
           "ballRadius": 1,
           "ballResetSampler": "biasedQuadrantGaussianRA",
           "paddleCoveragePercent": 25,
-          "paddleSpeedWidthPercentS": 0.85,
+          "paddleSpeedWidthPercentS": 0.845,
           "paddleVelocityAngularTransmissionPercent": 55,
           "paddleVelocitySpeedTransmissionPercent": 10,
           "powerUpRadius": 4.5,
@@ -49,10 +49,10 @@
 
         "customizableSettings": {
           "ballSpeedWidthPercentS": 60,
-          "ballRadius": 0.6,
+          "ballRadius": 0.625,
           "ballResetSampler": "biasedGaussianCA",
           "paddleCoveragePercent": 25,
-          "paddleSpeedWidthPercentS": 0.78,
+          "paddleSpeedWidthPercentS": 0.77,
           "paddleVelocityAngularTransmissionPercent": 55,
           "paddleVelocitySpeedTransmissionPercent": 10,
           "powerUpRadius": 3.25,
@@ -189,7 +189,7 @@
 
       "portals": {
         "className": "Portals",
-        "spawnWeight": 5.0,
+        "spawnWeight": 3.0,
         "selfActivation": false,
         "durationS": 60,
         "portalWallWidthHeightPercent": 40,
@@ -204,7 +204,7 @@
 
       "speedGate": {
         "className": "SpeedGate",
-        "spawnWeight": 5.0,
+        "spawnWeight": 3.0,
         "selfActivation": false,
         "durationS": 60,
         "initialBallSizeSmallPortalWidthPercent": 700,
