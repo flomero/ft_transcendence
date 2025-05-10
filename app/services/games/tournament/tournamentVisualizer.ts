@@ -186,12 +186,12 @@ export const getCurrentTournamentInfo = async (
   const tManager: TournamentManager | undefined = tournaments.get(tournamentId);
 
   if (!tManager) {
-    throw new Error("Tournament not found");
+    return undefined;
   }
   let tournament: TournamentInfos | undefined =
     tManager.getCurrentTournamentInfos();
   if (!tournament) {
-    throw new Error("Tournament not found");
+    return undefined;
   }
 
   tournament = await hydrateTournamentPlayers(tournament, fastify);
