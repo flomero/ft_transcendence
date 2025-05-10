@@ -14,30 +14,30 @@
         {{#if player.isReady}}
           <!-- Win-count badge, colour depends on leadPlayer -->
           {{#if (eq ../match.leadPlayer playerIndex)}}
-            <td class="px-2 font-bold text-center rounded bg-green-600 text-white">
+            <td class="px-2 mx-2 font-bold text-center rounded bg-green-600 text-white">
               {{player.winCount}}
             </td>
           {{else if (eq ../match.leadPlayer -1)}}
-            <td class="px-2 font-bold text-center rounded bg-gray-400 text-white">
+            <td class="px-2 mx-2 font-bold text-center rounded bg-gray-400 text-white">
               {{player.winCount}}
             </td>
           {{else}}
-            <td class="px-2 font-bold text-center rounded bg-gray-700 text-white">
+            <td class="px-2 mx-2 font-bold text-center rounded bg-gray-700 text-white">
               {{player.winCount}}
             </td>
           {{/if}}
 
           <!-- Separator -->
-          <td class="px-2 text-gray-500">|</td>
+          <td class="px-2 mx-2 text-gray-500">|</td>
 
           <!-- Per-game scores -->
           {{#each player.score as |score gameIndex|}}
-            {{#if (eq (lookup ../match.gameWinners gameIndex) playerIndex)}}
-              <td class="px-2 text-center rounded bg-green-600 text-white">
+            {{#if (eq (lookup ../../match.gameWinners gameIndex) playerIndex)}}
+              <td class="px-2 mx-2 text-center rounded bg-green-600 text-white">
                 {{score}}
               </td>
             {{else}}
-              <td class="px-2 text-center rounded bg-gray-700 text-white">
+              <td class="px-2 mx-2 text-center rounded bg-gray-700 text-white">
                 {{score}}
               </td>
             {{/if}}
