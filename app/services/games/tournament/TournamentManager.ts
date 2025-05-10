@@ -16,6 +16,10 @@ import { createMatch } from "../matchMaking/createMatch";
 import type { GameOrigin } from "../../../types/games/gameHandler/GameOrigin";
 import aiOpponents from "../aiOpponent/aiOpponents";
 import { FastifyInstance } from "fastify";
+import {
+  type TournamentInfos,
+  MatchStatus,
+} from "../../../types/tournament/tournament";
 
 class TournamentManager {
   public tournamentId: string = randomUUID();
