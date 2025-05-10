@@ -35,6 +35,7 @@ export enum TournamentGameModes {
   CompetitiveClassicPongPowerUps = "competitiveClassicPongPowerUps",
   CompetitiveMultiplayerPong = "competitiveMultiplayerPong",
   CompetitiveMultiplayerPongPowerUps = "competitiveMultiplayerPongPowerUps",
+  PowerUpMayhem1v1 = "powerUpMayhem1v1",
 }
 
 export const TournamentGameModesPerBracketType: {
@@ -45,18 +46,22 @@ export const TournamentGameModesPerBracketType: {
     TournamentGameModes.CompetitiveClassicPongPowerUps,
     TournamentGameModes.CompetitiveMultiplayerPong,
     TournamentGameModes.CompetitiveMultiplayerPongPowerUps,
+    TournamentGameModes.PowerUpMayhem1v1,
   ],
   singleElimination: [
     TournamentGameModes.CompetitiveClassicPong,
     TournamentGameModes.CompetitiveClassicPongPowerUps,
+    TournamentGameModes.PowerUpMayhem1v1,
   ],
   doubleElimination: [
     TournamentGameModes.CompetitiveClassicPong,
     TournamentGameModes.CompetitiveClassicPongPowerUps,
+    TournamentGameModes.PowerUpMayhem1v1,
   ],
   swissRound: [
     TournamentGameModes.CompetitiveClassicPong,
     TournamentGameModes.CompetitiveClassicPongPowerUps,
+    TournamentGameModes.PowerUpMayhem1v1,
   ],
 };
 
@@ -305,7 +310,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
     gameName: "pong",
     gameModeName: "classicPong",
     gameModeConfig: {
-      powerUpRadius: 5,
+      powerUpRadius: 6.5,
     },
     modifierNames: {
       paceBreaker: {},
@@ -317,8 +322,8 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       goalReset: {},
       idleWallBounceAcceleration: {},
       powerUpSpawner: {
-        meanDelay: 9.25,
-        delaySpan: 2.25,
+        meanDelay: 8.5,
+        delaySpan: 1.75,
       },
     },
     powerUpNames: {
@@ -345,7 +350,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
     gameName: "pong",
     gameModeName: "multiplayerPong",
     gameModeConfig: {
-      powerUpRadius: 5,
+      powerUpRadius: 6,
     },
     modifierNames: {
       paceBreaker: {},
@@ -357,8 +362,8 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       goalReset: {},
       idleWallBounceAcceleration: {},
       powerUpSpawner: {
-        meanDelay: 9.25,
-        delaySpan: 2.25,
+        meanDelay: 8.5,
+        delaySpan: 1.75,
       },
     },
     powerUpNames: {
@@ -394,7 +399,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
     gameName: "pong",
     gameModeName: "multiplayerPong",
     gameModeConfig: {
-      powerUpRadius: 5,
+      powerUpRadius: 6,
     },
     modifierNames: {
       paceBreaker: {},
@@ -406,8 +411,8 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       goalReset: {},
       idleWallBounceAcceleration: {},
       powerUpSpawner: {
-        meanDelay: 9.25,
-        delaySpan: 2.25,
+        meanDelay: 8.5,
+        delaySpan: 1.75,
       },
     },
     powerUpNames: {
