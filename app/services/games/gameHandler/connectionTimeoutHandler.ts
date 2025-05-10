@@ -18,8 +18,14 @@ const connectionTimeoutHandler = (
 };
 
 const startAiGame = (gameManager: GameManager, fastiy: FastifyInstance) => {
-  if (gameManager.justAisInGame() === true) {
-    gameManager.startGame(fastiy);
+  try {
+    if (gameManager.justAisInGame() === true) {
+      gameManager.startGame(fastiy);
+    }
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error("[connectionTimeoutHandler] Error starting AI game:", err);
+    }
   }
 };
 
@@ -29,8 +35,18 @@ const startGameIfNotAllPlayerConnected = (
 ) => {
   if (gameManager.allPlayersAreConnected() === true) return;
 
-  if (gameManager.gameStatus() === GameStatus.CREATED) {
-    gameManager.startGame(fastiy);
+  console.log("[connectionTimeoutHandler] Starting game");
+  try {
+    if (gameManager.gameStatus() === GameStatus.CREATED) {
+      gameManager.startGame(fastiy);
+    }
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error(
+        "[connectionTimeoutHandler] Error starting game with not all players connected:",
+        err,
+      );
+    }
   }
 };
 
