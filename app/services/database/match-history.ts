@@ -14,6 +14,7 @@ export const getMatchHistoryService = async (
       gameModeName: string;
       matchDate: string;
       playerCount: number;
+      isFinished: boolean;
       userId: string;
       username: string;
       score: number;
@@ -25,6 +26,7 @@ export const getMatchHistoryService = async (
              m.gameModeName,
              m.matchDate,
              m.playerCount,
+             m.result as isFinished,
              r2.userId,
              u.username,
              r2.score,
@@ -49,6 +51,7 @@ export const getMatchHistoryService = async (
       matchDate,
       playerCount,
       userId: playerId,
+      isFinished,
       username,
       score,
       result,
@@ -61,6 +64,7 @@ export const getMatchHistoryService = async (
         matchDate,
         leaderboard: [],
         result: "loss",
+        isFinished,
       });
     }
 

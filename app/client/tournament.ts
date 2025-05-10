@@ -1,19 +1,70 @@
 import type { Edge, TournamentInfos } from "../types/tournament/tournament";
 import type Router from "./router.js";
 
+/* -------------------------------------------------------------------
+   Window globals
+------------------------------------------------------------------- */
 declare global {
   interface Window {
+    /** server-side hydrated tournament data */
     __TOURNAMENTS__: TournamentInfos[];
 
     /* optional helpers the app sets/clears elsewhere */
     tournamentBracket?: TournamentBracket;
+    elapsedTimer?: ElapsedTimer; //  ← NEW
     drawTournamentLines?: () => void;
     TournamentBracket: typeof TournamentBracket;
+    ElapsedTimer: typeof ElapsedTimer;
     tournamentHandler: TournamentHandler;
     router: Router;
   }
 }
 
+/* -------------------------------------------------------------------
+   Elapsed-time handling (split out, logic unchanged)
+------------------------------------------------------------------- */
+class ElapsedTimer {
+  private timerInterval: number | null = null;
+
+  static create(): ElapsedTimer {
+    const t = new ElapsedTimer();
+    t.start();
+    return t;
+  }
+
+  private updateElapsedTime(el: Element) {
+    const start = el.getAttribute("data-start");
+    if (!start) return;
+
+    const diff = Math.floor((Date.now() - new Date(start).getTime()) / 1000);
+    const h = Math.floor(diff / 3600);
+    const m = Math.floor((diff % 3600) / 60);
+    const s = diff % 60;
+
+    el.textContent = `${h ? `${h}h ` : ""}${m ? `${m}m ` : ""}${s}s`;
+  }
+
+  private tick = () => {
+    Array.from(document.querySelectorAll(".elapsed-time")).forEach((el) => {
+      this.updateElapsedTime(el);
+    });
+  };
+
+  private start() {
+    if (this.timerInterval) clearInterval(this.timerInterval);
+    this.timerInterval = window.setInterval(this.tick, 1000);
+    this.tick();
+  }
+
+  public destroy() {
+    if (this.timerInterval) clearInterval(this.timerInterval);
+    this.timerInterval = null;
+  }
+}
+
+/* -------------------------------------------------------------------
+   Tournament bracket (identical except timers removed)
+------------------------------------------------------------------- */
 class TournamentBracket {
   /* ---------- state ---------- */
   private readonly tournaments: TournamentInfos[];
@@ -22,7 +73,6 @@ class TournamentBracket {
   private svg: SVGSVGElement | null = null;
   private bracket: HTMLElement | null = null;
 
-  private timerInterval: number | null = null;
   private resizeObserver: ResizeObserver | null = null;
 
   /* ---------- bootstrap ---------- */
@@ -50,31 +100,6 @@ class TournamentBracket {
     return bracket;
   }
 
-  /* ---------- timers ---------- */
-  private updateElapsedTime(el: Element) {
-    const start = el.getAttribute("data-start");
-    if (!start) return;
-
-    const diff = Math.floor((Date.now() - new Date(start).getTime()) / 1000);
-    const h = Math.floor(diff / 3600);
-    const m = Math.floor((diff % 3600) / 60);
-    const s = diff % 60;
-
-    el.textContent = `${h ? `${h}h ` : ""}${m ? `${m}m ` : ""}${s}s`;
-  }
-
-  private startLiveTimers() {
-    const tick = () => {
-      for (const el of document.querySelectorAll(".elapsed-time")) {
-        this.updateElapsedTime(el);
-      }
-    };
-
-    if (this.timerInterval) clearInterval(this.timerInterval);
-    this.timerInterval = window.setInterval(tick, 1000);
-    tick();
-  }
-
   /* ---------- lifecycle ---------- */
   private init() {
     // Find DOM elements now that we're sure they exist
@@ -93,16 +118,12 @@ class TournamentBracket {
     this.resizeObserver.observe(this.bracket);
 
     window.drawTournamentLines = this.drawLines;
-    this.startLiveTimers();
   }
 
   public destroy() {
     window.removeEventListener("resize", this.drawLines);
-    if (this.resizeObserver) {
-      this.resizeObserver.disconnect();
-    }
+    if (this.resizeObserver) this.resizeObserver.disconnect();
     window.drawTournamentLines = undefined;
-    if (this.timerInterval) clearInterval(this.timerInterval);
   }
 
   /* ---------- SVG rendering ---------- */
@@ -150,9 +171,7 @@ class TournamentBracket {
       path.setAttribute("fill", "none");
       path.setAttribute("stroke", "#999");
       path.setAttribute("stroke-width", "2");
-      if (this.svg) {
-        this.svg.appendChild(path);
-      }
+      this.svg.appendChild(path);
     }
   }
 }
@@ -300,4 +319,4 @@ class TournamentHandler {
     }
   }
 }
-export { TournamentHandler, TournamentBracket };
+export { TournamentHandler, TournamentBracket, ElapsedTimer };

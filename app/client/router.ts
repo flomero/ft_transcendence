@@ -1,6 +1,10 @@
 import { TransitionManager } from "./transitions.js";
 import LobbyHandler from "./lobby.js";
-import { TournamentBracket, TournamentHandler } from "./tournament.js";
+import {
+  TournamentBracket,
+  TournamentHandler,
+  ElapsedTimer,
+} from "./tournament.js";
 import MatchmakingHandler from "./matchmaking.js";
 import { initPongGame, type PongGame } from "./pong.js";
 import { closeSidebar } from "./sidebar.js";
@@ -466,13 +470,40 @@ document.addEventListener("DOMContentLoaded", () => {
     },
   });
 
+  window.router.addRoute("/profile", {
+    onEnter: () => {
+      window.elapsedTimer = ElapsedTimer.create();
+    },
+    onExit: () => {
+      if (window.elapsedTimer) {
+        window.elapsedTimer.destroy();
+        window.elapsedTimer = undefined;
+      }
+    },
+  });
+
+  window.router.addRoute("/users/:id", {
+    onEnter: () => {
+      window.elapsedTimer = ElapsedTimer.create();
+    },
+    onExit: () => {
+      if (window.elapsedTimer) {
+        window.elapsedTimer.destroy();
+        window.elapsedTimer = undefined;
+      }
+    },
+  });
+
   window.router.addRoute("/games/tournament/join/:id", {
     onEnter: () => {
       const tournamentHandler = new TournamentHandler();
       tournamentHandler.connect();
       window.tournamentHandler = tournamentHandler;
+
       window.tournamentBracket = TournamentBracket.create();
+      window.elapsedTimer = ElapsedTimer.create(); // ← NEW
     },
+
     onExit: () => {
       if (window.tournamentHandler?.socket) {
         window.tournamentHandler.socket.close();
@@ -480,6 +511,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if (window.tournamentBracket) {
         window.tournamentBracket.destroy();
         window.tournamentBracket = undefined;
+      }
+      if (window.elapsedTimer) {
+        //  ← NEW
+        window.elapsedTimer.destroy();
+        window.elapsedTimer = undefined;
       }
     },
   });
