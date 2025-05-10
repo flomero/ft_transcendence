@@ -1,6 +1,6 @@
-import { FastifyRequest, FastifyReply } from "fastify";
+import type { FastifyRequest, FastifyReply } from "fastify";
 import canTournamentBeLeftCheck from "../../lobby/leave/canTournamentBeLeftCheck";
-import { tournaments } from "../new/newTournamentHandler";
+import { tournaments } from "../tournaments";
 
 async function leaveTournamentHandler(
   request: FastifyRequest<{ Params: { lobbyId: string } }>,
@@ -15,10 +15,8 @@ async function leaveTournamentHandler(
     tournamentManager?.removeMemberSave(userId);
     return reply.code(201).send({ tournamentId: tournamentId });
   } catch (error) {
-    if (error instanceof Error) {
-      return reply.code(400).send({ error: error.message });
-    }
-    return reply.code(500).send({ message: "Internal server error" });
+    if (error instanceof Error) return reply.badRequest(error.message);
+    return reply.internalServerError();
   }
 }
 

@@ -1,5 +1,5 @@
-import { FastifyReply, FastifyRequest } from "fastify";
-import { tournaments } from "../new/newTournamentHandler";
+import type { FastifyReply, FastifyRequest } from "fastify";
+import { tournaments } from "../tournaments";
 import validTournamentConnectionCheck from "../tournamentValidation/validTournamentConnectionCheck";
 import { TournamentStatus } from "../tournament";
 
@@ -14,6 +14,8 @@ async function startTournamentHandler(
 
   try {
     validTournamentConnectionCheck(memberId, tournaemtId);
+    if (tournamentManager?.ownerId !== memberId)
+      throw new Error("You are not the owner of this tournament");
     if (
       tournamentStatus !== undefined &&
       tournamentStatus !== TournamentStatus.CREATED

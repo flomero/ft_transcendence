@@ -1,26 +1,26 @@
-import { TournamentMember } from "../../../interfaces/games/tournament/TournamentMember";
+import type { TournamentMember } from "../../../interfaces/games/tournament/TournamentMember";
 import { randomUUID } from "node:crypto";
-import { WebSocket } from "ws";
-import { GameModeType } from "../../config/gameModes";
-import { TournamentConfigKey } from "../../config/tournamentConfig";
-import { Tournament, TournamentStatus } from "./tournament";
+import type { WebSocket } from "ws";
+import type { GameModeType } from "../../config/gameModes";
+import type { TournamentConfigKey } from "../../config/tournamentConfig";
+import { type Tournament, TournamentStatus } from "./tournament";
 import createTournament from "./websocket/createTournament";
-import { Database } from "sqlite";
-import {
+import type { Database } from "sqlite";
+import type {
   Round,
   MatchResults,
   GameResult,
   Match,
 } from "../../../types/strategy/ITournamentBracketGenerator";
 import { createMatch } from "../matchMaking/createMatch";
-import { GameOrigin } from "../../../types/games/gameHandler/GameOrigin";
+import type { GameOrigin } from "../../../types/games/gameHandler/GameOrigin";
 import aiOpponents from "../aiOpponent/aiOpponents";
 
 class TournamentManager {
   public tournamentId: string = randomUUID();
-  public ownerId: string | undefined; // Make private
+  public ownerId: string;
   private tournamentMembers: Map<string, TournamentMember> = new Map();
-  public tournamentConfigKey: TournamentConfigKey; // Make private
+  public tournamentConfigKey: TournamentConfigKey;
   public gameModeType: GameModeType;
   public tournament: Tournament | undefined;
   public tournamentSize: number;
@@ -61,6 +61,14 @@ class TournamentManager {
     this.tournamentMembers.get(memberId)!.webSocket = socket;
   }
 
+  public sendMessageToAll(message: string): void {
+    for (const member of this.tournamentMembers.values()) {
+      if (member.webSocket) {
+        member.webSocket.send(message);
+      }
+    }
+  }
+
   public addMember(memberId: string): void {
     if (this.tournamentMembers.has(memberId) === true) {
       console.warn(
@@ -74,6 +82,11 @@ class TournamentManager {
       isAI: false,
     };
     this.tournamentMembers.set(memberId, newMember);
+    this.sendMessageToAll(
+      JSON.stringify({
+        type: "update",
+      }),
+    );
   }
 
   public addAiOpponent(memberId: string): void {
@@ -85,6 +98,11 @@ class TournamentManager {
       isAI: true,
     };
     this.tournamentMembers.set(aiId.toString(), newAiOpponent);
+    this.sendMessageToAll(
+      JSON.stringify({
+        type: "update",
+      }),
+    );
   }
 
   private canAIOpponentBeAdded(memberId: string): void {
@@ -118,6 +136,11 @@ class TournamentManager {
     ) {
       this.changeOwner();
     }
+    this.sendMessageToAll(
+      JSON.stringify({
+        type: "update",
+      }),
+    );
   }
 
   public changeOwner() {
@@ -126,7 +149,6 @@ class TournamentManager {
       this.ownerId = memberIds[0];
       return;
     }
-    this.ownerId = undefined;
   }
 
   public async startTournament(db: Database): Promise<void> {
@@ -134,21 +156,19 @@ class TournamentManager {
       throw new Error("[start Tournemant] Tournament cannot be started");
     }
 
+    console.log("BBBBBBBBBBB");
     this.tournament = await createTournament(db, this);
     this.tournament.startTournament();
     await this.generateRound();
   }
 
   public canTournamentBeStarted(): boolean {
-    if (this.isTournamentFull() === false)
-      throw new Error("Not enough members to start tournament");
+    if (this.isTournamentFull() === false) return false;
     if (this.tournament?.getStatus() === TournamentStatus.ON_GOING)
-      throw new Error("Tournament is already started");
+      return false;
     if (this.tournament?.getStatus() === TournamentStatus.FINISHED)
-      throw new Error("Tournament is already finished");
-    if (this.allMembersAreConnected() === false)
-      // put this check of for testing
-      throw new Error("Not all members are connected");
+      return false;
+    if (this.allMembersAreConnected() === false) return false;
     return true;
   }
 

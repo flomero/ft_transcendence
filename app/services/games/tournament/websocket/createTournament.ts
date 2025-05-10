@@ -1,7 +1,7 @@
-import { Database } from "sqlite";
+import type { Database } from "sqlite";
 import { Tournament } from "../tournament";
-import TournamentManager from "../TournamentManager";
-import {
+import type TournamentManager from "../TournamentManager";
+import type {
   bracketTypeSettings,
   TournamentSettings,
 } from "../../../../interfaces/games/tournament/TournamentSettings";
@@ -29,6 +29,7 @@ const createTournament = async (
     },
   };
 
+  console.log(JSON.stringify(tournamentSettings));
   const newTournament = new Tournament(tournamentSettings);
   await addTournamentToDB(db, tournamentManager, newTournament);
 
