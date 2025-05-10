@@ -4,11 +4,11 @@ import { FastifyInstance } from "fastify";
 
 const connectionTimeoutHandler = (
   gameManager: GameManager,
-  fastiy: FastifyInstance,
+  fastify: FastifyInstance,
 ) => {
-  setTimeout(() => startAiGame(gameManager, fastiy), 2000);
+  setTimeout(() => startAiGame(gameManager, fastify), 2000);
   setTimeout(
-    () => startGameIfNotAllPlayerConnected(gameManager, fastiy),
+    () => startGameIfNotAllPlayerConnected(gameManager, fastify),
     15000,
   );
   setTimeout(
