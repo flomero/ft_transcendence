@@ -8,11 +8,12 @@ export const getMatchHistoryService = async (
 ) => {
   const db = fastify.sqlite;
 
+  /* ➊ ─────────────── tell TypeScript matchDate is a number ─────────────── */
   const rows = await db.all<
     {
       matchId: string;
       gameModeName: string;
-      matchDate: string;
+      matchDate: number; // <-- was string
       playerCount: number;
       isFinished: boolean;
       userId: string;
@@ -21,10 +22,11 @@ export const getMatchHistoryService = async (
       result: number;
     }[]
   >(
+    /* unchanged SQL — matchDate comes back as the INTEGER we stored */
     `
       SELECT r1.matchId,
              m.gameModeName,
-             m.matchDate,
+             m.matchDate,          -- seconds since epoch (UTC)
              m.playerCount,
              m.result as isFinished,
              r2.userId,
@@ -33,22 +35,22 @@ export const getMatchHistoryService = async (
              r2.result
       FROM r_users_matches r1
              JOIN r_users_matches r2 ON r1.matchId = r2.matchId
-             JOIN users u ON u.id = r2.userId
-             JOIN matches m ON m.id = r1.matchId
+             JOIN users u          ON u.id = r2.userId
+             JOIN matches m        ON m.id = r1.matchId
       WHERE r1.userId = ?
       ORDER BY m.matchDate DESC, r2.result;
     `,
     userId,
   );
 
-  // --- build map keyed by matchId ---
+  /* ➋ ───────────────────── build map keyed by matchId ──────────────────── */
   const matchesMap = new Map<string, MatchInfo>();
 
   for (const row of rows) {
     const {
       matchId,
       gameModeName,
-      matchDate,
+      matchDate: matchDateSec, // ← epoch-seconds from DB
       playerCount,
       userId: playerId,
       isFinished,
@@ -57,52 +59,48 @@ export const getMatchHistoryService = async (
       result,
     } = row;
 
+    /* convert *once* here */
+    const matchDateMs = matchDateSec * 1000; // epoch-milliseconds
+
     if (!matchesMap.has(matchId)) {
       matchesMap.set(matchId, {
         matchId,
-        gameModeName: gameModeName,
-        matchDate,
+        gameModeName,
+        matchDate: matchDateMs, // store ms so the client can use it directly
         leaderboard: [],
         result: "loss",
         isFinished,
       });
     }
 
-    let showScore = playerCount === 2;
-
     matchesMap.get(matchId)!.leaderboard.push({
       userId: playerId,
       username,
       score,
       result,
-      showScore,
+      showScore: playerCount === 2,
     });
   }
 
-  // --- final per‑match processing ---
+  /* ➌ ───────────────────── post-processing & sorting ───────────────────── */
   for (const match of matchesMap.values()) {
-    // rows are already score‑DESC, but sort once more for safety
     match.leaderboard.sort((a, b) => a.result - b.result);
 
     const topScore = match.leaderboard[0].score;
     const topScorers = match.leaderboard.filter((p) => p.score === topScore);
     const isUserTopScorer = topScorers.some((p) => p.userId === userId);
 
-    if (topScorers.length > 1 && isUserTopScorer) {
-      match.result = "draw";
-    } else if (topScorers[0].userId === userId) {
-      match.result = "win";
-    }
-    // else default stays "loss"
+    if (topScorers.length > 1 && isUserTopScorer) match.result = "draw";
+    else if (topScorers[0].userId === userId) match.result = "win";
   }
 
+  /* now matchDate is already a number, so plain subtraction works */
   const result = [...matchesMap.values()].sort(
-    (a, b) => Date.parse(b.matchDate) - Date.parse(a.matchDate),
+    (a, b) => b.matchDate - a.matchDate,
   );
 
   fastify.log.debug(
     `Match history for user ${userId}: ${JSON.stringify(result)}`,
   );
-
   return result;
 };

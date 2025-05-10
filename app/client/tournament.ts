@@ -32,14 +32,33 @@ class ElapsedTimer {
     return t;
   }
 
-  private updateElapsedTime(el: Element) {
-    const start = el.getAttribute("data-start");
-    if (!start) return;
+  private parseStart(raw: string): number | null {
+    /* 1 – numeric? => epoch-ms straight away */
+    if (/^\d+$/.test(raw)) {
+      const ms = Number(raw);
+      return isNaN(ms) ? null : ms;
+    }
 
-    const diff = Math.floor((Date.now() - new Date(start).getTime()) / 1000);
-    const h = Math.floor(diff / 3600);
-    const m = Math.floor((diff % 3600) / 60);
-    const s = diff % 60;
+    /* 2 – ISO without zone? => force UTC by appending “Z” */
+    const iso = /[Z+-]\d{2}:?\d{2}$/.test(raw) ? raw : `${raw}Z`;
+    const t = Date.parse(iso);
+    return isNaN(t) ? null : t;
+  }
+
+  private updateElapsedTime(el: Element) {
+    const raw = el.getAttribute("data-start");
+    if (!raw) return;
+
+    const startMs = this.parseStart(raw);
+    if (startMs === null) {
+      el.textContent = "–"; // fallback for bad input
+      return;
+    }
+
+    const diffSec = Math.floor((Date.now() - startMs) / 1000);
+    const h = Math.floor(diffSec / 3600);
+    const m = Math.floor((diffSec % 3600) / 60);
+    const s = diffSec % 60;
 
     el.textContent = `${h ? `${h}h ` : ""}${m ? `${m}m ` : ""}${s}s`;
   }

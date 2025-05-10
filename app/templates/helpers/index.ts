@@ -1,7 +1,8 @@
 import type Handlebars from "handlebars";
 import { buttonVariants } from "./components/button";
 import { twMerge } from "tailwind-merge";
-import { format } from "date-fns";
+import { fromUnixTime } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 
 export function registerHelpers(handlebars: typeof Handlebars) {
   handlebars.registerHelper("buttonVariants", buttonVariants);
@@ -64,17 +65,33 @@ export function registerHelpers(handlebars: typeof Handlebars) {
 
   handlebars.registerHelper("inc", (value) => Number.parseInt(value, 10) + 1);
 
-  handlebars.registerHelper(
-    "formatDate",
-    (date: Date | string, dateFormat: string) => {
-      if (!date) return "";
-      try {
-        return format(new Date(date), dateFormat);
-      } catch (err) {
-        return "";
+  handlebars.registerHelper("formatDate", (raw: unknown, pattern: string) => {
+    if (raw == null || raw === "") return "";
+
+    let date: Date | null = null;
+
+    // ──────────────────── parse input ────────────────────
+    if (typeof raw === "number") {
+      // assume epoch-ms
+      date = new Date(raw);
+    } else if (typeof raw === "string") {
+      if (/^\d+$/.test(raw)) {
+        const num = Number(raw);
+        date =
+          num > 1e12 // 13+ digits → ms
+            ? new Date(num)
+            : fromUnixTime(num); // 10 digits  → s
+      } else {
+        const iso = /[Z+-]\d{2}:?\d{2}$/.test(raw) ? raw : `${raw}Z`;
+        date = new Date(iso);
       }
-    },
-  );
+    }
+
+    if (!date || isNaN(date.getTime())) return "";
+
+    // ───────────────────── format in Berlin time ─────────────────────
+    return formatInTimeZone(date, "Europe/Berlin", pattern);
+  });
 
   handlebars.registerHelper("length", (value) => {
     if (Array.isArray(value) || typeof value === "string") {

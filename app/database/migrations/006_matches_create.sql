@@ -9,6 +9,6 @@ CREATE TABLE IF NOT EXISTS matches
     powerUpNames   JSON,
     result         TEXT,
     tournamentId   TEXT,
-    matchDate      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    matchDate INTEGER NOT NULL DEFAULT (strftime('%s','now')),
     FOREIGN KEY (tournamentId) REFERENCES tournaments (id)
 );

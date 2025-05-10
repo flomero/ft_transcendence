@@ -9,7 +9,7 @@ export type MatchResult = "win" | "loss" | "draw";
 export type MatchInfo = {
   matchId: string;
   gameModeName: string;
-  matchDate: string; // keep as string from DB; parse only for sorting
+  matchDate: number; // keep as string from DB; parse only for sorting
   leaderboard: LeaderboardEntry[];
   result: MatchResult;
   isFinished: boolean;
