@@ -9,6 +9,7 @@ import {
 import { StrategyManager } from "../../../strategy/strategyManager";
 import type { IPongBallResetSampler } from "../../../../types/strategy/IPongBallResetSampler";
 import { pongUserInputs } from "../../../../types/games/userInput";
+import { fastifyInstance } from "../../../../app";
 
 export class MultiplayerPong extends Pong {
   name = "multiplayerPong";
@@ -92,7 +93,7 @@ export class MultiplayerPong extends Pong {
 
   startGame(): void {
     super.startGame();
-    console.log("Game Started");
+    fastifyInstance.log.info("Game Started");
   }
 
   initPaddles(): void {
@@ -113,8 +114,8 @@ export class MultiplayerPong extends Pong {
     const paddleSpeed =
       100 / (serverTickrateS * this.settings.paddleSpeedWidthPercentS);
 
-    console.log(`Paddle amplitude: ${paddleAmplitude}`);
-    console.log(`Paddle speed: ${paddleSpeed}`);
+    fastifyInstance.log.debug(`Paddle amplitude: ${paddleAmplitude}`);
+    fastifyInstance.log.debug(`Paddle speed: ${paddleSpeed}`);
 
     for (let index = 0; index < this.gameState.playerCount; ++index) {
       const angle =

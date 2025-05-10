@@ -3,6 +3,7 @@ import { PongModifierBase } from "../pongModifierBase";
 import type { Pong } from "../pong";
 import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
 import type { Paddle } from "../../../../types/games/pong/paddle";
+import { fastifyInstance } from "../../../../app";
 
 enum AnimationStatus {
   IDLE = 0,
@@ -293,7 +294,7 @@ export class PaddleBoost extends PongModifierBase {
       paddleInfos.animationStatus === AnimationStatus.EXTENDING &&
       !paddleInfos.didBoost
     ) {
-      console.log(
+      fastifyInstance.log.debug(
         `Extended paddle collision! Initial ball speed: ${ball.speed.toFixed(2)}`,
       );
 
@@ -301,7 +302,7 @@ export class PaddleBoost extends PongModifierBase {
       ball.speed *= 1 + this.extensionVelocityTransmissionFactor;
       paddleInfos.didBoost = true;
 
-      console.log(
+      fastifyInstance.log.debug(
         `Extended paddle collision! Ball speed: ${ball.speed.toFixed(2)}, direction: [${ball.dx.toFixed(2)}, ${ball.dy.toFixed(2)}]`,
       );
     }

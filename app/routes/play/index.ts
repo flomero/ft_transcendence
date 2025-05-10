@@ -53,7 +53,7 @@ const page: FastifyPluginAsync = async (fastify): Promise<void> => {
       matchmakingmodes: gamemodes,
     };
 
-    console.log(data.matchmakingmodes);
+    fastify.log.debug(data.matchmakingmodes);
 
     reply.header("X-Page-Title", "Play Pong | ft_transcendence");
     const viewOptions = request.isAjax() ? {} : { layout: "layouts/main" };

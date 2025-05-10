@@ -11,6 +11,7 @@ export type BallState = {
 };
 
 export type PaddleState = {
+  id: number;
   a: number;
   x: number;
   y: number;

@@ -9,6 +9,7 @@ import {
   TOURNAMENT_CONFIGS_REGISTRY,
   GAMEMODE_REGISTRY,
 } from "../../../../config";
+import { fastifyInstance } from "../../../../app";
 
 const createTournament = async (
   db: Database,
@@ -29,7 +30,7 @@ const createTournament = async (
     },
   };
 
-  console.log(JSON.stringify(tournamentSettings));
+  fastifyInstance.log.debug(JSON.stringify(tournamentSettings));
   const newTournament = new Tournament(tournamentSettings);
   await addTournamentToDB(db, tournamentManager, newTournament);
 
