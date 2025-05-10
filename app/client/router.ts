@@ -263,7 +263,7 @@ class Router {
 
       if (!response.ok) {
         console.error("Fetch error:", response.status, response.statusText);
-        this.displayError(response.status, response.statusText);
+        // this.displayError(response.status, response.statusText);
         return null;
       }
 
