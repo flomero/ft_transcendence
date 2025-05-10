@@ -471,7 +471,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const tournamentHandler = new TournamentHandler();
       tournamentHandler.connect();
       window.tournamentHandler = tournamentHandler;
-      window.tournamentBracket = new TournamentBracket();
+      window.tournamentBracket = TournamentBracket.create();
     },
     onExit: () => {
       if (window.tournamentHandler?.socket) {

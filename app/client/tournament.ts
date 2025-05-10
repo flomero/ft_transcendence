@@ -19,27 +19,35 @@ class TournamentBracket {
   private readonly tournaments: TournamentInfos[];
   private readonly edges: Edge[];
 
-  private readonly svg: SVGSVGElement;
-  private readonly bracket: HTMLElement;
+  private svg: SVGSVGElement | null = null;
+  private bracket: HTMLElement | null = null;
 
   private timerInterval: number | null = null;
-  private resizeObserver!: ResizeObserver;
+  private resizeObserver: ResizeObserver | null = null;
 
   /* ---------- bootstrap ---------- */
   constructor() {
     /* server now ships fully-hydrated tournaments with .seeding in place */
     this.tournaments = window.__TOURNAMENTS__;
 
-    this.bracket = document.querySelector<HTMLElement>("#bracket")!;
-    this.svg = this.bracket.querySelector<SVGSVGElement>("#lines")!;
-
     /* collect every edge from every tournament */
     this.edges = this.tournaments.flatMap((t) => t.seeding ?? []);
 
     /* make sure `this` survives when used as a callback */
     this.drawLines = this.drawLines.bind(this);
+  }
 
-    this.init();
+  /* Create and initialize a new tournament bracket when DOM is ready */
+  public static create(): TournamentBracket {
+    const bracket = new TournamentBracket();
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () => bracket.init());
+    } else {
+      bracket.init();
+    }
+
+    return bracket;
   }
 
   /* ---------- timers ---------- */
@@ -56,10 +64,11 @@ class TournamentBracket {
   }
 
   private startLiveTimers() {
-    const tick = () =>
-      document
-        .querySelectorAll(".elapsed-time")
-        .forEach((el) => this.updateElapsedTime(el));
+    const tick = () => {
+      for (const el of document.querySelectorAll(".elapsed-time")) {
+        this.updateElapsedTime(el);
+      }
+    };
 
     if (this.timerInterval) clearInterval(this.timerInterval);
     this.timerInterval = window.setInterval(tick, 1000);
@@ -68,6 +77,15 @@ class TournamentBracket {
 
   /* ---------- lifecycle ---------- */
   private init() {
+    // Find DOM elements now that we're sure they exist
+    this.bracket = document.querySelector<HTMLElement>("#bracket");
+    this.svg = this.bracket?.querySelector<SVGSVGElement>("#lines") || null;
+
+    if (!this.bracket || !this.svg) {
+      console.error("Tournament bracket elements not found in the DOM");
+      return;
+    }
+
     this.drawLines();
 
     window.addEventListener("resize", this.drawLines);
@@ -80,13 +98,17 @@ class TournamentBracket {
 
   public destroy() {
     window.removeEventListener("resize", this.drawLines);
-    this.resizeObserver.disconnect();
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+    }
     window.drawTournamentLines = undefined;
     if (this.timerInterval) clearInterval(this.timerInterval);
   }
 
   /* ---------- SVG rendering ---------- */
   private drawLines() {
+    if (!this.bracket || !this.svg) return;
+
     console.log("Drawing tournament lines...");
     console.dir(this.edges, { depth: null });
     const width = this.bracket.scrollWidth;
@@ -100,7 +122,7 @@ class TournamentBracket {
     const bracketBox = this.bracket.getBoundingClientRect();
 
     /* seeding edges already have the form [tid, fromId, toId, offset?] */
-    this.edges.forEach(([tid, from, to, offset = 0]) => {
+    for (const [tid, from, to, offset = 0] of this.edges) {
       const fromId = `${tid}-${from}`;
       const toId = `${tid}-${to}`;
 
@@ -109,7 +131,7 @@ class TournamentBracket {
 
       const aEl = document.getElementById(fromId);
       const bEl = document.getElementById(toId);
-      if (!aEl || !bEl) return; // element missing → skip
+      if (!aEl || !bEl) continue; // element missing → skip
 
       const aBox = aEl.getBoundingClientRect();
       const bBox = bEl.getBoundingClientRect();
@@ -128,8 +150,10 @@ class TournamentBracket {
       path.setAttribute("fill", "none");
       path.setAttribute("stroke", "#999");
       path.setAttribute("stroke-width", "2");
-      this.svg.appendChild(path);
-    });
+      if (this.svg) {
+        this.svg.appendChild(path);
+      }
+    }
   }
 }
 
