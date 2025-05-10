@@ -313,6 +313,7 @@ class TournamentManager {
       matchId,
       gameResult,
     );
+    console.log(`isMatchOver? ${isMatchOver}`);
     return isMatchOver;
   }
 
@@ -331,6 +332,7 @@ class TournamentManager {
       matchId,
       gameResult,
     );
+    console.log(`isRoundOver? ${isRoundOver}`);
 
     if (isRoundOver === true) this.generateRound();
   }
