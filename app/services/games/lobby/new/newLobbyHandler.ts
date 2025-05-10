@@ -14,7 +14,7 @@ function initializeSampleLobbies() {
   const sampleUserIds = Array.from<string>({
     length: Object.values(GAMEMODE_REGISTRY).length,
   }).fill("user123");
-  sampleUserIds[4] = "103562899409920461542";
+  sampleUserIds[0] = "107576203838928819270";
 
   const lobbyConfigs: NewLobbyRequestBody[] = Object.values(GAMEMODE_REGISTRY)
     .filter((_, index) => index < sampleUserIds.length)

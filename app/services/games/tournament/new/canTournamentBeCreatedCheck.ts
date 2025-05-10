@@ -1,7 +1,7 @@
 import { isUserInAnyLobby } from "../../lobby/lobbyVaidation/isUserInAnyLobby";
 import { matchMakingManager } from "../../matchMaking/MatchMakingManager";
 import isMemberInAnyTournament from "../tournamentValidation/isMemberInAnyTournament";
-import { GameModeType } from "../../../config/gameModes";
+import type { GameModeType } from "../../../config/gameModes";
 import { TOURNAMENT_CONFIGS_REGISTRY } from "../../../../config";
 
 const canTournamentBeCreatedCheck = (
@@ -15,7 +15,7 @@ const canTournamentBeCreatedCheck = (
   }
   if (isMemberInAnyTournament(memberId) !== null) {
     throw new Error(
-      "User is already in a tournament: " + isMemberInAnyTournament(memberId),
+      `User is already in a tournament: ${isMemberInAnyTournament(memberId)}`,
     );
   }
   if (matchMakingManager.memberExists(memberId) === true) {

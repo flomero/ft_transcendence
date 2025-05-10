@@ -117,7 +117,7 @@ export async function setCurrentRoomId(
   sendRoomUpdate(fastify, roomId, userId);
 }
 
-async function updateRoomAndSendMessage(
+export async function updateRoomAndSendMessage(
   fastify: FastifyInstance,
   userName: string,
   userId: string,
@@ -126,7 +126,9 @@ async function updateRoomAndSendMessage(
   type: ChatMessageType,
 ) {
   const userIdsBlacklist = chatClients
-    .filter((client) => client.currentRoomId === roomId || client.userId === userId)
+    .filter(
+      (client) => client.currentRoomId === roomId || client.userId === userId,
+    )
     .map((client) => client.userId);
 
   await setRoomReadForAllUsersBlacklist(
@@ -222,7 +224,7 @@ export async function sendGameInvite(
   fastify: FastifyInstance,
   request: FastifyRequest,
   roomId: number,
-  lobbyId: number,
+  lobbyId: string,
 ) {
   const message: string = "/games/lobby/join/" + lobbyId;
 
@@ -240,10 +242,10 @@ export async function sendGameInviteToUser(
   fastify: FastifyInstance,
   request: FastifyRequest,
   friendId: string,
-  gameId: number,
+  lobbyId: string,
 ) {
   const roomId = await getChatRoomTwoUsers(fastify, request.userId, friendId);
-  await sendGameInvite(fastify, request, roomId, gameId);
+  await sendGameInvite(fastify, request, roomId, lobbyId);
 }
 
 export async function addRoom(

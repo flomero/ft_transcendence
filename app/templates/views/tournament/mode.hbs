@@ -1,0 +1,13 @@
+<div class="flex flex-col justify-center items-center gap-4 mt-8">
+  <h2>Create a lobby</h2>
+  <h3>Choose prebuild settings</h3>
+  <div class="flex flex-row flex-wrap gap-2 justify-center">
+    {{#each gamemodes}}
+      {{#with this as |gameMode|}}
+        {{#> components/button variant="primary" url=(concat "/games/tournament/new/" ../config.bracketType  "/" gameMode "/" ../count) }}
+          {{hrGameModeName gameMode}}
+        {{/components/button}}
+      {{/with}}
+    {{/each}}
+  </div>
+</div>

@@ -1,6 +1,7 @@
 import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
 import type { IPong7segmentMaker } from "../../../../types/strategy/IPong7segmentMaker";
 import { StrategyManager } from "../../../strategy/strategyManager";
+import { ModifierStatus } from "../../modifierBase";
 import { TimeLimitedModifierBase } from "../../timeLimitedModifierBase";
 import type { Pong } from "../pong";
 
@@ -27,6 +28,13 @@ export class TimedStart extends TimeLimitedModifierBase {
       "pong7segmentMaker",
       "sampleRectangles",
     );
+  }
+
+  onUpdate(game: Pong): void {
+    super.onUpdate(game);
+
+    if (this.status === ModifierStatus.ACTIVE)
+      game.getState().balls[0].speed = 0;
   }
 
   onGameStart(game: Pong): void {

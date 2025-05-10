@@ -4,7 +4,7 @@ import type { FastifyPluginAsync, FastifyServerOptions } from "fastify";
 import { loadGameRegistry } from "./services/games/gameRegistryLoader";
 import { loadStrategyRegistry } from "./services/strategy/strategyRegistryLoader";
 import fastifyEnv from "@fastify/env";
-// import { Tournament } from "./services/tournament/tournament";
+//import { initializeSampleTournaments } from "./services/games/tournament/tournaments";
 
 const envSchema = {
   type: "object",
@@ -111,6 +111,11 @@ const app: FastifyPluginAsync<AppOptions> = async (
     options: opts,
   });
   fastify.ready();
+
+  // if (process.env.NODE_ENV === "development") {
+  //   console.log("Initializing sample lobbies...");
+  //   initializeSampleTournaments(fastify.sqlite);
+  // }
 };
 
 export default app;

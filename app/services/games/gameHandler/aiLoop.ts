@@ -8,8 +8,8 @@ const aiLoop = async (gameManagerId: string) => {
   const gameManager = gameManagers.get(gameManagerId);
 
   if (gameManager === undefined) throw new Error("Game does not exist");
-  if (gameManager?.getAiIdsAsArray.length === 0) return;
-  const game: GameBase = gameManager.getGame;
+  if (gameManager?.getAiIdsAsArray().length === 0) return;
+  const game: GameBase = gameManager.getGame();
 
   const sleepIntervalMs: number = 1000.0;
   while (game.getStatus() === GameStatus.RUNNING) {
@@ -19,8 +19,11 @@ const aiLoop = async (gameManagerId: string) => {
 };
 
 const updateAllAis = (gameManager: GameManager) => {
-  for (const aiOpponent of gameManager.aiOpponent.values()) {
-    aiOpponent.update();
+  const game: GameBase = gameManager.getGame();
+  for (const aiOpponent of gameManager.aiOpponents.values()) {
+    if (game.isEliminated(aiOpponent.getId()) === false) {
+      aiOpponent.update();
+    }
   }
 };
 

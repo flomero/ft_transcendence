@@ -3,12 +3,16 @@ import type { Ball } from "../../types/games/pong/ball";
 
 const EPSILON = 1e-2;
 
+export interface OutOfBoundsCollision {
+  position: [number, number];
+}
+
 export interface Collision {
   distance: number;
   objectId: number;
   normal?: [number, number];
   type?: string;
-  outOfBounds?: boolean; // New flag to indicate out-of-bounds correction
+  outOfBounds?: OutOfBoundsCollision; // New flag to indicate out-of-bounds correction
 }
 
 export class PhysicsEngine {
@@ -71,8 +75,6 @@ export class PhysicsEngine {
     obj: Rectangle,
     objId: number,
   ): Collision | null {
-    const rx = obj.x;
-    const ry = obj.y;
     const rdx = obj.dx;
     const rdy = obj.dy;
     const rw = obj.width;
@@ -80,90 +82,89 @@ export class PhysicsEngine {
     // alpha is the angle of the wall's (or paddle's) direction
     const alpha = rdx !== 0 ? Math.atan2(rdy, rdx) : (rdy * Math.PI) / 2.0;
 
-    const bx = ball.x;
-    const by = ball.y;
-    const bdx = ball.dx;
-    const bdy = ball.dy;
-    const br = ball.radius;
     const bs = distance;
 
-    // Transform ball properties into the object's local (rotated) coordinate system
-    const dx = bx - rx;
-    const dy = by - ry;
     const ca = Math.cos(alpha);
     const sa = Math.sin(alpha);
-    // local ball position
-    const r_bx = dx * ca + dy * sa;
-    const r_by = -dx * sa + dy * ca;
-    // local ball direction
-    const r_bdx = bdx * ca + bdy * sa;
-    const r_bdy = -bdx * sa + bdy * ca;
+
+    const transformedBall = PhysicsEngine.transformIntoBase(ball, obj);
+
+    const possibleInBoundsCollision = PhysicsEngine.resolveBallInsideObject(
+      ball,
+      obj,
+      objId,
+      [ball.dx, ball.dy],
+      true,
+    );
+    if (possibleInBoundsCollision) return possibleInBoundsCollision;
 
     // Check if the ball is inside the Rectangle (out of bounds)
-    if (
-      r_bx >= -rw / 2.0 - EPSILON &&
-      r_bx <= rw / 2.0 + EPSILON &&
-      r_by >= -rh / 2.0 - EPSILON &&
-      r_by <= rh / 2.0 + EPSILON
-    ) {
-      // Use the object's existing normal (already pointing toward the center of the arena)
-      // Transform the object's normal from global to local coordinates
-      const normalLocal: [number, number] = [
-        obj.nx * ca + obj.ny * sa,
-        -obj.nx * sa + obj.ny * ca,
-      ];
+    // if (
+    //   transformedBall.x >= -rw / 2.0 - EPSILON &&
+    //   transformedBall.x <= rw / 2.0 + EPSILON &&
+    //   transformedBall.y >= -rh / 2.0 - EPSILON &&
+    //   transformedBall.y <= rh / 2.0 + EPSILON
+    // ) {
+    //   console.log(`\nball in object: ${objId}`);
+    //   console.log(`Ball pos in object's base:`);
+    //   console.log(`  |- x: ${transformedBall.x}`);
+    //   console.log(`  |- y: ${transformedBall.y}`);
 
-      // Calculate how far to move along the normal direction
-      // We need to find the distance to move out of the rectangle along the normal
-      // Project current position onto the normal to find the distance
-      // const dotProduct = r_bx * normalLocal[0] + r_by * normalLocal[1];
+    //   // Required distance to move the ball out (along the normal)
+    //   const distanceToMove = obj.height - transformedBall.y + Math.PI * EPSILON;
 
-      // Calculate the penetration depth
-      let distanceToMove: number;
-      if (Math.abs(normalLocal[0]) > Math.abs(normalLocal[1])) {
-        // Normal is more horizontal
-        distanceToMove =
-          (normalLocal[0] > 0 ? rw / 2.0 - r_bx : r_bx + rw / 2.0) +
-          2 * EPSILON;
-      } else {
-        // Normal is more vertical
-        distanceToMove =
-          (normalLocal[1] > 0 ? rh / 2.0 - r_by : r_by + rh / 2.0) +
-          2 * EPSILON;
-      }
+    //   // Use original normal in global space
+    //   const normalGlobal: [number, number] = [obj.nx, obj.ny];
 
-      // Transform normal back to global coordinates
-      const normalGlobal: [number, number] = [obj.nx, obj.ny];
+    //   const newX = transformedBall.x + distanceToMove * obj.nx;
+    //   const newY = transformedBall.y + distanceToMove * obj.ny;
+    //   const newRBX = (newX - rx) * ca + (newY - ry) * sa;
+    //   const newRBY = -(newX - rx) * sa + (newY - ry) * ca;
 
-      // Return collision with out-of-bounds flag set
-      return {
-        distance: distanceToMove,
-        objectId: objId,
-        normal: normalGlobal,
-        outOfBounds: true,
-      };
-    }
+    //   console.log(`After resolution position:`);
+    //   console.log(`  |- x: ${newRBX}`);
+    //   console.log(`  |- y: ${newRBY}`);
+
+    //   return {
+    //     distance: distanceToMove,
+    //     objectId: objId,
+    //     normal: normalGlobal,
+    //     outOfBounds: true,
+    //   };
+    // }
 
     // Original collision logic continues...
     // First, check for side collisions
     const potentialTs: Array<[number, null]> = [];
     const tx_1 =
-      Math.abs(r_bdx) >= EPSILON ? (br + rw / 2.0 - r_bx) / r_bdx : null;
+      Math.abs(transformedBall.dx) >= EPSILON
+        ? (transformedBall.radius + rw / 2.0 - transformedBall.x) /
+          transformedBall.dx
+        : null;
     const tx_2 =
-      Math.abs(r_bdx) >= EPSILON ? (-br - rw / 2.0 - r_bx) / r_bdx : null;
+      Math.abs(transformedBall.dx) >= EPSILON
+        ? (-transformedBall.radius - rw / 2.0 - transformedBall.x) /
+          transformedBall.dx
+        : null;
     const ty_1 =
-      Math.abs(r_bdy) >= EPSILON ? (br + rh / 2.0 - r_by) / r_bdy : null;
+      Math.abs(transformedBall.dy) >= EPSILON
+        ? (transformedBall.radius + rh / 2.0 - transformedBall.y) /
+          transformedBall.dy
+        : null;
     const ty_2 =
-      Math.abs(r_bdy) >= EPSILON ? (-br - rh / 2.0 - r_by) / r_bdy : null;
+      Math.abs(transformedBall.dy) >= EPSILON
+        ? (-transformedBall.radius - rh / 2.0 - transformedBall.y) /
+          transformedBall.dy
+        : null;
 
     for (const tCandidate of [tx_1, tx_2, ty_1, ty_2]) {
       if (tCandidate !== null && 0 < tCandidate && tCandidate <= bs) {
         // Additionally check that the ball's position at time t_candidate is within the extended rectangle bounds
-        const new_r_bx = r_bx + tCandidate * r_bdx;
-        const new_r_by = r_by + tCandidate * r_bdy;
+        const new_r_bx = transformedBall.x + tCandidate * transformedBall.dx;
+        const new_r_by = transformedBall.y + tCandidate * transformedBall.dy;
         if (
-          Math.abs(new_r_bx) <= rw / 2.0 + br + EPSILON &&
-          Math.abs(new_r_by) <= rh / 2.0 + br + EPSILON
+          Math.abs(new_r_bx) <= rw / 2.0 + transformedBall.radius + EPSILON &&
+          Math.abs(new_r_by) <= rh / 2.0 + transformedBall.radius + EPSILON
         ) {
           potentialTs.push([tCandidate, null]); // normal will be computed below
         }
@@ -181,20 +182,26 @@ export class PhysicsEngine {
     // Now add the corner collision check
     // Define the four corners in the object's local space
     const corners: Array<[number, number]> = [
-      [rw / 2.0, rh / 2.0],
-      [-rw / 2.0, rh / 2.0],
-      [-rw / 2.0, -rh / 2.0],
-      [rw / 2.0, -rh / 2.0],
+      [rw / 2.0, rh / 2.0], // TOP LEFT
+      [-rw / 2.0, rh / 2.0], // TOP RIGHT
+      [-rw / 2.0, -rh / 2.0], // BOTTOM RIGHT
+      [rw / 2.0, -rh / 2.0], // BOTTOM LEFT
     ];
 
     let cornerCollisionT = Infinity;
     let cornerNormalLocal: [number, number] | null = null; // Will store the local normal for the earliest corner collision
 
     for (const [cx, cy] of corners) {
-      // Solve for t in: (r_bx + t*r_bdx - cx)^2 + (r_by + t*r_bdy - cy)^2 = br^2
-      const A = r_bdx ** 2 + r_bdy ** 2; // should be 1 if normalized
-      const B = 2 * ((r_bx - cx) * r_bdx + (r_by - cy) * r_bdy);
-      const C = (r_bx - cx) ** 2 + (r_by - cy) ** 2 - br ** 2;
+      // Solve for t in: (transformedBall.x + t*r_bdx - cx)^2 + (transformedBall.y + t*r_bdy - cy)^2 = transformedBall.radius^2
+      const A = transformedBall.dx ** 2 + transformedBall.dy ** 2; // should be 1 if normalized
+      const B =
+        2 *
+        ((transformedBall.x - cx) * transformedBall.dx +
+          (transformedBall.y - cy) * transformedBall.dy);
+      const C =
+        (transformedBall.x - cx) ** 2 +
+        (transformedBall.y - cy) ** 2 -
+        transformedBall.radius ** 2;
       const discriminant = B ** 2 - 4 * A * C;
 
       if (discriminant < 0) {
@@ -210,11 +217,23 @@ export class PhysicsEngine {
         if (tCandidate < cornerCollisionT) {
           cornerCollisionT = tCandidate;
           // Compute the collision point in local coordinates
-          const collisionX = r_bx + tCandidate * r_bdx;
-          const collisionY = r_by + tCandidate * r_bdy;
+          const collisionX =
+            transformedBall.x + tCandidate * transformedBall.dx;
+          const collisionY =
+            transformedBall.y + tCandidate * transformedBall.dy;
           // Local normal is from the corner to the collision point
-          const normalLocalX = collisionX - cx;
-          const normalLocalY = collisionY - cy;
+          const contactX =
+            collisionX -
+            transformedBall.radius *
+              (transformedBall.dx /
+                Math.sqrt(transformedBall.dx ** 2 + transformedBall.dy ** 2));
+          const contactY =
+            collisionY -
+            transformedBall.radius *
+              (transformedBall.dy /
+                Math.sqrt(transformedBall.dx ** 2 + transformedBall.dy ** 2));
+          const normalLocalX = contactX - cx;
+          const normalLocalY = contactY - cy;
           const normLength = Math.sqrt(normalLocalX ** 2 + normalLocalY ** 2);
 
           if (normLength > EPSILON) {
@@ -223,7 +242,7 @@ export class PhysicsEngine {
               normalLocalY / normLength,
             ];
           } else {
-            cornerNormalLocal = [0, 0]; // fallback; ideally should not happen
+            cornerNormalLocal = [obj.nx, obj.ny]; // fallback; ideally should not happen
           }
         }
       }
@@ -242,8 +261,8 @@ export class PhysicsEngine {
       // For a side collision, we must decide which side was hit
       // Use the ball position at time minT to choose a normal consistent with the side
       minT = sideCollisionT;
-      const posLocalX = r_bx + minT * r_bdx;
-      const posLocalY = r_by + minT * r_bdy;
+      const posLocalX = transformedBall.x + minT * transformedBall.dx;
+      const posLocalY = transformedBall.y + minT * transformedBall.dy;
 
       let normalLocal: [number, number];
 
@@ -270,6 +289,110 @@ export class PhysicsEngine {
     }
 
     return { distance: minT, normal: normalGlobal, objectId: objId };
+  }
+
+  static transformIntoBase(ball: Ball, obj: Rectangle): Ball {
+    const rx = obj.x;
+    const ry = obj.y;
+    const rdx = obj.dx;
+    const rdy = obj.dy;
+    // alpha is the angle of the wall's (or paddle's) direction
+    const alpha = rdx !== 0 ? Math.atan2(rdy, rdx) : (rdy * Math.PI) / 2.0;
+
+    const bx = ball.x;
+    const by = ball.y;
+    const bdx = ball.dx;
+    const bdy = ball.dy;
+
+    // Transform ball properties into the object's local (rotated) coordinate system
+    const dx = bx - rx;
+    const dy = by - ry;
+    const ca = Math.cos(alpha);
+    const sa = Math.sin(alpha);
+    // local ball position
+    const r_bx = dx * ca + dy * sa;
+    const r_by = -dx * sa + dy * ca;
+    // local ball direction
+    const r_bdx = bdx * ca + bdy * sa;
+    const r_bdy = -bdx * sa + bdy * ca;
+
+    return {
+      id: ball.id,
+      x: r_bx,
+      y: r_by,
+      dx: r_bdx,
+      dy: r_bdy,
+      radius: ball.radius,
+      speed: ball.speed,
+      isVisible: ball.isVisible,
+      doGoal: ball.doGoal,
+      doCollision: ball.doCollision,
+    };
+  }
+
+  static resolveBallInsideObject(
+    ball: Ball,
+    obj: Rectangle,
+    objID: number,
+    moveDir: [number, number], // normalized direction of the “mover”
+    isBallMovementStep: boolean,
+  ): Collision | null {
+    // 1) Compute relative velocity
+    const relVel: [number, number] = isBallMovementStep
+      ? [moveDir[0] * ball.speed, moveDir[1] * ball.speed]
+      : [-moveDir[0] * obj.velocity, -moveDir[1] * obj.velocity];
+
+    // 2) Transform ball center into object-local coordinates
+    const transformedBall = PhysicsEngine.transformIntoBase(ball, obj);
+    const halfW = obj.width / 2;
+    const halfH = obj.height / 2;
+    const { x: lx, y: ly } = transformedBall;
+
+    // 3) Check if ball is inside the rectangle
+    if (
+      lx >= -halfW - EPSILON &&
+      lx <= halfW + EPSILON &&
+      ly >= -halfH - EPSILON &&
+      ly <= halfH + EPSILON
+    ) {
+      console.log(`Ball inside object ${objID}`);
+
+      // 4) Get object's normal (in global space), and reverse if object is the mover
+      const normal: [number, number] = isBallMovementStep
+        ? [obj.nx, obj.ny]
+        : [-obj.nx, -obj.ny];
+
+      // 5) Project ball position onto the rotated local normal
+      const θ = Math.atan2(obj.dy, obj.dx);
+      const ca = Math.cos(θ),
+        sa = Math.sin(θ);
+      const nlx = normal[0] * ca + normal[1] * sa;
+      const nly = -normal[0] * sa + normal[1] * ca;
+      const proj = lx * nlx + ly * nly;
+
+      // 6) Compute penetration and relative velocity dot normal
+      const penetration = halfH - proj + 2 * EPSILON;
+      const velDotN = relVel[0] * normal[0] + relVel[1] * normal[1];
+
+      // Bail out if moving away — prevents infinite correction
+      if (velDotN <= EPSILON) return null;
+
+      // 7) Backtrack to contact position
+      const t = penetration / velDotN;
+      const contactX = ball.x - relVel[0] * t;
+      const contactY = ball.y - relVel[1] * t;
+
+      console.log(`Contact point: (${contactX}, ${contactY})`);
+
+      return {
+        objectId: objID,
+        distance: penetration,
+        normal: normal,
+        outOfBounds: { position: [contactX, contactY] },
+      };
+    }
+
+    return null;
   }
 
   static computeCollision(
