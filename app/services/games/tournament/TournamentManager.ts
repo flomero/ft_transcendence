@@ -158,17 +158,29 @@ class TournamentManager {
 
   public async startTournament(db: Database): Promise<void> {
     if (this.canTournamentBeStarted() === false) {
-      throw new Error("[start Tournemant] Tournament cannot be started");
+      throw new Error("[startTournament] Tournament cannot be started");
     }
 
     this.tournament = await createTournament(db, this);
-    this.tournament.startTournament();
-    await this.generateRound();
     this.sendMessageToAll(
       JSON.stringify({
         type: "update",
       }),
     );
+
+    const sleep = (ms: number): Promise<void> =>
+      new Promise((resolve) => setTimeout(resolve, ms));
+
+    // Sleep for 20 seconds before starting tournament.
+    await sleep(20000);
+
+    this.tournament.startTournament();
+    await this.generateRound();
+    // this.sendMessageToAll(
+    //   JSON.stringify({
+    //     type: "update",
+    //   }),
+    // );
   }
 
   public canTournamentBeStarted(): boolean {
