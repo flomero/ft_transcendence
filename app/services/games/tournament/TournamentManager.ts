@@ -15,6 +15,7 @@ import type {
 import { createMatch } from "../matchMaking/createMatch";
 import type { GameOrigin } from "../../../types/games/gameHandler/GameOrigin";
 import aiOpponents from "../aiOpponent/aiOpponents";
+import { FastifyInstance } from "fastify";
 
 class TournamentManager {
   public tournamentId: string = randomUUID();
@@ -25,7 +26,7 @@ class TournamentManager {
   public tournament: Tournament | undefined;
   public tournamentSize: number;
   public gameManagerIdToTorunGameId: Map<string, string[]> = new Map();
-  public db: Database;
+  public fastify: FastifyInstance;
   public gameMatches: Map<string, Match> = new Map();
   private static readonly PlayerType = {
     PLAYER: 0,
@@ -37,13 +38,13 @@ class TournamentManager {
     userId: string,
     gameModeType: GameModeType,
     tournamentSize: number,
-    db: Database,
+    fastify: FastifyInstance,
   ) {
     this.ownerId = userId;
     this.gameModeType = gameModeType;
     this.tournamentConfigKey = tournamentConfigKey;
     this.tournamentSize = tournamentSize;
-    this.db = db;
+    this.fastify = fastify;
 
     const newMember: TournamentMember = {
       id: userId,
@@ -197,7 +198,7 @@ class TournamentManager {
       const gameManagerId = await createMatch(
         playersAndAis[PLAYER],
         this.gameModeType,
-        this.db,
+        this.fastify,
         gameOrigin,
         playersAndAis[AI],
       );
@@ -349,7 +350,7 @@ class TournamentManager {
     const newGameManagerId = await createMatch(
       playersAndAis[PLAYER],
       this.gameModeType,
-      this.db,
+      this.fastify,
       gameOrigin,
       playersAndAis[AI],
     );

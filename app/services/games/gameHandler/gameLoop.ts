@@ -11,7 +11,7 @@ const gameLoop = async (gameManagerId: string, fastify: FastifyInstance) => {
   const gameManager = gameManagers.get(gameManagerId);
 
   if (gameManager === undefined) throw new Error("Game does not exist");
-  const game: GameBase = gameManager.getGame;
+  const game: GameBase = gameManager.getGame();
 
   let loopCounter = 0;
   const sleepIntervalMs: number = 1000.0 / game.getServerTickrateS();

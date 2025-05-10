@@ -16,9 +16,9 @@ const savePlayerScoresAndResultToDatabase = async (
   gameManager: GameManager,
   db: Database,
 ) => {
-  const gameScores = gameManager.getScores;
-  const players = gameManager.getPlayersAsArray;
-  const gameResults = gameManager.getResults;
+  const gameScores = gameManager.getScores();
+  const players = gameManager.getPlayersAsArray();
+  const gameResults = gameManager.getResults();
   const query = `UPDATE r_users_matches SET score = ?, result = ? WHERE userId = ? AND matchId = ?`;
 
   for (const player of players) {
@@ -30,7 +30,7 @@ const savePlayerScoresAndResultToDatabase = async (
         score,
         result,
         player.playerUUID,
-        gameManager.getId,
+        gameManager.getId(),
       ]);
     } catch (err) {
       if (err instanceof Error)
@@ -47,21 +47,21 @@ const saveAIScoresAndResultToDatabase = async (
   gameManager: GameManager,
   db: Database,
 ) => {
-  const gameScores = gameManager.getScores;
-  const gameResults = gameManager.getResults;
+  const gameScores = gameManager.getScores();
+  const gameResults = gameManager.getResults();
   const referenceTable = gameManager.getReferenceTable();
   const query = `UPDATE r_users_matches SET score = ?, result = ? WHERE userId = ? AND matchId = ?`;
 
-  if (!gameManager.aiOpponent || gameManager.aiOpponent.size === 0) return;
+  if (!gameManager.aiOpponents || gameManager.aiOpponents.size === 0) return;
 
-  for (const aiOpponent of gameManager.aiOpponent.values()) {
+  for (const aiOpponent of gameManager.aiOpponents.values()) {
     const playerInGameId = aiOpponent.getId();
     const playerUUID = referenceTable[playerInGameId];
     const score = gameScores[playerInGameId];
     const result = gameResults[playerInGameId];
 
     try {
-      await db.run(query, [score, result, playerUUID, gameManager.getId]);
+      await db.run(query, [score, result, playerUUID, gameManager.getId()]);
     } catch (err) {
       if (err instanceof Error)
         console.error(

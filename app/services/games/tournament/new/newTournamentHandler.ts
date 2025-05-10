@@ -41,7 +41,7 @@ async function newTournamentHandler(
       userId,
       gameMode,
       tournamentSize,
-      request.server.sqlite,
+      request.server,
     );
     tournaments.set(newTournament.tournamentId, newTournament);
 
