@@ -156,8 +156,6 @@ class TournamentManager {
     if (this.canTournamentBeStarted() === false) {
       throw new Error("[start Tournemant] Tournament cannot be started");
     }
-
-    console.log("BBBBBBBBBBB");
     this.tournament = await createTournament(db, this);
     this.tournament.startTournament();
     await this.generateRound();
