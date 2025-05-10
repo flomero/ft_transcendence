@@ -47,14 +47,14 @@ const saveAIScoresAndResultToDatabase = async (
   gameManager: GameManager,
   db: Database,
 ) => {
-  const gameScores = gameManager.getScores;
-  const gameResults = gameManager.getResults;
+  const gameScores = gameManager.getScores();
+  const gameResults = gameManager.getResults();
   const referenceTable = gameManager.getReferenceTable();
   const query = `UPDATE r_users_matches SET score = ?, result = ? WHERE userId = ? AND matchId = ?`;
 
   if (!gameManager.aiOpponents || gameManager.aiOpponents.size === 0) return;
 
-  for (const aiOpponent of gameManager.aiOpponent.values()) {
+  for (const aiOpponent of gameManager.aiOpponents.values()) {
     const playerInGameId = aiOpponent.getId();
     const playerUUID = referenceTable[playerInGameId];
     const score = gameScores[playerInGameId];
