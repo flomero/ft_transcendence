@@ -74,5 +74,5 @@ export const gameDisconnectionHandler = async (
         );
       }
     }
-  }, 10000);
+  }, 30000);
 };
