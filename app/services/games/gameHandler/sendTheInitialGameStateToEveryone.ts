@@ -2,8 +2,14 @@ import GameManager from "./GameManager";
 
 const sendTheInitialGameStateToEveryone = (gameManager: GameManager) => {
   const gameState = gameManager.getStateSnapshot();
-  const referenceTable = gameManager.getReferenceTable();
-  gameManager.sendMessageToAll("gameState", gameState, referenceTable);
+  const playerIdReferenceTableLength = Array(gameManager.getPlayerSize()).fill(
+    -1,
+  );
+  gameManager.sendMessageToAll(
+    "gameState",
+    gameState,
+    playerIdReferenceTableLength,
+  );
 };
 
 export default sendTheInitialGameStateToEveryone;
