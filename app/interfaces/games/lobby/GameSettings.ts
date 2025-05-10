@@ -130,6 +130,25 @@ interface SpeedGate {
   speedFactor?: number;
 }
 
+interface ProtectedPowerUp {
+  spawnWeight?: number;
+  powerUpName?: string;
+  powerUpRadiusWidthFactor?: number;
+  wellRadiusWidthFactor?: number;
+  speedMultiplier?: number;
+  meanSpawnRadiusHeightFactor?: number;
+  stdDevSpawnRadiusHeightFactor?: number;
+}
+
+interface BumperShield {
+  spawnWeight?: number;
+  speedMultiplier?: number;
+  wallsHitThresold?: number;
+  wallTotalWidthArenaWidthFactor?: number;
+  wallJunctionArenaWidthFactor?: number;
+  wallGoalOffsetArenaWidthFactor?: number;
+}
+
 interface PowerUp {
   speedBoost?: SpeedBoost;
   blinkingBall?: BlinkingBall;
@@ -138,6 +157,8 @@ interface PowerUp {
   bumper?: Bumper;
   portals?: Portals;
   speedGate?: SpeedGate;
+  protectedPowerUp?: ProtectedPowerUp;
+  bumperShield?: BumperShield;
 }
 
 interface GameSettings {

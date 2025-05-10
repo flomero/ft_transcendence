@@ -95,9 +95,9 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
 
   testLobby: {
     gameName: "pong",
-    gameModeName: "classicPong",
+    gameModeName: "multiplayerPong",
     gameModeConfig: {
-      powerUpRadius: 15,
+      powerUpRadius: 25,
     },
     modifierNames: {
       paceBreaker: {},
@@ -134,8 +134,14 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       // portals: {
       // },
       // speedGate: {}
+      protectedPowerUp: {},
+      // bumperShield: {
+      //   wallGoalOffsetArenaWidthFactor: 12,
+      //   wallTotalWidthArenaWidthFactor: 18,
+      //   wallsHitThresold: 3,
+      // },
     },
-    playerCount: 2,
+    playerCount: 5,
   },
 
   // Quick 1v1, no powerUps
@@ -184,6 +190,12 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       shooter: {},
       portals: {},
       speedGate: {},
+      protectedPowerUp: {},
+      bumperShield: {
+        wallGoalOffsetArenaWidthFactor: 12,
+        wallTotalWidthArenaWidthFactor: 18,
+        wallsHitThresold: 3,
+      },
     },
     playerCount: 2,
   },
@@ -262,6 +274,12 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
         initialBallSizeSmallPortalWidthFactor: 900,
         initialBallSizeBigPortalWidthFactor: 1300,
       },
+      protectedPowerUp: {},
+      bumperShield: {
+        wallTotalWidthArenaWidthFactor: 8,
+        wallJunctionArenaWidthFactor: 50,
+        wallsHitThresold: 2,
+      },
     },
     playerCount: 5,
   },
@@ -301,6 +319,12 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       speedGate: {
         initialBallSizeSmallPortalWidthFactor: 900,
         initialBallSizeBigPortalWidthFactor: 1300,
+      },
+      protectedPowerUp: {},
+      bumperShield: {
+        wallTotalWidthArenaWidthFactor: 8,
+        wallJunctionArenaWidthFactor: 50,
+        wallsHitThresold: 2,
       },
     },
     playerCount: 8,
@@ -342,6 +366,12 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       shooter: {},
       portals: {},
       speedGate: {},
+      protectedPowerUp: {},
+      bumperShield: {
+        wallGoalOffsetArenaWidthFactor: 12,
+        wallTotalWidthArenaWidthFactor: 18,
+        wallsHitThresold: 3,
+      },
     },
     playerCount: 2,
   },
@@ -391,6 +421,12 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
         sizeFactor: 1.8,
         speedFactor: 1.3,
       },
+      protectedPowerUp: {},
+      bumperShield: {
+        wallTotalWidthArenaWidthFactor: 8,
+        wallJunctionArenaWidthFactor: 50,
+        wallsHitThresold: 2,
+      },
     },
     playerCount: 5,
   },
@@ -439,6 +475,12 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
         initialBallSizeBigPortalWidthFactor: 1300,
         sizeFactor: 1.8,
         speedFactor: 1.3,
+      },
+      protectedPowerUp: {},
+      bumperShield: {
+        wallTotalWidthArenaWidthFactor: 8,
+        wallJunctionArenaWidthFactor: 50,
+        wallsHitThresold: 2,
       },
     },
     playerCount: 8,
@@ -516,6 +558,12 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       shooter: {},
       portals: {},
       speedGate: {},
+      protectedPowerUp: {},
+      bumperShield: {
+        wallGoalOffsetArenaWidthFactor: 12,
+        wallTotalWidthArenaWidthFactor: 18,
+        wallsHitThresold: 3,
+      },
     },
     playerCount: 2,
   },
@@ -597,6 +645,12 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       speedGate: {
         initialBallSizeSmallPortalWidthFactor: 900,
         initialBallSizeBigPortalWidthFactor: 1300,
+      },
+      protectedPowerUp: {},
+      bumperShield: {
+        wallTotalWidthArenaWidthFactor: 8,
+        wallJunctionArenaWidthFactor: 50,
+        wallsHitThresold: 2,
       },
     },
     playerCount: 5,

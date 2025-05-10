@@ -31,7 +31,9 @@
             "shooter": 1,
             "bumper": 1,
             "portals": 1,
-            "speedGate": 1
+            "speedGate": 1,
+            "protectedPowerUp": 2,
+            "bumperShield": 1
           }
         }
       },
@@ -64,7 +66,9 @@
             "shooter": 1,
             "bumper": 1,
             "portals": 1,
-            "speedGate": 1
+            "speedGate": 1,
+            "protectedPowerUp": 3,
+            "bumperShield": 1
           }
         }
       }
@@ -216,6 +220,29 @@
         "portalUseThreshold": 3,
         "sizeFactor": 1.4,
         "speedFactor": 1.15
+      },
+
+      "protectedPowerUp": {
+        "className": "ProtectedPowerUp",
+        "spawnWeight": 3.0,
+        "selfActivation": false,
+        "powerUpName": "bumperShield",
+        "powerUpRadiusWidthPercent": 6,
+        "wellRadiusWidthPercent": 8.5,
+        "speedMultiplierPercent": 8,
+        "meanSpawnRadiusHeightPercent": 40,
+        "stdDevSpawnRadiusHeightPercent": 5
+      },
+
+      "bumperShield": {
+        "className": "BumperShield",
+        "spawnWeight": 1.0,
+        "selfActivation": false,
+        "wallsHitThresold": 3,
+        "wallTotalWidthArenaWidthPercent": 21,
+        "wallJunctionArenaWidthPercent": 7,
+        "wallGoalOffsetArenaWidthPercent": 0.0,
+        "speedMultiplierPercent": 8
       }
     }
   }
