@@ -24,7 +24,7 @@ export const getMatchHistoryService = async (
     `
       SELECT r1.matchId,
              m.gameModeName,
-             m.matchDate,
+             m.matchDate || ' UTC' as matchDate,
              m.playerCount,
              m.result as isFinished,
              r2.userId,
