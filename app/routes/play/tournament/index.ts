@@ -1,14 +1,8 @@
 import type { FastifyPluginAsync } from "fastify";
 import {
   TOURNAMENT_CONFIGS_REGISTRY,
-  TournamentGameModes,
   TournamentGameModesPerBracketType,
 } from "../../../config";
-import { tournaments } from "../../../services/games/tournament/tournaments";
-import { gameModeFromString } from "../../../services/config/gameModes";
-import { tournamentConfigFromString } from "../../../services/config/tournamentConfig";
-import canTournamentBeCreatedCheck from "../../../services/games/tournament/new/canTournamentBeCreatedCheck";
-import TournamentManager from "../../../services/games/tournament/TournamentManager";
 
 const page: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.get("/", async (request, reply) => {
@@ -62,50 +56,6 @@ const page: FastifyPluginAsync = async (fastify): Promise<void> => {
     const viewOptions = request.isAjax() ? {} : { layout: "layouts/main" };
     return reply.view("views/tournament/mode", data, viewOptions);
   });
-
-  fastify.get<{
-    Params: {
-      tournamentConfig: string;
-      playerCount: string;
-      tournamentGameMode: string;
-    };
-  }>(
-    "/:tournamentConfig/:playerCount/:tournamentGameMode",
-    async (request, reply) => {
-      const playerCount = Number.parseInt(request.params.playerCount, 10);
-      const gameMode = gameModeFromString(
-        request.params.tournamentGameMode,
-        TournamentGameModes,
-      );
-      const tournamentConfigKey = tournamentConfigFromString(
-        request.params.tournamentConfig,
-      );
-      if (!gameMode || !tournamentConfigKey)
-        return reply.badRequest("Invalid game mode or tournament config");
-      try {
-        const userId = request.userId;
-        canTournamentBeCreatedCheck(
-          userId,
-          gameMode,
-          playerCount,
-          tournamentConfigKey,
-        );
-        const newTournament = new TournamentManager(
-          tournamentConfigKey,
-          userId,
-          gameMode,
-          playerCount,
-          request.server.sqlite,
-        );
-        tournaments.set(newTournament.tournamentId, newTournament);
-
-        reply.redirect(`/games/tournament/join/${newTournament.tournamentId}`);
-      } catch (error) {
-        if (error instanceof Error) return reply.badRequest(error.message);
-        return reply.internalServerError();
-      }
-    },
-  );
 };
 
 export default page;

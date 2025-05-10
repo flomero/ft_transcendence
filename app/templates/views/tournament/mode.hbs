@@ -4,7 +4,7 @@
   <div class="flex flex-row flex-wrap gap-2 justify-center">
     {{#each gamemodes}}
       {{#with this as |gameMode|}}
-        {{#> components/button variant="primary" url=(concat "/play/tournament/" ../config.bracketType "/" ../count "/" gameMode) }}
+        {{#> components/button variant="primary" url=(concat "/games/tournament/new/" ../config.bracketType  "/" gameMode "/" ../count) }}
           {{hrGameModeName gameMode}}
         {{/components/button}}
       {{/with}}

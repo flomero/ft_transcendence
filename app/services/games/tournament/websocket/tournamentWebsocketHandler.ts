@@ -12,7 +12,6 @@ async function tournamentWebsocketHandler(
   const tournament = tournaments.get(tournamentId);
 
   try {
-    connection.send(`Welcome to the tournament ${tournamentId}`);
     validTournamentConnectionCheck(userId, tournamentId);
     tournament?.setMemberSocket(userId, connection);
   } catch (error) {

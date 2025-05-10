@@ -45,7 +45,9 @@ async function newTournamentHandler(
     );
     tournaments.set(newTournament.tournamentId, newTournament);
 
-    return reply.code(201).send({ tournamentId: newTournament.tournamentId });
+    return reply.redirect(
+      `/games/tournament/join/${newTournament.tournamentId}`,
+    );
   } catch (error) {
     if (error instanceof Error) return reply.badRequest(error.message);
     return reply.internalServerError();

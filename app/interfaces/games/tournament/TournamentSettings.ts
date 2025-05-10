@@ -12,4 +12,5 @@ export interface TournamentSettings {
   gameData: {
     playerCount: number;
   };
+  initialSeedingMethod?: string;
 }

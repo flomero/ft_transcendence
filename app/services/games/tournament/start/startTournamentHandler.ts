@@ -14,6 +14,8 @@ async function startTournamentHandler(
 
   try {
     validTournamentConnectionCheck(memberId, tournaemtId);
+    if (tournamentManager?.ownerId !== memberId)
+      throw new Error("You are not the owner of this tournament");
     if (
       tournamentStatus !== undefined &&
       tournamentStatus !== TournamentStatus.CREATED

@@ -55,6 +55,8 @@ export class Tournament {
 
   constructor(tournamentData: TournamentSettings) {
     this.tournamentData = tournamentData;
+    if (!this.tournamentData.initialSeedingMethod)
+      this.tournamentData.initialSeedingMethod = "random";
 
     // Initialize bracket generator strategy
     this.bracketManager = new StrategyManager(

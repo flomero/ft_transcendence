@@ -1,4 +1,5 @@
 import type { Edge, Round } from "../types/tournament/tournament";
+import type Router from "./router.js";
 
 type Rounds = Round[];
 
@@ -15,6 +16,7 @@ declare global {
 
     TournamentBracket: typeof TournamentBracket;
     tournamentHandler: TournamentHandler;
+    router: Router;
   }
 }
 
@@ -105,6 +107,10 @@ class TournamentBracket {
 class TournamentHandler {
   public socket: WebSocket | null = null;
 
+  private getTournamentId(): string {
+    return document.location.pathname.split("/").pop() || "";
+  }
+
   public connect(): void {
     console.log("Connecting to tournament...");
     const tournamentId = window.location.pathname.split("/").pop();
@@ -140,29 +146,18 @@ class TournamentHandler {
 
     switch (message.type) {
       case "error":
-        this.displayError(message.data);
+        this.handleError(message.data);
         break;
       case "update":
-        this.updateTournament(message.data);
+        this.refreshView();
         break;
       default:
         console.log("Unknown message type:", message.type);
     }
   }
 
-  private displayError(errorMessage: string): void {
-    const errorElement = document.getElementById("tournament-error");
-    if (errorElement) {
-      errorElement.textContent = errorMessage;
-      errorElement.style.display = "block";
-    }
-  }
-
-  private updateTournament(data: any): void {
-    const container = document.getElementById("tournament-container");
-    if (container) {
-      container.innerHTML = data.html;
-    }
+  private refreshView(): void {
+    window.router.refresh(); // TODO: maybe make better
   }
 
   public leaveTournament(event: Event): void {
@@ -177,31 +172,66 @@ class TournamentHandler {
     });
   }
 
-  public setReady(): void {
-    fetch(
-      `/games/tournament/ready/${window.location.pathname.split("/").pop()}/true`,
-      {
-        method: "POST",
-      },
-    );
+  public async addAiOpponent(): Promise<void> {
+    try {
+      const response = await fetch(
+        `/games/tournament/add-ai-opponent/${this.getTournamentId()}`,
+        {
+          method: "POST",
+        },
+      );
+
+      if (!response.ok) {
+        const msg = await response.text();
+        const data = JSON.parse(msg);
+        throw new Error(
+          data?.message || `Failed to add AI opponent: ${response.statusText}`,
+        );
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        this.handleError(error);
+      } else {
+        this.handleError(
+          new Error("Failed to add AI opponent. Please try again later."),
+        );
+      }
+    }
   }
 
-  public addAiOpponent(): void {
-    fetch(
-      `/games/tournament/add-ai/${window.location.pathname.split("/").pop()}`,
-      {
-        method: "POST",
-      },
-    );
+  public async startTournament(): Promise<void> {
+    try {
+      const response = await fetch(
+        `/games/tournament/start/${this.getTournamentId()}`,
+        {
+          method: "POST",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to start Tournament: ${response.statusText}`);
+      }
+
+      // const data = await response.json();
+      // TODO: what happens here???
+      console.log("Tournament started");
+    } catch (error) {
+      if (error instanceof Error) {
+        this.handleError(error);
+      } else {
+        this.handleError(
+          new Error("Failed to start tournament. Please try again later."),
+        );
+      }
+    }
   }
 
-  public startTournament(): void {
-    fetch(
-      `/games/tournament/start/${window.location.pathname.split("/").pop()}`,
-      {
-        method: "POST",
-      },
-    );
+  private handleError(error: Error): void {
+    const errorEl = document.getElementById("tournament-error");
+    if (errorEl) {
+      errorEl.textContent = error.message;
+      errorEl.style.display = "block";
+    }
   }
 }
 export { TournamentHandler, TournamentBracket };

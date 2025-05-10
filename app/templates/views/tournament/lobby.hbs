@@ -1,42 +1,47 @@
 <div class="mt-8 flex flex-col items-center justify-center gap-4" id="lobby-container">
   <h1>Tournament</h1>
-  <p class="text-xs font-fg-muted">{{id}}</p>
-  <h1>{{hrGameModeName lobby.gameSettings.gameModeName}}</h1>
-  <button class="text-sm text-fg-muted underline italic cursor-pointer" onclick="lobbyHandler.leaveLobby(event)">Leave</button>
+  {{!-- <p class="text-xs text-fg-muted">{{id}}</p> --}}
+  <div class="flex w-full max-w-2xl mx-auto px-8">
+    <p class="flex-1 flex items-center justify-center px-4 py-2 border-r border-bg-muted text-balance text-center">
+      {{hrGameModeName tournament.gameModeType}}
+    </p>
+    <p class="flex-1 flex items-center justify-center px-4 py-2 border-r border-bg-muted text-balance text-center">
+      {{hrGameModeName tournament.tournamentConfigKey}}
+    </p>
+    <p class="flex-1 flex items-center justify-center px-4 py-2 text-balance text-center">
+      Size: {{tournament.tournamentSize}}
+    </p>
+  </div>
+  <button class="text-sm text-fg-muted underline italic cursor-pointer" onclick="tournamentHandler.leaveTournament(event)">Leave</button>
   <div class="flex flex-wrap justify-center gap-8 mt-8">
-    {{#each lobby.members}}
+    {{#each members}}
       {{#with this}}
         {{#> components/lobby/user
           userId=userId
           imageUrl=(add "/image/" image_id)
           userName=username
           ready=isReady
-          owner=(eq id ../lobby.lobbyOwner)
+          owner=isOwner
         }}
         {{/components/lobby/user}}
       {{/with}}
     {{/each}}
   </div>
-  {{#unless isReady}}
-    {{#> components/button onclick="lobbyHandler.setReady"}}
-      I'm ready
-    {{/components/button}}
-  {{/unless}}
 
   {{#if isOwner}}
     <div class="flex flex-col items-center justify-center gap-4">
-      {{#> components/button onclick="lobbyHandler.addAiOpponent" variant="outline"}}
+      {{#> components/button onclick="tournamentHandler.addAiOpponent" variant="outline" disabled=canStart}}
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bot-icon lucide-bot"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
         Add AI Opponent 
       {{/components/button}}
     </div>
-    {{#if allMembersReady}}
-      {{#> components/button onclick="lobbyHandler.startLobby"}}
-        Start Game
+    {{#if canStart}}
+      {{#> components/button onclick="tournamentHandler.startTournament"}}
+        Start Tournament
       {{/components/button}}
     {{/if}}
   {{/if}}
-  <div class="hidden border-error border text-error p-4 rounded text-xs" id="lobby-error">
+  <div class="hidden border-error border text-error p-4 rounded text-xs" id="tournament-error">
   </div>
   {{#if lobbyString}}
     <pre class="mt-8 p-1 bg-bg-muted rounded w-full text-wrap break-words">
