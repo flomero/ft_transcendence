@@ -1,12 +1,10 @@
-import { FastifyRequest, FastifyReply } from "fastify";
+import type { FastifyRequest, FastifyReply } from "fastify";
 import canTournamentBeCreatedCheck from "./canTournamentBeCreatedCheck";
 import TournamentManager from "../TournamentManager";
 import { gameModeFromString } from "../../../config/gameModes";
 import { TournamentGameModes } from "../../../../config";
 import { tournamentConfigFromString } from "../../../config/tournamentConfig";
-
-// Store active tournaments
-export const tournaments = new Map<string, TournamentManager>();
+import { tournaments } from "../tournaments";
 
 async function newTournamentHandler(
   request: FastifyRequest<{
@@ -28,6 +26,8 @@ async function newTournamentHandler(
     const tournamentConfigKey = tournamentConfigFromString(
       request.params.tournamentConfigName,
     );
+    if (!gameMode || !tournamentConfigKey)
+      return reply.badRequest("Invalid game mode or tournament config");
 
     canTournamentBeCreatedCheck(
       userId,
@@ -37,19 +37,19 @@ async function newTournamentHandler(
     );
 
     const newTournament = new TournamentManager(
-      tournamentConfigKey!,
+      tournamentConfigKey,
       userId,
-      gameMode!,
+      gameMode,
       tournamentSize,
       request.server,
     );
     tournaments.set(newTournament.tournamentId, newTournament);
 
-    return reply.code(201).send({ tournamentId: newTournament.tournamentId });
+    return reply.redirect(
+      `/games/tournament/join/${newTournament.tournamentId}`,
+    );
   } catch (error) {
-    if (error instanceof Error) {
-      return reply.badRequest(error.message);
-    }
+    if (error instanceof Error) return reply.badRequest(error.message);
     return reply.internalServerError();
   }
 }

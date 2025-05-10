@@ -527,13 +527,13 @@ export const TOURNAMENT_CONFIGS_REGISTRY: TOURNAMENT_CONFIGS_REGISTRY_TYPE = {
   },
 
   doubleElimination: {
-    bracketType: "singleElimination",
+    bracketType: "doubleElimination",
     matchWinner: "bestOfX",
     possiblePlayerCount: [4, 8, 16, 32],
   },
 
   swissRound: {
-    bracketType: "singleElimination",
+    bracketType: "swissRound",
     matchWinner: "bestOfX",
     possiblePlayerCount: Array.from({ length: 15 }).map(
       (_, index) => 2 * (index + 1),

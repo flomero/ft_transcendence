@@ -1,0 +1,13 @@
+<div class="flex flex-col justify-center items-center gap-4 mt-8">
+  <h2>Create a tournament</h2>
+  <h3>Choose type</h3>
+  <div class="flex flex-row flex-wrap gap-2 justify-center">
+    {{#each configs}}
+      {{#with this as |conf|}}
+        {{#> components/button variant="primary" url=(add "/play/tournament/" conf.bracketType) }}
+          {{hrGameModeName conf.bracketType}}
+        {{/components/button}}
+      {{/with}}
+    {{/each}}
+  </div>
+</div>

@@ -55,8 +55,8 @@ class PongGame {
       throw new Error("Failed to get 2D context from wall canvas");
     this.wallCtx = wallContext;
 
-    this.canvas.width = 800;
-    this.canvas.height = 800;
+    this.canvas.width = 800 + this.padding * 2;
+    this.canvas.height = 800 + this.padding * 2;
     this.wallCanvas.width = this.canvas.width;
     this.wallCanvas.height = this.canvas.height;
     this.ratio = (this.canvas.width - this.padding * 2) / 100.0;
@@ -103,8 +103,8 @@ class PongGame {
           this.playerCount = message.referenceTable.length;
 
           if (this.playerCount === 2) {
-            this.canvas.width = 800;
-            this.canvas.height = 400;
+            this.canvas.width = 800 + this.padding * 2;
+            this.canvas.height = 400 + this.padding * 2;
             this.wallCanvas.width = this.canvas.width;
             this.wallCanvas.height = this.canvas.height;
             this.ratio = (this.canvas.width - this.padding * 2) / 200.0;
