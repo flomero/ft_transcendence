@@ -12,7 +12,7 @@
           "paddleOffset": 2.5,
           "paddleHeight": 1,
           "wallsHeight": 2,
-          "minBallSpeed": 40
+          "minBallSpeed": 66
         },
 
         "customizableSettings": {
@@ -44,7 +44,8 @@
           "paddleOffset": 2.4,
           "paddleHeight": 0.6,
           "wallsHeight": 1.5,
-          "wallsOffset": 0
+          "wallsOffset": 0,
+          "minBallSpeed": 66
         },
 
         "customizableSettings": {
@@ -207,13 +208,13 @@
         "spawnWeight": 3.0,
         "selfActivation": false,
         "durationS": 60,
-        "initialBallSizeSmallPortalWidthPercent": 700,
-        "initialBallSizeBigPortalWidthPercent": 1000,
-        "portalWidthArenaHeightPercent": 12.5,
+        "initialBallSizeSmallPortalWidthPercent": 900,
+        "initialBallSizeBigPortalWidthPercent": 1250,
+        "portalWidthArenaHeightPercent": 10,
         "meanSpeedGateDstFromCenterPercent": 35,
         "stdDevSpeedGateDstFromCenterPercent": 5,
         "portalUseThreshold": 3,
-        "sizeFactor": 1.5,
+        "sizeFactor": 1.4,
         "speedFactor": 1.15
       }
     }
