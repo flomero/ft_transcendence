@@ -191,9 +191,9 @@ export class Tournament {
 
       gameNum++;
       console.log(`COUNTER: ${this.counter}`);
-      if (++this.counter === 24) {
+      if (++this.counter === 29) {
         console.log(`\n--------------\n`);
-        console.log(`Tournament infos after 24 games`);
+        console.log(`Tournament infos after 29 games`);
         const tournamentInfos = this.getCurrentTournamentInfos();
         console.dir(tournamentInfos, { depth: null });
         console.log(`\n--------------\n`);
@@ -307,6 +307,9 @@ export class Tournament {
     const matchesData: Map<string, MatchData> =
       this.matchWinnerManager.execute("getMatches");
 
+    console.log(`Semi-final:`);
+    console.dir(completeBracket.rounds[2], { depth: null });
+
     const roundCount = completeBracket.rounds.length;
 
     // TMP
@@ -327,12 +330,45 @@ export class Tournament {
               // Compute each MatchInfos from rounds
               Object.entries(round).map(([matchID, match]: [string, Match]) => {
                 const matchData = matchesData.get(matchID);
-                if (!matchData)
+                if (!matchData) {
+                  // Not yet in matchWinner -> check in completeBracket
+                  const matchDataFromBracket =
+                    completeBracket.rounds[roundID][matchID];
+                  if (!matchDataFromBracket)
+                    return {
+                      id: "",
+                      players: [],
+                      status: MatchStatus.NOT_STARTED,
+                    };
+
+                  console.log(`matchDataFromBracket:`);
+                  console.dir(matchDataFromBracket, { depth: null });
+
+                  const playerIDs: string[] = Array.from<string>(
+                    Object.keys(matchDataFromBracket.results),
+                  );
+                  if (playerIDs.length === 1) playerIDs.push("TBD_");
+
+                  const playersInfos: PlayerInfos[] = playerIDs.map(
+                    (playerID) => {
+                      const playerInfos: PlayerInfos = {
+                        id: playerID.startsWith("TBD_") ? "" : playerID,
+                        isReady: playerID !== "",
+                        score: [],
+                        winCount: 0,
+                      };
+
+                      if (playerID === "") playerInfos.name = "TBD";
+                      return playerInfos;
+                    },
+                  );
+
                   return {
-                    id: "",
-                    players: [],
+                    id: matchID,
+                    players: playersInfos,
                     status: MatchStatus.NOT_STARTED,
                   };
+                }
 
                 const playerIDs: string[] = matchData.playerIDs || [];
                 const playersInfos: PlayerInfos[] =
@@ -405,6 +441,15 @@ export class Tournament {
         counter = (counter + 1) % 2;
       },
     );
+
+    // Update ONGOING matches assuming that all matches in currentRound should have been at least started.
+    tournamentInfos.rounds
+      .filter((round) => round.isCurrent)
+      .forEach((round) => {
+        round.matches
+          .filter((match) => match.status === MatchStatus.NOT_STARTED)
+          .forEach((match) => (match.status = MatchStatus.ONGOING));
+      });
 
     return tournamentInfos;
   }
