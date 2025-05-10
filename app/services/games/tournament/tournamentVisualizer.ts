@@ -92,8 +92,9 @@ export async function hydrateMatchStartTimes(
 
   tourney.rounds.forEach((round) =>
     round.matches.forEach((match) => {
-      if (match.startTime) return; // already hydrated
+      // if (match.startTime) return; // already hydrated
       const ids = match.gameIDs;
+      match.tournamentId = tourney.id; // add tournamentId to match
       if (!ids?.length) return; // nothing we can do
       const lastGameId = ids[ids.length - 1]; // newest game
       gameId2Match.set(lastGameId, match);
@@ -120,6 +121,7 @@ export async function hydrateMatchStartTimes(
   rows.forEach((row) => {
     const match = gameId2Match.get(row.id);
     if (match) match.startTime = row.start_time; // ISO string straight from DB
+    console.log(`Match ${row.id} start time: ${row.start_time}`);
   });
 
   return tourney;
