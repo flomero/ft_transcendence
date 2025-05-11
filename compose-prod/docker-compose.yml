@@ -1,53 +1,63 @@
 services:
-  app:
-    build:
-      context: ../app
-      dockerfile: DockerfileProd
-    container_name: transcendence_node_app
-    volumes:
-      - db-data:/data
-    ports:
-      - 3000:3000
-    environment:
-      - DB_PATH=/data/db.sqlite
-    env_file:
-      - .env
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+    app:
+        build:
+            context: ../app
+            dockerfile: DockerfileProd
+        container_name: transcendence_node_app
+        volumes:
+            - db-data:/data
+        environment:
+            - DB_PATH=/data/db.sqlite
+        env_file:
+            - .env
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+            interval: 5s
+            timeout: 2s
+            retries: 10
 
+    nginx:
+        image: nginx:1.28
+        container_name: nginx
+        volumes:
+            - ./nginx.conf:/etc/nginx/conf.d/default.conf
+        depends_on:
+            - app
+        ports:
+            - 80:80
+            - 443:443
+        command: |
+            bash -c "openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/nginx.key -out /etc/ssl/nginx.crt -subj '/CN=localhost' && nginx -g 'daemon off;'"
 
-  prometheus:
-    image: prom/prometheus:v3.3.0
-    container_name: prometheus
-    volumes:
-      - ../monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus-data:/prometheus
-    ports:
-      - "9090:9090"
-    restart: unless-stopped
+    prometheus:
+        image: prom/prometheus:v3.3.0
+        container_name: prometheus
+        volumes:
+            - ../monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+            - prometheus-data:/prometheus
+        ports:
+            - "9090:9090"
+        restart: unless-stopped
 
-  grafana:
-    image: grafana/grafana:11.6.1
-    container_name: grafana
-    volumes:
-      - grafana-data:/var/lib/grafana
-      - ../monitoring/grafana/provisioning:/etc/grafana/provisioning
-    ports:
-      - "4000:3000"
-    restart: unless-stopped
-    environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=your_secure_password
+    grafana:
+        image: grafana/grafana:11.6.1
+        container_name: grafana
+        volumes:
+            - grafana-data:/var/lib/grafana
+            - ../monitoring/grafana/provisioning:/etc/grafana/provisioning
+        ports:
+            - "4000:3000"
+        restart: unless-stopped
+        environment:
+            - GF_SECURITY_ADMIN_USER=admin
+            - GF_SECURITY_ADMIN_PASSWORD=your_secure_password
 
-  node-exporter:
-    image: prom/node-exporter:v1.9.1
-    container_name: node_exporter
-    restart: unless-stopped
+    node-exporter:
+        image: prom/node-exporter:v1.9.1
+        container_name: node_exporter
+        restart: unless-stopped
 
 volumes:
-  db-data:
-  prometheus-data:
-  grafana-data:
+    db-data:
+    prometheus-data:
+    grafana-data:
