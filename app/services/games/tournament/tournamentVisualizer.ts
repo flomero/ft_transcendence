@@ -25,22 +25,10 @@ export async function hydratePlayerScores(
       const gids = match.gameIDs;
       if (!gids?.length) return;
 
-      // Only bother if somebody's score array is incomplete
-      const needsHydration = match.players.some(
-        (pl) => (pl.score?.length ?? 0) < gids.length,
-      );
-      if (!needsHydration) return;
-
+      // Process all matches, not just incomplete ones
       gids.forEach((g, idx) => {
         missingGameIds.add(g);
         gid2Match.set(g, { match, gameIndex: idx });
-      });
-
-      // Pre-allocate score arrays so we can assign by index
-      match.players.forEach((pl) => {
-        if (pl.score.length < gids.length) {
-          pl.score = Array(gids.length).fill(0);
-        }
       });
     }),
   );
@@ -53,29 +41,31 @@ export async function hydratePlayerScores(
   const ids = [...missingGameIds];
   const placeholders = ids.map(() => "?").join(",");
 
-  type Row = { gameId: string; playerId: string; score: number };
+  type Row = { matchId: string; userId: string; score: number };
 
   const rows: Row[] = await db.all<Row[]>(
     `
-      SELECT matchId , userId, score
-        FROM r_users_matches              -- ⇠ rename if your table differs
-       WHERE matchId IN (${placeholders})
+      SELECT matchId, userId, score
+      FROM r_users_matches
+      WHERE matchId IN (${placeholders})
     `,
     ids,
   );
-
+  console.log("Rows from DB:");
+  console.dir(rows);
   /* ────────────────────────────────────────────────────────────────
    * 3 ─ Merge back into the TournamentInfos structure
    * ────────────────────────────────────────────────────────────── */
   rows.forEach((row) => {
-    const meta = gid2Match.get(row.gameId);
+    const meta = gid2Match.get(row.matchId);
     if (!meta) return;
 
     const { match, gameIndex } = meta;
     const player: PlayerInfos | undefined = match.players.find(
-      (p) => p.id === row.playerId,
+      (p) => p.id === row.userId,
     );
     if (player) player.score[gameIndex] = row.score;
+    console.log(`Match ${match.id} player ${player?.name} score: ${row.score}`);
   });
 
   return tourney;
@@ -111,8 +101,8 @@ export async function hydrateMatchStartTimes(
   const rows: Row[] = await db.all<Row[]>(
     `
       SELECT id, matchDate
-        FROM matches
-       WHERE id IN (${placeholders})
+      FROM matches
+      WHERE id IN (${placeholders})
     `,
     gameIds,
   );
@@ -157,9 +147,9 @@ async function hydrateTournamentPlayers(
 
   const rows: Row[] = await db.all<Row[]>(
     `
-        SELECT id, username
-        FROM users
-        WHERE id IN (${placeholders})
+      SELECT id, username
+      FROM users
+      WHERE id IN (${placeholders})
     `,
     ids,
   );
