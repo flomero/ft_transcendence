@@ -21,6 +21,8 @@ import {
   MatchStatus,
   TournamentMessage,
 } from "../../../types/tournament/tournament";
+import { sendSystemMessageToUser } from "../../chat/live";
+import { getUserById, User } from "../../database/user";
 import { tournaments } from "./tournaments";
 
 const sleep = (ms: number): Promise<void> =>
@@ -216,6 +218,8 @@ class TournamentManager {
         tournament: this,
       };
 
+      this.announceNextMatchesInChat(playersAndAis);
+
       const gameManagerId = await createMatch(
         playersAndAis[PLAYER],
         this.gameModeType,
@@ -226,6 +230,37 @@ class TournamentManager {
       this.sendGameManagerIdToPlayersOfMatch(gameManagerId, playersAndAis[0]);
       this.addToGameManagerIdToTourunGameId(gameManagerId, bracketKey);
     }
+  }
+
+  private async announceNextMatchesInChat(playerAndAis: string[][]) {
+    const playerPromises: Promise<User | undefined>[] = [];
+    const aiPromises: Promise<User | undefined>[] = [];
+
+    for (const playerId of playerAndAis[TournamentManager.PlayerType.PLAYER]) {
+      playerPromises.push(getUserById(this.fastify, playerId));
+    }
+    for (const playerId of playerAndAis[TournamentManager.PlayerType.AI]) {
+      aiPromises.push(getUserById(this.fastify, playerId));
+    }
+
+    const players: User[] = (await Promise.all(playerPromises)).filter(
+      (user): user is User => user !== undefined,
+    );
+    const ais: User[] = (await Promise.all(aiPromises)).filter(
+      (user): user is User => user !== undefined,
+    );
+
+    players.forEach((player) => {
+      const opponents = players.filter((oppPlayer) => oppPlayer != player);
+      const opponentUsernames = opponents.map((opponent) => opponent.username);
+      const opponentAiNames = ais.map((ai) => ai.username + "(AI)");
+      const opponentListString = opponentUsernames
+        .concat(opponentAiNames)
+        .join(", ");
+
+      const message = `You will be playing against ${opponentListString} in the next round`;
+      sendSystemMessageToUser(this.fastify, player.id, message);
+    });
   }
 
   private sendGameManagerIdToPlayersOfMatch(
