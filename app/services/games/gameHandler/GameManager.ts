@@ -14,10 +14,12 @@ import terminateGame from "./terminateGame";
 import { GameResult } from "../../../types/strategy/ITournamentBracketGenerator";
 import { PongMinimalGameState } from "../../../types/games/pong/gameState";
 import { FastifyInstance } from "fastify";
+import { fastifyInstance } from "../../../app";
 
 class GameManager {
   private id: string = randomUUID();
   private gameOrigin: GameOrigin | undefined;
+  private isShuffled = false;
   game: GameBase;
   players: Map<string, Player> = new Map();
   aiOpponents: Map<string, PongAIOpponent> = new Map();
@@ -127,10 +129,13 @@ class GameManager {
   }
 
   public shuffleReferenceTable(): void {
+    if (this.isShuffled === true) return;
+    fastifyInstance.log.debug("Shuffling playerIdReferenceTable");
     const tmpRng = new RNG();
     this.playerIdReferenceTable = tmpRng.randomArray(
       this.playerIdReferenceTable,
     );
+    this.isShuffled = true;
   }
 
   private async startGameAndAiLoop(fastify: FastifyInstance): Promise<void> {
