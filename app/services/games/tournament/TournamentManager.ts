@@ -477,25 +477,23 @@ class TournamentManager {
       )
         round.isCurrent = true;
       else round.isCurrent = false;
+
       round.matches.forEach((match) => {
-        switch (match.status) {
-          case MatchStatus.NOT_STARTED:
-            if (round.isCurrent) {
-              match.status = MatchStatus.ONGOING;
-              match.players.forEach((player) => (player.isReady = true));
-            }
-            break;
+        if (match.status === MatchStatus.NOT_STARTED && round.isCurrent) {
+          match.status = MatchStatus.ONGOING;
+          match.players.forEach((player) => (player.isReady = true));
+        }
 
-          case MatchStatus.ONGOING:
-            match.players.forEach((player) => (player.isReady = true));
-            break;
+        if (match.status === MatchStatus.ONGOING) {
+          match.players.forEach((player) => (player.isReady = true));
+          const gameIDs = this.gameManagerIdToTorunGameId.get(match.id) || [];
+          match.gameIDs = gameIDs;
+        }
 
-          case MatchStatus.COMPLETED:
-            match.players.forEach((player) => (player.isReady = true));
-            const gameManagerIds =
-              this.gameManagerIdToTorunGameId.get(match.id) || [];
-            match.gameIDs = gameManagerIds; //.slice(0, match.currentGame || 0);
-            break;
+        if (match.status === MatchStatus.COMPLETED) {
+          match.players.forEach((player) => (player.isReady = true));
+          const gameIDs = this.gameManagerIdToTorunGameId.get(match.id) || [];
+          match.gameIDs = gameIDs;
         }
       });
     });

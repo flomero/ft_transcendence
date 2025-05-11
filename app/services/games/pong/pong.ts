@@ -606,6 +606,7 @@ export abstract class Pong extends GameBase {
   ): ExtendedCollisionData[] {
     const collisionsData = [];
     for (let tick = 1; tick <= maxTicks; tick++) {
+      if (gameState.balls.length === 0) return [];
       // Retrieve the ball
       const ball = gameState.balls[0];
       // Use the ball's speed as the per-tick movement distance.

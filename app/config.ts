@@ -52,6 +52,7 @@ export const TournamentGameModesPerBracketType: {
   singleElimination: [
     TournamentGameModes.CompetitiveClassicPong,
     TournamentGameModes.CompetitiveClassicPongPowerUps,
+    TournamentGameModes.TestTournamentConfig,
   ],
   doubleElimination: [
     TournamentGameModes.CompetitiveClassicPong,

@@ -323,9 +323,6 @@ export class Tournament {
                     },
                   );
 
-                  console.log(`matchDataFromBracket`);
-                  console.dir(matchDataFromBracket, { depth: null });
-
                   return {
                     id: matchID,
                     players: playersInfos,
@@ -350,9 +347,6 @@ export class Tournament {
                   matchData.winCounts.get(playerIDs[0]) || 0,
                   matchData.winCounts.get(playerIDs[1]) || 0,
                 ];
-
-                console.log(`matchData:`);
-                console.dir(matchData, { depth: null });
 
                 return {
                   id: matchID,
