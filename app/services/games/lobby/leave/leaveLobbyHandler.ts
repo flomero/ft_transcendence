@@ -16,26 +16,30 @@ async function leaveLobbyHandler(
 
   try {
     validConnectionCheck(userId, lobbyId);
-    const lobby = getLobby(lobbyId);
 
-    if (
-      isUserOwnerOfLobby(userId, lobbyId) === false &&
-      isUserLastMemberInLobby(userId, lobbyId) === false
-    ) {
-      closePossibleLobbySocketConnection(userId, lobbyId);
-      removeUserFromLobby(userId, lobbyId);
-    } else if (isUserOwnerOfLobby(userId, lobbyId) === true) {
-      lobby.disconnectAllMembers();
-      removeLobby(lobbyId);
-    } else if (isUserLastMemberInLobby(userId, lobbyId) === true) {
-      lobby.disconnectAllMembers();
-      removeLobby(lobbyId);
-    }
-
+    removeMemberFromLobby(lobbyId, userId);
     return reply.send({ message: "You have left the lobby" });
   } catch (error) {
     if (error instanceof Error) return reply.badRequest(error.message);
   }
 }
+
+export const removeMemberFromLobby = (lobbyId: string, userId: string) => {
+  const lobby = getLobby(lobbyId);
+
+  if (
+    isUserOwnerOfLobby(userId, lobbyId) === false &&
+    isUserLastMemberInLobby(userId, lobbyId) === false
+  ) {
+    closePossibleLobbySocketConnection(userId, lobbyId);
+    removeUserFromLobby(userId, lobbyId);
+  } else if (isUserOwnerOfLobby(userId, lobbyId) === true) {
+    lobby.disconnectAllMembers();
+    removeLobby(lobbyId);
+  } else if (isUserLastMemberInLobby(userId, lobbyId) === true) {
+    lobby.disconnectAllMembers();
+    removeLobby(lobbyId);
+  }
+};
 
 export default leaveLobbyHandler;
