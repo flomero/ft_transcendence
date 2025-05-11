@@ -36,11 +36,11 @@ const sendGameState = (
   playerIdReferenceTable: string[],
 ) => {
   const gameStateMessage = game.getStateSnapshot() as PongMinimalGameState;
-  gameManager.sendMessageToAll(
-    "gameState",
-    gameStateMessage,
-    playerIdReferenceTable,
-  );
+  gameManager.sendMessageToAll({
+    type: "gameState",
+    data: gameStateMessage,
+    referenceTable: playerIdReferenceTable,
+  });
 };
 
 const sendGameWinner = async (
@@ -56,12 +56,19 @@ const sendGameWinner = async (
   const userWithImage = userToUserWithImage(user);
   const html = await fastify.view("components/game/winner", {
     user: userWithImage,
+    isTournament: gameManager.gameOrigin?.type === "tournament",
+    tournamentId:
+      gameManager.gameOrigin?.type === "tournament"
+        ? gameManager.gameOrigin?.tournament.tournamentId
+        : "",
   });
-  gameManager.sendMessageToAll(
-    "gameFinished",
-    { html: html },
-    playerIdReferenceTable,
-  );
+  gameManager.sendMessageToAll({ type: "gameFinished", data: html });
+  if (gameManager.gameOrigin?.type === "tournament") {
+    gameManager.sendMessageToAll({
+      type: "redirect",
+      data: `/games/tournament/join/${gameManager.gameOrigin.tournament.tournamentId}`,
+    });
+  }
 };
 
 const getGameWinner = (game: GameBase, playerIdReferenceTable: string[]) => {
