@@ -5,6 +5,7 @@ import closePossibleLobbySocketConnection from "./closePossibleLobbySocketConnec
 import isUserOwnerOfLobby from "../lobbyVaidation/isUserOwnerOfLobby";
 import isUserLastMemberInLobby from "../lobbyVaidation/isUserLastMemberInLobby";
 import removeLobby from "./removeLobby";
+import { getLobby } from "../lobbyWebsocket/getLobby";
 
 async function leaveLobbyHandler(
   request: FastifyRequest<{ Params: { lobbyId: string } }>,
@@ -15,6 +16,7 @@ async function leaveLobbyHandler(
 
   try {
     validConnectionCheck(userId, lobbyId);
+    const lobby = getLobby(lobbyId);
 
     if (
       isUserOwnerOfLobby(userId, lobbyId) === false &&
@@ -23,8 +25,10 @@ async function leaveLobbyHandler(
       closePossibleLobbySocketConnection(userId, lobbyId);
       removeUserFromLobby(userId, lobbyId);
     } else if (isUserOwnerOfLobby(userId, lobbyId) === true) {
+      lobby.disconnectAllMembers();
       removeLobby(lobbyId);
     } else if (isUserLastMemberInLobby(userId, lobbyId) === true) {
+      lobby.disconnectAllMembers();
       removeLobby(lobbyId);
     }
 

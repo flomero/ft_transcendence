@@ -36,7 +36,7 @@ async function startLobbyHandler(
       JSON.stringify({ type: "gameStarted", data: newGameManager.getId() }),
     );
     request.server.customMetrics.countGameStarted();
-    lobby.disconnectMembersFromSockets();
+    lobby.disconnectAllMembers();
     connectionTimeoutHandler(newGameManager, fastify);
     return reply.code(200).send({ gameId: newGameManager.getId() });
   } catch (error) {
