@@ -7,7 +7,7 @@ import { fastifyInstance } from "../../../../app";
 export class ScoredGame extends ModifierBase {
   name = "scoredGame";
 
-  protected goalObjective: number;
+  goalObjective: number;
 
   constructor(customConfig?: Record<string, any>) {
     super();

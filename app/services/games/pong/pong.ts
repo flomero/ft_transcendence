@@ -19,6 +19,7 @@ import type {
   WallState,
 } from "../../../types/games/pong/gameState";
 import { fastifyInstance } from "../../../app";
+import { ScoredGame } from "./gameModifiers/scoredGame";
 
 const EPSILON = 1e-2;
 
@@ -664,5 +665,14 @@ export abstract class Pong extends GameBase {
 
   eliminate(playerID: number): void {
     this.modifierManager.trigger("onPlayerElimination", { playerId: playerID });
+
+    if (this.gameState.playerCount === 2) {
+      this.gameState.scores[(playerID + 1) % 2] = 0;
+      const scoredGame = this.getModifierManager()
+        .getModifiers()
+        .find((modifier) => modifier.name === "scoredGame") as ScoredGame;
+      if (!scoredGame) return;
+      this.gameState.scores[playerID] = scoredGame.goalObjective;
+    }
   }
 }

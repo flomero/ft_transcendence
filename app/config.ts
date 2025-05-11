@@ -108,7 +108,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       timedGame: { duration: 600 },
       scoredGame: { goalObjective: 11 },
       survivalGame: {},
-      elimination: { threshold: 1 },
+      elimination: { threshold: 12 },
       arenaShrink: {},
       goalReset: {},
       idleWallBounceAcceleration: {},
