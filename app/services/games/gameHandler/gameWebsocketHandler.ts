@@ -29,9 +29,11 @@ const gameWebsocketHandler = async (
     });
     connection.on("close", () => {
       if (gameManager) gameDisconnectionHandler(userId, gameManager);
+      gameManager?.removePlayerSocket(userId);
     });
     connection.on("error", () => {
       if (gameManager) gameDisconnectionHandler(userId, gameManager);
+      gameManager?.removePlayerSocket(userId);
     });
   } catch (error) {
     if (error instanceof Error) {

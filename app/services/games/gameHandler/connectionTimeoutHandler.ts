@@ -58,7 +58,7 @@ export const gameDisconnectionHandler = async (
   userId: string,
   gameManager: GameManager,
 ) => {
-  setTimeout(() => {
+  const timeOut = setTimeout(() => {
     try {
       if (
         gameManager.isUserConnected(userId) === false &&
@@ -75,4 +75,5 @@ export const gameDisconnectionHandler = async (
       }
     }
   }, 30000);
+  gameManager.setTimeOut(userId, timeOut);
 };

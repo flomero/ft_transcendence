@@ -97,6 +97,13 @@ class GameManager {
       throw new Error("[addSocketToPlayer] Player not found");
     }
     player.ws = ws;
+    this.clearPossibleTimeOut(player);
+  }
+
+  private clearPossibleTimeOut(player: Player): void {
+    if (player.timeOut) {
+      clearTimeout(player.timeOut);
+    }
   }
 
   public allPlayersAreConnected(): boolean {
@@ -215,6 +222,14 @@ class GameManager {
       this.game.eliminate(player.id);
   }
 
+  public removePlayerSocket(playerId: string): void {
+    const player = this.players.get(playerId);
+    if (player === undefined) {
+      return console.error("[removePlayerSocket] Player not found");
+    }
+    player.ws = undefined;
+  }
+
   public getPlayerSize() {
     return this.players.size + this.aiOpponents.size;
   }
@@ -290,6 +305,14 @@ class GameManager {
 
   public getStateSnapshot(): PongMinimalGameState {
     return this.game.getStateSnapshot() as PongMinimalGameState;
+  }
+
+  public setTimeOut(playerId: string, timeOut: NodeJS.Timeout): void {
+    const player = this.players.get(playerId);
+    if (player === undefined) {
+      return console.error("[setTimeOut] Player not found");
+    }
+    player.timeOut = timeOut;
   }
 }
 
