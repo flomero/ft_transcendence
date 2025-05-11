@@ -164,10 +164,9 @@ export class ModifierManager {
       spawnedPowerUps: groupedPowerUps,
       modifiersState: {
         ...Object.fromEntries(
-          this.modifiers.map((modifiers) => [
-            modifiers.name,
-            modifiers.getState(),
-          ]),
+          this.modifiers
+            .filter((modifier) => modifier.name === "timedGame")
+            .map((modifiers) => [modifiers.name, modifiers.getState()]),
         ),
       },
     };

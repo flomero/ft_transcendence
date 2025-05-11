@@ -35,7 +35,7 @@ export type ModifierState = {
 };
 
 export type ModifiersState = {
-  spawnedPowerUps: { [powerUpName: string]: BallState };
+  spawnedPowerUps: { [powerUpName: string]: BallState[] };
   modifiersState: { [modifierName: string]: ModifierState };
 };
 

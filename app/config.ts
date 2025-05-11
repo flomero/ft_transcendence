@@ -98,6 +98,9 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
     gameModeName: "multiplayerPong",
     gameModeConfig: {
       powerUpRadius: 25,
+      powerUpCapacities: {
+        speedBoost: 100,
+      },
     },
     modifierNames: {
       paceBreaker: {},
@@ -134,7 +137,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       // portals: {
       // },
       // speedGate: {}
-      protectedPowerUp: {},
+      speedBoost: {},
       // bumperShield: {
       //   wallGoalOffsetArenaWidthFactor: 12,
       //   wallTotalWidthArenaWidthFactor: 18,
