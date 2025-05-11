@@ -60,7 +60,6 @@ export async function createChatRoom(
 ): Promise<number> {
   const sql = "INSERT INTO chat_rooms (name, type) VALUES (?, ?) RETURNING id";
   const result = await fastify.sqlite.get(sql, [name, type]);
-  fastify.log.trace(`Created chat_room with id: ${result.id}`);
   return result.id;
 }
 
