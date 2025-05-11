@@ -1,5 +1,6 @@
 import type { Edge, TournamentInfos } from "../types/tournament/tournament";
 import type Router from "./router.js";
+import type { TournamentMessage } from "../types/tournament/tournament";
 
 /* -------------------------------------------------------------------
    Window globals
@@ -202,7 +203,7 @@ class TournamentHandler {
     };
 
     this.socket.onmessage = (event) => {
-      const message = JSON.parse(event.data);
+      const message = JSON.parse(event.data) as TournamentMessage;
       this.handleMessage(message);
     };
 
@@ -215,19 +216,27 @@ class TournamentHandler {
     };
   }
 
-  private handleMessage(message: any): void {
+  private handleMessage(message: TournamentMessage): void {
     console.log("Received tournament message:", message);
 
     switch (message.type) {
       case "error":
-        this.handleError(message.data);
+        this.handleError(new Error(message.data));
         break;
       case "update":
         this.refreshView();
         break;
+      case "game":
+        this.handleGameStart(message.data);
+        break;
       default:
-        console.log("Unknown message type:", message.type);
+        console.log("Unknown message type");
     }
+  }
+
+  private handleGameStart(gameManagerId: string): void {
+    console.log("Game started with ID:", gameManagerId);
+    window.router.navigateTo(`/play/game/${gameManagerId}`);
   }
 
   private refreshView(): void {

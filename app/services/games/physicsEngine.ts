@@ -356,7 +356,7 @@ export class PhysicsEngine {
       ly >= -halfH - EPSILON &&
       ly <= halfH + EPSILON
     ) {
-      fastifyInstance.log.warn(`Ball inside object ${objID}`);
+      // fastifyInstance.log.warn(`Ball inside object ${objID}`);
 
       // 4) Get object's normal (in global space), and reverse if object is the mover
       const normal: [number, number] = isBallMovementStep
