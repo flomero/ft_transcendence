@@ -6,7 +6,7 @@ import type GameManager from "../../gameHandler/GameManager";
 import addGameToDatabase from "./addGameToDatabase";
 import { getLobby } from "../lobbyWebsocket/getLobby";
 import { canLobbyBeStartedCheck } from "./canLobbyBeStartedCheck";
-import connectionTimeoutHandler from "../../gameHandler/connectionTimeoutHandler";
+import { connectionTimeoutHandler } from "../../gameHandler/connectionTimeoutHandler";
 
 export const gameManagers = new Map<string, GameManager>();
 
@@ -36,7 +36,7 @@ async function startLobbyHandler(
       JSON.stringify({ type: "gameStarted", data: newGameManager.getId() }),
     );
     request.server.customMetrics.countGameStarted();
-    lobby.disconnectMembersFromSockets();
+    lobby.disconnectAllMembers();
     connectionTimeoutHandler(newGameManager, fastify);
     return reply.code(200).send({ gameId: newGameManager.getId() });
   } catch (error) {

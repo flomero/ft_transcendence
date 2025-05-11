@@ -6,6 +6,7 @@ import {
   type User,
   usersToUserWithImages,
 } from "../../../services/database/user";
+import { GAME_REGISTRY } from "../../../types/games/gameRegistry";
 
 const page: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.get("/:gameId", async (request, reply) => {
@@ -26,6 +27,7 @@ const page: FastifyPluginAsync = async (fastify): Promise<void> => {
       title: "Game | ft_transcendence",
       gameId: gameId,
       userId: request.userId,
+      tps: GAME_REGISTRY.pong.serverTickrateS,
       users: usersToUserWithImages(users),
     };
 
