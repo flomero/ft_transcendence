@@ -95,7 +95,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
 
   testLobby: {
     gameName: "pong",
-    gameModeName: "multiplayerPong",
+    gameModeName: "classicPong",
     gameModeConfig: {
       powerUpRadius: 25,
       powerUpCapacities: {
@@ -106,8 +106,9 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       paceBreaker: {},
       timedStart: {},
       timedGame: { duration: 600 },
+      scoredGame: { goalObjective: 11 },
       survivalGame: {},
-      elimination: { threshold: 5 },
+      elimination: { threshold: 1 },
       arenaShrink: {},
       goalReset: {},
       idleWallBounceAcceleration: {},
@@ -137,14 +138,14 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       // portals: {
       // },
       // speedGate: {}
-      speedBoost: {},
+      // speedBoost: {},
       // bumperShield: {
       //   wallGoalOffsetArenaWidthFactor: 12,
       //   wallTotalWidthArenaWidthFactor: 18,
       //   wallsHitThresold: 3,
       // },
     },
-    playerCount: 5,
+    playerCount: 2,
   },
 
   // Quick 1v1, no powerUps
@@ -212,6 +213,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       paceBreaker: {},
       timedStart: {},
       timedGame: { duration: 360 },
+      scoredGame: { goalObjective: 4 },
       survivalGame: {},
       elimination: { threshold: 3 },
       arenaShrink: {},
@@ -231,6 +233,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       paceBreaker: {},
       timedStart: {},
       timedGame: { duration: 360 },
+      scoredGame: { goalObjective: 4 },
       survivalGame: {},
       elimination: { threshold: 3 },
       arenaShrink: {},
@@ -254,6 +257,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       timedGame: {
         duration: 360,
       },
+      scoredGame: { goalObjective: 4 },
       survivalGame: {},
       elimination: { threshold: 3 },
       arenaShrink: {},
@@ -300,6 +304,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       timedGame: {
         duration: 360,
       },
+      scoredGame: { goalObjective: 4 },
       survivalGame: {},
       elimination: { threshold: 3 },
       arenaShrink: {},
@@ -389,6 +394,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       paceBreaker: {},
       timedStart: {},
       timedGame: { duration: 600 },
+      scoredGame: { goalObjective: 6 },
       survivalGame: {},
       elimination: { threshold: 5 },
       arenaShrink: {},
@@ -445,6 +451,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       timedStart: {},
       timedGame: { duration: 600 },
       survivalGame: {},
+      scoredGame: { goalObjective: 6 },
       elimination: { threshold: 5 },
       arenaShrink: {},
       goalReset: {},
@@ -614,6 +621,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       timedStart: {},
       timedGame: { duration: 960 },
       survivalGame: {},
+      scoredGame: { goalObjective: 6 },
       elimination: { threshold: 5 },
       arenaShrink: {},
       goalReset: { delay: 2 },
@@ -641,6 +649,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       timedStart: {},
       timedGame: { duration: 960 },
       survivalGame: {},
+      scoredGame: { goalObjective: 6 },
       elimination: { threshold: 5 },
       arenaShrink: {},
       goalReset: { delay: 2 },
