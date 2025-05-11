@@ -429,17 +429,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
-      const chatRoomsView = document.getElementById("chat-rooms");
-      if (!chatRoomsView) {
-        console.error("Chat rooms view not found");
-        return;
-      }
-      const inviteIcons = chatRoomsView.querySelectorAll(
-        "button#send-invite-button",
-      );
-      inviteIcons.forEach((icon) => {
-        icon.classList.add("hidden");
-      });
+      window.chat.hideInviteButtons();
     },
   });
 
@@ -509,6 +499,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       window.tournamentBracket = TournamentBracket.create();
       window.elapsedTimer = ElapsedTimer.create(); // ← NEW
+
+      window.chat.showInviteButtons();
     },
 
     onExit: () => {
@@ -524,6 +516,8 @@ document.addEventListener("DOMContentLoaded", () => {
         window.elapsedTimer.destroy();
         window.elapsedTimer = undefined;
       }
+
+      window.chat.hideInviteButtons();
     },
   });
 
