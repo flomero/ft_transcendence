@@ -195,6 +195,7 @@ export const getCurrentTournamentInfo = async (
   tournament = await hydrateMatchStartTimes(tournament, fastify);
   tournament = await hydratePlayerScores(tournament, fastify);
 
+  console.log(`TournamentInfos from tournamentVisualizer:`);
   console.dir(tournament, { depth: null });
   return tournament;
 };

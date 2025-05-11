@@ -450,17 +450,32 @@ class TournamentManager {
     const tournamentInfos = this.tournament.getCurrentTournamentInfos();
 
     tournamentInfos.rounds.forEach((round, roundID) => {
-      if (roundID === this.currentRoundIndex) round.isCurrent = true;
+      if (
+        roundID === this.currentRoundIndex ||
+        (this.currentRoundIndex === -1 && roundID === 0)
+      )
+        round.isCurrent = true;
       else round.isCurrent = false;
       round.matches.forEach((match) => {
-        if (match.status === MatchStatus.NOT_STARTED) {
-          if (round.isCurrent) match.status = MatchStatus.ONGOING;
-          else return;
+        switch (match.status) {
+          case MatchStatus.NOT_STARTED:
+            if (round.isCurrent) {
+              match.status = MatchStatus.ONGOING;
+              match.players.forEach((player) => (player.isReady = true));
+            }
+            break;
+
+          case MatchStatus.ONGOING:
+            match.players.forEach((player) => (player.isReady = true));
+            break;
+
+          case MatchStatus.COMPLETED:
+            match.players.forEach((player) => (player.isReady = true));
+            const gameManagerIds =
+              this.gameManagerIdToTorunGameId.get(match.id) || [];
+            match.gameIDs = gameManagerIds; //.slice(0, match.currentGame || 0);
+            break;
         }
-        match.players.forEach((player) => (player.isReady = true));
-        const gameManagerIds =
-          this.gameManagerIdToTorunGameId.get(match.id) || [];
-        match.gameIDs = gameManagerIds;
       });
     });
 

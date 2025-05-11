@@ -300,6 +300,7 @@ export class Tournament {
                       id: "",
                       players: [],
                       status: MatchStatus.NOT_STARTED,
+                      currentGame: 0,
                     };
 
                   const playerIDs: string[] = Array.from<string>(
@@ -326,6 +327,7 @@ export class Tournament {
                     id: matchID,
                     players: playersInfos,
                     status: MatchStatus.NOT_STARTED,
+                    currentGame: 0,
                   };
                 }
 
@@ -360,7 +362,8 @@ export class Tournament {
                         ? -1
                         : 0
                       : 1,
-                  currentGame: winCounts.reduce((prev, curr) => prev + curr),
+                  currentGame:
+                    winCounts.reduce((prev, curr) => prev + curr) || 0,
                   status:
                     roundID === 0 || matchData.isComplete
                       ? MatchStatus.COMPLETED
@@ -387,34 +390,6 @@ export class Tournament {
     tournamentInfos.rounds.forEach((round) => {
       round.matches.forEach((match) => matchesMap.set(match.id, match));
     });
-
-    // tournamentInfos.rounds
-    //   .forEach((round) => {
-    //     round.matches
-    //       .filter((match) => match.status !== MatchStatus.COMPLETED)
-    //       .forEach((match) => {
-
-    //         match.players
-    //           .forEach((player) => {
-    //             if (player.name && player.name.startsWith("TBD")) return;
-    //             player.isReady = true;
-    //           })
-    //       })
-    //   });
-
-    // let counter: number = 0;
-    // (tournamentInfos.seeding || []).forEach(
-    //   ([_, fromMatchID, toMatchID]: Edge) => {
-    //     const fromMatch = matchesMap.get(fromMatchID);
-    //     const toMatch = matchesMap.get(toMatchID);
-
-    //     if (!fromMatch || !toMatch) return;
-    //     toMatch.players[counter].isReady =
-    //       fromMatch.status === MatchStatus.COMPLETED;
-
-    //     counter = (counter + 1) % 2;
-    //   },
-    // );
 
     return tournamentInfos;
   }
