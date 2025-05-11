@@ -256,23 +256,22 @@ class TournamentManager {
   }
 
   private async announceNextMatchesInChat(playerAndAis: string[][]) {
-    const players: User[] = [];
+    const playerPromises: Promise<User | undefined>[] = [];
+    const aiPromises: Promise<User | undefined>[] = [];
 
     for (const playerId of playerAndAis[TournamentManager.PlayerType.PLAYER]) {
-      const user = await getUserById(this.fastify, playerId);
-      if (user) {
-        players.push(user);
-      }
+      playerPromises.push(getUserById(this.fastify, playerId));
     }
-
-    const ais: User[] = [];
-
     for (const playerId of playerAndAis[TournamentManager.PlayerType.AI]) {
-      const user = await getUserById(this.fastify, playerId);
-      if (user) {
-        ais.push(user);
-      }
+      aiPromises.push(getUserById(this.fastify, playerId));
     }
+
+    const players: User[] = (await Promise.all(playerPromises)).filter(
+      (user): user is User => user !== undefined,
+    );
+    const ais: User[] = (await Promise.all(aiPromises)).filter(
+      (user): user is User => user !== undefined,
+    );
 
     players.forEach((player) => {
       const opponents = players.filter((oppPlayer) => oppPlayer != player);
