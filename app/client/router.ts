@@ -494,6 +494,24 @@ document.addEventListener("DOMContentLoaded", () => {
     },
   });
 
+  window.router.addRoute("/tournaments", {
+    onEnter: () => {
+      window.tournamentBracket = TournamentBracket.create();
+      window.elapsedTimer = ElapsedTimer.create();
+    },
+
+    onExit: () => {
+      if (window.tournamentBracket) {
+        window.tournamentBracket.destroy();
+        window.tournamentBracket = undefined;
+      }
+      if (window.elapsedTimer) {
+        window.elapsedTimer.destroy();
+        window.elapsedTimer = undefined;
+      }
+    },
+  });
+
   window.router.addRoute("/games/tournament/join/:id", {
     onEnter: () => {
       const tournamentHandler = new TournamentHandler();
