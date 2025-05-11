@@ -281,7 +281,7 @@ class TournamentManager {
         .concat(opponentAiNames)
         .join(", ");
 
-      const message = `You will be playing against ${opponentListString} in the next round!`;
+      const message = `You will be playing against ${opponentListString} in the next round`;
       sendSystemMessageToUser(this.fastify, player.id, message);
     });
   }
