@@ -135,9 +135,6 @@ export class SingleElimination implements ITournamentBracketGenerator {
     // Handle match results and push players to their next matches
     this.handleMatchResults(matchID, rankedPlayers);
 
-    console.log(`activeMatches:`);
-    console.dir(this.activeMatches, { depth: null });
-
     return this.activeMatches.size === 0;
   }
 

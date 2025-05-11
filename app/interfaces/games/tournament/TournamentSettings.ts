@@ -13,4 +13,5 @@ export interface TournamentSettings {
   gameData: {
     playerCount: number;
   };
+  id: string; // Optional tournament ID
 }

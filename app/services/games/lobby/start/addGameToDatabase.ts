@@ -25,7 +25,7 @@ const addUserMatchesToDB = async (gameManager: GameManager, db: Database) => {
   VALUES (?, ?, ?)
   `;
   for (const userId of gameManager.players.keys()) {
-    await db.run(sql, [userId, gameManager.getId(), 0]);
+    await db.run(sql, [userId, gameManager.getId(), -1]);
   }
 };
 
@@ -69,7 +69,7 @@ const addAIToDatabase = async (gameManager: GameManager, db: Database) => {
   const aiIds = gameManager.getAiIdsAsArray();
 
   for (const aiId of aiIds) {
-    await db.run(sql, [aiId, gameManager.getId(), 0]);
+    await db.run(sql, [aiId, gameManager.getId(), -1]);
   }
 };
 
