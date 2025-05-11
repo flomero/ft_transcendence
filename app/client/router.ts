@@ -420,18 +420,7 @@ document.addEventListener("DOMContentLoaded", () => {
       lobbyHandler.connect();
       window.lobbyHandler = lobbyHandler;
 
-      const chatRoomsView = document.getElementById("chat-rooms");
-      console.log("Chat rooms view:", chatRoomsView);
-      if (!chatRoomsView) {
-        console.error("Chat rooms view not found");
-        return;
-      }
-      const inviteIcons = chatRoomsView.querySelectorAll(
-        "button#send-invite-button",
-      );
-      inviteIcons.forEach((icon) => {
-        icon.classList.remove("hidden");
-      });
+      window.chat.showInviteButtons();
     },
     onExit: () => {
       if (window.lobbyHandler) {
