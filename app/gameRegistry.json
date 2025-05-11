@@ -32,8 +32,7 @@
             "bumper": 1,
             "portals": 1,
             "speedGate": 1,
-            "protectedPowerUp": 2,
-            "bumperShield": 1
+            "protectedPowerUp": 2
           }
         }
       },
@@ -67,8 +66,7 @@
             "bumper": 1,
             "portals": 1,
             "speedGate": 1,
-            "protectedPowerUp": 3,
-            "bumperShield": 1
+            "protectedPowerUp": 2
           }
         }
       }
@@ -140,7 +138,7 @@
     "powerUps": {
       "speedBoost": {
         "className": "SpeedBoost",
-        "spawnWeight": 2.0,
+        "spawnWeight": 1.0,
         "selfActivation": false,
         "durationS": 5,
         "rampUpStrengthPercent": 4.5,
@@ -149,7 +147,7 @@
 
       "blinkingBall": {
         "className": "BlinkingBall",
-        "spawnWeight": 1.5,
+        "spawnWeight": 1.0,
         "selfActivation": false,
         "durationS": 6,
         "blinkIntervalS": 0.5,
@@ -158,7 +156,7 @@
 
       "multiBall": {
         "className": "MultiBall",
-        "spawnWeight": 1.5,
+        "spawnWeight": 1.0,
         "selfActivation": false,
         "durationS": 6,
         "ballCount": 8,
@@ -194,7 +192,7 @@
 
       "portals": {
         "className": "Portals",
-        "spawnWeight": 3.0,
+        "spawnWeight": 1.0,
         "selfActivation": false,
         "durationS": 60,
         "portalWallWidthHeightPercent": 40,
@@ -209,7 +207,7 @@
 
       "speedGate": {
         "className": "SpeedGate",
-        "spawnWeight": 3.0,
+        "spawnWeight": 1.0,
         "selfActivation": false,
         "durationS": 60,
         "initialBallSizeSmallPortalWidthPercent": 900,
@@ -224,7 +222,7 @@
 
       "protectedPowerUp": {
         "className": "ProtectedPowerUp",
-        "spawnWeight": 3.0,
+        "spawnWeight": 1.0,
         "selfActivation": false,
         "powerUpName": "bumperShield",
         "powerUpRadiusWidthPercent": 6,
@@ -236,7 +234,7 @@
 
       "bumperShield": {
         "className": "BumperShield",
-        "spawnWeight": 1.0,
+        "spawnWeight": 0.0,
         "selfActivation": false,
         "wallsHitThresold": 3,
         "wallTotalWidthArenaWidthPercent": 21,
