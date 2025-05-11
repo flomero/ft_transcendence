@@ -8,12 +8,18 @@
       <tr class="pb-2">
         <!-- Player name -->
         <td class="pr-2">
-          <div class="font-semibold w-[200px] truncate">
-            {{player.name}}
-          </div>
+          {{#if player.isReady}}
+            <div class="font-semibold w-[200px] truncate">
+              {{player.name}}
+            </div>
+          {{else}}
+            <div class="w-[200px] truncate text-center text-gray-500">
+              LUEN is an asshole
+            </div>
+          {{/if}}
         </td>
 
-       {{#if player.isReady}}
+        {{#if player.isReady}}
           <!-- Win-count badge, colour depends on leadPlayer -->
           {{#if (eq ../match.leadPlayer playerIndex)}}
             {{> components/tournament-view/score-cell score=player.winCount isWinner=true}}
@@ -41,18 +47,19 @@
   </table>
 
   {{#if (eq match.status "ONGOING")}}
-    <div class="mt-4">
-      <h3 class="text-lg font-bold text-yellow-400">
-        Game {{add match.currentGame 1}} in progress
-      </h3>
-      <p class="text-sm">
-        Started at: {{formatDate match.startTime "HH:mm"}}
-      </p>
-      <p class="text-sm">
-        Duration:
-        <span class="elapsed-time" data-start="{{match.startTime}}"></span>
-        <span>{{match.startTime}}</span>
-      </p>
-    </div>
+    {{#if match.startTime}}
+      <div class="mt-4">
+        <span class="text-sm font-bold text-green-500">
+          Game {{add match.currentGame 1}} in progress
+          <span class="elapsed-time" data-start="{{match.startTime}}"></span>
+        </span>
+      </div>
+    {{else}}
+      <div class="mt-4">
+        <span class="text-sm font-bold text-green-500">
+          Game {{add match.currentGame 1}} starting soon
+        </span>
+      </div>
+    {{/if}}
   {{/if}}
 </div>
