@@ -191,7 +191,7 @@ class TournamentManager {
       return console.error("Tournament is not started");
     const brackets = this.tournament.bracketManager.executeStrategy();
     this.currentRoundIndex++;
-    this.createMatches(brackets);
+    await this.createMatches(brackets);
   }
 
   private async createMatches(brackets: Round): Promise<void> {
@@ -294,11 +294,10 @@ class TournamentManager {
   ): Promise<void> {
     const isMatchOver = this.notifyMatchWinnder(gameManagerId, gameResult);
 
-    console.log(`Game finished: ${gameManagerId}`);
-    console.dir(gameResult, { depth: null });
+    this.fastify.log.info(`Game finished: ${gameManagerId}`);
 
     if (isMatchOver === true) {
-      this.notifyBracketManager(gameResult, gameManagerId);
+      await this.notifyBracketManager(gameResult, gameManagerId);
     }
     this.sendMessageToAll({ type: "update" });
     await sleep(10000);
@@ -318,20 +317,21 @@ class TournamentManager {
         `[notifyMatchWinner] GameManagerId: ${gameManagerId} does not exist`,
       );
 
-    console.log(`matchWinner notif: ${matchId}`);
+    this.fastify.log.info(`matchWinner notif: ${matchId}`);
 
     const isMatchOver = this.tournament?.matchWinnerManager.executeStrategy(
       matchId,
       gameResult,
     );
-    console.log(`isMatchOver? ${isMatchOver}`);
+    this.fastify.log.info(`isMatchOver? ${isMatchOver}`);
+
     return isMatchOver;
   }
 
-  private notifyBracketManager(
+  private async notifyBracketManager(
     gameResult: GameResult,
     gameManagerId: string,
-  ): void {
+  ): Promise<void> {
     const matchId = this.getInGameIdFromGameManagerId(gameManagerId);
     if (matchId === undefined || this.tournament === undefined)
       throw new Error(
@@ -343,9 +343,9 @@ class TournamentManager {
       matchId,
       gameResult,
     );
-    console.log(`isRoundOver? ${isRoundOver}`);
+    this.fastify.log.info(`isRoundOver? ${isRoundOver}`);
 
-    if (isRoundOver === true) this.generateRound();
+    if (isRoundOver === true) await this.generateRound();
   }
 
   private getInGameIdFromGameManagerId(
