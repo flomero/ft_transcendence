@@ -2,13 +2,15 @@
   id="{{match.tournamentId}}-{{match.id}}"
   class="match border bg-black-200 mt-2 mb-2 p-2 rounded-lg"
 >
-  <table class=" table-auto text-sm font-mono border-separate border-spacing-x-2">
+  <table class="table-fixed text-sm font-mono border-separate border-spacing-x-2 border-spacing-y-3">
     <tbody>
     {{#each match.players as |player playerIndex|}}
-      <tr>
+      <tr class="pb-2">
         <!-- Player name -->
-        <td class="pr-2 font-semibold whitespace-nowrap">
-          {{player.name}}
+        <td class="pr-2">
+          <div class="font-semibold w-[200px] truncate">
+            {{player.name}}
+          </div>
         </td>
 
        {{#if player.isReady}}
