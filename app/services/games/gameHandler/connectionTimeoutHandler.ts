@@ -9,7 +9,7 @@ export const connectionTimeoutHandler = (
   setTimeout(() => startAiGame(gameManager, fastify), 2000);
   setTimeout(
     () => startGameIfNotAllPlayerConnected(gameManager, fastify),
-    25000,
+    15000,
   );
   setTimeout(
     () => disqualifyNotConnectedPlayersIfOnePlayer(gameManager),

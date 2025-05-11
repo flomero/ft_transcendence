@@ -25,7 +25,6 @@ import { tournaments } from "./tournaments";
 
 const sleep = (ms: number): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, ms));
-
 class TournamentManager {
   public tournamentId: string = randomUUID();
   public ownerId: string;
@@ -169,9 +168,6 @@ class TournamentManager {
 
     this.tournament = await createTournament(db, this);
     this.sendMessageToAll({ type: "update" });
-
-    await sleep(10000);
-
     this.tournament.startTournament();
     await this.generateRound();
   }
@@ -191,6 +187,8 @@ class TournamentManager {
       return console.error("Tournament is not started");
     const brackets = this.tournament.bracketManager.executeStrategy();
     this.currentRoundIndex++;
+    this.sendMessageToAll({ type: "update" });
+    await sleep(10000);
     await this.createMatches(brackets);
   }
 
@@ -298,10 +296,9 @@ class TournamentManager {
 
     if (isMatchOver === true) {
       await this.notifyBracketManager(gameResult, gameManagerId);
-    }
-    this.sendMessageToAll({ type: "update" });
-    await sleep(10000);
-    if (isMatchOver === false) {
+    } else {
+      this.sendMessageToAll({ type: "update" });
+      await sleep(10000);
       await this.createOneGame(gameManagerId);
     }
     this.sendMessageToAll({ type: "update" });
