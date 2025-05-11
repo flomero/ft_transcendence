@@ -32,6 +32,7 @@ class TournamentManager {
   public gameManagerIdToTorunGameId: Map<string, string[]> = new Map();
   public fastify: FastifyInstance;
   public gameMatches: Map<string, Match> = new Map();
+  currentRoundIndex: number = -1;
   private static readonly PlayerType = {
     PLAYER: 0,
     AI: 1,
@@ -197,6 +198,7 @@ class TournamentManager {
     if (this.tournament === undefined)
       return console.error("Tournament is not started");
     const brackets = this.tournament.bracketManager.executeStrategy();
+    this.currentRoundIndex++;
     this.createMatches(brackets);
   }
 
@@ -447,9 +449,15 @@ class TournamentManager {
 
     const tournamentInfos = this.tournament.getCurrentTournamentInfos();
 
-    tournamentInfos.rounds.forEach((round) => {
+    tournamentInfos.rounds.forEach((round, roundID) => {
+      if (roundID === this.currentRoundIndex) round.isCurrent = true;
+      else round.isCurrent = false;
       round.matches.forEach((match) => {
-        if (match.status === MatchStatus.NOT_STARTED) return;
+        if (match.status === MatchStatus.NOT_STARTED) {
+          if (round.isCurrent) match.status = MatchStatus.ONGOING;
+          else return;
+        }
+        match.players.forEach((player) => (player.isReady = true));
         const gameManagerIds =
           this.gameManagerIdToTorunGameId.get(match.id) || [];
         match.gameIDs = gameManagerIds;

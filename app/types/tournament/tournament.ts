@@ -39,6 +39,7 @@ export interface MatchInfos {
   status: MatchStatus;
   startTime?: string; // ISO date string for match start time
   gameIDs?: string[]; // Stores [game1ID, game2ID, ...] with DB game UUID
+  winner?: number;
 }
 
 export interface RoundInfos {

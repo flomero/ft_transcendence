@@ -281,7 +281,7 @@ export class Tournament {
         completeBracket.rounds.map((round, roundID) => {
           return {
             name: singleEliminationRoundNames[roundCount - (roundID + 1)],
-            isCurrent: this.currentRound === round,
+            isCurrent: false, // set later in TournamentManager
             matches: Array.from<MatchInfos>(
               // Compute each MatchInfos from rounds
               Object.entries(round).map(([matchID, match]: [string, Match]) => {
@@ -306,7 +306,7 @@ export class Tournament {
                     (playerID) => {
                       const playerInfos: PlayerInfos = {
                         id: playerID.startsWith("TBD") ? "" : playerID,
-                        isReady: playerID !== "",
+                        isReady: !playerID.startsWith("TBD"),
                         score: [],
                         winCount: 0,
                       };
@@ -356,9 +356,10 @@ export class Tournament {
                         : 0
                       : 1,
                   currentGame: winCounts.reduce((prev, curr) => prev + curr),
-                  status: matchData.isComplete
-                    ? MatchStatus.COMPLETED
-                    : MatchStatus.NOT_STARTED,
+                  status:
+                    roundID === 0 || matchData.isComplete
+                      ? MatchStatus.COMPLETED
+                      : MatchStatus.NOT_STARTED,
                 };
               }),
             ),
@@ -382,28 +383,33 @@ export class Tournament {
       round.matches.forEach((match) => matchesMap.set(match.id, match));
     });
 
-    let counter: number = 0;
-    (tournamentInfos.seeding || []).forEach(
-      ([_, fromMatchID, toMatchID]: Edge) => {
-        const fromMatch = matchesMap.get(fromMatchID);
-        const toMatch = matchesMap.get(toMatchID);
+    // tournamentInfos.rounds
+    //   .forEach((round) => {
+    //     round.matches
+    //       .filter((match) => match.status !== MatchStatus.COMPLETED)
+    //       .forEach((match) => {
 
-        if (!fromMatch || !toMatch) return;
-        toMatch.players[counter].isReady =
-          fromMatch.status === MatchStatus.COMPLETED;
+    //         match.players
+    //           .forEach((player) => {
+    //             if (player.name && player.name.startsWith("TBD")) return;
+    //             player.isReady = true;
+    //           })
+    //       })
+    //   });
 
-        counter = (counter + 1) % 2;
-      },
-    );
+    // let counter: number = 0;
+    // (tournamentInfos.seeding || []).forEach(
+    //   ([_, fromMatchID, toMatchID]: Edge) => {
+    //     const fromMatch = matchesMap.get(fromMatchID);
+    //     const toMatch = matchesMap.get(toMatchID);
 
-    // Update ONGOING matches assuming that all matches in currentRound should have been at least started.
-    tournamentInfos.rounds
-      .filter((round) => round.isCurrent)
-      .forEach((round) => {
-        round.matches
-          .filter((match) => match.status === MatchStatus.NOT_STARTED)
-          .forEach((match) => (match.status = MatchStatus.ONGOING));
-      });
+    //     if (!fromMatch || !toMatch) return;
+    //     toMatch.players[counter].isReady =
+    //       fromMatch.status === MatchStatus.COMPLETED;
+
+    //     counter = (counter + 1) % 2;
+    //   },
+    // );
 
     return tournamentInfos;
   }
