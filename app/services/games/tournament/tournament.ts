@@ -22,6 +22,7 @@ import {
   Edge,
 } from "../../../types/tournament/tournament";
 import type { TournamentSettings } from "../../../interfaces/games/tournament/TournamentSettings";
+import { fastifyInstance } from "../../../app";
 
 export enum TournamentStatus {
   CREATED = 0,
@@ -109,7 +110,9 @@ export class Tournament {
   simulateRound(round: Round): void {
     // For each match in the round
     Object.entries(round).forEach(([matchID, match]) => {
-      console.log(`\nPlaying match ${matchID} (Best of ${match.gamesCount}):`);
+      fastifyInstance.log.debug(
+        `\nPlaying match ${matchID} (Best of ${match.gamesCount}):`,
+      );
       this.simulateMatch(matchID, match);
     });
   }
@@ -127,7 +130,7 @@ export class Tournament {
 
       // Format for console output
       const resultString = gameResult.join("|");
-      console.log(`  Game ${gameNum}: ${resultString}`);
+      fastifyInstance.log.debug(`  Game ${gameNum}: ${resultString}`);
 
       // Notify strategies about completed game and check if match is complete
       isMatchComplete = this.notifyGameCompleted(matchID, gameResult);
@@ -145,7 +148,9 @@ export class Tournament {
           matchID,
         );
 
-        console.log(`  ${winner} wins the match in ${gameNum} games!`);
+        fastifyInstance.log.debug(
+          `  ${winner} wins the match in ${gameNum} games!`,
+        );
       }
 
       gameNum++;

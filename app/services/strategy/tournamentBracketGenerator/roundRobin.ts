@@ -12,6 +12,7 @@ import type {
   GameResult,
   TournamentBracket,
 } from "../../../types/strategy/ITournamentBracketGenerator";
+import { fastifyInstance } from "../../../app";
 
 type Results = {
   [matchID: string]: Match;
@@ -127,7 +128,7 @@ export class RoundRobin implements ITournamentBracketGenerator {
       results: {}, // Results will be provided by the match winner strategy
     };
 
-    console.log(`${matchID} finished, results:`);
+    fastifyInstance.log.info(`${matchID} finished, results:`);
     console.dir(gameResult, { depth: null });
 
     // Remove from active matches when complete

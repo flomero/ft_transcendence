@@ -5,6 +5,7 @@ import { ModifierStatus } from "../../modifierBase";
 import type { Pong } from "../pong";
 import { StrategyManager } from "../../../strategy/strategyManager";
 import type { IPongPowerUpPositionSampler } from "../../../../types/strategy/IPongPowerUpPositionSampler";
+import { fastifyInstance } from "../../../../app";
 
 export class PowerUpSpawner extends TimeLimitedModifierBase {
   name = "powerUpSpawner";
@@ -63,8 +64,6 @@ export class PowerUpSpawner extends TimeLimitedModifierBase {
       0,
       game.getRNG().randomGaussian(this.meanDelay, this.delaySpan),
     );
-
-    // console.log(`Next powerUpSpawn in ${this.duration} ticks`);
   }
 
   onDeactivation(game: Pong): void {
@@ -84,11 +83,11 @@ export class PowerUpSpawner extends TimeLimitedModifierBase {
   }
 
   onPausing(game: GameBase): void {
-    console.log("PowerUpSpawner PAUSED");
+    fastifyInstance.log.debug("PowerUpSpawner PAUSED");
   }
 
   onResuming(game: GameBase): void {
     this.status = ModifierStatus.ACTIVE;
-    console.log("PowerUpSpawner RESUMED");
+    fastifyInstance.log.debug("PowerUpSpawner RESUMED");
   }
 }

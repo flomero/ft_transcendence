@@ -14,6 +14,7 @@ import type {
 import { STRATEGY_REGISTRY } from "../strategyRegistryLoader";
 import { StrategyManager } from "../strategyManager";
 import type { IUserSampler } from "../../../types/strategy/IUserSampler";
+import { fastifyInstance } from "../../../app";
 
 type OverallPlayerResults = {
   lastRoundPlayed: number;
@@ -69,11 +70,13 @@ export class SingleElimination implements ITournamentBracketGenerator {
     // Generate the entire bracket with proper seeding
     this.generateEntireBracket();
 
-    console.log(
+    fastifyInstance.log.debug(
       `Generated ${this.rounds.length} rounds for single elimination bracket`,
     );
     this.rounds.forEach((round, index) => {
-      console.log(`Round ${index + 1}: ${Object.keys(round).length} matches`);
+      fastifyInstance.log.debug(
+        `Round ${index + 1}: ${Object.keys(round).length} matches`,
+      );
     });
   }
 
@@ -202,7 +205,9 @@ export class SingleElimination implements ITournamentBracketGenerator {
       targetMatch.results[playerId] = [];
     }
 
-    console.log(`Pushed player ${playerId} to next match ${nextMatchId}`);
+    fastifyInstance.log.debug(
+      `Pushed player ${playerId} to next match ${nextMatchId}`,
+    );
   }
 
   /**

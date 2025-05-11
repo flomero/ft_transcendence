@@ -80,6 +80,9 @@ class TournamentBracket {
     /* server now ships fully-hydrated tournaments with .seeding in place */
     this.tournaments = window.__TOURNAMENTS__;
 
+    // if (!this.tournaments || this.tournaments.length === 0) {
+    //   return;
+    // }
     /* collect every edge from every tournament */
     this.edges = this.tournaments.flatMap((t) => t.seeding ?? []);
 
@@ -107,7 +110,6 @@ class TournamentBracket {
     this.svg = this.bracket?.querySelector<SVGSVGElement>("#lines") || null;
 
     if (!this.bracket || !this.svg) {
-      console.error("Tournament bracket elements not found in the DOM");
       return;
     }
 

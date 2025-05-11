@@ -4,6 +4,7 @@ import type { WebSocket } from "ws";
 import { randomUUID } from "node:crypto";
 import MinAndMaxPlayers from "../../../types/games/lobby/MinAndMaxPlayers";
 import aiOpponents from "../aiOpponent/aiOpponents";
+import { fastifyInstance } from "../../../app";
 
 class Lobby {
   private lobbyId: string = randomUUID();
@@ -275,8 +276,8 @@ class Lobby {
   }
 
   public printGameSettings(): void {
-    console.log("GameSettings: ");
-    console.log(this.gameSettings);
+    fastifyInstance.log.debug("GameSettings: ");
+    fastifyInstance.log.debug(this.gameSettings);
   }
 
   private getMemberLimits(): { min: number; max: number } {
@@ -306,9 +307,9 @@ class Lobby {
   }
 
   private printLobbyMembers(): void {
-    console.log("Lobby members: ");
+    fastifyInstance.log.debug("Lobby members: ");
     this.lobbyMembers.forEach((member) => {
-      console.log(member.id);
+      fastifyInstance.log.debug(member.id);
     });
   }
 

@@ -77,9 +77,9 @@ class TournamentManager {
 
   public addMember(memberId: string): void {
     if (this.tournamentMembers.has(memberId) === true) {
-      // console.warn(
-      //   `Member: ${memberId} already exists in tournament: ${this.tournamentId}`,
-      // );
+      console.warn(
+        `Member: ${memberId} already exists in tournament: ${this.tournamentId}`,
+      );
       return;
     }
     const newMember: TournamentMember = {

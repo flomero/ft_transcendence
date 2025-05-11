@@ -1,6 +1,7 @@
 import { GAME_REGISTRY } from "../../../../types/games/gameRegistry";
 import { Pong } from "../pong";
 import { TimeLimitedModifierBase } from "../../timeLimitedModifierBase";
+import { fastifyInstance } from "../../../../app";
 
 interface TwoPaddlesBounce {
   count: number;
@@ -150,7 +151,7 @@ export class PaceBreaker extends TimeLimitedModifierBase {
   }
 
   protected nudgeBall(game: Pong) {
-    // console.log(`Nudging the ball`);
+    fastifyInstance.log.debug(`Nudging the ball`);
     const gameState = game.getState();
 
     let maxEntry: { dir: { x: number; y: number }; mag: number } | null = null;

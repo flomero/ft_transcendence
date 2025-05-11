@@ -11,6 +11,7 @@ import { STRATEGY_REGISTRY } from "../strategyRegistryLoader";
 import { RNG } from "../../games/rng";
 import { StrategyManager } from "../strategyManager";
 import type { IUserSampler } from "../../../types/strategy/IUserSampler";
+import { fastifyInstance } from "../../../app";
 
 type PlayerStats = {
   wins: number;
@@ -89,13 +90,15 @@ export class SwissRound implements ITournamentBracketGenerator {
     // Generate the entire bracket structure
     this.generateEntireBracket();
 
-    console.log(
+    fastifyInstance.log.debug(
       `Swiss Round Tournament initialized with ${this.tournamentData.players.length} players`,
     );
-    console.log(
+    fastifyInstance.log.debug(
       `Round count: ${this.roundCount}, Games per match: ${this.gamesCount}, Final games: ${this.finalGamesCount}`,
     );
-    console.log(`Total rounds generated: ${this.allRounds.length}`);
+    fastifyInstance.log.debug(
+      `Total rounds generated: ${this.allRounds.length}`,
+    );
   }
 
   /**
@@ -119,7 +122,7 @@ export class SwissRound implements ITournamentBracketGenerator {
    * Generate the entire bracket structure
    */
   private generateEntireBracket(): void {
-    console.log("Generating complete Swiss Round bracket");
+    fastifyInstance.log.debug("Generating complete Swiss Round bracket");
 
     // Seed players into the first round
     this.seedPlayersIntoFirstRound();
@@ -128,9 +131,11 @@ export class SwissRound implements ITournamentBracketGenerator {
     this.generateAdditionalRounds();
 
     // Log the generated bracket structure
-    console.log(`Generated ${this.allRounds.length} rounds`);
+    fastifyInstance.log.debug(`Generated ${this.allRounds.length} rounds`);
     this.allRounds.forEach((round, index) => {
-      console.log(`Round ${index + 1}: ${Object.keys(round).length} matches`);
+      fastifyInstance.log.debug(
+        `Round ${index + 1}: ${Object.keys(round).length} matches`,
+      );
     });
   }
 
@@ -317,13 +322,13 @@ export class SwissRound implements ITournamentBracketGenerator {
       allPendingPlayers = allPendingPlayers.concat(players);
     }
 
-    console.log(
+    fastifyInstance.log.debug(
       `Assigning ${allPendingPlayers.length} players to round ${this.currentRoundIndex + 1}`,
     );
 
     // Log players by their records
     for (const [record, players] of playersByRecord.entries()) {
-      console.log(
+      fastifyInstance.log.debug(
         `Assigning players with ${record}: ${players.length} players`,
       );
     }
@@ -425,7 +430,7 @@ export class SwissRound implements ITournamentBracketGenerator {
       remainingPlayers.forEach((playerId) => {
         if (!assignedPlayers.has(playerId)) {
           // Will be handled in cleanup pass
-          console.log(
+          fastifyInstance.log.debug(
             `Player ${playerId} couldn't be assigned in their record group`,
           );
         }
@@ -438,7 +443,9 @@ export class SwissRound implements ITournamentBracketGenerator {
     );
 
     if (unassignedPlayers.length > 0) {
-      console.log(`Handling ${unassignedPlayers.length} unassigned players`);
+      fastifyInstance.log.debug(
+        `Handling ${unassignedPlayers.length} unassigned players`,
+      );
 
       let currentPlayers = [...unassignedPlayers];
 
@@ -547,12 +554,12 @@ export class SwissRound implements ITournamentBracketGenerator {
       // Update wins/losses
       if (isWinner) {
         stats.wins++;
-        console.log(
+        fastifyInstance.log.debug(
           `Player ${playerId} wins! Now has ${stats.wins}/${this.roundCount} wins`,
         );
       } else {
         stats.losses++;
-        console.log(
+        fastifyInstance.log.debug(
           `Player ${playerId} loses. Now has ${stats.losses}/${this.roundCount} losses`,
         );
       }
@@ -568,13 +575,15 @@ export class SwissRound implements ITournamentBracketGenerator {
       // Check for qualification or elimination
       if (stats.wins >= this.roundCount) {
         stats.qualified = true;
-        console.log(`Player ${playerId} has QUALIFIED with ${stats.wins} wins`);
+        fastifyInstance.log.debug(
+          `Player ${playerId} has QUALIFIED with ${stats.wins} wins`,
+        );
         this.activePlayers.delete(playerId);
       }
 
       if (stats.losses >= this.roundCount) {
         stats.eliminated = true;
-        console.log(
+        fastifyInstance.log.debug(
           `Player ${playerId} has been ELIMINATED with ${stats.losses} losses`,
         );
         this.activePlayers.delete(playerId);
