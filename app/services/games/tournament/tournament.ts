@@ -274,7 +274,7 @@ export class Tournament {
     const roundCount = completeBracket.rounds.length;
 
     // TMP
-    const tournamentID = "0";
+    const tournamentID = this.tournamentData.id;
 
     const tournamentInfos: TournamentInfos = {
       id: tournamentID,
