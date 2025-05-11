@@ -58,6 +58,10 @@ export interface TournamentInfos {
   seeding: Edge[];
 }
 
+export type TournamentMessage =
+  | { type: "update" }
+  | { type: "game" | "error"; data: string };
+
 /** ────────────────────────────────────────────────────────────────
  *  Edge   — [from-match] ➜ [to-match] (+ optional horizontal offset)
  *  Now carries the tournament id in position 0.

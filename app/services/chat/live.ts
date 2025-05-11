@@ -7,7 +7,7 @@ import {
   getChatRoomRead,
   getChatRoomTwoUsers,
   getUserIdsFromDirectChatRooms,
-  type RoomType,
+  RoomType,
   setRoomRead,
   setRoomReadForAllUsersBlacklist,
 } from "../database/chat/room";
@@ -243,7 +243,26 @@ export async function sendGameInviteToUser(
   message: string,
 ) {
   const roomId = await getChatRoomTwoUsers(fastify, request.userId, friendId);
+  if (!roomId) {
+    return;
+  }
   await sendGameInvite(fastify, request, roomId, message);
+}
+
+export async function sendSystemMessageToUser(
+  fastify: FastifyInstance,
+  userId: string,
+  message: string,
+) {
+  var roomId = await getChatRoomTwoUsers(fastify, userId, "system");
+  if (roomId == undefined) {
+    roomId = await addRoom(fastify, "System", RoomType.Direct, [
+      userId,
+      "system",
+    ]);
+  }
+
+  await sendSystemMessage(fastify, roomId, message);
 }
 
 export async function addRoom(
@@ -251,7 +270,7 @@ export async function addRoom(
   roomName: string,
   roomType: RoomType,
   userIds: string[],
-) {
+): Promise<number> {
   const roomId = await createChatRoom(fastify, roomName, roomType);
   for (const userId of userIds) {
     await addUserToChatRoom(fastify, roomId, userId);
@@ -275,6 +294,7 @@ export async function addRoom(
 
     client.socket.send(JSON.stringify(response));
   }
+  return roomId;
 }
 
 export function deleteRoom(fastify: FastifyInstance, roomId: number) {
