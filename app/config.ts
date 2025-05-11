@@ -538,32 +538,6 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
     playerCount: 2,
   },
 
-  // Competitive 1v1
-  testTournamentConfig: {
-    gameName: "pong",
-    gameModeName: "classicPong",
-    gameModeConfig: {
-      ballRadius: 0.85,
-      ballSpeedWidthPercentS: 62.5,
-      paddleCoveragePercent: 22.5,
-      paddleSpeedWidthPercentS: 0.825,
-      paddleVelocityAngularTransmissionPercent: 90,
-      paddleVelocitySpeedTransmissionPercent: 12.5,
-    },
-    modifierNames: {
-      paceBreaker: {},
-      timedStart: {},
-      timedGame: { duration: 600 },
-      scoredGame: { goalObjective: 2 },
-      survivalGame: {},
-      elimination: { threshold: 12 },
-      goalReset: { delay: 2 },
-      idleWallBounceAcceleration: {},
-    },
-    powerUpNames: {},
-    playerCount: 2,
-  },
-
   // Competitive 1v1, w/ power ups
   competitiveClassicPongPowerUps: {
     gameName: "pong",
