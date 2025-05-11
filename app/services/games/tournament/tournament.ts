@@ -323,6 +323,9 @@ export class Tournament {
                     },
                   );
 
+                  console.log(`matchDataFromBracket`);
+                  console.dir(matchDataFromBracket, { depth: null });
+
                   return {
                     id: matchID,
                     players: playersInfos,
@@ -348,6 +351,9 @@ export class Tournament {
                   matchData.winCounts.get(playerIDs[1]) || 0,
                 ];
 
+                console.log(`matchData:`);
+                console.dir(matchData, { depth: null });
+
                 return {
                   id: matchID,
                   players: playersInfos,
@@ -364,10 +370,9 @@ export class Tournament {
                       : 1,
                   currentGame:
                     winCounts.reduce((prev, curr) => prev + curr) || 0,
-                  status:
-                    roundID === 0 || matchData.isComplete
-                      ? MatchStatus.COMPLETED
-                      : MatchStatus.NOT_STARTED,
+                  status: matchData.isComplete
+                    ? MatchStatus.COMPLETED
+                    : MatchStatus.NOT_STARTED,
                 };
               }),
             ),
@@ -385,11 +390,6 @@ export class Tournament {
           ]),
       ),
     };
-
-    const matchesMap = new Map<string, MatchInfos>();
-    tournamentInfos.rounds.forEach((round) => {
-      round.matches.forEach((match) => matchesMap.set(match.id, match));
-    });
 
     return tournamentInfos;
   }
