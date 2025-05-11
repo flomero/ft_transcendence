@@ -131,110 +131,119 @@ export class Bumper extends TimeLimitedModifierBase {
 
     // Array.from({ length: gameState.playerCount }).forEach((_, index) => {
     //   const wallID = 2 * index + 1;
-    gameState.walls.forEach((wall, index) => {
-      // const wall = gameState.walls[wallID];
-      if (index % 2 === 0 && !game.isEliminated(index / 2)) return;
-      const ca = parseFloat(Math.cos(wall.alpha).toFixed(3));
-      const sa = parseFloat(Math.sin(wall.alpha).toFixed(3));
+    gameState.walls
+      .filter((_, index) => index < 2 * gameState.playerCount) // Only main walls
+      .forEach((wall, index) => {
+        // const wall = gameState.walls[wallID];
+        if (index % 2 === 0 && !game.isEliminated(index / 2)) return;
+        const ca = parseFloat(Math.cos(wall.alpha).toFixed(3));
+        const sa = parseFloat(Math.sin(wall.alpha).toFixed(3));
 
-      const wallJunctionDistance = this.bumperWallJunctionDistance * wall.width;
-      // Calculate junction point for the bumpers
-      const junctionX = wall.x - junctionDistanceFromCenter * ca;
-      const junctionY = wall.y - junctionDistanceFromCenter * sa;
+        const wallJunctionDistance =
+          this.bumperWallJunctionDistance * wall.width;
+        // Calculate junction point for the bumpers
+        const junctionX = wall.x - junctionDistanceFromCenter * ca;
+        const junctionY = wall.y - junctionDistanceFromCenter * sa;
 
-      // Calculate the bumper length based on the wall junction distance
-      const bumperLength = Math.sqrt(
-        junctionDistanceFromCenter ** 2 + wallJunctionDistance ** 2 / 4.0,
-      );
+        // Calculate the bumper length based on the wall junction distance
+        const bumperLength = Math.sqrt(
+          junctionDistanceFromCenter ** 2 + wallJunctionDistance ** 2 / 4.0,
+        );
 
-      // Calculate the angle for the bumpers based on distances
-      // Note: Changed the order of arguments in atan2 to get the correct angle
-      const bumperAngle = Math.atan2(
-        wallJunctionDistance / 2.0,
-        junctionDistanceFromCenter,
-      );
+        // Calculate the angle for the bumpers based on distances
+        // Note: Changed the order of arguments in atan2 to get the correct angle
+        const bumperAngle = Math.atan2(
+          wallJunctionDistance / 2.0,
+          junctionDistanceFromCenter,
+        );
 
-      // 'LEFT' BUMPER - Fixed the angle calculation
-      const leftAngle = wall.alpha - bumperAngle;
-      const leftCa = parseFloat(Math.cos(leftAngle).toFixed(3));
-      const leftSa = parseFloat(Math.sin(leftAngle).toFixed(3));
+        // 'LEFT' BUMPER - Fixed the angle calculation
+        const leftAngle = wall.alpha - bumperAngle;
+        const leftCa = parseFloat(Math.cos(leftAngle).toFixed(3));
+        const leftSa = parseFloat(Math.sin(leftAngle).toFixed(3));
 
-      // Normal vector for left bumper (pointing outward from arena)
-      const leftNx = -leftSa;
-      const leftNy = leftCa;
+        // Normal vector for left bumper (pointing outward from arena)
+        const leftNx = -leftSa;
+        const leftNy = leftCa;
 
-      // Direction vector (perpendicular to normal, defines the "length" direction)
-      const leftDx = leftCa;
-      const leftDy = leftSa;
+        // Direction vector (perpendicular to normal, defines the "length" direction)
+        const leftDx = leftCa;
+        const leftDy = leftSa;
 
-      // Calculate center of left bumper (halfway along its length from junction)
-      const leftCenterX = junctionX + (bumperLength / 2) * leftDx;
-      const leftCenterY = junctionY + (bumperLength / 2) * leftDy;
+        // Calculate center of left bumper (halfway along its length from junction)
+        const leftCenterX = junctionX + (bumperLength / 2) * leftDx;
+        const leftCenterY = junctionY + (bumperLength / 2) * leftDy;
 
-      const leftBumper: Rectangle = {
-        doCollision: true,
-        id: 0,
-        x: leftCenterX,
-        y: leftCenterY,
-        absX: leftCenterX,
-        absY: leftCenterY,
-        nx: leftNx, // Normal vector
-        ny: leftNy,
-        dx: leftDx, // Direction vector
-        dy: leftDy,
-        width: bumperLength,
-        height: wall.height, // Same height as the original wall
-        alpha: leftAngle,
-        isVisible: true,
-        doRotation: true,
-      };
+        const leftBumper: Rectangle = {
+          doCollision: true,
+          id: 0,
+          x: leftCenterX,
+          y: leftCenterY,
+          absX: leftCenterX,
+          absY: leftCenterY,
+          nx: leftNx, // Normal vector
+          ny: leftNy,
+          dx: leftDx, // Direction vector
+          dy: leftDy,
+          width: bumperLength,
+          height: wall.height, // Same height as the original wall
+          alpha: leftAngle,
+          isVisible: true,
+          doRotation: true,
+          doBoundsProtection: true,
+          doResolveCollision: true,
+        };
 
-      // 'RIGHT' BUMPER - Fixed the angle calculation
-      const rightAngle = wall.alpha + bumperAngle;
-      const rightCa = parseFloat(Math.cos(rightAngle).toFixed(3));
-      const rightSa = parseFloat(Math.sin(rightAngle).toFixed(3));
+        // 'RIGHT' BUMPER - Fixed the angle calculation
+        const rightAngle = wall.alpha + bumperAngle;
+        const rightCa = parseFloat(Math.cos(rightAngle).toFixed(3));
+        const rightSa = parseFloat(Math.sin(rightAngle).toFixed(3));
 
-      // Normal vector for right bumper
-      const rightNx = -rightSa;
-      const rightNy = rightCa;
+        // Normal vector for right bumper
+        const rightNx = -rightSa;
+        const rightNy = rightCa;
 
-      // Direction vector
-      const rightDx = rightCa;
-      const rightDy = rightSa;
+        // Direction vector
+        const rightDx = rightCa;
+        const rightDy = rightSa;
 
-      // Calculate center of right bumper (halfway along its length from junction)
-      const rightCenterX = junctionX + (bumperLength / 2) * rightDx;
-      const rightCenterY = junctionY + (bumperLength / 2) * rightDy;
+        // Calculate center of right bumper (halfway along its length from junction)
+        const rightCenterX = junctionX + (bumperLength / 2) * rightDx;
+        const rightCenterY = junctionY + (bumperLength / 2) * rightDy;
 
-      const rightBumper: Rectangle = {
-        doCollision: true,
-        id: 0,
-        x: rightCenterX,
-        y: rightCenterY,
-        absX: rightCenterX,
-        absY: rightCenterY,
-        nx: rightNx, // Normal vector
-        ny: rightNy,
-        dx: rightDx, // Direction vector
-        dy: rightDy,
-        width: bumperLength,
-        height: wall.height, // Same height as the original wall
-        alpha: rightAngle,
-        isVisible: true,
-        doRotation: true,
-      };
+        const rightBumper: Rectangle = {
+          doCollision: true,
+          id: 0,
+          x: rightCenterX,
+          y: rightCenterY,
+          absX: rightCenterX,
+          absY: rightCenterY,
+          nx: rightNx, // Normal vector
+          ny: rightNy,
+          dx: rightDx, // Direction vector
+          dy: rightDy,
+          width: bumperLength,
+          height: wall.height, // Same height as the original wall
+          alpha: rightAngle,
+          isVisible: true,
+          doRotation: true,
+          doBoundsProtection: true,
+          doResolveCollision: true,
+        };
 
-      // Add both bumpers to the bumpers array
-      this.bumpers.push(leftBumper, rightBumper);
-    });
+        // Add both bumpers to the bumpers array
+        this.bumpers.push(leftBumper, rightBumper);
+      });
 
     // Add the bumpers to the game's walls
     gameState.walls.push(...this.bumpers);
   }
 
-  onWallBounce(game: Pong, args: { wallID: number }): void {
+  onWallBounce(game: Pong, args: { wallID: number; ballID: number }): void {
     const isBumper = this.bumpers.includes(game.getState().walls[args.wallID]);
     if (!isBumper) return;
+
+    if (args.ballID < 0 || args.ballID > game.getState().balls.length) return;
 
     // Add velocity (clamped to max)
     this.velocityFactor = Math.min(
@@ -243,8 +252,8 @@ export class Bumper extends TimeLimitedModifierBase {
     );
 
     if (game.getState().balls.length === 0) return;
-    game.getState().balls[0].speed +=
-      this.velocityFactor * game.getState().balls[0].speed;
+    game.getState().balls[args.ballID].speed +=
+      this.velocityFactor * game.getState().balls[args.ballID].speed;
   }
 
   onUpdate(game: Pong): void {

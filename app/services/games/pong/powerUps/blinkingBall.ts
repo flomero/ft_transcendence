@@ -85,10 +85,10 @@ export class BlinkingBall extends TimeLimitedModifierBase {
       !this.isVisible &&
       this.ticks % this.blinkInterval < this.blinkInterval - this.blinkDuration
     ) {
-      gameState.balls[0].isVisible = true;
+      gameState.balls.forEach((ball) => (ball.isVisible = true));
       this.isVisible = true;
     } else if (this.ticks % this.blinkInterval == 0) {
-      gameState.balls[0].isVisible = false;
+      gameState.balls.forEach((ball) => (ball.isVisible = false));
       this.isVisible = false;
     }
   }

@@ -1,5 +1,6 @@
 import type { GameMessage, PongUserInput } from "../types/games/userInput";
 import type { PongMinimalGameState } from "../types/games/pong/gameState";
+import type { BallState } from "../types/games/pong/gameState";
 
 class PongGame {
   private canvas: HTMLCanvasElement;
@@ -429,16 +430,18 @@ class PongGame {
   private drawPowerUps(): void {
     if (!this.gameState?.modifiersState?.spawnedPowerUps) return;
 
-    for (const [type, powerUp] of Object.entries(
-      this.gameState.modifiersState.spawnedPowerUps,
-    )) {
-      const x = powerUp.x * this.ratio;
-      const y = powerUp.y * this.ratio;
-      const radius = powerUp.r * this.ratio;
-      const color = this.getPowerUpColor(type);
+    Object.entries(this.gameState.modifiersState.spawnedPowerUps).forEach(
+      ([type, powerUpList]: [string, BallState[]]) => {
+        powerUpList.forEach((powerUp) => {
+          const x = powerUp.x * this.ratio;
+          const y = powerUp.y * this.ratio;
+          const radius = powerUp.r * this.ratio;
+          const color = this.getPowerUpColor(type);
 
-      this.drawNeonCircle(x, y, radius, color);
-    }
+          this.drawNeonCircle(x, y, radius, color);
+        });
+      },
+    );
   }
 
   private getPowerUpColor(type: string): string {
@@ -453,6 +456,14 @@ class PongGame {
         return "#ffff33"; // bright yellow
       case "bumper":
         return "#bf00ff"; // vivid purple
+      case "portals":
+        return "#ff6ec7"; // Magenta pink
+      case "speedGate":
+        return "#00ffcc"; // Aqua teal
+      case "protectedPowerUp":
+        return "#ff9933"; // Orange
+      case "bumperShield":
+        return "#cc00ff"; // Violet
       default:
         return "#7fff00"; // chartreuse
     }

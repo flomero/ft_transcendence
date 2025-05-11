@@ -12,15 +12,15 @@
           "paddleOffset": 2.5,
           "paddleHeight": 1,
           "wallsHeight": 2,
-          "minBallSpeed": 40
+          "minBallSpeed": 66
         },
 
         "customizableSettings": {
           "ballSpeedWidthPercentS": 55,
-          "ballRadius": 0.95,
+          "ballRadius": 1,
           "ballResetSampler": "biasedQuadrantGaussianRA",
           "paddleCoveragePercent": 25,
-          "paddleSpeedWidthPercentS": 0.85,
+          "paddleSpeedWidthPercentS": 0.845,
           "paddleVelocityAngularTransmissionPercent": 55,
           "paddleVelocitySpeedTransmissionPercent": 10,
           "powerUpRadius": 4.5,
@@ -29,7 +29,11 @@
             "blinkingBall": 1,
             "multiBall": 1,
             "shooter": 1,
-            "bumper": 1
+            "bumper": 1,
+            "portals": 1,
+            "speedGate": 1,
+            "protectedPowerUp": 2,
+            "bumperShield": 1
           }
         }
       },
@@ -42,15 +46,16 @@
           "paddleOffset": 2.4,
           "paddleHeight": 0.6,
           "wallsHeight": 1.5,
-          "wallsOffset": 0
+          "wallsOffset": 0,
+          "minBallSpeed": 66
         },
 
         "customizableSettings": {
           "ballSpeedWidthPercentS": 60,
-          "ballRadius": 0.6,
+          "ballRadius": 0.625,
           "ballResetSampler": "biasedGaussianCA",
           "paddleCoveragePercent": 25,
-          "paddleSpeedWidthPercentS": 0.8,
+          "paddleSpeedWidthPercentS": 0.77,
           "paddleVelocityAngularTransmissionPercent": 55,
           "paddleVelocitySpeedTransmissionPercent": 10,
           "powerUpRadius": 3.25,
@@ -59,7 +64,11 @@
             "blinkingBall": 1,
             "multiBall": 1,
             "shooter": 1,
-            "bumper": 1
+            "bumper": 1,
+            "portals": 1,
+            "speedGate": 1,
+            "protectedPowerUp": 3,
+            "bumperShield": 1
           }
         }
       }
@@ -134,7 +143,7 @@
         "spawnWeight": 2.0,
         "selfActivation": false,
         "durationS": 5,
-        "rampUpStrengthPercent": 4,
+        "rampUpStrengthPercent": 4.5,
         "rampUpFrequencyS": 0.33
       },
 
@@ -164,7 +173,7 @@
         "durationS": 5,
         "chargeDurationS": 2,
         "chargeRadius": 7.5,
-        "shootAdditionalVelocityPercent": 40,
+        "shootAdditionalVelocityPercent": 20,
         "shootAngularOffsetPercent": 45,
         "shootStandardAngularDeviationPercent": 22.5,
         "shootTargetWidthPercent": 90,
@@ -181,6 +190,59 @@
         "bumperVelocityPercent": 12.5,
         "bumperMaxVelocityPercent": 12.5,
         "bumperAccelerationPercentS": -8.5
+      },
+
+      "portals": {
+        "className": "Portals",
+        "spawnWeight": 3.0,
+        "selfActivation": false,
+        "durationS": 60,
+        "portalWallWidthHeightPercent": 40,
+        "directionalOffsetPercent": 30,
+        "directionalOffsetStandardDeviationPercent": 3.5,
+        "normalOffsetPercent": 30,
+        "normalOffsetStandardDeviationPercent": 3.5,
+        "useNaturalSide": true,
+        "useBothSides": true,
+        "teleportationCountThrehsold": 5
+      },
+
+      "speedGate": {
+        "className": "SpeedGate",
+        "spawnWeight": 3.0,
+        "selfActivation": false,
+        "durationS": 60,
+        "initialBallSizeSmallPortalWidthPercent": 900,
+        "initialBallSizeBigPortalWidthPercent": 1250,
+        "portalWidthArenaHeightPercent": 10,
+        "meanSpeedGateDstFromCenterPercent": 35,
+        "stdDevSpeedGateDstFromCenterPercent": 5,
+        "portalUseThreshold": 3,
+        "sizeFactor": 1.4,
+        "speedFactor": 1.15
+      },
+
+      "protectedPowerUp": {
+        "className": "ProtectedPowerUp",
+        "spawnWeight": 3.0,
+        "selfActivation": false,
+        "powerUpName": "bumperShield",
+        "powerUpRadiusWidthPercent": 6,
+        "wellRadiusWidthPercent": 8.5,
+        "speedMultiplierPercent": 8,
+        "meanSpawnRadiusHeightPercent": 40,
+        "stdDevSpawnRadiusHeightPercent": 5
+      },
+
+      "bumperShield": {
+        "className": "BumperShield",
+        "spawnWeight": 1.0,
+        "selfActivation": false,
+        "wallsHitThresold": 3,
+        "wallTotalWidthArenaWidthPercent": 21,
+        "wallJunctionArenaWidthPercent": 7,
+        "wallGoalOffsetArenaWidthPercent": 0.0,
+        "speedMultiplierPercent": 8
       }
     }
   }
