@@ -20,6 +20,8 @@ import {
   type TournamentInfos,
   MatchStatus,
 } from "../../../types/tournament/tournament";
+import { sendSystemMessageToUser } from "../../chat/live";
+import { getUserById, User } from "../../database/user";
 
 class TournamentManager {
   public tournamentId: string = randomUUID();
@@ -226,6 +228,8 @@ class TournamentManager {
         tournament: this,
       };
 
+      this.announceNextMatchesInChat(playersAndAis);
+
       const gameManagerId = await createMatch(
         playersAndAis[PLAYER],
         this.gameModeType,
@@ -236,6 +240,38 @@ class TournamentManager {
       this.sendGameManagerIdToPlayersOfMatch(gameManagerId, playersAndAis[0]);
       this.addToGameManagerIdToTourunGameId(gameManagerId, bracketKey);
     }
+  }
+
+  private async announceNextMatchesInChat(playerAndAis: string[][]) {
+    const players: User[] = [];
+
+    for (const playerId of playerAndAis[TournamentManager.PlayerType.PLAYER]) {
+      const user = await getUserById(this.fastify, playerId);
+      if (user) {
+        players.push(user);
+      }
+    }
+
+    const ais: User[] = [];
+
+    for (const playerId of playerAndAis[TournamentManager.PlayerType.AI]) {
+      const user = await getUserById(this.fastify, playerId);
+      if (user) {
+        ais.push(user);
+      }
+    }
+
+    players.forEach((player) => {
+      const opponents = players.filter((oppPlayer) => oppPlayer != player);
+      const opponentUsernames = opponents.map((opponent) => opponent.username);
+      const opponentAiNames = ais.map((ai) => ai.username + "(AI)");
+      const opponentListString = opponentUsernames
+        .concat(opponentAiNames)
+        .join(", ");
+
+      const message = `You will be playing against ${opponentListString} in the next round!`;
+      sendSystemMessageToUser(this.fastify, player.id, message);
+    });
   }
 
   private sendGameManagerIdToPlayersOfMatch(
