@@ -19,8 +19,12 @@ import { FastifyInstance } from "fastify";
 import {
   type TournamentInfos,
   MatchStatus,
+  TournamentMessage,
 } from "../../../types/tournament/tournament";
 import { tournaments } from "./tournaments";
+
+const sleep = (ms: number): Promise<void> =>
+  new Promise((resolve) => setTimeout(resolve, ms));
 
 class TournamentManager {
   public tournamentId: string = randomUUID();
@@ -68,10 +72,10 @@ class TournamentManager {
     this.tournamentMembers.get(memberId)!.webSocket = socket;
   }
 
-  public sendMessageToAll(message: string): void {
+  public sendMessageToAll(message: TournamentMessage): void {
     for (const member of this.tournamentMembers.values()) {
       if (member.webSocket) {
-        member.webSocket.send(message);
+        member.webSocket.send(JSON.stringify(message));
       }
     }
   }
@@ -89,11 +93,7 @@ class TournamentManager {
       isAI: false,
     };
     this.tournamentMembers.set(memberId, newMember);
-    this.sendMessageToAll(
-      JSON.stringify({
-        type: "update",
-      }),
-    );
+    this.sendMessageToAll({ type: "update" });
   }
 
   public addAiOpponent(memberId: string): void {
@@ -105,11 +105,7 @@ class TournamentManager {
       isAI: true,
     };
     this.tournamentMembers.set(aiId.toString(), newAiOpponent);
-    this.sendMessageToAll(
-      JSON.stringify({
-        type: "update",
-      }),
-    );
+    this.sendMessageToAll({ type: "update" });
   }
 
   private canAIOpponentBeAdded(memberId: string): void {
@@ -143,11 +139,7 @@ class TournamentManager {
     ) {
       this.changeOwner();
     }
-    this.sendMessageToAll(
-      JSON.stringify({
-        type: "update",
-      }),
-    );
+    this.sendMessageToAll({ type: "update" });
   }
 
   public changeOwner() {
@@ -176,25 +168,12 @@ class TournamentManager {
     }
 
     this.tournament = await createTournament(db, this);
-    this.sendMessageToAll(
-      JSON.stringify({
-        type: "update",
-      }),
-    );
+    this.sendMessageToAll({ type: "update" });
 
-    const sleep = (ms: number): Promise<void> =>
-      new Promise((resolve) => setTimeout(resolve, ms));
-
-    // Sleep for 20 seconds before starting tournament.
-    await sleep(20000);
+    await sleep(10000);
 
     this.tournament.startTournament();
     await this.generateRound();
-    // this.sendMessageToAll(
-    //   JSON.stringify({
-    //     type: "update",
-    //   }),
-    // );
   }
 
   public canTournamentBeStarted(): boolean {
@@ -259,8 +238,8 @@ class TournamentManager {
       const member = this.tournamentMembers.get(player);
       member?.webSocket?.send(
         JSON.stringify({
-          type: "gameManagerId",
-          gameManagerId: gameManagerId,
+          type: "game",
+          data: gameManagerId,
         }),
       );
     }
@@ -309,10 +288,10 @@ class TournamentManager {
     }
   }
 
-  public notifyGameCompleted(
+  public async notifyGameCompleted(
     gameManagerId: string,
     gameResult: GameResult,
-  ): void {
+  ): Promise<void> {
     const isMatchOver = this.notifyMatchWinnder(gameManagerId, gameResult);
 
     console.log(`Game finished: ${gameManagerId}`);
@@ -320,15 +299,13 @@ class TournamentManager {
 
     if (isMatchOver === true) {
       this.notifyBracketManager(gameResult, gameManagerId);
-    } else {
-      this.createOneGame(gameManagerId);
     }
-
-    this.sendMessageToAll(
-      JSON.stringify({
-        type: "update",
-      }),
-    );
+    this.sendMessageToAll({ type: "update" });
+    await sleep(10000);
+    if (isMatchOver === false) {
+      await this.createOneGame(gameManagerId);
+    }
+    this.sendMessageToAll({ type: "update" });
   }
 
   private notifyMatchWinnder(

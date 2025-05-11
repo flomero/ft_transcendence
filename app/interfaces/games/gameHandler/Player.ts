@@ -5,6 +5,7 @@ interface Player {
   playerUUID: string;
   ws?: WebSocket;
   timeOut?: NodeJS.Timeout;
+  leftGame: boolean;
 }
 
 export default Player;

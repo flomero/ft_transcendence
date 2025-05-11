@@ -1,6 +1,18 @@
-import type { GameMessage, PongUserInput } from "../types/games/userInput";
+import type {
+  GameMessage,
+  GameStateMessage,
+  PongUserInput,
+  ServerMessage,
+} from "../types/games/userInput";
 import type { PongMinimalGameState } from "../types/games/pong/gameState";
+import type Router from "./router.js";
 import type { BallState } from "../types/games/pong/gameState";
+
+declare global {
+  interface Window {
+    router: Router;
+  }
+}
 
 class PongGame {
   private canvas: HTMLCanvasElement;
@@ -91,44 +103,64 @@ class PongGame {
 
   private handleSocketMessage(event: MessageEvent): void {
     try {
-      const message = JSON.parse(event.data);
+      const message = JSON.parse(event.data) as ServerMessage;
 
-      if (message.type === "gameState") {
-        const prevWalls = this.gameState?.walls || [];
-        this.gameState = message.data as PongMinimalGameState;
-        const currentWalls = this.gameState?.walls || [];
-
-        // Check if walls have changed (either count or properties)
-        if (this.haveWallsChanged(prevWalls, currentWalls)) {
-          this.wallsNeedRedraw = true;
-        }
-
-        if (message.referenceTable && this.playerIndex === -1) {
-          this.referenceTable = message.referenceTable;
-          this.playerIndex = message.referenceTable.indexOf(this.currentUserId);
-          this.playerCount = message.referenceTable.length;
-
-          if (this.playerCount === 2) {
-            this.canvas.width = 800 + this.padding * 2;
-            this.canvas.height = 400 + this.padding * 2;
-            this.wallCanvas.width = this.canvas.width;
-            this.wallCanvas.height = this.canvas.height;
-            this.ratio = (this.canvas.width - this.padding * 2) / 200.0;
-            this.wallsNeedRedraw = true;
-          }
-
-          if (this.playerIndex >= 0 && this.gameState?.paddles) {
-            this.calculateRotationAngle();
-          }
-        }
-      }
-      if (message.type === "gameFinished") {
-        this.displayGameFinishedMessage(message.data.html);
+      switch (message.type) {
+        case "gameState":
+          this.handleGameStateMessage(message);
+          break;
+        case "gameFinished":
+          this.handleGameFinishedMessage(message.data);
+          break;
+        case "redirect":
+          this.handleRedirectMessage(message.data);
+          break;
       }
     } catch (error) {
       if (this.debug)
         console.error("Error processing WebSocket message:", error);
     }
+  }
+
+  private handleGameStateMessage(message: GameStateMessage): void {
+    const prevWalls = this.gameState?.walls || [];
+    this.gameState = message.data as PongMinimalGameState;
+    const currentWalls = this.gameState?.walls || [];
+
+    // Check if walls have changed (either count or properties)
+    if (this.haveWallsChanged(prevWalls, currentWalls)) {
+      this.wallsNeedRedraw = true;
+    }
+
+    if (message.referenceTable && this.playerIndex === -1) {
+      this.referenceTable = message.referenceTable;
+      this.playerIndex = message.referenceTable.indexOf(this.currentUserId);
+      this.playerCount = message.referenceTable.length;
+
+      if (this.playerCount === 2) {
+        this.canvas.width = 800 + this.padding * 2;
+        this.canvas.height = 400 + this.padding * 2;
+        this.wallCanvas.width = this.canvas.width;
+        this.wallCanvas.height = this.canvas.height;
+        this.ratio = (this.canvas.width - this.padding * 2) / 200.0;
+        this.wallsNeedRedraw = true;
+      }
+
+      if (this.playerIndex >= 0 && this.gameState?.paddles) {
+        this.calculateRotationAngle();
+      }
+    }
+  }
+
+  private handleRedirectMessage(url: string): void {
+    setTimeout(() => {
+      this.disconnect();
+      window.router.navigateTo(url);
+    }, 5000);
+  }
+
+  private handleGameFinishedMessage(data: string): void {
+    this.displayGameFinishedMessage(data);
   }
 
   private haveWallsChanged(prevWalls: any[], currentWalls: any[]): boolean {
@@ -670,11 +702,11 @@ function initPongGame() {
     throw new Error("Canvas element with id 'gameCanvas' not found");
   } catch (error) {
     const errorMessage = document.createElement("div");
-    errorMessage.textContent = `Error initializing Pong game: ${error}`;
-    errorMessage.style.color = "red";
-    errorMessage.style.fontSize = "20px";
-    errorMessage.style.textAlign = "center";
-    errorMessage.style.marginTop = "20px";
+    // errorMessage.textContent = `Error initializing Pong game: ${error}`;
+    // errorMessage.style.color = "red";
+    // errorMessage.style.fontSize = "20px";
+    // errorMessage.style.textAlign = "center";
+    // errorMessage.style.marginTop = "20px";
     document.body.appendChild(errorMessage);
   }
 }

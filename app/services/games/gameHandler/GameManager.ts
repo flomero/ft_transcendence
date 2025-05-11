@@ -4,7 +4,10 @@ import { GameStatus } from "../../../types/games/gameBaseState";
 import type Player from "../../../interfaces/games/gameHandler/Player";
 import { WebSocket } from "ws";
 import gameLoop from "./gameLoop";
-import type { GameMessage } from "../../../types/games/userInput";
+import type {
+  GameMessage,
+  ServerMessage,
+} from "../../../types/games/userInput";
 import { PongAIOpponent } from "../pong/pongAIOpponent";
 import aiLoop from "./aiLoop";
 import { RNG } from "../rng";
@@ -15,10 +18,12 @@ import { GameResult } from "../../../types/strategy/ITournamentBracketGenerator"
 import { PongMinimalGameState } from "../../../types/games/pong/gameState";
 import { FastifyInstance } from "fastify";
 import { fastifyInstance } from "../../../app";
+import { getLobby } from "../lobby/lobbyWebsocket/getLobby";
+import { removeMemberFromLobby } from "../lobby/leave/leaveLobbyHandler";
 
 class GameManager {
   private id: string = randomUUID();
-  private gameOrigin: GameOrigin | undefined;
+  gameOrigin: GameOrigin | undefined;
   private isShuffled = false;
   game: GameBase;
   players: Map<string, Player> = new Map();
@@ -39,6 +44,7 @@ class GameManager {
     const newPlayer = {
       id: -1,
       playerUUID: userId,
+      leftGame: false,
     };
     this.players.set(userId, newPlayer);
     this.playerIdReferenceTable.push(userId);
@@ -59,7 +65,8 @@ class GameManager {
   }
 
   public hasPlayer(userId: string): boolean {
-    return this.players.has(userId);
+    if (this.players.get(userId)?.leftGame === false) return true;
+    return false;
   }
 
   public sendMessageToPlayer(userId: string, type: string, data: string): void {
@@ -72,20 +79,10 @@ class GameManager {
     }
   }
 
-  public sendMessageToAll(
-    type: string,
-    data: PongMinimalGameState | { html: string },
-    referenceTable: string[],
-  ): void {
+  public sendMessageToAll(message: ServerMessage): void {
     for (const player of this.players.values()) {
       if (player.ws !== undefined) {
-        player.ws.send(
-          JSON.stringify({
-            type: type,
-            data: data,
-            referenceTable: referenceTable,
-          }),
-        );
+        player.ws.send(JSON.stringify(message));
       }
     }
   }
@@ -214,6 +211,22 @@ class GameManager {
       if (player.ws === undefined || player.ws.readyState !== WebSocket.OPEN) {
         this.game.eliminate(player.id);
       }
+    }
+  }
+
+  public leaveGame(playerId: string): void {
+    const player = this.players.get(playerId);
+    if (player === undefined) {
+      return console.error("[leaveGame] Player not found");
+    }
+
+    if (this.game.getStatus() === GameStatus.RUNNING) {
+      this.disqualifyPlayer(playerId);
+      player.leftGame = true;
+    }
+    if (this.gameOrigin?.type === "lobby") {
+      const lobby = getLobby(this.gameOrigin.lobby.getLobbyId);
+      removeMemberFromLobby(lobby.getLobbyId, playerId);
     }
   }
 

@@ -8,7 +8,13 @@
   alt="User Avatar"
   class="bg-bg-muted size-12 rounded-full border object-cover"
   />
-  {{#> components/button url="/play" variant="fancy" class="mt-6"}}
-    Play again!
-  {{/components/button}}
+    {{#if isTournament}}
+      {{#> components/button url=(add "/games/tournament/join/" tournamentId) variant="fancy" class="mt-6"}}
+          Continue...
+      {{/components/button}}
+    {{else}}
+      {{#> components/button url="/play" variant="fancy" class="mt-6"}}
+          Play again!
+      {{/components/button}}
+    {{/if}}
 </div>
