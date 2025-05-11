@@ -312,7 +312,7 @@ class GameManager {
     return this.game.getStateSnapshot() as PongMinimalGameState;
   }
 
-  public setTimeOut(playerId: string, timeOut: NodeJS.Timeout): void {
+  public setPlayerTimeout(playerId: string, timeOut: NodeJS.Timeout): void {
     const player = this.players.get(playerId);
     if (player === undefined) {
       return console.error("[setTimeOut] Player not found");

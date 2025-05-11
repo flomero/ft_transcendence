@@ -75,5 +75,5 @@ export const gameDisconnectionHandler = async (
       }
     }
   }, 30000);
-  gameManager.setTimeOut(userId, timeOut);
+  gameManager.setPlayerTimeout(userId, timeOut);
 };
