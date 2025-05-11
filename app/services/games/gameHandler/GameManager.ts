@@ -133,7 +133,8 @@ class GameManager {
   }
 
   public shuffleReferenceTable(): void {
-    if (this.isShuffled === true) return;
+    if (this.isShuffled === true && this.gameStatus() === GameStatus.RUNNING)
+      return;
     fastifyInstance.log.debug("Shuffling playerIdReferenceTable");
     const tmpRng = new RNG();
     this.playerIdReferenceTable = tmpRng.randomArray(
