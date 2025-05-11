@@ -1,6 +1,6 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import validTournamentConnectionCheck from "../tournamentValidation/validTournamentConnectionCheck";
-import { tournaments } from "../new/newTournamentHandler";
+import { tournaments } from "../tournaments";
 
 async function addAIOpponentHandler(
   request: FastifyRequest<{ Params: { lobbyId: string } }>, // eg tournamentId

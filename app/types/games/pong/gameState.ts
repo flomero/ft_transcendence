@@ -11,6 +11,7 @@ export type BallState = {
 };
 
 export type PaddleState = {
+  id: number;
   a: number;
   x: number;
   y: number;
@@ -34,8 +35,8 @@ export type ModifierState = {
 };
 
 export type ModifiersState = {
-  spawnedPowerUps: { [powerUpName: string]: BallState[] };
-  modifiers: { [modifierName: string]: ModifierState };
+  spawnedPowerUps: { [powerUpName: string]: BallState };
+  modifiersState: { [modifierName: string]: ModifierState };
 };
 
 export type PongGameState = GameBaseState & {

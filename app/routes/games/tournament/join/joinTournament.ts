@@ -3,7 +3,7 @@ import joinTournamentHandler from "../../../../services/games/tournament/join/jo
 import joinLobbySchema from "../../../../schemas/games/lobby/joinLobbySchema";
 
 const joinTournament: FastifyPluginAsync = async (fastify): Promise<void> => {
-  fastify.post("/:lobbyId", {
+  fastify.get("/:lobbyId", {
     handler: joinTournamentHandler,
     schema: joinLobbySchema,
   });

@@ -25,7 +25,7 @@ const addUserMatchesToDB = async (gameManager: GameManager, db: Database) => {
   VALUES (?, ?, ?)
   `;
   for (const userId of gameManager.players.keys()) {
-    await db.run(sql, [userId, gameManager.getId, 0]);
+    await db.run(sql, [userId, gameManager.getId(), -1]);
   }
 };
 
@@ -47,7 +47,7 @@ const addMatchToDatabase = async (
   `;
 
   await db.run(sql, [
-    gameManager.getId,
+    gameManager.getId(),
     gameSettings.gameName,
     gameSettings.gameModeName,
     JSON.stringify(gameSettings.modifierNames),
@@ -58,7 +58,7 @@ const addMatchToDatabase = async (
 };
 
 const addAIToDatabase = async (gameManager: GameManager, db: Database) => {
-  if (gameManager.getAiIdsAsArray.length === 0) return;
+  if (gameManager.getAiIdsAsArray().length === 0) return;
   const sql = `
   INSERT INTO r_users_matches (
     userId,
@@ -66,10 +66,10 @@ const addAIToDatabase = async (gameManager: GameManager, db: Database) => {
     score)
     VALUES (?, ?, ?)
   `;
-  const aiIds = gameManager.getAiIdsAsArray;
+  const aiIds = gameManager.getAiIdsAsArray();
 
   for (const aiId of aiIds) {
-    await db.run(sql, [aiId, gameManager.getId, 0]);
+    await db.run(sql, [aiId, gameManager.getId(), -1]);
   }
 };
 

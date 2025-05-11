@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { GameBase } from "../gameBase";
 import { GameStatus } from "../../../types/games/gameBaseState";
 import type Player from "../../../interfaces/games/gameHandler/Player";
-import type { WebSocket } from "ws";
+import { WebSocket } from "ws";
 import gameLoop from "./gameLoop";
 import type { GameMessage } from "../../../types/games/userInput";
 import { PongAIOpponent } from "../pong/pongAIOpponent";
@@ -14,13 +14,15 @@ import terminateGame from "./terminateGame";
 import { GameResult } from "../../../types/strategy/ITournamentBracketGenerator";
 import { PongMinimalGameState } from "../../../types/games/pong/gameState";
 import { FastifyInstance } from "fastify";
+import { fastifyInstance } from "../../../app";
 
 class GameManager {
   private id: string = randomUUID();
   private gameOrigin: GameOrigin | undefined;
+  private isShuffled = false;
   game: GameBase;
   players: Map<string, Player> = new Map();
-  aiOpponent: Map<string, PongAIOpponent> = new Map();
+  aiOpponents: Map<string, PongAIOpponent> = new Map();
   playerIdReferenceTable: Array<string> = [];
 
   constructor(game: GameBase, gameOrigin?: GameOrigin) {
@@ -52,7 +54,7 @@ class GameManager {
       playerId: -1,
       strategyName: "foresight",
     });
-    this.aiOpponent.set(aiOpponentId, newAiOpponent);
+    this.aiOpponents.set(aiOpponentId, newAiOpponent);
     this.playerIdReferenceTable.push(aiOpponentId);
   }
 
@@ -94,9 +96,16 @@ class GameManager {
   public addSocketToPlayer(userId: string, ws: WebSocket): void {
     const player = this.players.get(userId);
     if (player === undefined) {
-      throw new Error("Player not found");
+      throw new Error("[addSocketToPlayer] Player not found");
     }
     player.ws = ws;
+    this.clearPossibleTimeOut(player);
+  }
+
+  private clearPossibleTimeOut(player: Player): void {
+    if (player.timeOut) {
+      clearTimeout(player.timeOut);
+    }
   }
 
   public allPlayersAreConnected(): boolean {
@@ -119,21 +128,21 @@ class GameManager {
   }
 
   public async startGame(fastify: FastifyInstance): Promise<void> {
-    if (this.allPlayersAreConnected() === false)
-      throw new Error("Not all players are connected");
     if (this.game.getStatus() !== GameStatus.CREATED) return;
 
-    this.shuffleReferenceTable();
     this.addIngameIdToPlayerAndAiOpponent();
     this.game.startGame();
     this.startGameAndAiLoop(fastify);
   }
 
-  private shuffleReferenceTable(): void {
+  public shuffleReferenceTable(): void {
+    if (this.isShuffled === true) return;
+    fastifyInstance.log.debug("Shuffling playerIdReferenceTable");
     const tmpRng = new RNG();
     this.playerIdReferenceTable = tmpRng.randomArray(
       this.playerIdReferenceTable,
     );
+    this.isShuffled = true;
   }
 
   private async startGameAndAiLoop(fastify: FastifyInstance): Promise<void> {
@@ -151,9 +160,9 @@ class GameManager {
     for (let i = 0; i < this.playerIdReferenceTable.length; i++) {
       const playerOrAiId = this.playerIdReferenceTable[i];
 
-      const aiOpponent = this.aiOpponent.get(playerOrAiId);
-      if (aiOpponent) {
-        aiOpponent.setPlayerId(i);
+      const aiOpponents = this.aiOpponents.get(playerOrAiId);
+      if (aiOpponents) {
+        aiOpponents.setPlayerId(i);
       }
 
       const player = this.players.get(playerOrAiId);
@@ -184,59 +193,131 @@ class GameManager {
     return gameResult;
   }
 
-  public get getId() {
+  public removeNotConnectedPlayers(): void {
+    for (const player of this.players.values()) {
+      if (player.ws === undefined || player.ws.readyState !== WebSocket.OPEN) {
+        this.players.delete(player.playerUUID);
+      }
+    }
+  }
+
+  public disconnectAllPlayers(): void {
+    for (const player of this.players.values()) {
+      if (player.ws !== undefined) {
+        player.ws.close(1001, "Game terminated");
+      }
+    }
+  }
+
+  public disqualifyNotConnectedPlayers(): void {
+    for (const player of this.players.values()) {
+      if (player.ws === undefined || player.ws.readyState !== WebSocket.OPEN) {
+        this.game.eliminate(player.id);
+      }
+    }
+  }
+
+  public disqualifyPlayer(playerId: string): void {
+    const player = this.players.get(playerId);
+    if (player === undefined) {
+      throw new Error("[disqualifyPlayer] Player not found");
+    }
+
+    if (this.game.getStatus() === GameStatus.RUNNING)
+      this.game.eliminate(player.id);
+  }
+
+  public removePlayerSocket(playerId: string): void {
+    const player = this.players.get(playerId);
+    if (player === undefined) {
+      return console.error("[removePlayerSocket] Player not found");
+    }
+    player.ws = undefined;
+  }
+
+  public getPlayerSize() {
+    return this.players.size + this.aiOpponents.size;
+  }
+
+  public getId() {
     return this.id;
   }
 
-  public get getGame() {
+  public getGame() {
     return this.game;
   }
 
-  public get getResults(): number[] {
-    return this.game.getResults();
-  }
-
-  public get getScores(): number[] {
+  public getScores(): number[] {
     return this.game.getScores();
   }
 
-  public getOrderedResultsWithUUIDs(): string[] {
-    const results = this.game.getResults();
-    const referenceTable = this.playerIdReferenceTable;
-    const orderedResults: string[] = [];
+  public getAiIdsAsArray() {
+    return Array.from(this.aiOpponents.keys());
+  }
 
-    for (let i = 0; i < results.length; i++) {
-      const indexOfPlayer = results.indexOf(i + 1); // because results are 1-indexed
-
-      if (indexOfPlayer !== -1) {
-        const playerId = referenceTable[indexOfPlayer];
-        orderedResults.push(playerId);
+  public connectedNumberOfPlayersInGame() {
+    let count = 0;
+    for (const player of this.players.values()) {
+      if (player.ws !== undefined && player.ws.readyState === WebSocket.OPEN) {
+        count++;
       }
     }
-    return orderedResults;
+    return count + this.aiOpponents.size;
   }
 
-  public getGameResults(): number[] {
-    return this.game.getResults();
-  }
-
-  public get getAiIdsAsArray() {
-    return Array.from(this.aiOpponent.keys());
+  public isUserConnected(userId: string): boolean {
+    const player = this.players.get(userId);
+    if (player === undefined) {
+      return false;
+    } else if (
+      player.ws === undefined ||
+      player.ws.readyState !== WebSocket.OPEN
+    ) {
+      return false;
+    }
+    return true;
   }
 
   public getPlayer(playerId: string) {
     if (!this.players.has(playerId)) {
-      throw new Error("Player not found");
+      throw new Error("[getPlayer] Player not found");
     }
     return this.players.get(playerId);
+  }
+
+  public getResults() {
+    return this.game.getResults();
+  }
+
+  public gameStatus(): GameStatus {
+    return this.game.getStatus();
   }
 
   public handleAction(data: GameMessage): void {
     this.game.handleAction(data.options);
   }
 
-  public get getPlayersAsArray(): Player[] {
+  public getPlayersAsArray(): Player[] {
     return Array.from(this.players.values());
+  }
+
+  public justAisInGame(): boolean {
+    if (this.players.size === 0 && this.aiOpponents.size > 0) {
+      return true;
+    }
+    return false;
+  }
+
+  public getStateSnapshot(): PongMinimalGameState {
+    return this.game.getStateSnapshot() as PongMinimalGameState;
+  }
+
+  public setPlayerTimeout(playerId: string, timeOut: NodeJS.Timeout): void {
+    const player = this.players.get(playerId);
+    if (player === undefined) {
+      return console.error("[setTimeOut] Player not found");
+    }
+    player.timeOut = timeOut;
   }
 }
 

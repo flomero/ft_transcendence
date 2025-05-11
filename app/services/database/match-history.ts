@@ -1,14 +1,6 @@
 import type { FastifyInstance } from "fastify";
 
-type LeaderboardEntry = { userId: string; username: string; score: number };
-type MatchResult = "win" | "loss" | "draw";
-type MatchInfo = {
-  matchId: string;
-  gameModeName: string;
-  matchDate: string; // keep as string from DB; parse only for sorting
-  leaderboard: LeaderboardEntry[];
-  result: MatchResult;
-};
+import type { MatchInfo } from "../../types/games/match-history";
 
 export const getMatchHistoryService = async (
   fastify: FastifyInstance,
@@ -21,25 +13,31 @@ export const getMatchHistoryService = async (
       matchId: string;
       gameModeName: string;
       matchDate: string;
+      playerCount: number;
+      isFinished: boolean;
       userId: string;
       username: string;
       score: number;
+      result: number;
     }[]
   >(
     `
       SELECT r1.matchId,
              m.gameModeName,
-             m.matchDate,
+             m.matchDate || ' UTC' as matchDate,
+             m.playerCount,
+             m.result as isFinished,
              r2.userId,
              u.username,
-             r2.score
+             r2.score,
+             r2.result
       FROM r_users_matches r1
-               JOIN r_users_matches r2 ON r1.matchId = r2.matchId
-               JOIN users u ON u.id = r2.userId
-               JOIN matches m ON m.id = r1.matchId
+             JOIN r_users_matches r2 ON r1.matchId = r2.matchId
+             JOIN users u ON u.id = r2.userId
+             JOIN matches m ON m.id = r1.matchId
       WHERE r1.userId = ?
-      ORDER BY m.matchDate DESC, r2.score DESC;
-  `,
+      ORDER BY m.matchDate DESC, r2.result;
+    `,
     userId,
   );
 
@@ -51,9 +49,12 @@ export const getMatchHistoryService = async (
       matchId,
       gameModeName,
       matchDate,
+      playerCount,
       userId: playerId,
+      isFinished,
       username,
       score,
+      result,
     } = row;
 
     if (!matchesMap.has(matchId)) {
@@ -63,27 +64,36 @@ export const getMatchHistoryService = async (
         matchDate,
         leaderboard: [],
         result: "loss",
+        isFinished,
       });
     }
 
-    matchesMap
-      .get(matchId)!
-      .leaderboard.push({ userId: playerId, username, score });
+    let showScore = playerCount === 2;
+
+    matchesMap.get(matchId)!.leaderboard.push({
+      userId: playerId,
+      username,
+      score,
+      result,
+      showScore,
+    });
   }
 
   // --- final per‑match processing ---
   for (const match of matchesMap.values()) {
     // rows are already score‑DESC, but sort once more for safety
-    match.leaderboard.sort((a, b) => b.score - a.score);
+    match.leaderboard.sort((a, b) => a.result - b.result);
 
     const topScore = match.leaderboard[0].score;
     const topScorers = match.leaderboard.filter((p) => p.score === topScore);
+    const isUserTopScorer = topScorers.some((p) => p.userId === userId);
 
-    if (topScorers.length > 1) {
+    if (topScorers.length > 1 && isUserTopScorer) {
       match.result = "draw";
     } else if (topScorers[0].userId === userId) {
       match.result = "win";
     }
+    // else default stays "loss"
   }
 
   const result = [...matchesMap.values()].sort(

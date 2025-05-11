@@ -1,7 +1,7 @@
 import sqlite3 from "sqlite3";
 import fp from "fastify-plugin";
 import { open, type Database } from "sqlite";
-import path from "path";
+import path from "node:path";
 import createAIOpponents from "../services/games/aiOpponent/createAIOpponents";
 
 /**
@@ -26,7 +26,7 @@ export default fp(async (fastify) => {
   fastify.decorate("sqlite", db);
   await fastify.sqlite.run("PRAGMA foreign_keys = ON");
 
-  fastify.addHook("onReady", async function () {
+  fastify.addHook("onReady", async () => {
     await db.migrate({
       migrationsPath: path.resolve(__dirname, "../../database/migrations"),
     });

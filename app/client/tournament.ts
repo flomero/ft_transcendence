@@ -1,104 +1,324 @@
-import type { Edge, Round } from "../types/tournament/tournament";
+import type { Edge, TournamentInfos } from "../types/tournament/tournament";
+import type Router from "./router.js";
 
-type Rounds = Round[];
-
-type Connections =
-  | { auto: true; edges: never[] }
-  | { auto: false; edges: Edge[] };
-
+/* -------------------------------------------------------------------
+   Window globals
+------------------------------------------------------------------- */
 declare global {
   interface Window {
-    __ROUNDS__: Rounds;
-    __CONNECTIONS__: Connections;
-    tournamentBracket?: TournamentBracket;
-    drawTournamentLines?: () => void;
+    /** server-side hydrated tournament data */
+    __TOURNAMENTS__: TournamentInfos[];
 
+    /* optional helpers the app sets/clears elsewhere */
+    tournamentBracket?: TournamentBracket;
+    elapsedTimer?: ElapsedTimer; //  ← NEW
+    drawTournamentLines?: () => void;
     TournamentBracket: typeof TournamentBracket;
+    ElapsedTimer: typeof ElapsedTimer;
+    tournamentHandler: TournamentHandler;
+    router: Router;
   }
 }
 
+/* -------------------------------------------------------------------
+   Elapsed-time handling (split out, logic unchanged)
+------------------------------------------------------------------- */
+class ElapsedTimer {
+  private timerInterval: number | null = null;
+
+  static create(): ElapsedTimer {
+    const t = new ElapsedTimer();
+    t.start();
+    return t;
+  }
+
+  private updateElapsedTime(el: Element) {
+    const start = el.getAttribute("data-start");
+    if (!start) return;
+
+    const diff = Math.floor((Date.now() - new Date(start).getTime()) / 1000);
+    const h = Math.floor(diff / 3600);
+    const m = Math.floor((diff % 3600) / 60);
+    const s = diff % 60;
+
+    el.textContent = `${h ? `${h}h ` : ""}${m ? `${m}m ` : ""}${s}s`;
+  }
+
+  private tick = () => {
+    Array.from(document.querySelectorAll(".elapsed-time")).forEach((el) => {
+      this.updateElapsedTime(el);
+    });
+  };
+
+  private start() {
+    if (this.timerInterval) clearInterval(this.timerInterval);
+    this.timerInterval = window.setInterval(this.tick, 1000);
+    this.tick();
+  }
+
+  public destroy() {
+    if (this.timerInterval) clearInterval(this.timerInterval);
+    this.timerInterval = null;
+  }
+}
+
+/* -------------------------------------------------------------------
+   Tournament bracket (identical except timers removed)
+------------------------------------------------------------------- */
 class TournamentBracket {
-  private rounds: Rounds;
-  private connections: Connections;
-  private edges: Edge[];
-  private svg: SVGSVGElement;
-  private bracket: HTMLElement;
+  /* ---------- state ---------- */
+  private readonly tournaments: TournamentInfos[];
+  private readonly edges: Edge[];
 
+  private svg: SVGSVGElement | null = null;
+  private bracket: HTMLElement | null = null;
+
+  private resizeObserver: ResizeObserver | null = null;
+
+  /* ---------- bootstrap ---------- */
   constructor() {
-    this.rounds = window.__ROUNDS__;
-    this.connections = window.__CONNECTIONS__;
-    this.svg = document.querySelector<SVGSVGElement>("#lines")!;
-    this.bracket = document.querySelector<HTMLElement>("#bracket")!;
+    /* server now ships fully-hydrated tournaments with .seeding in place */
+    this.tournaments = window.__TOURNAMENTS__;
 
-    this.edges = this.connections.auto
-      ? this.buildAutoEdges()
-      : this.connections.edges;
+    // if (!this.tournaments || this.tournaments.length === 0) {
+    //   return;
+    // }
+    /* collect every edge from every tournament */
+    this.edges = this.tournaments.flatMap((t) => t.seeding ?? []);
 
+    /* make sure `this` survives when used as a callback */
     this.drawLines = this.drawLines.bind(this);
-    this.init();
   }
 
-  private buildAutoEdges(): Edge[] {
-    console.log("Building auto edges");
-    const list: Edge[] = [];
-    for (let r = 0; r < this.rounds.length - 1; r++) {
-      const currentMatches = this.rounds[r].matches;
-      const nextMatches = this.rounds[r + 1].matches;
+  /* Create and initialize a new tournament bracket when DOM is ready */
+  public static create(): TournamentBracket {
+    const bracket = new TournamentBracket();
 
-      currentMatches.forEach((match, i) => {
-        const target = nextMatches[Math.floor(i / 2)];
-        if (match.id && target.id) {
-          list.push([match.id, target.id]); // no offset (defaults to 0)
-        } else {
-          console.error("Match or target ID is undefined", { match, target });
-        }
-      });
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () => bracket.init());
+    } else {
+      bracket.init();
     }
-    return list;
+
+    return bracket;
   }
 
-  private init(): void {
+  /* ---------- lifecycle ---------- */
+  private init() {
+    // Find DOM elements now that we're sure they exist
+    this.bracket = document.querySelector<HTMLElement>("#bracket");
+    this.svg = this.bracket?.querySelector<SVGSVGElement>("#lines") || null;
+
+    if (!this.bracket || !this.svg) {
+      return;
+    }
+
     this.drawLines();
+
     window.addEventListener("resize", this.drawLines);
+    this.resizeObserver = new ResizeObserver(this.drawLines);
+    this.resizeObserver.observe(this.bracket);
+
     window.drawTournamentLines = this.drawLines;
   }
 
-  public destroy(): void {
+  public destroy() {
     window.removeEventListener("resize", this.drawLines);
+    if (this.resizeObserver) this.resizeObserver.disconnect();
     window.drawTournamentLines = undefined;
   }
 
-  private drawLines(): void {
-    console.log("Drawing Lines");
-    console.log("Edges", this.edges);
-    console.log(this.connections.auto);
+  /* ---------- SVG rendering ---------- */
+  private drawLines() {
+    if (!this.bracket || !this.svg) return;
 
-    const box = this.bracket.getBoundingClientRect();
-    this.svg.setAttribute("width", `${box.width}`);
-    this.svg.setAttribute("height", `${box.height}`);
-    this.svg.setAttribute("viewBox", `0 0 ${box.width} ${box.height}`);
+    console.log("Drawing tournament lines...");
+    console.dir(this.edges, { depth: null });
+    const width = this.bracket.scrollWidth;
+    const height = this.bracket.scrollHeight;
+
+    this.svg.style.width = `${width}px`;
+    this.svg.style.height = `${height}px`;
+    this.svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
     this.svg.innerHTML = "";
 
-    this.edges.forEach((edge) => {
-      const [from, to, offset = 0] = edge;
+    const bracketBox = this.bracket.getBoundingClientRect();
 
-      const a = document.getElementById(from)!.getBoundingClientRect();
-      const b = document.getElementById(to)!.getBoundingClientRect();
+    /* seeding edges already have the form [tid, fromId, toId, offset?] */
+    for (const [tid, from, to, offset = 0] of this.edges) {
+      const fromId = `${tid}-${from}`;
+      const toId = `${tid}-${to}`;
 
-      const x1 = a.right - box.left;
-      const y1 = a.top - box.top + a.height / 2;
-      const x2 = b.left - box.left;
-      const y2 = b.top - box.top + b.height / 2;
+      console.log(`drawing tournament lines for ${fromId}`);
+      console.log(`drawing tournament lines for ${toId}`);
+
+      const aEl = document.getElementById(fromId);
+      const bEl = document.getElementById(toId);
+      if (!aEl || !bEl) continue; // element missing → skip
+
+      const aBox = aEl.getBoundingClientRect();
+      const bBox = bEl.getBoundingClientRect();
+
+      const x1 = aBox.right - bracketBox.left;
+      const y1 = aBox.top - bracketBox.top + aBox.height / 2;
+      const x2 = bBox.left - bracketBox.left;
+      const y2 = bBox.top - bracketBox.top + bBox.height / 2;
       const midX = (x1 + x2) / 2 + offset;
 
-      const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      p.setAttribute("d", `M${x1},${y1} H${midX} V${y2} H${x2}`);
-      p.setAttribute("fill", "none");
-      p.setAttribute("stroke", "#999");
-      p.setAttribute("stroke-width", "2");
-      this.svg.appendChild(p);
-    });
+      const path = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "path",
+      );
+      path.setAttribute("d", `M${x1},${y1} H${midX} V${y2} H${x2}`);
+      path.setAttribute("fill", "none");
+      path.setAttribute("stroke", "#999");
+      path.setAttribute("stroke-width", "2");
+      this.svg.appendChild(path);
+    }
   }
 }
 
-export default TournamentBracket;
+class TournamentHandler {
+  public socket: WebSocket | null = null;
+
+  private getTournamentId(): string {
+    return document.location.pathname.split("/").pop() || "";
+  }
+
+  public connect(): void {
+    console.log("Connecting to tournament...");
+    const tournamentId = window.location.pathname.split("/").pop();
+    if (!tournamentId) {
+      console.error("Tournament ID not found in URL");
+      return;
+    }
+
+    this.socket = new WebSocket(
+      `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/games/tournament/${tournamentId}`,
+    );
+
+    this.socket.onopen = () => {
+      console.log("Tournament WebSocket connected");
+    };
+
+    this.socket.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      this.handleMessage(message);
+    };
+
+    this.socket.onclose = () => {
+      console.log("Tournament WebSocket disconnected");
+    };
+
+    this.socket.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+  }
+
+  private handleMessage(message: any): void {
+    console.log("Received tournament message:", message);
+
+    switch (message.type) {
+      case "error":
+        this.handleError(message.data);
+        break;
+      case "update":
+        this.refreshView();
+        break;
+      default:
+        console.log("Unknown message type:", message.type);
+    }
+  }
+
+  private refreshView(): void {
+    window.router.refresh(); // TODO: maybe make better
+  }
+
+  public async leaveTournament(): Promise<void> {
+    try {
+      const response = await fetch(
+        `/games/tournament/leave/${this.getTournamentId()}`,
+        {
+          method: "POST",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to leave tournament: ${response.statusText}`);
+      }
+
+      if (this.socket) {
+        this.socket.close();
+      }
+
+      window.router.navigateTo("/play");
+    } catch (error) {
+      this.handleError(
+        new Error("Failed to leave tournament. Please try again later."),
+      );
+    }
+  }
+
+  public async addAiOpponent(): Promise<void> {
+    try {
+      const response = await fetch(
+        `/games/tournament/add-ai-opponent/${this.getTournamentId()}`,
+        {
+          method: "POST",
+        },
+      );
+
+      if (!response.ok) {
+        const msg = await response.text();
+        const data = JSON.parse(msg);
+        throw new Error(
+          data?.message || `Failed to add AI opponent: ${response.statusText}`,
+        );
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        this.handleError(error);
+      } else {
+        this.handleError(
+          new Error("Failed to add AI opponent. Please try again later."),
+        );
+      }
+    }
+  }
+
+  public async startTournament(): Promise<void> {
+    try {
+      const response = await fetch(
+        `/games/tournament/start/${this.getTournamentId()}`,
+        {
+          method: "POST",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to start Tournament: ${response.statusText}`);
+      }
+
+      // const data = await response.json();
+      // TODO: what happens here???
+      console.log("Tournament started");
+    } catch (error) {
+      if (error instanceof Error) {
+        this.handleError(error);
+      } else {
+        this.handleError(
+          new Error("Failed to start tournament. Please try again later."),
+        );
+      }
+    }
+  }
+
+  private handleError(error: Error): void {
+    const errorEl = document.getElementById("tournament-error");
+    if (errorEl) {
+      errorEl.textContent = error.message;
+      errorEl.style.display = "block";
+    }
+  }
+}
+export { TournamentHandler, TournamentBracket, ElapsedTimer };

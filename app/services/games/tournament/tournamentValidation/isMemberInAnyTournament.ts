@@ -1,4 +1,4 @@
-import { tournaments } from "../new/newTournamentHandler";
+import { tournaments } from "../tournaments";
 
 const isMemberInAnyTournament = (memberId: string): string | null => {
   for (const tournament of tournaments.values()) {

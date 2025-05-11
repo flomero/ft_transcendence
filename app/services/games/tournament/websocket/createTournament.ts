@@ -1,14 +1,15 @@
-import { Database } from "sqlite";
+import type { Database } from "sqlite";
 import { Tournament } from "../tournament";
-import TournamentManager from "../TournamentManager";
+import type TournamentManager from "../TournamentManager";
 import {
-  bracketTypeSettings,
+  BracketTypeSettings,
   TournamentSettings,
 } from "../../../../interfaces/games/tournament/TournamentSettings";
 import {
   TOURNAMENT_CONFIGS_REGISTRY,
   GAMEMODE_REGISTRY,
 } from "../../../../config";
+import { fastifyInstance } from "../../../../app";
 
 const createTournament = async (
   db: Database,
@@ -21,18 +22,20 @@ const createTournament = async (
   const playersUUIDs = tournamentManager.getPlayersUUIDs();
 
   const tournamentSettings: TournamentSettings = {
-    bracketType: tournamentRegistry.bracketType as bracketTypeSettings,
+    bracketType: tournamentRegistry.bracketType as BracketTypeSettings,
     matchWinner: tournamentRegistry.matchWinner,
     players: playersUUIDs,
     gameData: {
       playerCount: playerCount,
     },
+    id: tournamentManager.getId(),
   };
 
   if (tournamentRegistry.initialSeedingMethod)
     tournamentSettings.initialSeedingMethod =
       tournamentRegistry.initialSeedingMethod;
 
+  fastifyInstance.log.debug(JSON.stringify(tournamentSettings));
   const newTournament = new Tournament(tournamentSettings);
   await addTournamentToDB(db, tournamentManager, newTournament);
 

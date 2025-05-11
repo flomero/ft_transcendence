@@ -8,7 +8,7 @@ import { GAMEMODE_REGISTRY, LobbyGameModes } from "../../../config";
 import { isUserInAnyLobby } from "../../../services/games/lobby/lobbyVaidation/isUserInAnyLobby";
 import { Lobby } from "../../../services/games/lobby/Lobby";
 import { setLobby } from "../../../services/games/lobby/new/setLobby";
-import { GameSettings } from "../../../interfaces/games/lobby/GameSettings";
+import type { GameSettings } from "../../../interfaces/games/lobby/GameSettings";
 
 const page: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.get("/", async (request, reply) => {
@@ -46,7 +46,7 @@ const page: FastifyPluginAsync = async (fastify): Promise<void> => {
   }>("/:gameMode/:visibility", async (request, reply) => {
     try {
       const visibility = request.params.visibility;
-      if (visibility != "public" && visibility != "private")
+      if (visibility !== "public" && visibility !== "private")
         return reply.badRequest();
       const gameModeString = request.params.gameMode;
       const gameMode = gameModeFromString(gameModeString, LobbyGameModes);

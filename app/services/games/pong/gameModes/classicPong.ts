@@ -9,6 +9,7 @@ import {
 import type { IPongBallResetSampler } from "../../../../types/strategy/IPongBallResetSampler";
 import { StrategyManager } from "../../../strategy/strategyManager";
 import { pongUserInputs } from "../../../../types/games/userInput";
+import { fastifyInstance } from "../../../../app";
 
 export class ClassicPong extends Pong {
   name = "classicPong";
@@ -94,7 +95,7 @@ export class ClassicPong extends Pong {
 
   startGame(): void {
     super.startGame();
-    console.log("Game Started");
+    fastifyInstance.log.info("Game Started");
   }
 
   initPaddles(): void {

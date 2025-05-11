@@ -4,6 +4,7 @@ import type { WebSocket } from "ws";
 import { randomUUID } from "node:crypto";
 import MinAndMaxPlayers from "../../../types/games/lobby/MinAndMaxPlayers";
 import aiOpponents from "../aiOpponent/aiOpponents";
+import { fastifyInstance } from "../../../app";
 
 class Lobby {
   private lobbyId: string = randomUUID();
@@ -210,10 +211,13 @@ class Lobby {
   }
 
   public disconnectAllMembers(): void {
+    this.sendMessageToAllMembers(
+      JSON.stringify({ type: "disconnect", data: "owner left the lobby" }),
+    );
     for (const member of this.lobbyMembers.values()) {
-      this.sendMessageToMember(member.id, "Lobby is closed");
       if (member.socket !== undefined) {
         member.socket.close();
+        member.socket = undefined;
       }
     }
   }
@@ -234,15 +238,6 @@ class Lobby {
       throw new Error("[isMemberOwner] Member is not in the lobby");
     }
     return this.lobbyMembers.get(memberId)!.userState;
-  }
-
-  public disconnectMembersFromSockets(): void {
-    for (const member of this.lobbyMembers.values()) {
-      if (member.socket !== undefined) {
-        member.socket.close();
-        member.socket = undefined;
-      }
-    }
   }
 
   public allMembersConnectedToSocket(): boolean {
@@ -275,8 +270,8 @@ class Lobby {
   }
 
   public printGameSettings(): void {
-    console.log("GameSettings: ");
-    console.log(this.gameSettings);
+    fastifyInstance.log.debug("GameSettings: ");
+    fastifyInstance.log.debug(this.gameSettings);
   }
 
   private getMemberLimits(): { min: number; max: number } {
@@ -306,9 +301,9 @@ class Lobby {
   }
 
   private printLobbyMembers(): void {
-    console.log("Lobby members: ");
+    fastifyInstance.log.debug("Lobby members: ");
     this.lobbyMembers.forEach((member) => {
-      console.log(member.id);
+      fastifyInstance.log.debug(member.id);
     });
   }
 

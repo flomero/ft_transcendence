@@ -6,6 +6,7 @@ class PongGame {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private wallCanvas: HTMLCanvasElement;
+  private timeDiv: HTMLDivElement;
   private wallCtx: CanvasRenderingContext2D;
   private wallsNeedRedraw = true;
   private gameState: PongMinimalGameState | null = null;
@@ -20,6 +21,7 @@ class PongGame {
   private playerIndex = -1; // -1 means not determined yet
   private playerCount = 0;
   private referenceTable: string[] = [];
+  private tps: number;
 
   private readonly KEY_MAPPINGS: Record<string, PongUserInput> = {
     ArrowUp: "UP",
@@ -43,6 +45,9 @@ class PongGame {
     if (!this.canvas) throw new Error(`Canvas with id ${canvasId} not found`);
 
     this.currentUserId = this.canvas.dataset.userid || "";
+    this.tps = Number(this.canvas.dataset.tps) || 0;
+
+    this.timeDiv = document.getElementById("time") as HTMLDivElement;
 
     const context = this.canvas.getContext("2d");
     if (!context) throw new Error("Failed to get 2D context from canvas");
@@ -56,8 +61,8 @@ class PongGame {
       throw new Error("Failed to get 2D context from wall canvas");
     this.wallCtx = wallContext;
 
-    this.canvas.width = 800;
-    this.canvas.height = 800;
+    this.canvas.width = 800 + this.padding * 2;
+    this.canvas.height = 800 + this.padding * 2;
     this.wallCanvas.width = this.canvas.width;
     this.wallCanvas.height = this.canvas.height;
     this.ratio = (this.canvas.width - this.padding * 2) / 100.0;
@@ -104,18 +109,15 @@ class PongGame {
           this.playerCount = message.referenceTable.length;
 
           if (this.playerCount === 2) {
-            this.canvas.width = 800;
-            this.canvas.height = 400;
+            this.canvas.width = 800 + this.padding * 2;
+            this.canvas.height = 400 + this.padding * 2;
             this.wallCanvas.width = this.canvas.width;
             this.wallCanvas.height = this.canvas.height;
             this.ratio = (this.canvas.width - this.padding * 2) / 200.0;
             this.wallsNeedRedraw = true;
           }
 
-          if (
-            this.playerIndex >= 0 &&
-            this.gameState?.paddles[this.playerIndex]
-          ) {
+          if (this.playerIndex >= 0 && this.gameState?.paddles) {
             this.calculateRotationAngle();
           }
         }
@@ -167,12 +169,13 @@ class PongGame {
   }
 
   private calculateRotationAngle(): void {
-    if (this.playerIndex < 0 || !this.gameState?.paddles[this.playerIndex]) {
+    if (this.playerIndex < 0 || !this.gameState?.paddles) {
       return;
     }
 
-    const paddle = this.gameState.paddles[this.playerIndex];
-
+    const paddle = this.gameState.paddles.find(
+      (p) => p.id === this.playerIndex,
+    );
     if (!paddle || paddle.a === undefined) return;
     const targetAngle = Math.PI;
 
@@ -350,17 +353,18 @@ class PongGame {
   private drawPaddles(): void {
     if (!this.gameState?.paddles) return;
 
-    this.gameState.paddles.forEach((paddle, index) => {
+    for (let paddle of this.gameState.paddles) {
       const angle = paddle.a + Math.PI / 2;
       const x = paddle.x * this.ratio;
       const y = paddle.y * this.ratio;
       const width = paddle.w * this.ratio;
       const height = paddle.h * this.ratio;
 
-      const paddleColor = index === this.playerIndex ? "#ff00ff" : "#00ffff";
+      const paddleColor =
+        paddle.id === this.playerIndex ? "#ff00ff" : "#00ffff";
 
       this.drawNeonRectangle(x, y, width, height, paddleColor, angle);
-    });
+    }
   }
 
   private drawWalls(): void {
@@ -478,8 +482,18 @@ class PongGame {
         this.updateScoreDisplay(userId, scores[i] || 0);
       });
     }
+    this.updateTimeDisplay(
+      this.gameState.modifiersState?.modifiersState?.timedGame?.ticks,
+    );
+  }
 
-    this.ctx.restore();
+  private updateTimeDisplay(time: number): void {
+    if (this.timeDiv && time) {
+      const totalSeconds = Math.floor(time / this.tps);
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      this.timeDiv.textContent = `${minutes}:${seconds.toString().padStart(2, "0")}`;
+    }
   }
 
   private updateScoreDisplay(userId: string, score: number): void {

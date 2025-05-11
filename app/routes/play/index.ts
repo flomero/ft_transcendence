@@ -8,6 +8,7 @@ import {
   getMatchmakingGameModes,
   gameModeArrToString,
 } from "../../services/config/gameModes";
+import { getTournamentsWithOwners } from "../../services/games/tournament/tournaments";
 
 const checkRedirects = async (
   request: FastifyRequest,
@@ -44,13 +45,16 @@ const page: FastifyPluginAsync = async (fastify): Promise<void> => {
 
     const lobbies = await getPublicLobbies(fastify);
     const gamemodes = gameModeArrToString(getMatchmakingGameModes());
+    const tournaments = await getTournamentsWithOwners(fastify);
     const data = {
       title: "Play Pong | ft_transcendence",
       lobbies: lobbies,
+      tournaments: tournaments,
       matchmakingmodes: gamemodes,
+      // debugString: JSON.stringify(tournaments),
     };
 
-    console.log(data.matchmakingmodes);
+    fastify.log.debug(data.matchmakingmodes);
 
     reply.header("X-Page-Title", "Play Pong | ft_transcendence");
     const viewOptions = request.isAjax() ? {} : { layout: "layouts/main" };

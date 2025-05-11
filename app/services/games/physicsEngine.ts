@@ -1,5 +1,6 @@
 import type { Rectangle } from "../../types/games/pong/rectangle";
 import type { Ball } from "../../types/games/pong/ball";
+import { fastifyInstance } from "../../app";
 
 const EPSILON = 1e-2;
 
@@ -357,7 +358,7 @@ export class PhysicsEngine {
       ly >= -halfH - EPSILON &&
       ly <= halfH + EPSILON
     ) {
-      console.log(`Ball inside object ${objID}`);
+      fastifyInstance.log.warn(`Ball inside object ${objID}`);
 
       // 4) Get object's normal (in global space), and reverse if object is the mover
       const normal: [number, number] = isBallMovementStep
@@ -384,7 +385,7 @@ export class PhysicsEngine {
       const contactX = ball.x - relVel[0] * t;
       const contactY = ball.y - relVel[1] * t;
 
-      console.log(`Contact point: (${contactX}, ${contactY})`);
+      fastifyInstance.log.debug(`Contact point: (${contactX}, ${contactY})`);
 
       return {
         objectId: objID,

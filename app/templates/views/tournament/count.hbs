@@ -1,0 +1,12 @@
+<div class="flex flex-col justify-center items-center gap-4 mt-8">
+  <h2 class="max-w-lg text-center text-balance">Choose number of players for your tournament</h2>
+  <div class="flex flex-row flex-wrap gap-2 justify-center">
+    {{#each config.possiblePlayerCount}}
+      {{#with this as |count|}}
+        {{#> components/button variant="primary" url=(concat "/play/tournament/" ../config.bracketType "/" count) class="flex gap-2" }}
+          {{count}} players
+        {{/components/button}}
+      {{/with}}
+    {{/each}}
+  </div>
+</div>
