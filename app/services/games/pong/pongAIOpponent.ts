@@ -42,7 +42,7 @@ export class PongAIOpponent extends AIOpponent {
     this.gameState = JSON.parse(
       JSON.stringify({
         ...gameState,
-        balls: gameState.balls.filter((ball) => ball.doGoal),
+        balls: gameState.balls.filter((ball) => ball.doGoal && ball.isVisible),
       }),
     );
 

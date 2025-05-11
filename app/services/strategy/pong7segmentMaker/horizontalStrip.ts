@@ -41,6 +41,8 @@ export class HorizontalStrip implements IPong7segmentMaker {
         doCollision: false,
         doRotation: false,
         isVisible: true,
+        doBoundsProtection: true,
+        doResolveCollision: true,
       },
 
       // TOP END
@@ -60,6 +62,8 @@ export class HorizontalStrip implements IPong7segmentMaker {
         doCollision: false,
         doRotation: false,
         isVisible: true,
+        doBoundsProtection: true,
+        doResolveCollision: true,
       },
 
       // BOTTOM END
@@ -79,6 +83,8 @@ export class HorizontalStrip implements IPong7segmentMaker {
         doCollision: false,
         doRotation: false,
         isVisible: true,
+        doBoundsProtection: true,
+        doResolveCollision: true,
       },
     ];
 

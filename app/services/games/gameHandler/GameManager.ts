@@ -18,6 +18,8 @@ import { GameResult } from "../../../types/strategy/ITournamentBracketGenerator"
 import { PongMinimalGameState } from "../../../types/games/pong/gameState";
 import { FastifyInstance } from "fastify";
 import { fastifyInstance } from "../../../app";
+import { getLobby } from "../lobby/lobbyWebsocket/getLobby";
+import { removeMemberFromLobby } from "../lobby/leave/leaveLobbyHandler";
 
 class GameManager {
   private id: string = randomUUID();
@@ -42,6 +44,7 @@ class GameManager {
     const newPlayer = {
       id: -1,
       playerUUID: userId,
+      leftGame: false,
     };
     this.players.set(userId, newPlayer);
     this.playerIdReferenceTable.push(userId);
@@ -62,7 +65,8 @@ class GameManager {
   }
 
   public hasPlayer(userId: string): boolean {
-    return this.players.has(userId);
+    if (this.players.get(userId)?.leftGame === false) return true;
+    return false;
   }
 
   public sendMessageToPlayer(userId: string, type: string, data: string): void {
@@ -207,6 +211,22 @@ class GameManager {
       if (player.ws === undefined || player.ws.readyState !== WebSocket.OPEN) {
         this.game.eliminate(player.id);
       }
+    }
+  }
+
+  public leaveGame(playerId: string): void {
+    const player = this.players.get(playerId);
+    if (player === undefined) {
+      return console.error("[leaveGame] Player not found");
+    }
+
+    if (this.game.getStatus() === GameStatus.RUNNING) {
+      this.disqualifyPlayer(playerId);
+      player.leftGame = true;
+    }
+    if (this.gameOrigin?.type === "lobby") {
+      const lobby = getLobby(this.gameOrigin.lobby.getLobbyId);
+      removeMemberFromLobby(lobby.getLobbyId, playerId);
     }
   }
 

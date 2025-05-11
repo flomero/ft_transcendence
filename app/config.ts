@@ -35,6 +35,7 @@ export enum TournamentGameModes {
   CompetitiveClassicPongPowerUps = "competitiveClassicPongPowerUps",
   CompetitiveMultiplayerPong = "competitiveMultiplayerPong",
   CompetitiveMultiplayerPongPowerUps = "competitiveMultiplayerPongPowerUps",
+  PowerUpMayhem1v1 = "powerUpMayhem1v1",
   TestTournamentConfig = "testTournamentConfig",
 }
 
@@ -46,19 +47,21 @@ export const TournamentGameModesPerBracketType: {
     TournamentGameModes.CompetitiveClassicPongPowerUps,
     TournamentGameModes.CompetitiveMultiplayerPong,
     TournamentGameModes.CompetitiveMultiplayerPongPowerUps,
+    TournamentGameModes.PowerUpMayhem1v1,
   ],
   singleElimination: [
     TournamentGameModes.CompetitiveClassicPong,
     TournamentGameModes.CompetitiveClassicPongPowerUps,
-    TournamentGameModes.TestTournamentConfig,
   ],
   doubleElimination: [
     TournamentGameModes.CompetitiveClassicPong,
     TournamentGameModes.CompetitiveClassicPongPowerUps,
+    TournamentGameModes.PowerUpMayhem1v1,
   ],
   swissRound: [
     TournamentGameModes.CompetitiveClassicPong,
     TournamentGameModes.CompetitiveClassicPongPowerUps,
+    TournamentGameModes.PowerUpMayhem1v1,
   ],
 };
 
@@ -67,23 +70,81 @@ export type GAMEMODE_REGISTRY_TYPE = {
 };
 
 export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
+  // testLobby: {
+  //   gameName: "pong",
+  //   gameModeName: "multiplayerPong",
+  //   gameModeConfig: {
+  //     ballSpeedWidthPercentS: 0.00000001,
+  //     powerUpRadius: 0.15,
+  //     powerUpCapacities: {
+  //       speedBoost: 100000,
+  //     },
+  //   },
+  //   modifierNames: {
+  //     powerUpSpawner: {
+  //       meanDelay: 0.001,
+  //       delaySpan: 0.0005,
+  //       positionSamplerStrategyName: "flowerGaussianCA",
+  //     },
+  //   },
+  //   powerUpNames: {
+  //     speedBoost: {},
+  //   },
+  //   playerCount: 5,
+  // },
+
   testLobby: {
     gameName: "pong",
-    gameModeName: "classicPong",
+    gameModeName: "multiplayerPong",
     gameModeConfig: {
-      powerUpRadius: 10,
+      powerUpRadius: 25,
+      powerUpCapacities: {
+        speedBoost: 100,
+      },
     },
     modifierNames: {
-      powerUpSpawner: {
-        meanDelay: 1,
-        delaySpan: 0.01,
-      },
-      goalReset: {},
       paceBreaker: {},
+      timedStart: {},
+      timedGame: { duration: 600 },
+      survivalGame: {},
+      elimination: { threshold: 5 },
+      arenaShrink: {},
+      goalReset: {},
       idleWallBounceAcceleration: {},
+      powerUpSpawner: {
+        meanDelay: 1.25,
+        delaySpan: 0.25,
+      },
     },
-    powerUpNames: {},
-    playerCount: 2,
+    powerUpNames: {
+      // speedBoost: {},
+      // blinkingBall: {
+      //   duration: 6,
+      //   blinkDuration: 75,
+      //   blinkInterval: 0.6,
+      // },
+      // multiBall: {
+      //   ballCount: 17,
+      //   totalAngle: 360,
+      //   radiusFactor: 72.5,
+      // },
+      // bumper: {
+      //   bumperJunctionDistanceFromCenter: 6,
+      // },
+      // shooter: {
+      //   chargeRadius: 3.5,
+      // },
+      // portals: {
+      // },
+      // speedGate: {}
+      speedBoost: {},
+      // bumperShield: {
+      //   wallGoalOffsetArenaWidthFactor: 12,
+      //   wallTotalWidthArenaWidthFactor: 18,
+      //   wallsHitThresold: 3,
+      // },
+    },
+    playerCount: 5,
   },
 
   // Quick 1v1, no powerUps
@@ -130,6 +191,14 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       multiBall: {},
       bumper: {},
       shooter: {},
+      portals: {},
+      speedGate: {},
+      protectedPowerUp: {},
+      bumperShield: {
+        wallGoalOffsetArenaWidthFactor: 12,
+        wallTotalWidthArenaWidthFactor: 18,
+        wallsHitThresold: 3,
+      },
     },
     playerCount: 2,
   },
@@ -200,127 +269,22 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       blinkingBall: {},
       multiBall: {},
       bumper: {},
-      shooter: {},
+      shooter: {
+        chargeRadius: 3.5,
+      },
+      portals: {},
+      speedGate: {
+        initialBallSizeSmallPortalWidthFactor: 900,
+        initialBallSizeBigPortalWidthFactor: 1300,
+      },
+      protectedPowerUp: {},
+      bumperShield: {
+        wallTotalWidthArenaWidthFactor: 8,
+        wallJunctionArenaWidthFactor: 50,
+        wallsHitThresold: 2,
+      },
     },
     playerCount: 5,
-  },
-
-  powerUpMayhem1v1: {
-    gameName: "pong",
-    gameModeName: "classicPong",
-    gameModeConfig: {
-      powerUpRadius: 5,
-    },
-    modifierNames: {
-      paceBreaker: {},
-      timedStart: {},
-      timedGame: { duration: 600 },
-      scoredGame: { goalObjective: 7 },
-      survivalGame: {},
-      elimination: { threshold: 8 },
-      goalReset: {},
-      idleWallBounceAcceleration: {},
-      powerUpSpawner: {
-        meanDelay: 9.25,
-        delaySpan: 2.25,
-      },
-    },
-    powerUpNames: {
-      speedBoost: {},
-      blinkingBall: {
-        duration: 6,
-        blinkDuration: 75,
-        blinkInterval: 0.6,
-      },
-      multiBall: {
-        ballCount: 17,
-        totalAngle: 360,
-        radiusFactor: 72.5,
-      },
-      bumper: {},
-      shooter: {},
-    },
-    playerCount: 2,
-  },
-
-  powerUpMayhem5: {
-    gameName: "pong",
-    gameModeName: "multiplayerPong",
-    gameModeConfig: {
-      powerUpRadius: 5,
-    },
-    modifierNames: {
-      paceBreaker: {},
-      timedStart: {},
-      timedGame: { duration: 600 },
-      survivalGame: {},
-      elimination: { threshold: 5 },
-      arenaShrink: {},
-      goalReset: {},
-      idleWallBounceAcceleration: {},
-      powerUpSpawner: {
-        meanDelay: 9.25,
-        delaySpan: 2.25,
-      },
-    },
-    powerUpNames: {
-      speedBoost: {},
-      blinkingBall: {
-        duration: 6,
-        blinkDuration: 75,
-        blinkInterval: 0.6,
-      },
-      multiBall: {
-        ballCount: 17,
-        totalAngle: 360,
-        radiusFactor: 72.5,
-      },
-      bumper: {
-        bumperJunctionDistanceFromCenter: 6,
-      },
-      shooter: {},
-    },
-    playerCount: 5,
-  },
-
-  powerUpMayhem8: {
-    gameName: "pong",
-    gameModeName: "multiplayerPong",
-    gameModeConfig: {
-      powerUpRadius: 5,
-    },
-    modifierNames: {
-      paceBreaker: {},
-      timedStart: {},
-      timedGame: { duration: 600 },
-      survivalGame: {},
-      elimination: { threshold: 5 },
-      arenaShrink: {},
-      goalReset: {},
-      idleWallBounceAcceleration: {},
-      powerUpSpawner: {
-        meanDelay: 9.25,
-        delaySpan: 2.25,
-      },
-    },
-    powerUpNames: {
-      speedBoost: {},
-      blinkingBall: {
-        duration: 6,
-        blinkDuration: 75,
-        blinkInterval: 0.6,
-      },
-      multiBall: {
-        ballCount: 17,
-        totalAngle: 360,
-        radiusFactor: 72.5,
-      },
-      bumper: {
-        bumperJunctionDistanceFromCenter: 6,
-      },
-      shooter: {},
-    },
-    playerCount: 8,
   },
 
   // All powerUps, quick game
@@ -350,10 +314,177 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       speedBoost: {},
       blinkingBall: {},
       multiBall: {},
+      bumper: {},
+      shooter: {
+        chargeRadius: 3.5,
+      },
+      portals: {},
+      speedGate: {
+        initialBallSizeSmallPortalWidthFactor: 900,
+        initialBallSizeBigPortalWidthFactor: 1300,
+      },
+      protectedPowerUp: {},
+      bumperShield: {
+        wallTotalWidthArenaWidthFactor: 8,
+        wallJunctionArenaWidthFactor: 50,
+        wallsHitThresold: 2,
+      },
+    },
+    playerCount: 8,
+  },
+
+  powerUpMayhem1v1: {
+    gameName: "pong",
+    gameModeName: "classicPong",
+    gameModeConfig: {
+      powerUpRadius: 6.5,
+    },
+    modifierNames: {
+      paceBreaker: {},
+      timedStart: {},
+      timedGame: { duration: 600 },
+      scoredGame: { goalObjective: 7 },
+      survivalGame: {},
+      elimination: { threshold: 8 },
+      goalReset: {},
+      idleWallBounceAcceleration: {},
+      powerUpSpawner: {
+        meanDelay: 8.5,
+        delaySpan: 1.75,
+      },
+    },
+    powerUpNames: {
+      speedBoost: {},
+      blinkingBall: {
+        duration: 6,
+        blinkDuration: 75,
+        blinkInterval: 0.6,
+      },
+      multiBall: {
+        ballCount: 17,
+        totalAngle: 360,
+        radiusFactor: 72.5,
+      },
+      bumper: {},
+      shooter: {},
+      portals: {},
+      speedGate: {},
+      protectedPowerUp: {},
+      bumperShield: {
+        wallGoalOffsetArenaWidthFactor: 12,
+        wallTotalWidthArenaWidthFactor: 18,
+        wallsHitThresold: 3,
+      },
+    },
+    playerCount: 2,
+  },
+
+  powerUpMayhem5: {
+    gameName: "pong",
+    gameModeName: "multiplayerPong",
+    gameModeConfig: {
+      powerUpRadius: 6,
+    },
+    modifierNames: {
+      paceBreaker: {},
+      timedStart: {},
+      timedGame: { duration: 600 },
+      survivalGame: {},
+      elimination: { threshold: 5 },
+      arenaShrink: {},
+      goalReset: {},
+      idleWallBounceAcceleration: {},
+      powerUpSpawner: {
+        meanDelay: 8.5,
+        delaySpan: 1.75,
+      },
+    },
+    powerUpNames: {
+      speedBoost: {},
+      blinkingBall: {
+        duration: 6,
+        blinkDuration: 75,
+        blinkInterval: 0.6,
+      },
+      multiBall: {
+        ballCount: 17,
+        totalAngle: 360,
+        radiusFactor: 72.5,
+      },
       bumper: {
         bumperJunctionDistanceFromCenter: 6,
       },
-      shooter: {},
+      shooter: {
+        chargeRadius: 3.5,
+      },
+      portals: {},
+      speedGate: {
+        initialBallSizeSmallPortalWidthFactor: 900,
+        initialBallSizeBigPortalWidthFactor: 1300,
+        sizeFactor: 1.8,
+        speedFactor: 1.3,
+      },
+      protectedPowerUp: {},
+      bumperShield: {
+        wallTotalWidthArenaWidthFactor: 8,
+        wallJunctionArenaWidthFactor: 50,
+        wallsHitThresold: 2,
+      },
+    },
+    playerCount: 5,
+  },
+
+  powerUpMayhem8: {
+    gameName: "pong",
+    gameModeName: "multiplayerPong",
+    gameModeConfig: {
+      powerUpRadius: 6,
+    },
+    modifierNames: {
+      paceBreaker: {},
+      timedStart: {},
+      timedGame: { duration: 600 },
+      survivalGame: {},
+      elimination: { threshold: 5 },
+      arenaShrink: {},
+      goalReset: {},
+      idleWallBounceAcceleration: {},
+      powerUpSpawner: {
+        meanDelay: 8.5,
+        delaySpan: 1.75,
+      },
+    },
+    powerUpNames: {
+      speedBoost: {},
+      blinkingBall: {
+        duration: 6,
+        blinkDuration: 75,
+        blinkInterval: 0.6,
+      },
+      multiBall: {
+        ballCount: 17,
+        totalAngle: 360,
+        radiusFactor: 72.5,
+      },
+      bumper: {
+        bumperJunctionDistanceFromCenter: 6,
+      },
+      shooter: {
+        chargeRadius: 3.5,
+      },
+      portals: {},
+      speedGate: {
+        initialBallSizeSmallPortalWidthFactor: 900,
+        initialBallSizeBigPortalWidthFactor: 1300,
+        sizeFactor: 1.8,
+        speedFactor: 1.3,
+      },
+      protectedPowerUp: {},
+      bumperShield: {
+        wallTotalWidthArenaWidthFactor: 8,
+        wallJunctionArenaWidthFactor: 50,
+        wallsHitThresold: 2,
+      },
     },
     playerCount: 8,
   },
@@ -366,9 +497,9 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       ballRadius: 0.85,
       ballSpeedWidthPercentS: 62.5,
       paddleCoveragePercent: 22.5,
-      paddleSpeedWidthPercentS: 0.825,
-      paddleVelocityAngularTransmissionPercent: 90,
-      paddleVelocitySpeedTransmissionPercent: 12.5,
+      paddleSpeedWidthPercentS: 0.8,
+      paddleVelocityAngularTransmissionPercent: 5,
+      paddleVelocitySpeedTransmissionPercent: 20,
     },
     modifierNames: {
       paceBreaker: {},
@@ -418,9 +549,9 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       ballRadius: 0.85,
       ballSpeedWidthPercentS: 62.5,
       paddleCoveragePercent: 22.5,
-      paddleSpeedWidthPercentS: 0.825,
-      paddleVelocityAngularTransmissionPercent: 90,
-      paddleVelocitySpeedTransmissionPercent: 12.5,
+      paddleSpeedWidthPercentS: 0.8,
+      paddleVelocityAngularTransmissionPercent: 5,
+      paddleVelocitySpeedTransmissionPercent: 17.5,
       powerUpRadius: 3.75,
     },
     modifierNames: {
@@ -454,11 +585,19 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
         bumperWallJunctionDistance: 95,
       },
       shooter: {},
+      portals: {},
+      speedGate: {},
+      protectedPowerUp: {},
+      bumperShield: {
+        wallGoalOffsetArenaWidthFactor: 12,
+        wallTotalWidthArenaWidthFactor: 18,
+        wallsHitThresold: 3,
+      },
     },
     playerCount: 2,
   },
 
-  // Competitive 5p, w/ power ups
+  // Competitive 5p
   competitiveMultiplayerPong: {
     gameName: "pong",
     gameModeName: "multiplayerPong",
@@ -466,7 +605,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       ballRadius: 0.65,
       ballSpeedWidthPercentS: 70,
       paddleCoveragePercent: 22.5,
-      paddleSpeedWidthPercentS: 0.78,
+      paddleSpeedWidthPercentS: 0.755,
       paddleVelocityAngularTransmissionPercent: 90,
       paddleVelocitySpeedTransmissionPercent: 12.5,
     },
@@ -492,7 +631,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       ballRadius: 0.65,
       ballSpeedWidthPercentS: 70,
       paddleCoveragePercent: 22.5,
-      paddleSpeedWidthPercentS: 0.78,
+      paddleSpeedWidthPercentS: 0.755,
       paddleVelocityAngularTransmissionPercent: 90,
       paddleVelocitySpeedTransmissionPercent: 12.5,
       powerUpRadius: 2.75,
@@ -524,10 +663,24 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
         blinkInterval: 1.2,
       },
       bumper: {
-        bumperJunctionDistanceFromCenter: 12,
-        bumperWallJunctionDistance: 95,
+        bumperJunctionDistanceFromCenter: 6,
       },
-      shooter: {},
+      shooter: {
+        chargeRadius: 3.5,
+      },
+      portals: {
+        portalWallWidthHeightFactor: 30,
+      },
+      speedGate: {
+        initialBallSizeSmallPortalWidthFactor: 900,
+        initialBallSizeBigPortalWidthFactor: 1300,
+      },
+      protectedPowerUp: {},
+      bumperShield: {
+        wallTotalWidthArenaWidthFactor: 8,
+        wallJunctionArenaWidthFactor: 50,
+        wallsHitThresold: 2,
+      },
     },
     playerCount: 5,
   },
@@ -538,6 +691,7 @@ export type TOURNAMENT_CONFIGS_REGISTRY_TYPE = {
     bracketType: string;
     matchWinner: string;
     possiblePlayerCount: number[];
+    initialSeedingMethod?: string;
   };
 };
 
@@ -551,18 +705,21 @@ export const TOURNAMENT_CONFIGS_REGISTRY: TOURNAMENT_CONFIGS_REGISTRY_TYPE = {
   singleElimination: {
     bracketType: "singleElimination",
     matchWinner: "bestOfX",
+    initialSeedingMethod: "random",
     possiblePlayerCount: [4, 8, 16, 32],
   },
 
   doubleElimination: {
     bracketType: "doubleElimination",
     matchWinner: "bestOfX",
+    initialSeedingMethod: "random",
     possiblePlayerCount: [4, 8, 16, 32],
   },
 
   swissRound: {
     bracketType: "swissRound",
     matchWinner: "bestOfX",
+    initialSeedingMethod: "random",
     possiblePlayerCount: Array.from({ length: 15 }).map(
       (_, index) => 2 * (index + 1),
     ),

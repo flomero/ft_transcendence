@@ -90,14 +90,16 @@ export class PhysicsEngine {
 
     const transformedBall = PhysicsEngine.transformIntoBase(ball, obj);
 
-    const possibleInBoundsCollision = PhysicsEngine.resolveBallInsideObject(
-      ball,
-      obj,
-      objId,
-      [ball.dx, ball.dy],
-      true,
-    );
-    if (possibleInBoundsCollision) return possibleInBoundsCollision;
+    if (obj.doBoundsProtection) {
+      const possibleInBoundsCollision = PhysicsEngine.resolveBallInsideObject(
+        ball,
+        obj,
+        objId,
+        [ball.dx, ball.dy],
+        true,
+      );
+      if (possibleInBoundsCollision) return possibleInBoundsCollision;
+    }
 
     // Check if the ball is inside the Rectangle (out of bounds)
     // if (
