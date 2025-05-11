@@ -5,6 +5,7 @@ class PongGame {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private wallCanvas: HTMLCanvasElement;
+  private timeDiv: HTMLDivElement;
   private wallCtx: CanvasRenderingContext2D;
   private wallsNeedRedraw = true;
   private gameState: PongMinimalGameState | null = null;
@@ -19,6 +20,7 @@ class PongGame {
   private playerIndex = -1; // -1 means not determined yet
   private playerCount = 0;
   private referenceTable: string[] = [];
+  private tps: number;
 
   private readonly KEY_MAPPINGS: Record<string, PongUserInput> = {
     ArrowUp: "UP",
@@ -42,6 +44,9 @@ class PongGame {
     if (!this.canvas) throw new Error(`Canvas with id ${canvasId} not found`);
 
     this.currentUserId = this.canvas.dataset.userid || "";
+    this.tps = Number(this.canvas.dataset.tps) || 0;
+
+    this.timeDiv = document.getElementById("time") as HTMLDivElement;
 
     const context = this.canvas.getContext("2d");
     if (!context) throw new Error("Failed to get 2D context from canvas");
@@ -466,8 +471,18 @@ class PongGame {
         this.updateScoreDisplay(userId, scores[i] || 0);
       });
     }
+    this.updateTimeDisplay(
+      this.gameState.modifiersState?.modifiersState?.timedGame?.ticks,
+    );
+  }
 
-    this.ctx.restore();
+  private updateTimeDisplay(time: number): void {
+    if (this.timeDiv && time) {
+      const totalSeconds = Math.floor(time / this.tps);
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      this.timeDiv.textContent = `${minutes}:${seconds.toString().padStart(2, "0")}`;
+    }
   }
 
   private updateScoreDisplay(userId: string, score: number): void {

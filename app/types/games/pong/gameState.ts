@@ -36,7 +36,7 @@ export type ModifierState = {
 
 export type ModifiersState = {
   spawnedPowerUps: { [powerUpName: string]: BallState };
-  modifiers: { [modifierName: string]: ModifierState };
+  modifiersState: { [modifierName: string]: ModifierState };
 };
 
 export type PongGameState = GameBaseState & {
