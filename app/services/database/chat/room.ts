@@ -86,17 +86,17 @@ export async function getChatRoomsForUser(
   userId: string,
 ): Promise<ChatRoom[]> {
   const sql = `
-    SELECT 
-      chat_rooms.id, 
-      chat_rooms.name, 
-      chat_rooms.type, 
+    SELECT
+      chat_rooms.id,
+      chat_rooms.name,
+      chat_rooms.type,
       r_users_chat.read,
       users.id as "user.id",
       users.username as "user.username",
       users.image_id as "user.image_id"
-    FROM chat_rooms 
-    JOIN r_users_chat ON chat_rooms.id = r_users_chat.room_id 
-    LEFT JOIN r_users_chat other_users ON chat_rooms.id = other_users.room_id 
+    FROM chat_rooms
+    JOIN r_users_chat ON chat_rooms.id = r_users_chat.room_id
+    LEFT JOIN r_users_chat other_users ON chat_rooms.id = other_users.room_id
       AND other_users.user_id != ? AND chat_rooms.type = 'DIRECT'
     LEFT JOIN users ON other_users.user_id = users.id
     WHERE r_users_chat.user_id = ?`;
@@ -136,7 +136,7 @@ export async function getChatRoomTwoUsers(
   fastify: FastifyInstance,
   userId1: string,
   userId2: string,
-) {
+): Promise<number | undefined> {
   const sql = `SELECT room_id
 FROM r_users_chat
 WHERE user_id IN (?, ?)
