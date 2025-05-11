@@ -28,7 +28,12 @@ const createTournament = async (
     gameData: {
       playerCount: playerCount,
     },
+    id: tournamentManager.getId(),
   };
+
+  if (tournamentRegistry.initialSeedingMethod)
+    tournamentSettings.initialSeedingMethod =
+      tournamentRegistry.initialSeedingMethod;
 
   fastifyInstance.log.debug(JSON.stringify(tournamentSettings));
   const newTournament = new Tournament(tournamentSettings);

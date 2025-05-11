@@ -22,6 +22,7 @@ import {
 } from "../../../types/tournament/tournament";
 import { sendSystemMessageToUser } from "../../chat/live";
 import { getUserById, User } from "../../database/user";
+import { tournaments } from "./tournaments";
 
 class TournamentManager {
   public tournamentId: string = randomUUID();
@@ -152,11 +153,23 @@ class TournamentManager {
   }
 
   public changeOwner() {
-    if (this.tournamentMembers.size > 0) {
-      const memberIds = Array.from(this.tournamentMembers.keys());
-      this.ownerId = memberIds[0];
+    if (this.getNumberOfPlayers() > 0) {
+      const firstNextMember = this.getFirstNonAIMember();
+      if (firstNextMember === undefined) return;
+
+      this.ownerId = firstNextMember.id;
       return;
     }
+    tournaments.delete(this.tournamentId);
+  }
+
+  public getFirstNonAIMember(): TournamentMember | undefined {
+    for (const member of this.tournamentMembers.values()) {
+      if (!member.isAI) {
+        return member;
+      }
+    }
+    return undefined; // Return undefined if no non-AI member is found
   }
 
   public async startTournament(db: Database): Promise<void> {
@@ -478,6 +491,14 @@ class TournamentManager {
       if (member.isAI === true) numberOfAiOpponents++;
     }
     return numberOfAiOpponents;
+  }
+
+  public getNumberOfPlayers(): number {
+    let numberOfPlayers = 0;
+    for (const member of this.tournamentMembers.values()) {
+      if (member.isAI === false) numberOfPlayers++;
+    }
+    return numberOfPlayers;
   }
 
   public getCurrentTournamentInfos(): TournamentInfos | undefined {

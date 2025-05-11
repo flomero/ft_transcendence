@@ -147,25 +147,26 @@ export class ModifierManager {
   }
 
   getStateSnapshot(): Record<string, any> {
+    const groupedPowerUps: Record<string, any[]> = {};
+
+    for (const [type, data] of this.spawnedPowerUps) {
+      if (!groupedPowerUps[type]) {
+        groupedPowerUps[type] = [];
+      }
+      groupedPowerUps[type].push({
+        r: data.radius,
+        x: parseFloat(data.x.toFixed(3)),
+        y: parseFloat(data.y.toFixed(3)),
+      });
+    }
+
     const state = {
-      spawnedPowerUps: {
-        ...Object.fromEntries(
-          this.spawnedPowerUps.map((powerUp) => [
-            powerUp[0],
-            {
-              r: powerUp[1].radius,
-              x: parseFloat(powerUp[1].x.toFixed(3)),
-              y: parseFloat(powerUp[1].y.toFixed(3)),
-            },
-          ]),
-        ),
-      },
+      spawnedPowerUps: groupedPowerUps,
       modifiersState: {
         ...Object.fromEntries(
-          this.modifiers.map((modifiers) => [
-            modifiers.name,
-            modifiers.getState(),
-          ]),
+          this.modifiers
+            .filter((modifier) => modifier.name === "timedGame")
+            .map((modifiers) => [modifiers.name, modifiers.getState()]),
         ),
       },
     };

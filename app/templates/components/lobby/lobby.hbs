@@ -7,7 +7,7 @@
     {{#if hasPowerUps}}
       <span class="px-2 py-1 text-xs rounded">PowerUps</span>
     {{/if}}
-    {{#> components/button variant="ghost" size="sm" url=(add "/games/lobby/join/" lobbyId)}}
+    {{#> components/button variant="ghost" size="sm" url=(add urlPrefix lobbyId)}}
       Join
     {{/components/button}}
   </div>

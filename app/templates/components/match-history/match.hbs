@@ -17,14 +17,17 @@
   }
 </style>
 
-<details class="group font-mono rounded-2xl mb-2
-          border {{#if (eq result 'win')}}border-green-900/50 bg-green-900/10
-          {{else if (eq result 'draw')}}border-yellow-900/50 bg-yellow-900/10
-          {{else}}border-red-900/50 bg-red-900/10
-          {{/if}}"
-         aria-labelledby="match-{{matchId}}"
-         name="match"
+<details
+  class="{{twMerge 'group font-mono rounded-2xl mb-2 border'
+                   (when (eq result 'win') 'border-green-900/50 bg-green-900/10')
+                   (when (eq result 'draw') 'border-yellow-900/50 bg-yellow-900/10')
+                   (when (not isFinished) 'border-blue-900/50 bg-blue-900/10')
+                   (when (eq result 'loss') 'border-red-900/50 bg-red-900/10') }}"
+  aria-labelledby="match-{{matchId}}"
+  name="match"
 >
+
+
   <summary
     id="match-{{matchId}}"
     class="flex items-center justify-between gap-2 p-2 cursor-pointer select-none">
@@ -45,7 +48,7 @@
         {{/if}}
       </span>
     {{else}}
-      <span class="elapsed-time font-mono" data-start="{{matchDate}}"></span>
+      <span class="font-bold elapsed-time text-blue-500 font-mono" data-start="{{matchDate}}"></span>
     {{/if}}
 
     <svg class="w-4 h-4 shrink-0 transition-transform group-open:rotate-180"
@@ -68,7 +71,9 @@
 
           <span class="w-8 text-right">1.</span>
           <span class="flex-1 truncate">{{get leaderboard "0" "username"}}</span>
-          <span class="w-12 text-right">{{get leaderboard "1" "score"}}</span>
+          {{#if isFinished}}
+            <span class="w-12 text-right">{{get leaderboard "1" "score"}}</span>
+          {{/if}}
         </a>
       </li>
       <li>
@@ -83,7 +88,9 @@
 
           <span class="w-8 text-right">2.</span>
           <span class="flex-1 truncate">{{get leaderboard "1" "username"}}</span>
-          <span class="w-12 text-right">{{get leaderboard "0" "score"}}</span>
+          {{#if isFinished}}
+            <span class="w-12 text-right">{{get leaderboard "0" "score"}}</span>
+          {{/if}}
         </a>
       </li>
 
@@ -101,7 +108,9 @@
 
             <span class="w-8 text-right">{{inc @index}}.</span>
             <span class="flex-1 truncate">{{username}}</span>
-            <span class="w-12 text-right">{{score}}</span>
+            {{#if isFinished}}
+              <span class="w-12 text-right">{{score}}</span>
+            {{/if}}
           </a>
         </li>
       {{/each}}
