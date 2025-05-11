@@ -57,6 +57,10 @@ class Chat {
     } else {
       chatRooms.innerHTML += data.html;
     }
+
+    if (/^\/games\/lobby\/join\/[a-f0-9-]+$/i.test(window.location.pathname)) {
+      this.showInviteButtons();
+    }
   }
 
   backToChats = (): void => {
@@ -216,6 +220,21 @@ class Chat {
         }, 300);
       })
       .catch((error) => console.error("Error fetching room:", error));
+  }
+
+  showInviteButtons() {
+    const chatRoomsView = document.getElementById("chat-rooms");
+
+    if (!chatRoomsView) {
+      console.error("Chat rooms view not found");
+      return;
+    }
+    const inviteIcons = chatRoomsView.querySelectorAll(
+      "button#send-invite-button",
+    );
+    inviteIcons.forEach((icon) => {
+      icon.classList.remove("hidden");
+    });
   }
 
   sendInvite = (event: Event): void => {
