@@ -5,6 +5,7 @@ import type {
   TournamentInfos,
   MatchInfos,
 } from "../../../types/tournament/tournament";
+import { MatchResults } from "../../../types/strategy/ITournamentBracketGenerator";
 
 export async function hydratePlayerScores(
   tourney: TournamentInfos,
@@ -16,8 +17,8 @@ export async function hydratePlayerScores(
    * 1 ─ Collect the gameIds that *still* need scores
    *     and create a lookup so we can find the match quickly later.
    * ────────────────────────────────────────────────────────────── */
-  type MatchAndIndex = { match: MatchInfos; gameIndex: number };
-  const gid2Match: Map<string, MatchAndIndex> = new Map();
+  // type MatchAndIndex = { match: MatchInfos; gameIndex: number };
+  const gid2Match: Map<string, MatchInfos> = new Map();
   const missingGameIds = new Set<string>();
 
   tourney.rounds.forEach((round) =>
@@ -26,9 +27,9 @@ export async function hydratePlayerScores(
       if (!gids?.length) return;
 
       // Process all matches, not just incomplete ones
-      gids.forEach((g, idx) => {
+      gids.forEach((g) => {
         missingGameIds.add(g);
-        gid2Match.set(g, { match, gameIndex: idx });
+        gid2Match.set(g, match);
       });
     }),
   );
@@ -51,21 +52,59 @@ export async function hydratePlayerScores(
     `,
     ids,
   );
-  console.log("Rows from DB:");
-  console.dir(rows);
-  /* ────────────────────────────────────────────────────────────────
-   * 3 ─ Merge back into the TournamentInfos structure
-   * ────────────────────────────────────────────────────────────── */
-  rows.forEach((row) => {
-    const meta = gid2Match.get(row.matchId);
-    if (!meta) return;
 
-    const { match, gameIndex } = meta;
-    const player: PlayerInfos | undefined = match.players.find(
-      (p) => p.id === row.userId,
-    );
-    if (player) player.score[gameIndex] = row.score;
-    console.log(`Match ${match.id} player ${player?.name} score: ${row.score}`);
+  const groupedByGameID: { [gameID: string]: MatchResults } = {};
+  for (const row of rows) {
+    const { matchId, userId, score } = row;
+
+    if (score === -1) continue;
+
+    if (!groupedByGameID[matchId]) {
+      groupedByGameID[matchId] = {};
+    }
+
+    if (!groupedByGameID[matchId][userId]) {
+      groupedByGameID[matchId][userId] = [];
+    }
+
+    groupedByGameID[matchId][userId].push(score);
+  }
+
+  for (const matchId in groupedByGameID) {
+    const players = Object.keys(groupedByGameID[matchId]);
+    if (players.length === 2) {
+      const [p1, p2] = players;
+      const temp = groupedByGameID[matchId][p1];
+      groupedByGameID[matchId][p1] = groupedByGameID[matchId][p2];
+      groupedByGameID[matchId][p2] = temp;
+    }
+  }
+
+  const groupedByMatchID: { [mathID: string]: MatchResults } = {};
+  tourney.rounds.forEach((round) => {
+    round.matches.forEach((match) => {
+      if (!match.gameIDs || match.gameIDs.length === 0) return;
+      groupedByMatchID[match.id] = {};
+
+      // Get all games results in the match
+      // const allGamesResults: MatchResults = {};
+      match.players.forEach((player) => (player.score = []));
+
+      const playerIDs = match.players.map((playerInfos) => playerInfos.id);
+
+      for (const gameID of match.gameIDs) {
+        if (!gameID) continue;
+
+        const gameResults = groupedByGameID[gameID];
+        if (!gameResults) continue;
+
+        for (const playerID of playerIDs) {
+          const player = match.players.find((player) => player.id === playerID);
+          if (!player) continue;
+          player.score.push(...gameResults[playerID]);
+        }
+      }
+    });
   });
 
   return tourney;
