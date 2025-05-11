@@ -50,6 +50,7 @@ export class BestOfX implements ITournamentMatchWinner {
 
     // Record positions for each player
     Object.entries(gameResult).forEach(([playerID, position]) => {
+      if (!match.results[playerID]) return;
       match.results[playerID].push(position);
     });
 
