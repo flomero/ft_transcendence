@@ -4,7 +4,10 @@ import { GameStatus } from "../../../types/games/gameBaseState";
 import type Player from "../../../interfaces/games/gameHandler/Player";
 import { WebSocket } from "ws";
 import gameLoop from "./gameLoop";
-import type { GameMessage } from "../../../types/games/userInput";
+import type {
+  GameMessage,
+  ServerMessage,
+} from "../../../types/games/userInput";
 import { PongAIOpponent } from "../pong/pongAIOpponent";
 import aiLoop from "./aiLoop";
 import { RNG } from "../rng";
@@ -20,7 +23,7 @@ import { removeMemberFromLobby } from "../lobby/leave/leaveLobbyHandler";
 
 class GameManager {
   private id: string = randomUUID();
-  private gameOrigin: GameOrigin | undefined;
+  gameOrigin: GameOrigin | undefined;
   private isShuffled = false;
   game: GameBase;
   players: Map<string, Player> = new Map();
@@ -76,20 +79,10 @@ class GameManager {
     }
   }
 
-  public sendMessageToAll(
-    type: string,
-    data: PongMinimalGameState | { html: string },
-    referenceTable: string[],
-  ): void {
+  public sendMessageToAll(message: ServerMessage): void {
     for (const player of this.players.values()) {
       if (player.ws !== undefined) {
-        player.ws.send(
-          JSON.stringify({
-            type: type,
-            data: data,
-            referenceTable: referenceTable,
-          }),
-        );
+        player.ws.send(JSON.stringify(message));
       }
     }
   }

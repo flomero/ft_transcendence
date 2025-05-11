@@ -1,3 +1,5 @@
+import { PongMinimalGameState } from "./pong/gameState";
+
 export const pongUserInputs = {
   UP: "UP",
   STOP_UP: "STOP_UP",
@@ -20,3 +22,13 @@ export interface GameMessage {
   type: "userInput";
   options: UserInput;
 }
+
+export type GameStateMessage = {
+  type: "gameState";
+  data: PongMinimalGameState;
+  referenceTable: string[];
+};
+
+export type ServerMessage =
+  | GameStateMessage
+  | { type: "gameFinished" | "redirect"; data: string };
