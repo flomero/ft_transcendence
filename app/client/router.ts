@@ -196,11 +196,14 @@ class Router {
           matchedRoute?.handler?.contentHandler ||
           this.routes[path]?.contentHandler;
         let html: string | null = null;
+        let responseOk = true;
 
         if (customHandler) {
           html = await customHandler();
         } else {
-          html = await this.fetchContent(path);
+          const result = await this.fetchContent(path);
+          html = result.html;
+          responseOk = result.responseOk;
         }
 
         if (html) {
@@ -209,10 +212,12 @@ class Router {
           this.updateActiveLinks(this.currentPath); // Use this.currentPath which may have been updated during redirection
           window.scrollTo(0, 0);
 
-          // Get the updated route handler for the possibly changed path
-          const finalMatchedRoute = this.findMatchingRoute(this.currentPath);
-          if (finalMatchedRoute?.handler?.onEnter) {
-            await finalMatchedRoute.handler.onEnter();
+          if (responseOk) {
+            // Get the updated route handler for the possibly changed path
+            const finalMatchedRoute = this.findMatchingRoute(this.currentPath);
+            if (finalMatchedRoute?.handler?.onEnter) {
+              await finalMatchedRoute.handler.onEnter();
+            }
           }
 
           document.dispatchEvent(
@@ -255,7 +260,9 @@ class Router {
   //   }
   // }
 
-  async fetchContent(path: string): Promise<string | null> {
+  async fetchContent(
+    path: string,
+  ): Promise<{ html: string | null; responseOk: boolean }> {
     try {
       const url = new URL(path, window.location.origin);
 
@@ -270,7 +277,7 @@ class Router {
       if (!response.ok) {
         console.error("Fetch error:", response.status, response.statusText);
         // this.displayError(response.status, response.statusText);
-        // return null;
+        // return { html: null, responseOk: response.ok };
       }
 
       const pageTitle = response.headers.get("X-Page-Title");
@@ -309,7 +316,10 @@ class Router {
           redirectedPath = data.redirectTo;
           needsRedirect = true;
         } else {
-          return `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+          return {
+            html: `<pre>${JSON.stringify(data, null, 2)}</pre>`,
+            responseOk: response.ok,
+          };
         }
       }
 
@@ -318,10 +328,11 @@ class Router {
         return await this.fetchContent(redirectedPath);
       }
 
-      return await response.text();
+      const html = await response.text();
+      return { html: html, responseOk: response.ok };
     } catch (error) {
       console.error("Fetch error:", error);
-      return null;
+      return { html: null, responseOk: false };
     }
   }
 
