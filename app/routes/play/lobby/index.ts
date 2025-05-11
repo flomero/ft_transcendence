@@ -9,6 +9,10 @@ import { isUserInAnyLobby } from "../../../services/games/lobby/lobbyVaidation/i
 import { Lobby } from "../../../services/games/lobby/Lobby";
 import { setLobby } from "../../../services/games/lobby/new/setLobby";
 import type { GameSettings } from "../../../interfaces/games/lobby/GameSettings";
+import {
+  GAME_MODES,
+  GAME_NAMES,
+} from "../../../schemas/games/lobby/newLobbySchema";
 
 const page: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.get("/", async (request, reply) => {
@@ -65,6 +69,25 @@ const page: FastifyPluginAsync = async (fastify): Promise<void> => {
         "An error occurred while creating the lobby",
       );
     }
+  });
+
+  fastify.get("/custom", async (request, reply) => {
+    const data = {
+      title: "Create Custom Game Lobby | ft_transcendence",
+      gameNames: Object.values(GAME_NAMES),
+      gameModes: Object.values(GAME_MODES),
+      positionSamplers: [
+        "biasedGaussianCATester",
+        "biasedQuadrantGaussianRATester",
+        "elipticGaussianRA",
+        "flowerGaussianCA",
+        "uniformCA",
+        "uniformRA",
+      ],
+    };
+    reply.header("X-Page-Title", "Create Custom Game Lobby | ft_transcendence");
+    const viewOptions = request.isAjax() ? {} : { layout: "layouts/main" };
+    return reply.view("views/lobby/custom", data, viewOptions);
   });
 };
 

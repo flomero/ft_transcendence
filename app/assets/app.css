@@ -237,4 +237,146 @@
   .badge {
     @apply bg-bg-muted text-fg-muted rounded-full px-2 py-1 text-xs;
   }
+
+  /* Form Styles */
+  .form-container {
+    @apply mx-auto w-full max-w-4xl;
+  }
+
+  .form-card {
+    @apply bg-bg border-border mb-6 overflow-hidden rounded-lg border shadow-md;
+  }
+
+  .form-card-header {
+    @apply bg-bg-muted border-border border-b p-4;
+  }
+
+  .form-card-body {
+    @apply p-5;
+  }
+
+  .form-group {
+    @apply mb-4;
+  }
+
+  .form-row {
+    @apply -mx-2 flex flex-wrap;
+  }
+
+  .form-col {
+    @apply mb-4 w-full px-2 md:w-1/2 lg:w-1/3;
+  }
+
+  .form-label {
+    @apply text-fg-muted mb-2 block text-sm font-medium;
+  }
+
+  /* Updated shadcn-like form controls */
+  .form-input,
+  .form-select,
+  .form-textarea {
+    @apply bg-bg text-fg border-border focus:ring-fg-muted focus:border-fg-muted placeholder:text-fg-muted/50 w-full rounded-lg border px-3 py-2 ring-0 ring-offset-0 transition-all duration-200 outline-none focus:ring-2 focus:ring-offset-0;
+  }
+
+  .form-input:hover,
+  .form-select:hover,
+  .form-textarea:hover {
+    @apply border-fg-muted;
+  }
+
+  .form-check {
+    @apply flex items-center;
+  }
+
+  .form-check-input {
+    @apply border-border bg-bg text-fg-muted focus:ring-fg-muted h-4 w-4 rounded border focus:ring-2 focus:ring-offset-0;
+  }
+
+  .form-check-label {
+    @apply text-fg-muted ml-2 text-sm;
+  }
+
+  /* Updated button classes to use the button component styles */
+  .form-submit {
+    @apply bg-fg text-bg hover:bg-fg-muted focus:ring-fg-muted w-full rounded-lg px-4 py-2.5 transition-colors select-none focus:ring-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .form-section-title {
+    @apply text-fg mb-3 text-lg font-medium;
+  }
+
+  .form-subsection-title {
+    @apply text-fg-muted mb-2 text-base font-medium;
+  }
+
+  .form-help-text {
+    @apply text-fg-muted mt-1 text-xs;
+  }
+
+  .form-error {
+    @apply text-error mt-1 text-sm;
+  }
+
+  /* Number Input Styles - Updated */
+  input[type="number"].form-input {
+    @apply pr-8 text-right;
+  }
+
+  /* Chrome, Safari, Edge, Opera - updated spinner styles */
+  input[type="number"].form-input::-webkit-inner-spin-button,
+  input[type="number"].form-input::-webkit-outer-spin-button {
+    @apply h-auto opacity-0;
+    appearance: none;
+  }
+
+  /* Firefox */
+  input[type="number"].form-input {
+    -moz-appearance: textfield;
+  }
+
+  /* Cleaner number input with custom buttons */
+  .form-number-container {
+    @apply relative flex items-center;
+  }
+
+  .form-number-container .form-input {
+    @apply pr-8;
+  }
+
+  .form-number-buttons {
+    @apply absolute right-1 flex h-[calc(100%-8px)] flex-col;
+  }
+
+  .form-number-button {
+    @apply text-fg-muted hover:bg-bg-muted hover:text-fg flex w-6 items-center justify-center rounded-sm transition-colors;
+  }
+
+  .form-number-button-up {
+    @apply h-1/2;
+  }
+
+  .form-number-button-down {
+    @apply h-1/2;
+  }
+
+  /* Range input styling - updated */
+  input[type="range"].form-range {
+    @apply bg-border h-2 w-full cursor-pointer appearance-none rounded-lg;
+  }
+
+  input[type="range"].form-range::-webkit-slider-thumb {
+    @apply bg-fg hover:bg-fg-muted h-4 w-4 cursor-pointer appearance-none rounded-full border-none transition-colors;
+  }
+
+  input[type="range"].form-range::-moz-range-thumb {
+    @apply bg-fg hover:bg-fg-muted h-4 w-4 cursor-pointer rounded-full border-none transition-colors;
+  }
+
+  /* Disabled state */
+  .form-input:disabled,
+  .form-select:disabled,
+  .form-textarea:disabled,
+  .form-check-input:disabled {
+    @apply cursor-not-allowed opacity-50;
+  }
 }

@@ -1,0 +1,427 @@
+<div class="container mt-4 form-container">
+  <h1>Create New Game Lobby</h1>
+  
+  <form id="newLobbyForm" onsubmit="return handleFormSubmit(event)" data-spa-ignore="true">
+    <div class="form-card">
+      <div class="form-card-header">
+        <h2 class="form-section-title mb-0">Basic Settings</h2>
+      </div>
+      <div class="form-card-body">
+        <div class="form-row">
+          <div class="form-col">
+            <label for="gameName" class="form-label">Game</label>
+            <select id="gameName" name="gameName" class="form-select" required>
+              {{#each gameNames}}
+                <option value="{{this}}">{{this}}</option>
+              {{/each}}
+            </select>
+          </div>
+          
+          <div class="form-col">
+            <label for="gameModeName" class="form-label">Game Mode</label>
+            <select id="gameModeName" name="gameModeName" class="form-select" required>
+              {{#each gameModes}}
+                <option value="{{this}}">{{this}}</option>
+              {{/each}}
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Game Mode Configuration -->
+    <div class="form-card">
+      <div class="form-card-header">
+        <h2 class="form-section-title mb-0">Game Mode Configuration</h2>
+      </div>
+      <div class="form-card-body">
+        <div class="form-row">
+          <div class="form-col">
+            <label for="ballSpeedWidthPercentS" class="form-label">Ball Speed (% width/s)</label>
+            <div class="form-number-container">
+              <input type="number" id="ballSpeedWidthPercentS" name="gameModeConfig.ballSpeedWidthPercentS" class="form-input" min="0" step="0.1" value="30">
+            </div>
+          </div>
+          
+          <div class="form-col">
+            <label for="ballRadius" class="form-label">Ball Radius</label>
+            <div class="form-number-container">
+              <input type="number" id="ballRadius" name="gameModeConfig.ballRadius" class="form-input" min="0" step="0.1" value="1">
+            </div>
+          </div>
+          
+          <div class="form-col">
+            <label for="paddleCoveragePercent" class="form-label">Paddle Coverage (%)</label>
+            <div class="form-number-container">
+              <input type="number" id="paddleCoveragePercent" name="gameModeConfig.paddleCoveragePercent" class="form-input" min="0" max="100" step="1" value="15">
+            </div>
+          </div>
+          
+          <div class="form-col">
+            <label for="paddleSpeedWidthPercentS" class="form-label">Paddle Speed (% width/s)</label>
+            <div class="form-number-container">
+              <input type="number" id="paddleSpeedWidthPercentS" name="gameModeConfig.paddleSpeedWidthPercentS" class="form-input" min="0" step="0.1" value="50">
+            </div>
+          </div>
+          
+          <div class="form-col">
+            <label for="paddleVelocityAngularTransmissionPercent" class="form-label">Paddle Angular Transmission (%)</label>
+            <div class="form-number-container">
+              <input type="number" id="paddleVelocityAngularTransmissionPercent" name="gameModeConfig.paddleVelocityAngularTransmissionPercent" class="form-input" min="0" step="1" value="20">
+            </div>
+          </div>
+          
+          <div class="form-col">
+            <label for="paddleVelocitySpeedTransmissionPercent" class="form-label">Paddle Speed Transmission (%)</label>
+            <div class="form-number-container">
+              <input type="number" id="paddleVelocitySpeedTransmissionPercent" name="gameModeConfig.paddleVelocitySpeedTransmissionPercent" class="form-input" min="0" step="1" value="20">
+            </div>
+          </div>
+          
+          <div class="form-col">
+            <label for="powerUpRadius" class="form-label">Power-up Radius</label>
+            <div class="form-number-container">
+              <input type="number" id="powerUpRadius" name="gameModeConfig.powerUpRadius" class="form-input" min="0" step="0.1" value="1">
+            </div>
+          </div>
+          
+          <div class="form-col">
+            <label for="speedBoost" class="form-label">Speed Boost Value</label>
+            <div class="form-number-container">
+              <input type="number" id="speedBoost" name="gameModeConfig.powerUpCapacities.speedBoost" class="form-input" min="0" step="0.1" value="1.5" required>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Modifiers -->
+    <div class="form-card">
+      <div class="form-card-header">
+        <h2 class="form-section-title mb-0">Game Modifiers</h2>
+      </div>
+      <div class="form-card-body">
+        <!-- Power-Up Spawner -->
+        <div class="mb-4">
+          <h3 class="form-subsection-title">Power-Up Spawner</h3>
+          <div class="form-row">
+            <div class="form-col">
+              <label for="meanDelayS" class="form-label">Mean Delay (seconds)</label>
+              <div class="form-number-container">
+                <input type="number" id="meanDelayS" name="modifierNames.powerUpSpawner.meanDelayS" class="form-input" min="0" step="0.1" value="5">
+              </div>
+            </div>
+            
+            <div class="form-col">
+              <label for="delaySpanS" class="form-label">Delay Span (seconds)</label>
+              <div class="form-number-container">
+                <input type="number" id="delaySpanS" name="modifierNames.powerUpSpawner.delaySpanS" class="form-input" min="0" step="0.1" value="2">
+              </div>
+            </div>
+            
+            <div class="form-col">
+              <label for="positionSamplerStrategyName" class="form-label">Position Sampler</label>
+              <select id="positionSamplerStrategyName" name="modifierNames.powerUpSpawner.positionSamplerStrategyName" class="form-select">
+                {{#each positionSamplers}}
+                  <option value="{{this}}">{{this}}</option>
+                {{/each}}
+              </select>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Game Mode Type Selection -->
+        <div class="mb-4">
+          <h3 class="form-subsection-title">Game Mode Type</h3>
+          <div class="form-row">
+            <div class="form-col">
+              <div class="form-check">
+                <input type="radio" id="timedGameMode" name="gameModeType" value="timedGame" class="form-check-input" checked>
+                <label for="timedGameMode" class="form-check-label">Timed Game</label>
+              </div>
+            </div>
+            <div class="form-col">
+              <div class="form-check">
+                <input type="radio" id="scoredGameMode" name="gameModeType" value="scoredGame" class="form-check-input">
+                <label for="scoredGameMode" class="form-check-label">Scored Game</label>
+              </div>
+            </div>
+            <div class="form-col">
+              <div class="form-check">
+                <input type="radio" id="survivalGameMode" name="gameModeType" value="survivalGame" class="form-check-input">
+                <label for="survivalGameMode" class="form-check-label">Survival Game</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Timed Game Section -->
+        <div class="mb-4 game-mode-section" id="timedGameSection">
+          <h3 class="form-subsection-title">Timed Game Settings</h3>
+          <div class="form-row">
+            <div class="form-col">
+              <label for="durationS" class="form-label">Duration (seconds)</label>
+              <div class="form-number-container">
+                <input type="number" id="durationS" name="modifierNames.timedGame.durationS" class="form-input" min="0" step="1" value="180">
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Scored Game Section -->
+        <div class="mb-4 game-mode-section hidden" id="scoredGameSection">
+          <h3 class="form-subsection-title">Scored Game Settings</h3>
+          <div class="form-row">
+            <div class="form-col">
+              <label for="goalObjective" class="form-label">Goal Objective</label>
+              <div class="form-number-container">
+                <input type="number" id="goalObjective" name="modifierNames.scoredGame.goalObjective" class="form-input" min="0" step="1" value="5">
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Survival Game Section -->
+        <div class="mb-4 game-mode-section hidden" id="survivalGameSection">
+          <h3 class="form-subsection-title">Survival Game Settings</h3>
+          
+          <!-- Elimination - Only visible for Survival Game -->
+          <div class="mb-4">
+            <h4 class="form-subsection-title">Elimination</h4>
+            <div class="form-row">
+              <div class="form-col">
+                <label for="threshold" class="form-label">Threshold</label>
+                <div class="form-number-container">
+                  <input type="number" id="threshold" name="modifierNames.elimination.threshold" class="form-input" min="0" step="1" value="3">
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Arena Shrink - Only visible for Survival Game -->
+          <div class="mb-4">
+            <h4 class="form-subsection-title">Arena Shrink</h4>
+            <div class="form-row">
+              <div class="form-col">
+                <p class="text-fg-muted">Arena shrink settings are automatically configured.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Goal Reset - Available for all game modes -->
+        <div class="mb-4">
+          <h3 class="form-subsection-title">Goal Reset</h3>
+          <div class="form-row">
+            <div class="form-col">
+              <label for="goalResetDelayS" class="form-label">Delay (seconds)</label>
+              <div class="form-number-container">
+                <input type="number" id="goalResetDelayS" name="modifierNames.goalReset.delayS" class="form-input" min="0" step="0.1" value="1">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Power-Ups -->
+    <div class="form-card">
+      <div class="form-card-header">
+        <h2 class="form-section-title mb-0">Power-Ups</h2>
+      </div>
+      <div class="form-card-body">
+        <!-- Speed Boost -->
+        <div class="mb-4">
+          <h3 class="h6">Speed Boost</h3>
+          <div class="form-row">
+            <div class="form-col">
+              <label for="spawnWeight" class="form-label">Spawn Weight</label>
+              <div class="form-number-container">
+                <input type="number" id="spawnWeight" name="powerUpNames.speedBoost.spawnWeight" class="form-input" min="0" step="0.1" value="1">
+              </div>
+            </div>
+            
+            <div class="form-col">
+              <div class="form-check mt-4">
+                <input type="checkbox" id="selfActivation" name="powerUpNames.speedBoost.selfActivation" class="form-check-input" value="true">
+                <label for="selfActivation" class="form-check-label">Self Activation</label>
+              </div>
+            </div>
+            
+            <div class="form-col">
+              <label for="durationS" class="form-label">Duration (seconds)</label>
+              <div class="form-number-container">
+                <input type="number" id="boostDurationS" name="powerUpNames.speedBoost.durationS" class="form-input" min="0" step="0.1" value="3">
+              </div>
+            </div>
+            
+            <div class="form-col">
+              <label for="totalRampUpStrength" class="form-label">Ramp Up Strength</label>
+              <div class="form-number-container">
+                <input type="number" id="totalRampUpStrength" name="powerUpNames.speedBoost.totalRampUpStrength" class="form-input" min="0" step="0.1" value="1.5">
+              </div>
+            </div>
+            
+            <div class="form-col">
+              <label for="rampUpFrequencyS" class="form-label">Ramp Up Frequency (seconds)</label>
+              <div class="form-number-container">
+                <input type="number" id="rampUpFrequencyS" name="powerUpNames.speedBoost.rampUpFrequencyS" class="form-input" min="0" step="0.1" value="0.5">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="mt-6">
+      {{#> components/button type="submit" variant="primary" class="w-full py-3"}}
+        Create Lobby
+      {{/components/button}}
+    </div>
+  </form>
+</div>
+
+<style>
+  .hidden {
+    display: none;
+  }
+</style>
+
+<script>
+  // Toggle game mode sections based on selection
+  document.addEventListener('DOMContentLoaded', function() {
+    const gameModeRadios = document.querySelectorAll('input[name="gameModeType"]');
+    const gameModeTypes = ['timedGame', 'scoredGame', 'survivalGame'];
+    
+    gameModeRadios.forEach(radio => {
+      radio.addEventListener('change', function() {
+        // Hide all game mode sections
+        document.querySelectorAll('.game-mode-section').forEach(section => {
+          section.classList.add('hidden');
+        });
+        
+        // Show the selected game mode section
+        const selectedSection = document.getElementById(`${this.value}Section`);
+        if (selectedSection) {
+          selectedSection.classList.remove('hidden');
+        }
+      });
+    });
+  });
+
+  function handleFormSubmit(event) {
+    event.preventDefault();
+    
+    // Get the form element
+    const form = event.target;
+    
+    // Get the selected game mode type
+    const selectedGameModeType = document.querySelector('input[name="gameModeType"]:checked').value;
+    
+    // Build the JSON object from form data
+    const formData = new FormData(form);
+    const gameSettings = {
+      gameName: formData.get('gameName'),
+      gameModeName: formData.get('gameModeName'),
+      gameModeConfig: {},
+      modifierNames: {
+        powerUpSpawner: {},
+        goalReset: {}
+      },
+      powerUpNames: {
+        speedBoost: {}
+      }
+    };
+    
+    // Set up game mode and related modifiers based on selection
+    if (selectedGameModeType === 'timedGame') {
+      gameSettings.modifierNames.timedGame = {};
+    } else if (selectedGameModeType === 'scoredGame') {
+      gameSettings.modifierNames.scoredGame = {};
+    } else if (selectedGameModeType === 'survivalGame') {
+      gameSettings.modifierNames.survivalGame = [];
+      gameSettings.modifierNames.elimination = {};
+      gameSettings.modifierNames.arenaShrink = [];
+    }
+    
+    // Process all form inputs to create nested objects
+    for (const [key, value] of formData.entries()) {
+      // Skip the game mode type radio since we handled it separately
+      if (key === 'gameModeType') continue;
+      
+      // Skip fields for non-selected game modes
+      if (key.includes('.') && 
+          (key.startsWith('modifierNames.timedGame') && selectedGameModeType !== 'timedGame' ||
+           key.startsWith('modifierNames.scoredGame') && selectedGameModeType !== 'scoredGame' ||
+           key.startsWith('modifierNames.survivalGame') && selectedGameModeType !== 'survivalGame' ||
+           // Skip elimination and arenaShrink unless survival game is selected
+           ((key.startsWith('modifierNames.elimination') || key.startsWith('modifierNames.arenaShrink')) && 
+            selectedGameModeType !== 'survivalGame'))) {
+        continue;
+      }
+      
+      if (key.includes('.')) {
+        const parts = key.split('.');
+        let current = gameSettings;
+        
+        // Navigate to the appropriate nested object and create objects along the path if needed
+        for (let i = 0; i < parts.length - 1; i++) {
+          const part = parts[i];
+          // Skip if the path doesn't exist in our gameSettings structure
+          if (current[part] === undefined) break;
+          
+          if (!(part in current)) {
+            // Initialize as empty object or array based on the next part
+            current[part] = isNaN(Number(parts[i + 1])) ? {} : [];
+          }
+          current = current[part];
+        }
+        
+        // Skip if we broke out of the loop due to undefined value
+        if (current === undefined) continue;
+        
+        // Set the value converting to number if needed
+        const lastKey = parts[parts.length - 1];
+        if (value === 'true') {
+          current[lastKey] = true;
+        } else if (value === 'false') {
+          current[lastKey] = false;
+        } else if (!isNaN(value) && value !== '') {
+          current[lastKey] = Number(value);
+        } else {
+          current[lastKey] = value;
+        }
+      }
+    }
+    
+    console.log('Game settings:', gameSettings); // For debugging
+    
+    // Send the data
+    fetch('/games/lobby/new', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(gameSettings)
+    })
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => {
+          throw new Error(err.message || 'Network response was not ok');
+        });
+      }
+      return response.json();
+    })
+    .then(data => {
+      // Redirect to the new lobby or show success message
+      window.location.href = `/games/lobby/${data.id}`;
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error creating lobby: ' + error.message);
+    });
+    
+    // Return false to prevent default form submission
+    return false;
+  }
+</script>
