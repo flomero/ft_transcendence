@@ -3,6 +3,7 @@ import type {
   ITournamentBracketGenerator,
   Match,
   Round,
+  TournamentBracket,
   TournamentRankings,
 } from "../../../types/strategy/ITournamentBracketGenerator";
 import type { TournamentResults } from "../../../types/tournament/tournament";
@@ -669,7 +670,10 @@ export class SwissRound implements ITournamentBracketGenerator {
     return this.activeMatches.has(matchID);
   }
 
-  getCompleteBracket(): Round[] {
-    return this.allRounds;
+  getCompleteBracket(): TournamentBracket {
+    return {
+      rounds: this.allRounds,
+      seeding: new Map(),
+    };
   }
 }

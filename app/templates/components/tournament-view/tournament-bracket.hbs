@@ -1,0 +1,34 @@
+<div class="overflow-auto max-h-screen rounded-2xl mb-2 p-2 border border-gray-200">
+  <div
+    id="bracket"
+    class="relative flex flex-row gap-8 p-4 font-mono text-xs min-w-min"
+  >
+    {{! — rounds — }}
+    {{#each rounds as |round r|}}
+      <div
+        class="border rounded-lg p-2 pb-6 min-w-[200px] flex-shrink-0"
+        {{#if round.isCurrent}} style="border-color: blue;" {{/if}}
+        {{#if round.isCurrent}}id="current-round"{{/if}}
+      >
+        <div class="text-center">{{round.name}}</div>
+        <div class="flex flex-col justify-around h-full">
+          {{#each round.matches as |match i|}}
+            {{> components/tournament-view/match match=match}}
+          {{/each}}
+        </div>
+      </div>
+    {{/each}}
+
+    <svg
+      id="lines"
+      class="absolute top-0 left-0 pointer-events-none select-none"
+    ></svg>
+  </div>
+</div>
+
+<script>
+  document.getElementById('current-round')?.scrollIntoView({
+    behavior: 'smooth',
+    inline: 'center'
+  });
+</script>

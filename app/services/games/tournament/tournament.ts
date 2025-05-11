@@ -11,9 +11,15 @@ import type {
   TournamentRankings,
   GameResult,
 } from "../../../types/strategy/ITournamentBracketGenerator";
-import type {
-  TournamentResults,
-  PlayerResults,
+import {
+  type TournamentResults,
+  type PlayerResults,
+  type TournamentInfos,
+  type RoundInfos,
+  MatchInfos,
+  PlayerInfos,
+  MatchStatus,
+  Edge,
 } from "../../../types/tournament/tournament";
 import type { TournamentSettings } from "../../../interfaces/games/tournament/TournamentSettings";
 import { fastifyInstance } from "../../../app";
@@ -23,6 +29,14 @@ export enum TournamentStatus {
   ON_GOING = 1,
   FINISHED = 2,
 }
+
+const singleEliminationRoundNames: string[] = [
+  "Final",
+  "1/2 Final",
+  "1/4 Final",
+  "1/8 Final",
+  "1/16 Final",
+];
 
 export class Tournament {
   // All tournament related data given at creation
@@ -53,6 +67,9 @@ export class Tournament {
 
   protected status: TournamentStatus = TournamentStatus.CREATED;
   protected tournamentResults: TournamentResults = {};
+
+  // DEBUG
+  counter: number = 0;
 
   constructor(tournamentData: TournamentSettings) {
     this.tournamentData = tournamentData;
@@ -137,6 +154,14 @@ export class Tournament {
       }
 
       gameNum++;
+      console.log(`COUNTER: ${this.counter}`);
+      if (++this.counter === 29) {
+        console.log(`\n--------------\n`);
+        console.log(`Tournament infos after 29 games`);
+        const tournamentInfos = this.getCurrentTournamentInfos();
+        console.dir(tournamentInfos, { depth: null });
+        console.log(`\n--------------\n`);
+      }
     }
 
     // Mark this match as completed
@@ -239,5 +264,133 @@ export class Tournament {
       "computeFinalRankings",
       this.getResults(),
     );
+  }
+
+  getCurrentTournamentInfos(): TournamentInfos {
+    const completeBracket = this.bracketManager.execute("getCompleteBracket");
+    const matchesData: Map<string, MatchData> =
+      this.matchWinnerManager.execute("getMatches");
+
+    const roundCount = completeBracket.rounds.length;
+
+    // TMP
+    const tournamentID = "0";
+
+    const tournamentInfos: TournamentInfos = {
+      id: tournamentID,
+      state: this.status,
+      playerCount: this.tournamentData.players?.length || 0,
+      type: "Single Elimination",
+      rounds: Array.from<RoundInfos>(
+        // Compute each RoundInfos from bracketRounds & matchWinner matchesData
+        completeBracket.rounds.map((round, roundID) => {
+          return {
+            name: singleEliminationRoundNames[roundCount - (roundID + 1)],
+            isCurrent: false, // set later in TournamentManager
+            matches: Array.from<MatchInfos>(
+              // Compute each MatchInfos from rounds
+              Object.entries(round).map(([matchID, match]: [string, Match]) => {
+                const matchData = matchesData.get(matchID);
+                if (!matchData) {
+                  // Not yet in matchWinner -> check in completeBracket
+                  const matchDataFromBracket =
+                    completeBracket.rounds[roundID][matchID];
+                  if (!matchDataFromBracket)
+                    return {
+                      id: "",
+                      players: [],
+                      status: MatchStatus.NOT_STARTED,
+                      currentGame: 0,
+                    };
+
+                  const playerIDs: string[] = Array.from<string>(
+                    Object.keys(matchDataFromBracket.results),
+                  );
+                  if (playerIDs.length === 1) playerIDs.push("TBD_");
+
+                  const playersInfos: PlayerInfos[] = playerIDs.map(
+                    (playerID) => {
+                      const playerInfos: PlayerInfos = {
+                        id: playerID.startsWith("TBD") ? "" : playerID,
+                        isReady: !playerID.startsWith("TBD"),
+                        score: [],
+                        winCount: 0,
+                      };
+
+                      if (playerID.startsWith("TBD") || playerID === "")
+                        playerInfos.name = "TBD";
+                      return playerInfos;
+                    },
+                  );
+
+                  return {
+                    id: matchID,
+                    players: playersInfos,
+                    status: MatchStatus.NOT_STARTED,
+                    currentGame: 0,
+                  };
+                }
+
+                const playerIDs: string[] = matchData.playerIDs || [];
+                const playersInfos: PlayerInfos[] =
+                  // Compute each PlayerInfos from matchData
+                  playerIDs.map((playerID) => {
+                    return {
+                      id: playerID,
+                      score: matchData.results[playerID] || [],
+                      winCount: matchData.winCounts.get(playerID) || 0,
+                      isReady: roundID === 0, // Other rounds will be propagated from seeding
+                    };
+                  });
+
+                const winCounts: [number, number] = [
+                  matchData.winCounts.get(playerIDs[0]) || 0,
+                  matchData.winCounts.get(playerIDs[1]) || 0,
+                ];
+
+                return {
+                  id: matchID,
+                  players: playersInfos,
+                  gameWinners: Array.from<number>(
+                    matchData.results[playerIDs[0]].map((p0rank) =>
+                      p0rank === 1 ? 0 : 1,
+                    ),
+                  ),
+                  leadPlayer:
+                    winCounts[0] >= winCounts[1]
+                      ? winCounts[0] === winCounts[1]
+                        ? -1
+                        : 0
+                      : 1,
+                  currentGame:
+                    winCounts.reduce((prev, curr) => prev + curr) || 0,
+                  status:
+                    roundID === 0 || matchData.isComplete
+                      ? MatchStatus.COMPLETED
+                      : MatchStatus.NOT_STARTED,
+                };
+              }),
+            ),
+          };
+        }),
+      ),
+
+      seeding: Array.from<Edge>(
+        Array.from(completeBracket.seeding.entries())
+          .filter(([, toList]) => toList.length > 0)
+          .map(([from, toList]: [string, string[]]) => [
+            tournamentID,
+            from,
+            toList[0],
+          ]),
+      ),
+    };
+
+    const matchesMap = new Map<string, MatchInfos>();
+    tournamentInfos.rounds.forEach((round) => {
+      round.matches.forEach((match) => matchesMap.set(match.id, match));
+    });
+
+    return tournamentInfos;
   }
 }

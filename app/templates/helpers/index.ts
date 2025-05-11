@@ -1,7 +1,6 @@
 import type Handlebars from "handlebars";
 import { buttonVariants } from "./components/button";
 import { twMerge } from "tailwind-merge";
-import { format } from "date-fns";
 
 export function registerHelpers(handlebars: typeof Handlebars) {
   handlebars.registerHelper("buttonVariants", buttonVariants);
@@ -68,11 +67,18 @@ export function registerHelpers(handlebars: typeof Handlebars) {
     "formatDate",
     (date: Date | string, dateFormat: string) => {
       if (!date) return "";
-      try {
-        return format(new Date(date), dateFormat);
-      } catch (err) {
-        return "";
-      }
+
+      const event = new Date(date);
+      const options = {
+        hourCycle: "h12",
+        dayPeriod: "long",
+        day: "numeric",
+        month: "long",
+        hour: "numeric",
+        timeZone: "Europe/Berlin",
+      } as Intl.DateTimeFormatOptions;
+
+      return event.toLocaleString("en-EN", options);
     },
   );
 
@@ -99,6 +105,15 @@ export function registerHelpers(handlebars: typeof Handlebars) {
   handlebars.registerHelper("concat", (...args) => {
     const strings = args.slice(0, -1).map(String);
     return strings.join("");
+  });
+
+  handlebars.registerHelper("get", (obj, path, prop) => {
+    if (!obj) return "";
+    if (Array.isArray(obj) && path !== undefined) {
+      const item = obj[parseInt(path, 10)];
+      return prop ? item?.[prop] : item;
+    }
+    return obj[path];
   });
 
   // Add other helpers here as needed

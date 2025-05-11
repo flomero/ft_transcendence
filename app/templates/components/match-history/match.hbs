@@ -29,19 +29,24 @@
     id="match-{{matchId}}"
     class="flex items-center justify-between gap-2 p-2 cursor-pointer select-none">
     <span class="flex-1 min-w-0">
-      <span class="flex font-medium truncate">{{formatDate matchDate "do MMMM, HH:mm"}}  {{ hrGameModeName gameModeName }} </span>
+      <span class="flex font-medium truncate">{{formatDate matchDate "do MMMM, HH:mm"}}  {{ hrGameModeName
+        gameModeName }} </span>
       <span class="flex ml-1 text-sm text-gray-500 truncate">{{matchId}}</span>
     </span>
 
-    <span class="font-bold">
-      {{#if (eq result "win")}}
-        <span class="text-green-500">Win</span>
-      {{else if (eq result "draw")}}
-        <span class="text-yellow-500">Draw</span>
-      {{else}}
-        <span class="text-red-500">Loss</span>
-      {{/if}}
-    </span>
+    {{#if isFinished}}
+      <span class="font-bold">
+        {{#if (eq result "win")}}
+          <span class="text-green-500">Win</span>
+        {{else if (eq result "draw")}}
+          <span class="text-yellow-500">Draw</span>
+        {{else}}
+          <span class="text-red-500">Loss</span>
+        {{/if}}
+      </span>
+    {{else}}
+      <span class="elapsed-time font-mono" data-start="{{matchDate}}"></span>
+    {{/if}}
 
     <svg class="w-4 h-4 shrink-0 transition-transform group-open:rotate-180"
          viewBox="0 0 20 20" fill="currentColor">
@@ -49,23 +54,58 @@
     </svg>
   </summary>
 
-  <ol class="p-2 space-y-1 ">
-    {{#each leaderboard}}
+  <ol class="p-2 space-y-1">
+    {{#if (eq leaderboard.length 2)}}
       <li>
         <a
-          href="/users/{{userId}}"
+          href="/users/{{get leaderboard "0" "userId"}}"
           class="flex items-center justify-between gap-x-4
-           py-1 px-2 w-full rounded-md           <!-- soft corners -->
-           transition-colors duration-150        <!-- smooth fade -->
-           hover:bg-slate-100 dark:hover:bg-slate-800
-           focus-visible:bg-slate-100 dark:focus-visible:bg-slate-800
-           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/40">
-          <span class="w-8 text-right">{{inc @index}}.</span>
-          <span class="flex-1 truncate">{{username}}</span>
-          <span class="w-12 text-right">{{score}}</span>
+               py-1 px-2 w-full rounded-md
+               transition-colors duration-150
+               hover:bg-slate-100 dark:hover:bg-slate-800
+               focus-visible:bg-slate-100 dark:focus-visible:bg-slate-800
+               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/40">
+
+          <span class="w-8 text-right">1.</span>
+          <span class="flex-1 truncate">{{get leaderboard "0" "username"}}</span>
+          <span class="w-12 text-right">{{get leaderboard "1" "score"}}</span>
         </a>
       </li>
-    {{/each}}
+      <li>
+        <a
+          href="/users/{{get leaderboard "1" "userId"}}"
+          class="flex items-center justify-between gap-x-4
+               py-1 px-2 w-full rounded-md
+               transition-colors duration-150
+               hover:bg-slate-100 dark:hover:bg-slate-800
+               focus-visible:bg-slate-100 dark:focus-visible:bg-slate-800
+               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/40">
+
+          <span class="w-8 text-right">2.</span>
+          <span class="flex-1 truncate">{{get leaderboard "1" "username"}}</span>
+          <span class="w-12 text-right">{{get leaderboard "0" "score"}}</span>
+        </a>
+      </li>
+
+    {{else}}
+      {{#each leaderboard}}
+        <li>
+          <a
+            href="/users/{{userId}}"
+            class="flex items-center justify-between gap-x-4
+               py-1 px-2 w-full rounded-md
+               transition-colors duration-150
+               hover:bg-slate-100 dark:hover:bg-slate-800
+               focus-visible:bg-slate-100 dark:focus-visible:bg-slate-800
+               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/40">
+
+            <span class="w-8 text-right">{{inc @index}}.</span>
+            <span class="flex-1 truncate">{{username}}</span>
+            <span class="w-12 text-right">{{score}}</span>
+          </a>
+        </li>
+      {{/each}}
+    {{/if}}
   </ol>
 
 </details>

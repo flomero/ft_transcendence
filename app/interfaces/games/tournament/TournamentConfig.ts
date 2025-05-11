@@ -1,6 +1,6 @@
-import type { bracketTypeSettings } from "./TournamentSettings";
+import type { BracketTypeSettings } from "./TournamentSettings";
 
 export interface TournamentConfig {
-  bracketType: bracketTypeSettings;
+  bracketType: BracketTypeSettings;
   matchWinner: string;
 }

@@ -6,6 +6,7 @@ import type GameManager from "./GameManager";
 const saveGameResultInDb = async (gameManager: GameManager, db: Database) => {
   await savePlayerScoresAndResultToDatabase(gameManager, db);
   await saveAIScoresAndResultToDatabase(gameManager, db);
+  await updateMatchStatusToFinished(gameManager, db);
 };
 
 /**
@@ -68,6 +69,20 @@ const saveAIScoresAndResultToDatabase = async (
           `Error updating AI score for ${playerUUID}:`,
           err.message,
         );
+    }
+  }
+};
+
+const updateMatchStatusToFinished = async (
+  gameManager: GameManager,
+  db: Database,
+) => {
+  const query = `UPDATE matches SET result = 'finished' WHERE id = ?`;
+  try {
+    await db.run(query, [gameManager.getId()]);
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error("Error updating match status:", err.message);
     }
   }
 };

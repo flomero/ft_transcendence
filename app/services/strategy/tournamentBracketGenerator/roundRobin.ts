@@ -10,6 +10,7 @@ import type {
   TournamentRankings,
   ITournamentBracketGenerator,
   GameResult,
+  TournamentBracket,
 } from "../../../types/strategy/ITournamentBracketGenerator";
 import { fastifyInstance } from "../../../app";
 
@@ -415,7 +416,10 @@ export class RoundRobin implements ITournamentBracketGenerator {
     return this.activeMatches.has(matchID);
   }
 
-  getCompleteBracket(): Round[] {
-    return this.possibleRounds;
+  getCompleteBracket(): TournamentBracket {
+    return {
+      rounds: this.possibleRounds,
+      seeding: new Map(),
+    };
   }
 }
