@@ -497,7 +497,7 @@ export abstract class Pong extends GameBase {
       switch (collision.type) {
         case "powerUp":
           fastifyInstance.log.debug(
-            `\nPlayer ${gameState.lastHit} picked up a powerUp`,
+            `Player ${gameState.lastHit} picked up a powerUp`,
           );
           this.modifierManager.pickupPowerUp(collision.objectId);
           break;
