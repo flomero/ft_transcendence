@@ -21,7 +21,6 @@ import {
   MatchStatus,
 } from "../../../types/tournament/tournament";
 import { tournaments } from "./tournaments";
-import { textChangeRangeIsUnchanged } from "typescript";
 
 class TournamentManager {
   public tournamentId: string = randomUUID();
