@@ -11,4 +11,8 @@ function getLobby(lobbyId: string): Lobby {
   throw new Error("getLobby Lobby does not exist");
 }
 
-export { getLobby };
+function lobbyExists(lobbyId: string): boolean {
+  return PublicLobbies.has(lobbyId) || PrivateLobbies.has(lobbyId);
+}
+
+export { getLobby, lobbyExists };
