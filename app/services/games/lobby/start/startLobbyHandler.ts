@@ -6,7 +6,7 @@ import type GameManager from "../../gameHandler/GameManager";
 import addGameToDatabase from "./addGameToDatabase";
 import { getLobby } from "../lobbyWebsocket/getLobby";
 import { canLobbyBeStartedCheck } from "./canLobbyBeStartedCheck";
-import connectionTimeoutHandler from "../../gameHandler/connectionTimeoutHandler";
+import { connectionTimeoutHandler } from "../../gameHandler/connectionTimeoutHandler";
 
 export const gameManagers = new Map<string, GameManager>();
 

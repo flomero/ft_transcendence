@@ -2,7 +2,7 @@ import GameManager from "../gameHandler/GameManager";
 import { GameStatus } from "../../../types/games/gameBaseState";
 import { FastifyInstance } from "fastify";
 
-const connectionTimeoutHandler = (
+export const connectionTimeoutHandler = (
   gameManager: GameManager,
   fastify: FastifyInstance,
 ) => {
@@ -35,7 +35,6 @@ const startGameIfNotAllPlayerConnected = (
 ) => {
   if (gameManager.allPlayersAreConnected() === true) return;
 
-  fastify.log.info("[connectionTimeoutHandler] Starting game");
   try {
     if (gameManager.gameStatus() === GameStatus.CREATED) {
       gameManager.startGame(fastify);
@@ -55,4 +54,26 @@ const disqualifyNotConnectedPlayersIfOnePlayer = (gameManager: GameManager) => {
     gameManager.disqualifyNotConnectedPlayers();
 };
 
-export default connectionTimeoutHandler;
+export const gameDisconnectionHandler = async (
+  userId: string,
+  gameManager: GameManager,
+) => {
+  const timeOut = setTimeout(() => {
+    try {
+      if (
+        gameManager.isUserConnected(userId) === false &&
+        gameManager.gameStatus() === GameStatus.RUNNING
+      ) {
+        gameManager.disqualifyPlayer(userId);
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        console.error(
+          "[gameDisconnectionHandler] Error handling game disconnection:",
+          err,
+        );
+      }
+    }
+  }, 30000);
+  gameManager.setPlayerTimeout(userId, timeOut);
+};

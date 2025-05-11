@@ -96,9 +96,16 @@ class GameManager {
   public addSocketToPlayer(userId: string, ws: WebSocket): void {
     const player = this.players.get(userId);
     if (player === undefined) {
-      throw new Error("Player not found");
+      throw new Error("[addSocketToPlayer] Player not found");
     }
     player.ws = ws;
+    this.clearPossibleTimeOut(player);
+  }
+
+  private clearPossibleTimeOut(player: Player): void {
+    if (player.timeOut) {
+      clearTimeout(player.timeOut);
+    }
   }
 
   public allPlayersAreConnected(): boolean {
@@ -210,6 +217,24 @@ class GameManager {
     }
   }
 
+  public disqualifyPlayer(playerId: string): void {
+    const player = this.players.get(playerId);
+    if (player === undefined) {
+      throw new Error("[disqualifyPlayer] Player not found");
+    }
+
+    if (this.game.getStatus() === GameStatus.RUNNING)
+      this.game.eliminate(player.id);
+  }
+
+  public removePlayerSocket(playerId: string): void {
+    const player = this.players.get(playerId);
+    if (player === undefined) {
+      return console.error("[removePlayerSocket] Player not found");
+    }
+    player.ws = undefined;
+  }
+
   public getPlayerSize() {
     return this.players.size + this.aiOpponents.size;
   }
@@ -240,9 +265,22 @@ class GameManager {
     return count + this.aiOpponents.size;
   }
 
+  public isUserConnected(userId: string): boolean {
+    const player = this.players.get(userId);
+    if (player === undefined) {
+      return false;
+    } else if (
+      player.ws === undefined ||
+      player.ws.readyState !== WebSocket.OPEN
+    ) {
+      return false;
+    }
+    return true;
+  }
+
   public getPlayer(playerId: string) {
     if (!this.players.has(playerId)) {
-      throw new Error("Player not found");
+      throw new Error("[getPlayer] Player not found");
     }
     return this.players.get(playerId);
   }
@@ -272,6 +310,14 @@ class GameManager {
 
   public getStateSnapshot(): PongMinimalGameState {
     return this.game.getStateSnapshot() as PongMinimalGameState;
+  }
+
+  public setPlayerTimeout(playerId: string, timeOut: NodeJS.Timeout): void {
+    const player = this.players.get(playerId);
+    if (player === undefined) {
+      return console.error("[setTimeOut] Player not found");
+    }
+    player.timeOut = timeOut;
   }
 }
 
