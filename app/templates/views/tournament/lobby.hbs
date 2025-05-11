@@ -53,6 +53,7 @@
   {{/if}}
   {{#if info}}
     {{> components/tournament-view/tournament-bracket rounds=info.rounds}}
+    <button class="text-sm text-fg-muted underline italic cursor-pointer" onclick="tournamentHandler.leaveTournament(event)">Leave</button>
   {{/if}}
 </div>
 
