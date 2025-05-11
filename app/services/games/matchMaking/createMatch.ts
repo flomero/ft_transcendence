@@ -6,7 +6,7 @@ import addGameToDatabase from "../lobby/start/addGameToDatabase";
 import { GAMEMODE_REGISTRY } from "../../../config";
 import { GameModeType } from "../../config/gameModes";
 import { GameOrigin } from "../../../types/games/gameHandler/GameOrigin";
-import connectionTimeoutHandler from "../gameHandler/connectionTimeoutHandler";
+import { connectionTimeoutHandler } from "../gameHandler/connectionTimeoutHandler";
 import { FastifyInstance } from "fastify";
 import { GameStatus } from "../../../types/games/gameBaseState";
 

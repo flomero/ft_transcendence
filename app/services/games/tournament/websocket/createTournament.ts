@@ -28,6 +28,7 @@ const createTournament = async (
     gameData: {
       playerCount: playerCount,
     },
+    id: tournamentManager.getId(),
   };
 
   fastifyInstance.log.debug(JSON.stringify(tournamentSettings));

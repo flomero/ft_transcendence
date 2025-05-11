@@ -4,6 +4,7 @@ interface Player {
   id: number;
   playerUUID: string;
   ws?: WebSocket;
+  timeOut?: NodeJS.Timeout;
 }
 
 export default Player;

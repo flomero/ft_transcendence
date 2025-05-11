@@ -72,6 +72,9 @@ class LobbyHandler {
       case "addedAI":
         this.handleMemberJoined(message.data);
         break;
+      case "disconnect":
+        this.handleClose();
+        break;
       default:
         console.log("Unknown message type:", message.type);
     }
@@ -94,6 +97,10 @@ class LobbyHandler {
 
   private handleGameStart(gameId: string): void {
     window.router.navigateTo(`/play/game/${gameId}`);
+  }
+
+  private handleClose(): void {
+    window.router.navigateTo("/play");
   }
 
   private handleAllReady(): void {

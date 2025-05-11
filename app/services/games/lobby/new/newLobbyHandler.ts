@@ -33,7 +33,7 @@ function initializeSampleLobbies() {
   });
 }
 
-if (process.env.NODE_ENV === "development") {
+if (process.env.NODE_ENV === "testlobby") {
   fastifyInstance.log.debug("Initializing sample lobbies...");
   initializeSampleLobbies();
 }

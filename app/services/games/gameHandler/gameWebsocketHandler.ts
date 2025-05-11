@@ -4,6 +4,7 @@ import { WebSocket } from "ws";
 import gameValidationCheck from "./gameValidationCheck";
 import handleGameMessage from "./handleGameMessage";
 import sendTheInitialGameStateToEveryone from "./sendTheInitialGameStateToEveryone";
+import { gameDisconnectionHandler } from "./connectionTimeoutHandler";
 
 const gameWebsocketHandler = async (
   connection: WebSocket,
@@ -25,6 +26,14 @@ const gameWebsocketHandler = async (
 
     connection.on("message", (message: string) => {
       handleGameMessage(message, userId, gameId);
+    });
+    connection.on("close", () => {
+      if (gameManager) gameDisconnectionHandler(userId, gameManager);
+      gameManager?.removePlayerSocket(userId);
+    });
+    connection.on("error", () => {
+      if (gameManager) gameDisconnectionHandler(userId, gameManager);
+      gameManager?.removePlayerSocket(userId);
     });
   } catch (error) {
     if (error instanceof Error) {

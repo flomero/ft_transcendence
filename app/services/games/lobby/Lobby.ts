@@ -211,10 +211,13 @@ class Lobby {
   }
 
   public disconnectAllMembers(): void {
+    this.sendMessageToAllMembers(
+      JSON.stringify({ type: "disconnect", data: "owner left the lobby" }),
+    );
     for (const member of this.lobbyMembers.values()) {
-      this.sendMessageToMember(member.id, "Lobby is closed");
       if (member.socket !== undefined) {
         member.socket.close();
+        member.socket = undefined;
       }
     }
   }
@@ -235,15 +238,6 @@ class Lobby {
       throw new Error("[isMemberOwner] Member is not in the lobby");
     }
     return this.lobbyMembers.get(memberId)!.userState;
-  }
-
-  public disconnectMembersFromSockets(): void {
-    for (const member of this.lobbyMembers.values()) {
-      if (member.socket !== undefined) {
-        member.socket.close();
-        member.socket = undefined;
-      }
-    }
   }
 
   public allMembersConnectedToSocket(): boolean {

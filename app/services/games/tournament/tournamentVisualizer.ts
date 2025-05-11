@@ -109,53 +109,48 @@ export async function hydratePlayerScores(
 
   return tourney;
 }
-
 export async function hydrateMatchStartTimes(
   tourney: TournamentInfos,
   fastify: FastifyInstance,
 ): Promise<TournamentInfos> {
   const db = fastify.sqlite;
 
-  /** 1 ─ Collect “latest gameId” → MatchInfos */
   const gameId2Match = new Map<string, MatchInfos>();
 
   tourney.rounds.forEach((round) =>
     round.matches.forEach((match) => {
-      // if (match.startTime) return; // already hydrated
       const ids = match.gameIDs;
-      match.tournamentId = tourney.id; // add tournamentId to match
-      if (!ids?.length) return; // nothing we can do
-      const lastGameId = ids[ids.length - 1]; // newest game
+      match.tournamentId = tourney.id;
+      if (!ids?.length) return;
+      const lastGameId = ids[ids.length - 1];
       gameId2Match.set(lastGameId, match);
     }),
   );
 
-  if (gameId2Match.size === 0) return tourney; // all done ✅
+  if (gameId2Match.size === 0) return tourney;
 
-  /** 2 ─ Grab all start times in one go */
   const gameIds = [...gameId2Match.keys()];
   const placeholders = gameIds.map(() => "?").join(",");
 
-  type Row = { id: string; start_time: string }; // adjust column name if needed
+  // Update type to match database column name
+  type Row = { id: string; matchDate: string };
   const rows: Row[] = await db.all<Row[]>(
     `
-      SELECT id, matchDate
+      SELECT id, matchDate || ' UTC' AS matchDate
       FROM matches
       WHERE id IN (${placeholders})
     `,
     gameIds,
   );
 
-  /** 3 ─ Merge back into the structure */
   rows.forEach((row) => {
     const match = gameId2Match.get(row.id);
-    if (match) match.startTime = row.start_time; // ISO string straight from DB
-    console.log(`Match ${row.id} start time: ${row.start_time}`);
+    if (match) match.startTime = row.matchDate; // Use matchDate instead of start_time
+    console.log(`Match ${row.id} start time: ${row.matchDate}`);
   });
 
   return tourney;
 }
-
 async function hydrateTournamentPlayers(
   tourney: TournamentInfos,
   fastify: FastifyInstance,

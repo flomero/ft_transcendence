@@ -11,7 +11,7 @@
     {{/each}}
   </div>
   <div class="flex flex-row gap-2 divide-x">
-    <div class="flex flex-col gap-4 px-4 py-2">
+    <div class="flex flex-col w-1/2 gap-4 px-4 py-2">
       <h2>Lobbys</h2>
       <div class="flex flex-row gap-2">
       {{#> components/button variant="outline" url="/play/lobby"}}
@@ -29,6 +29,7 @@
               gameModeName=this.gameSettings.gameModeName
               ownerName=this.ownerName
               lobbyId=this.lobbyId
+              urlPrefix="/games/lobby/join/"
             }}
           {{/each}}
         {{else}}
@@ -36,13 +37,29 @@
         {{/if}}
       </div>
     </div>
-    <div class="flex flex-col gap-4 px-4 py-2">
+    <div class="flex flex-col w-1/2 gap-4 px-4 py-2">
       <h2>Tournaments</h2>
       {{#> components/button variant="outline" url="/play/tournament"}}
         Create New
       {{/components/button}}
       <div class="flex flex-col gap-2 divide-y divide-fg-muted">
+        {{#if tournaments.length}}
+          {{#each tournaments}}
+            {{> components/lobby/lobby
+              gameModeName=this.gameModeType
+              ownerName=this.owner.username
+              lobbyId=this.tournamentId
+              urlPrefix="/games/tournament/join/"
+            }}
+          {{/each}}
+        {{else}}
           <p class="text-fg-muted">No tournaments available</p>
+        {{/if}}
       </div>
   </div>
 </div>
+{{#if debugString}}
+  <pre class="bg-bg-muted font-mono rounded-md p-4 text-wrap break-words">
+    {{debugString}}
+  </pre>
+{{/if}}
