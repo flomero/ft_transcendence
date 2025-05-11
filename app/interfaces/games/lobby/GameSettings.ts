@@ -104,12 +104,61 @@ interface Bumper {
   bumperAcceleration?: number;
 }
 
+interface Portals {
+  spawnWeight?: number;
+  duration?: number;
+  portalWallWidthHeightFactor?: number;
+  directionalOffsetFactor?: number;
+  directionalOffsetStandardDeviationFactor?: number;
+  normalOffsetFactor?: number;
+  normalOffsetStandardDeviationFactor?: number;
+  useWallSide?: boolean;
+  useBothSides?: boolean;
+  teleportationCountThrehsold?: number;
+}
+
+interface SpeedGate {
+  spawnWeight?: number;
+  duration?: number;
+  initialBallSizeSmallPortalWidthFactor?: number;
+  initialBallSizeBigPortalWidthFactor?: number;
+  portalWidthArenaHeightFactor?: number;
+  portalUseThreshold?: number;
+  meanSpeedGateDstFromCenterFactor?: number;
+  stdDevSpeedGateDstFromCenterFactor?: number;
+  sizeFactor?: number;
+  speedFactor?: number;
+}
+
+interface ProtectedPowerUp {
+  spawnWeight?: number;
+  powerUpName?: string;
+  powerUpRadiusWidthFactor?: number;
+  wellRadiusWidthFactor?: number;
+  speedMultiplier?: number;
+  meanSpawnRadiusHeightFactor?: number;
+  stdDevSpawnRadiusHeightFactor?: number;
+}
+
+interface BumperShield {
+  spawnWeight?: number;
+  speedMultiplier?: number;
+  wallsHitThresold?: number;
+  wallTotalWidthArenaWidthFactor?: number;
+  wallJunctionArenaWidthFactor?: number;
+  wallGoalOffsetArenaWidthFactor?: number;
+}
+
 interface PowerUp {
   speedBoost?: SpeedBoost;
   blinkingBall?: BlinkingBall;
   shooter?: Shooter;
   multiBall?: MultiBall;
   bumper?: Bumper;
+  portals?: Portals;
+  speedGate?: SpeedGate;
+  protectedPowerUp?: ProtectedPowerUp;
+  bumperShield?: BumperShield;
 }
 
 interface GameSettings {

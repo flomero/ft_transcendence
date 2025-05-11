@@ -42,8 +42,6 @@ export class GoalReset extends ModifierBase {
   }
 
   onGoal(game: Pong, args: { playerId: number }): void {
-    if (this.status !== ModifierStatus.ACTIVE) return;
-
     game.getModifierManager().trigger("onBallReset", { ballID: -1 });
 
     this.ticks = this.delay;
@@ -57,7 +55,9 @@ export class GoalReset extends ModifierBase {
   }
 
   onBallOutOfBounds(game: Pong, args: { ballID: number }): void {
-    if (this.status !== ModifierStatus.ACTIVE) return;
+    console.log(`Ball out of bounds: ${args.ballID}`);
+    console.dir(game.getState().balls[args.ballID], { depth: null });
+
     game.getModifierManager().trigger("onBallReset", { ballID: args.ballID });
     this.ticks = this.delay;
     this.status = ModifierStatus.PAUSED;
