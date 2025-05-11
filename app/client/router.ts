@@ -1,6 +1,10 @@
 import { TransitionManager } from "./transitions.js";
 import LobbyHandler from "./lobby.js";
-import { TournamentBracket, TournamentHandler } from "./tournament.js";
+import {
+  TournamentBracket,
+  TournamentHandler,
+  ElapsedTimer,
+} from "./tournament.js";
 import MatchmakingHandler from "./matchmaking.js";
 import { initPongGame, type PongGame } from "./pong.js";
 import { closeSidebar } from "./sidebar.js";
@@ -450,32 +454,6 @@ document.addEventListener("DOMContentLoaded", () => {
     },
   });
 
-  window.router.addRoute("/tournaments?auto=false", {
-    onEnter: () => {
-      console.log("Tournament");
-      window.tournamentBracket = new TournamentBracket();
-    },
-    onExit: () => {
-      if (window.tournamentBracket) {
-        window.tournamentBracket.destroy();
-        window.tournamentBracket = undefined;
-      }
-    },
-  });
-
-  window.router.addRoute("/tournaments", {
-    onEnter: () => {
-      console.log("Tournament");
-      window.tournamentBracket = new TournamentBracket();
-    },
-    onExit: () => {
-      if (window.tournamentBracket) {
-        window.tournamentBracket.destroy();
-        window.tournamentBracket = undefined;
-      }
-    },
-  });
-
   window.router.addRoute("/games/matchmaking/join/:gamemode", {
     onEnter: () => {
       console.log("Matchmaking handler initialized");
@@ -492,15 +470,70 @@ document.addEventListener("DOMContentLoaded", () => {
     },
   });
 
+  window.router.addRoute("/profile", {
+    onEnter: () => {
+      window.elapsedTimer = ElapsedTimer.create();
+    },
+    onExit: () => {
+      if (window.elapsedTimer) {
+        window.elapsedTimer.destroy();
+        window.elapsedTimer = undefined;
+      }
+    },
+  });
+
+  window.router.addRoute("/users/:id", {
+    onEnter: () => {
+      window.elapsedTimer = ElapsedTimer.create();
+    },
+    onExit: () => {
+      if (window.elapsedTimer) {
+        window.elapsedTimer.destroy();
+        window.elapsedTimer = undefined;
+      }
+    },
+  });
+
+  window.router.addRoute("/tournaments", {
+    onEnter: () => {
+      window.tournamentBracket = TournamentBracket.create();
+      window.elapsedTimer = ElapsedTimer.create();
+    },
+
+    onExit: () => {
+      if (window.tournamentBracket) {
+        window.tournamentBracket.destroy();
+        window.tournamentBracket = undefined;
+      }
+      if (window.elapsedTimer) {
+        window.elapsedTimer.destroy();
+        window.elapsedTimer = undefined;
+      }
+    },
+  });
+
   window.router.addRoute("/games/tournament/join/:id", {
     onEnter: () => {
       const tournamentHandler = new TournamentHandler();
       tournamentHandler.connect();
       window.tournamentHandler = tournamentHandler;
+
+      window.tournamentBracket = TournamentBracket.create();
+      window.elapsedTimer = ElapsedTimer.create(); // ← NEW
     },
+
     onExit: () => {
       if (window.tournamentHandler?.socket) {
         window.tournamentHandler.socket.close();
+      }
+      if (window.tournamentBracket) {
+        window.tournamentBracket.destroy();
+        window.tournamentBracket = undefined;
+      }
+      if (window.elapsedTimer) {
+        //  ← NEW
+        window.elapsedTimer.destroy();
+        window.elapsedTimer = undefined;
       }
     },
   });

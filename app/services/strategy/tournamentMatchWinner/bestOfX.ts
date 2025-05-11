@@ -34,6 +34,9 @@ export class BestOfX implements ITournamentMatchWinner {
   }
 
   recordGameResult(matchID: string, gameResult: GameResult): boolean {
+    console.log(`All matches before recording`);
+    console.dir(this.matches, { depth: null });
+
     const match = this.matches.get(matchID);
     if (!match) {
       console.error(`Match ${matchID} not found`);

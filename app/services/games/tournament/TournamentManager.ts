@@ -16,6 +16,10 @@ import { createMatch } from "../matchMaking/createMatch";
 import type { GameOrigin } from "../../../types/games/gameHandler/GameOrigin";
 import aiOpponents from "../aiOpponent/aiOpponents";
 import { FastifyInstance } from "fastify";
+import {
+  type TournamentInfos,
+  MatchStatus,
+} from "../../../types/tournament/tournament";
 
 class TournamentManager {
   public tournamentId: string = randomUUID();
@@ -28,6 +32,7 @@ class TournamentManager {
   public gameManagerIdToTorunGameId: Map<string, string[]> = new Map();
   public fastify: FastifyInstance;
   public gameMatches: Map<string, Match> = new Map();
+  currentRoundIndex: number = -1;
   private static readonly PlayerType = {
     PLAYER: 0,
     AI: 1,
@@ -154,11 +159,29 @@ class TournamentManager {
 
   public async startTournament(db: Database): Promise<void> {
     if (this.canTournamentBeStarted() === false) {
-      throw new Error("[start Tournemant] Tournament cannot be started");
+      throw new Error("[startTournament] Tournament cannot be started");
     }
+
     this.tournament = await createTournament(db, this);
+    this.sendMessageToAll(
+      JSON.stringify({
+        type: "update",
+      }),
+    );
+
+    const sleep = (ms: number): Promise<void> =>
+      new Promise((resolve) => setTimeout(resolve, ms));
+
+    // Sleep for 20 seconds before starting tournament.
+    await sleep(20000);
+
     this.tournament.startTournament();
     await this.generateRound();
+    // this.sendMessageToAll(
+    //   JSON.stringify({
+    //     type: "update",
+    //   }),
+    // );
   }
 
   public canTournamentBeStarted(): boolean {
@@ -175,10 +198,20 @@ class TournamentManager {
     if (this.tournament === undefined)
       return console.error("Tournament is not started");
     const brackets = this.tournament.bracketManager.executeStrategy();
+    this.currentRoundIndex++;
     this.createMatches(brackets);
   }
 
   private async createMatches(brackets: Round): Promise<void> {
+    Object.entries(brackets).forEach(([matchID, match]: [string, Match]) => {
+      this.tournament?.matchWinnerManager.execute(
+        "initializeMatch",
+        matchID,
+        Object.keys(match.results),
+        match.gamesCount,
+      );
+    });
+
     const bracketKeys = Object.keys(brackets);
     const { PLAYER, AI } = TournamentManager.PlayerType;
 
@@ -269,11 +302,20 @@ class TournamentManager {
   ): void {
     const isMatchOver = this.notifyMatchWinnder(gameManagerId, gameResult);
 
+    console.log(`Game finished: ${gameManagerId}`);
+    console.dir(gameResult, { depth: null });
+
     if (isMatchOver === true) {
       this.notifyBracketManager(gameResult, gameManagerId);
     } else {
       this.createOneGame(gameManagerId);
     }
+
+    this.sendMessageToAll(
+      JSON.stringify({
+        type: "update",
+      }),
+    );
   }
 
   private notifyMatchWinnder(
@@ -286,10 +328,13 @@ class TournamentManager {
         `[notifyMatchWinner] GameManagerId: ${gameManagerId} does not exist`,
       );
 
+    console.log(`matchWinner notif: ${matchId}`);
+
     const isMatchOver = this.tournament?.matchWinnerManager.executeStrategy(
       matchId,
       gameResult,
     );
+    console.log(`isMatchOver? ${isMatchOver}`);
     return isMatchOver;
   }
 
@@ -308,6 +353,7 @@ class TournamentManager {
       matchId,
       gameResult,
     );
+    console.log(`isRoundOver? ${isRoundOver}`);
 
     if (isRoundOver === true) this.generateRound();
   }
@@ -396,6 +442,44 @@ class TournamentManager {
       if (member.isAI === true) numberOfAiOpponents++;
     }
     return numberOfAiOpponents;
+  }
+
+  public getCurrentTournamentInfos(): TournamentInfos | undefined {
+    if (!this.tournament) return;
+
+    const tournamentInfos = this.tournament.getCurrentTournamentInfos();
+
+    tournamentInfos.rounds.forEach((round, roundID) => {
+      if (
+        roundID === this.currentRoundIndex ||
+        (this.currentRoundIndex === -1 && roundID === 0)
+      )
+        round.isCurrent = true;
+      else round.isCurrent = false;
+      round.matches.forEach((match) => {
+        switch (match.status) {
+          case MatchStatus.NOT_STARTED:
+            if (round.isCurrent) {
+              match.status = MatchStatus.ONGOING;
+              match.players.forEach((player) => (player.isReady = true));
+            }
+            break;
+
+          case MatchStatus.ONGOING:
+            match.players.forEach((player) => (player.isReady = true));
+            break;
+
+          case MatchStatus.COMPLETED:
+            match.players.forEach((player) => (player.isReady = true));
+            const gameManagerIds =
+              this.gameManagerIdToTorunGameId.get(match.id) || [];
+            match.gameIDs = gameManagerIds; //.slice(0, match.currentGame || 0);
+            break;
+        }
+      });
+    });
+
+    return tournamentInfos;
   }
 }
 
