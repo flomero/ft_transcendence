@@ -12,16 +12,16 @@
           "paddleOffset": 2.5,
           "paddleHeight": 1,
           "wallsHeight": 2,
-          "minBallSpeed": 66
+          "minBallSpeed": 75
         },
 
         "customizableSettings": {
-          "ballSpeedWidthPercentS": 55,
+          "ballSpeedWidthPercentS": 52.5,
           "ballRadius": 1,
           "ballResetSampler": "biasedQuadrantGaussianRA",
           "paddleCoveragePercent": 25,
-          "paddleSpeedWidthPercentS": 0.845,
-          "paddleVelocityAngularTransmissionPercent": 55,
+          "paddleSpeedWidthPercentS": 0.84,
+          "paddleVelocityAngularTransmissionPercent": 10,
           "paddleVelocitySpeedTransmissionPercent": 10,
           "powerUpRadius": 4.5,
           "powerUpCapacities": {
@@ -47,18 +47,18 @@
           "paddleHeight": 0.6,
           "wallsHeight": 1.5,
           "wallsOffset": 0,
-          "minBallSpeed": 66
+          "minBallSpeed": 75
         },
 
         "customizableSettings": {
-          "ballSpeedWidthPercentS": 60,
+          "ballSpeedWidthPercentS": 52.5,
           "ballRadius": 0.625,
           "ballResetSampler": "biasedGaussianCA",
           "paddleCoveragePercent": 25,
           "paddleSpeedWidthPercentS": 0.77,
-          "paddleVelocityAngularTransmissionPercent": 55,
+          "paddleVelocityAngularTransmissionPercent": 10,
           "paddleVelocitySpeedTransmissionPercent": 10,
-          "powerUpRadius": 3.25,
+          "powerUpRadius": 3,
           "powerUpCapacities": {
             "speedBoost": 1,
             "blinkingBall": 1,
@@ -117,8 +117,8 @@
 
       "paceBreaker": {
         "className": "PaceBreaker",
-        "noResetThresholdS": 12,
-        "noPaddleBounceThreshold": 14,
+        "noResetThresholdS": 10,
+        "noPaddleBounceThreshold": 10,
         "twoPaddlesBounceThreshold": 7,
         "onePaddleBounceThreshold": 14
       },

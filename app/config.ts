@@ -100,9 +100,6 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
     gameModeName: "classicPong",
     gameModeConfig: {
       powerUpRadius: 25,
-      powerUpCapacities: {
-        speedBoost: 100,
-      },
     },
     modifierNames: {
       paceBreaker: {},
@@ -119,7 +116,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       },
     },
     powerUpNames: {
-      // speedBoost: {},
+      speedBoost: {},
       // blinkingBall: {
       //   duration: 6,
       //   blinkDuration: 75,
@@ -138,7 +135,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       // },
       // portals: {
       // },
-      speedGate: {},
+      // speedGate: {},
       // speedBoost: {},
       // bumperShield: {
       //   wallGoalOffsetArenaWidthFactor: 12,
