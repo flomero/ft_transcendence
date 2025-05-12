@@ -3,10 +3,9 @@ import { isFriend } from "../../../services/database/friend/friends";
 import {
   sendGameInvite,
   sendGameInviteToUser,
-  updateRoomAndSendMessage,
 } from "../../../services/chat/live";
 import { userIsInRoom } from "../../../services/database/chat/room";
-import { ChatMessageType } from "../../../services/chat/message";
+import { lobbyExists } from "../../../services/games/lobby/lobbyWebsocket/getLobby";
 
 const inviteLobby: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.post("/:lobbyId/invite/friend/:friendId", async (request, reply) => {
@@ -18,9 +17,15 @@ const inviteLobby: FastifyPluginAsync = async (fastify): Promise<void> => {
 
     if (!(await isFriend(fastify, request.userId, friendId)))
       return reply.badRequest("Friend not found");
+    if (!lobbyExists(lobbyId)) return reply.badRequest("Lobby not found");
 
     try {
-      await sendGameInviteToUser(fastify, request, friendId, lobbyId);
+      await sendGameInviteToUser(
+        fastify,
+        request,
+        friendId,
+        "/games/lobby/join/" + lobbyId,
+      );
     } catch (error) {
       if (error instanceof Error) return reply.badRequest(error.message);
       return reply.badRequest("Error sending invite");
@@ -36,23 +41,18 @@ const inviteLobby: FastifyPluginAsync = async (fastify): Promise<void> => {
     };
     if (!lobbyId || !roomId) return reply.badRequest("No lobbyId or roomId");
 
-    if (!(await userIsInRoom(fastify, roomId, request.userId))) {
+    if (!(await userIsInRoom(fastify, roomId, request.userId)))
       return reply.badRequest("Room does not exist or you are not in it");
-    }
 
     try {
+      let message;
       if (lobbyId === "rr") {
-        await updateRoomAndSendMessage(
-          fastify,
-          request.userName,
-          request.userId,
-          "https://tiny.cc/v8di001",
-          roomId,
-          ChatMessageType.invite,
-        );
+        message = "https://coregame.de/rr";
       } else {
-        await sendGameInvite(fastify, request, roomId, lobbyId);
+        if (!lobbyExists(lobbyId)) return reply.badRequest("Lobby not found");
+        message = "/games/lobby/join/" + lobbyId;
       }
+      await sendGameInvite(fastify, request, roomId, message);
     } catch (error) {
       if (error instanceof Error) return reply.badRequest(error.message);
       return reply.badRequest("Error sending invite");

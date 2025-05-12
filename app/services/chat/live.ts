@@ -224,10 +224,8 @@ export async function sendGameInvite(
   fastify: FastifyInstance,
   request: FastifyRequest,
   roomId: number,
-  lobbyId: string,
+  message: string,
 ) {
-  const message: string = "/games/lobby/join/" + lobbyId;
-
   await updateRoomAndSendMessage(
     fastify,
     request.userName,
@@ -242,13 +240,13 @@ export async function sendGameInviteToUser(
   fastify: FastifyInstance,
   request: FastifyRequest,
   friendId: string,
-  lobbyId: string,
+  message: string,
 ) {
   const roomId = await getChatRoomTwoUsers(fastify, request.userId, friendId);
   if (!roomId) {
     return;
   }
-  await sendGameInvite(fastify, request, roomId, lobbyId);
+  await sendGameInvite(fastify, request, roomId, message);
 }
 
 export async function sendSystemMessageToUser(

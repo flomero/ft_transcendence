@@ -58,7 +58,10 @@ class Chat {
       chatRooms.innerHTML += data.html;
     }
 
-    if (/^\/games\/lobby\/join\/[a-f0-9-]+$/i.test(window.location.pathname)) {
+    if (
+      /^\/games\/lobby\/join\/[a-f0-9-]+$/i.test(window.location.pathname) ||
+      /^\/games\/tournament\/join\/[a-f0-9-]+$/i.test(window.location.pathname)
+    ) {
       this.showInviteButtons();
     }
   }
@@ -237,6 +240,20 @@ class Chat {
     });
   }
 
+  hideInviteButtons() {
+    const chatRoomsView = document.getElementById("chat-rooms");
+    if (!chatRoomsView) {
+      console.error("Chat rooms view not found");
+      return;
+    }
+    const inviteIcons = chatRoomsView.querySelectorAll(
+      "button#send-invite-button",
+    );
+    inviteIcons.forEach((icon) => {
+      icon.classList.add("hidden");
+    });
+  }
+
   sendInvite = (event: Event): void => {
     event.stopPropagation();
 
@@ -262,11 +279,28 @@ class Chat {
     const inviteIcon = svgs[0];
     const inviteSuccessIcon = svgs[1];
 
-    const lobby = window.location.pathname.match(
+    let waitId: string;
+    let endpoint: string;
+    let match = window.location.pathname.match(
       /\/games\/lobby\/join\/([a-f0-9-]+)/i,
     );
-    const lobbyId = lobby ? lobby[1] : null;
-    if (!lobbyId) {
+    if (match) {
+      waitId = match[1];
+      endpoint = "/games/lobby/";
+    } else {
+      match = window.location.pathname.match(
+        /\/games\/tournament\/join\/([a-f0-9-]+)/i,
+      );
+      if (match) {
+        waitId = match[1];
+        endpoint = "/games/tournament/";
+      } else {
+        console.error("No match UUID found");
+        return;
+      }
+    }
+
+    if (!waitId) {
       console.error("No match UUID found");
       return;
     }
@@ -282,7 +316,7 @@ class Chat {
       inviteSuccessIcon.classList.add("hidden");
     }, 3000);
 
-    fetch("/games/lobby/" + lobbyId + "/invite/room/" + roomId, {
+    fetch(endpoint + waitId + "/invite/room/" + roomId, {
       method: "POST",
     });
   };
