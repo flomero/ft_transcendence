@@ -97,7 +97,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
 
   testLobby: {
     gameName: "pong",
-    gameModeName: "multiplayerPong",
+    gameModeName: "classicPong",
     gameModeConfig: {
       powerUpRadius: 25,
       powerUpCapacities: {
@@ -138,15 +138,15 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       // },
       // portals: {
       // },
-      // speedGate: {}
-      speedBoost: {},
+      speedGate: {},
+      // speedBoost: {},
       // bumperShield: {
       //   wallGoalOffsetArenaWidthFactor: 12,
       //   wallTotalWidthArenaWidthFactor: 18,
       //   wallsHitThresold: 3,
       // },
     },
-    playerCount: 5,
+    playerCount: 2,
   },
 
   // Quick 1v1, no powerUps
