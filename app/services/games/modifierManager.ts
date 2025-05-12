@@ -9,6 +9,13 @@ import {
 import type { RNG } from "./rng";
 import { fastifyInstance } from "../../app";
 
+export const portalWallsModifiers: string[] = ["portals", "speedGate"];
+export const bumperWallsModifiers: string[] = [
+  "bumper",
+  "bumperShield",
+  "protectedPowerUp",
+];
+
 export class ModifierManager {
   // Arrays that maintain the allowed names and their definitions.
   protected game: GameBase;

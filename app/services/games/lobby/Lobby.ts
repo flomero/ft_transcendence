@@ -118,17 +118,16 @@ class Lobby {
   }
 
   public disconnectMember(memberId: string): void {
-    if (
-      this.lobbyMembers.get(memberId)?.userState === "inMatch" ||
-      this.lobbyMembers.get(memberId)?.socket === undefined
-    ) {
-      throw new Error(
-        "[disconnectMember] Member is not in the lobby WebSocket",
-      );
+    const member = this.lobbyMembers.get(memberId);
+    if (member === undefined) {
+      throw new Error("[disconnectMember] Member is not in the lobby");
     }
-    this.lobbyMembers.get(memberId)!.userState = "notInLobby";
-    this.lobbyMembers.get(memberId)!.socket!.close();
-    this.lobbyMembers.get(memberId)!.socket = undefined;
+
+    member.userState = "notInLobby";
+    if (member.socket !== undefined) {
+      member.socket.close();
+      member.socket = undefined;
+    }
   }
 
   public addSocketToMember(memberId: string, socket: WebSocket): void {

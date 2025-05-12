@@ -20,6 +20,7 @@ import { FastifyInstance } from "fastify";
 import { fastifyInstance } from "../../../app";
 import { getLobby } from "../lobby/lobbyWebsocket/getLobby";
 import { removeMemberFromLobby } from "../lobby/leave/leaveLobbyHandler";
+import { isUserInAnyLobby } from "../lobby/lobbyVaidation/isUserInAnyLobby";
 
 class GameManager {
   private id: string = randomUUID();
@@ -133,7 +134,12 @@ class GameManager {
   }
 
   public shuffleReferenceTable(): void {
-    if (this.isShuffled === true) return;
+    if (
+      this.isShuffled === true ||
+      this.gameStatus() === GameStatus.RUNNING ||
+      this.gameOrigin?.type === "tournament"
+    )
+      return;
     fastifyInstance.log.debug("Shuffling playerIdReferenceTable");
     const tmpRng = new RNG();
     this.playerIdReferenceTable = tmpRng.randomArray(
@@ -224,7 +230,10 @@ class GameManager {
       this.disqualifyPlayer(playerId);
       player.leftGame = true;
     }
-    if (this.gameOrigin?.type === "lobby") {
+    if (
+      this.gameOrigin?.type === "lobby" &&
+      isUserInAnyLobby(playerId) !== null
+    ) {
       const lobby = getLobby(this.gameOrigin.lobby.getLobbyId);
       removeMemberFromLobby(lobby.getLobbyId, playerId);
     }

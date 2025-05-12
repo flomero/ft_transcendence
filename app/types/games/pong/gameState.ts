@@ -58,5 +58,9 @@ export type PongMinimalGameState = {
   paddles: PaddleState[];
   walls: WallState[];
   scores: number[];
+  specialWallsIDs: {
+    portal: number[];
+    bumper: number[];
+  };
   modifiersState: ModifiersState;
 };

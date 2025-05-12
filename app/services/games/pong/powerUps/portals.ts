@@ -17,7 +17,7 @@ export class Portals extends TimeLimitedModifierBase {
   protected normalOffsetFactor: number = 0;
   protected normalOffsetStandardDeviationFactor: number = 0;
 
-  protected portalWalls: Rectangle[] = [];
+  portalWalls: Rectangle[] = [];
 
   protected teleportationCount: number = 0;
   protected teleportationCountThrehsold: number = 0;
@@ -199,6 +199,8 @@ export class Portals extends TimeLimitedModifierBase {
     const ca2 = Math.cos(alpha2);
     const sa2 = Math.sin(alpha2);
 
+    const wallHeight = gameSettings.paddleHeight * 1.25;
+
     // 5. Save portalWalls
     const portalWall1: Rectangle = {
       id: gameState.walls.length,
@@ -213,7 +215,7 @@ export class Portals extends TimeLimitedModifierBase {
       absY: center1.y,
       width:
         (this.portalWallWidthHeightFactor * gameSettings.arenaHeight) / 2.0,
-      height: gameSettings.paddleHeight / 2.0,
+      height: wallHeight,
       doCollision: true,
       doRotation: true,
       isVisible: true,
@@ -235,7 +237,7 @@ export class Portals extends TimeLimitedModifierBase {
       absY: center2.y,
       width:
         (this.portalWallWidthHeightFactor * gameSettings.arenaHeight) / 2.0,
-      height: gameSettings.paddleHeight / 2.0,
+      height: wallHeight,
       doCollision: true,
       doRotation: true,
       isVisible: true,
@@ -333,17 +335,4 @@ export class Portals extends TimeLimitedModifierBase {
     )
       this.deactivate(game);
   }
-
-  // onArenaModification(game: Pong): void {
-  //   if (game.getState().walls.length > 0) {
-  //     this.portalWalls.forEach((portalWall) => {
-  //       const wallID = game.getState().walls.indexOf(portalWall);
-  //       if (wallID < 0) return;
-  //       game.getState().walls.splice(wallID, 1);
-  //     });
-  //     this.portalWalls = [];
-  //   }
-
-  //   this.createPortalWalls(game);
-  // }
 }

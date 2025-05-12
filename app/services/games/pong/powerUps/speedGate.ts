@@ -21,7 +21,7 @@ export class SpeedGate extends TimeLimitedModifierBase {
   protected sizeFactor: number = 0;
   protected speedFactor: number = 0;
 
-  protected portalWalls: Rectangle[] = [];
+  portalWalls: Rectangle[] = [];
 
   constructor(customConfig?: Record<string, any>) {
     super();
@@ -179,9 +179,12 @@ export class SpeedGate extends TimeLimitedModifierBase {
       y: gameSettings.arenaHeight / 2.0 + rndDst * Math.sin(rndAngle),
     };
 
-    let trapezoideAngle = 0;
-    if (gameState.playerCount > 2)
-      trapezoideAngle = game.getRNG().random() * Math.PI * 2.0;
+    const trapezoideAngle =
+      gameState.playerCount === 2
+        ? game.getRNG().randomSign() * Math.PI
+        : game.getRNG().random() * Math.PI * 2.0;
+    // if (gameState.playerCount > 2)
+    //   trapezoideAngle = game.getRNG().random() * Math.PI * 2.0;
 
     const trapezoideDir = {
       x: Math.cos(trapezoideAngle),
@@ -202,8 +205,8 @@ export class SpeedGate extends TimeLimitedModifierBase {
     };
     const legWallWidth = Math.hypot(deltaWidth, portalWallsInnerWidth);
 
-    const gateWallHeight = gameSettings.paddleHeight / 4.0;
-    const legWallHeight = gateWallHeight * 2.0;
+    const gateWallHeight = gameSettings.paddleHeight / 2.0;
+    const legWallHeight = gameSettings.paddleHeight;
 
     // 3. Build walls.
     const smallPortalWall: Rectangle = {
