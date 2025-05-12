@@ -6,7 +6,7 @@ export default fp(async (fastify) => {
   await fastify.register(fastifyStatic, {
     root: path.resolve(__dirname, "../../public"),
     prefix: "/public/",
-    decorateReply: false,
+    decorateReply: true,
   });
 
   await fastify.register(fastifyStatic, {
