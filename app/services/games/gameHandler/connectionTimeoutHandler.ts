@@ -21,6 +21,7 @@ const startAiGame = (gameManager: GameManager, fastiy: FastifyInstance) => {
   try {
     if (gameManager.justAisInGame() === true) {
       gameManager.startGame(fastiy);
+      gameManager.randomizeAndFinishGame();
     }
   } catch (err) {
     if (err instanceof Error) {
