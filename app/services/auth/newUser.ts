@@ -15,6 +15,9 @@ export async function insertUser(
   if (await userExists(fastify, userInfo.id)) {
     return;
   }
+  if (userInfo.name.length < 3) userInfo.name += 4242;
+  if (userInfo.name.length > 16) userInfo.name = userInfo.name.slice(0, 16);
+
   while (await usernameExists(fastify, userInfo.name)) {
     userInfo.name = `${userInfo.name}#${Math.floor(Math.random() * 1000)}`;
   }
