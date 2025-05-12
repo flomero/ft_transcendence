@@ -21,6 +21,7 @@ import {
   MatchStatus,
 } from "../../../types/tournament/tournament";
 import { tournaments } from "./tournaments";
+import { gameManagers } from "../lobby/start/startLobbyHandler";
 
 class TournamentManager {
   public tournamentId: string = randomUUID();
@@ -38,6 +39,7 @@ class TournamentManager {
     PLAYER: 0,
     AI: 1,
   } as const;
+  private terminatedTournament: boolean = false;
 
   constructor(
     tournamentConfigKey: TournamentConfigKey,
@@ -309,10 +311,44 @@ class TournamentManager {
     }
   }
 
+  public terminate(ownerId: string): void {
+    if (this.ownerId !== ownerId) {
+      throw new Error(
+        `[terminate] Only the owner can terminate the tournament`,
+      );
+    }
+
+    this.terminatedTournament = true;
+    this.terminateAllCurrentGames();
+    this.disconnectAllMembers();
+    tournaments.delete(this.tournamentId);
+  }
+
+  private terminateAllCurrentGames(): void {
+    const currentGamesIngameId = this.tournament?.currentRound;
+
+    if (currentGamesIngameId === undefined)
+      return console.error("No current games");
+
+    for (const ingameId of Object.keys(currentGamesIngameId)) {
+      const gameManagerId = this.getInGameIdFromGameManagerId(ingameId);
+      const gameManager = gameManagers.get(gameManagerId || "");
+      if (gameManager) gameManager.randomizeAndFinishGame();
+    }
+  }
+
+  private disconnectAllMembers(): void {
+    for (const member of this.tournamentMembers.values()) {
+      member.webSocket?.close();
+    }
+  }
+
   public notifyGameCompleted(
     gameManagerId: string,
     gameResult: GameResult,
   ): void {
+    if (this.terminatedTournament === true) return;
+
     const isMatchOver = this.notifyMatchWinnder(gameManagerId, gameResult);
 
     console.log(`Game finished: ${gameManagerId}`);

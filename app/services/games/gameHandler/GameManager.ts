@@ -156,6 +156,10 @@ class GameManager {
     }
   }
 
+  public randomizeAndFinishGame(): void {
+    this.game.randomizeGame();
+  }
+
   private addIngameIdToPlayerAndAiOpponent(): void {
     for (let i = 0; i < this.playerIdReferenceTable.length; i++) {
       const playerOrAiId = this.playerIdReferenceTable[i];
