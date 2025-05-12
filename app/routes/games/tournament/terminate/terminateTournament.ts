@@ -5,7 +5,7 @@ import joinLobbySchema from "../../../../schemas/games/lobby/joinLobbySchema";
 const terminateTournament: FastifyPluginAsync = async (
   fastify,
 ): Promise<void> => {
-  fastify.post("/:lobbyId", {
+  fastify.get("/:lobbyId", {
     handler: terminateTournamentHandler,
     schema: joinLobbySchema,
   });
