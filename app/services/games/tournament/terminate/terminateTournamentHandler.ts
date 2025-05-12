@@ -12,7 +12,7 @@ async function terminateTournamentHandler(
 
     canTournamentBeLeftCheck(userId, tournamentId);
     const tournamentManager = tournaments.get(tournamentId);
-    tournamentManager?.removeMemberSave(userId);
+    tournamentManager?.terminate(userId);
     return reply.code(201).send({ tournamentId: tournamentId });
   } catch (error) {
     if (error instanceof Error) return reply.badRequest(error.message);
