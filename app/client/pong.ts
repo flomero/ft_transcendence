@@ -248,6 +248,8 @@ class PongGame {
   private handleKeyUp(event: KeyboardEvent): void {
     const actionType = this.KEY_RELEASE_MAPPINGS[event.key];
     if (actionType) {
+      const target = event.target as HTMLElement;
+      if (target.tagName !== "INPUT" && target.tagName !== "TEXTAREA") return;
       event.preventDefault();
       this.sendGameInput(actionType);
     }
