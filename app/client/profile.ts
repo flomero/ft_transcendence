@@ -70,7 +70,7 @@ class ProfileEditor {
       .then((response) => response.json())
       .then((data) => {
         if (data.error) {
-          this.showError(data.error);
+          this.showError(data.message || data.error);
           return;
         }
         innerTextById("current-username", username);

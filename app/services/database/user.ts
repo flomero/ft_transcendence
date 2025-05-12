@@ -56,6 +56,15 @@ export async function insertUserIfNotExists(
   await fastify.sqlite.run(sql, [user.id, user.username, user.image_id]);
 }
 
+export async function usernameExists(
+  fastify: FastifyInstance,
+  username: string,
+): Promise<boolean> {
+  const sql = "SELECT 1 FROM users WHERE LOWER(username) = LOWER(?) LIMIT 1";
+  const result = await fastify.sqlite.get(sql, username);
+  return result !== null && result !== undefined;
+}
+
 export async function updateUsername(
   fastify: FastifyInstance,
   userId: string,
