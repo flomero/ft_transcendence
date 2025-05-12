@@ -2,7 +2,7 @@ import type { FastifyRequest, FastifyReply } from "fastify";
 import canTournamentBeLeftCheck from "../../lobby/leave/canTournamentBeLeftCheck";
 import { tournaments } from "../tournaments";
 
-async function leaveTournamentHandler(
+async function terminateTournamentHandler(
   request: FastifyRequest<{ Params: { lobbyId: string } }>,
   reply: FastifyReply,
 ) {
@@ -20,4 +20,4 @@ async function leaveTournamentHandler(
   }
 }
 
-export default leaveTournamentHandler;
+export default terminateTournamentHandler;
