@@ -100,7 +100,7 @@ export async function hydratePlayerScores(
 
         for (const playerID of playerIDs) {
           const player = match.players.find((player) => player.id === playerID);
-          if (!player) continue;
+          if (!player || !gameResults[playerID]) continue;
           player.score.push(...gameResults[playerID]);
         }
       }
