@@ -1,5 +1,9 @@
 import { downloadImageAsBase64 } from "../images/downloadImage";
-import { insertUserIfNotExists, userExists } from "../database/user";
+import {
+  insertUserIfNotExists,
+  userExists,
+  usernameExists,
+} from "../database/user";
 import type { GoogleUserInfo } from "./google-api";
 import type { FastifyInstance } from "fastify";
 import { saveImage } from "../database/image/image";
@@ -10,6 +14,9 @@ export async function insertUser(
 ): Promise<void> {
   if (await userExists(fastify, userInfo.id)) {
     return;
+  }
+  while (await usernameExists(fastify, userInfo.name)) {
+    userInfo.name = `${userInfo.name}#${Math.floor(Math.random() * 1000)}`;
   }
 
   fastify.customMetrics.newUser();
