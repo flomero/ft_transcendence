@@ -116,5 +116,16 @@ export function registerHelpers(handlebars: typeof Handlebars) {
     return obj[path];
   });
 
+  handlebars.registerHelper("formatName", (value) => {
+    if (!value) return "";
+
+    return String(value)
+      .replace(/([A-Z])/g, " $1")
+      .replace(/_/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .replace(/^\w/, (c) => c.toUpperCase());
+  });
+
   // Add other helpers here as needed
 }
