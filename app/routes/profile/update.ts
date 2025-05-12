@@ -15,7 +15,7 @@ const updateProfile: FastifyPluginAsync = async (fastify): Promise<void> => {
 
     let newUsername = request.body as string;
     newUsername = newUsername.trim();
-    if (newUsername.length < 3 || newUsername.length > 32)
+    if (newUsername.length < 3 || newUsername.length > 16)
       return reply.badRequest(
         "Username must be at least 3 characters long and at most 32 characters long",
       );
