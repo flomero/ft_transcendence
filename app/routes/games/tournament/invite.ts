@@ -49,14 +49,14 @@ const inviteTournament: FastifyPluginAsync = async (fastify): Promise<void> => {
 
     if (!(await userIsInRoom(fastify, roomId, request.userId)))
       return reply.badRequest("Room does not exist or you are not in it");
-    if (!tournaments.has(tournamentId))
-      return reply.badRequest("Tournament not found");
 
     try {
       let message;
       if (tournamentId === "rr") {
-        message = "https://tiny.cc/v8di001";
+        message = "https://coregame.de/rr";
       } else {
+        if (!tournaments.has(tournamentId))
+          return reply.badRequest("Tournament not found");
         message = "/games/tournament/join/" + tournamentId;
       }
       await sendGameInvite(fastify, request, roomId, message);

@@ -43,13 +43,13 @@ const inviteLobby: FastifyPluginAsync = async (fastify): Promise<void> => {
 
     if (!(await userIsInRoom(fastify, roomId, request.userId)))
       return reply.badRequest("Room does not exist or you are not in it");
-    if (!lobbyExists(lobbyId)) return reply.badRequest("Lobby not found");
 
     try {
       let message;
       if (lobbyId === "rr") {
-        message = "https://tiny.cc/v8di001";
+        message = "https://coregame.de/rr";
       } else {
+        if (!lobbyExists(lobbyId)) return reply.badRequest("Lobby not found");
         message = "/games/lobby/join/" + lobbyId;
       }
       await sendGameInvite(fastify, request, roomId, message);
