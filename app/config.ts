@@ -52,6 +52,8 @@ export const TournamentGameModesPerBracketType: {
   singleElimination: [
     TournamentGameModes.CompetitiveClassicPong,
     TournamentGameModes.CompetitiveClassicPongPowerUps,
+    TournamentGameModes.TestTournamentConfig,
+    TournamentGameModes.PowerUpMayhem1v1,
   ],
   doubleElimination: [
     TournamentGameModes.CompetitiveClassicPong,
@@ -98,9 +100,6 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
     gameModeName: "classicPong",
     gameModeConfig: {
       powerUpRadius: 25,
-      powerUpCapacities: {
-        speedBoost: 100,
-      },
     },
     modifierNames: {
       paceBreaker: {},

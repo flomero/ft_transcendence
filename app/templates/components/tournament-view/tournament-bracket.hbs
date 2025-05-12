@@ -6,8 +6,7 @@
     {{! — rounds — }}
     {{#each rounds as |round r|}}
       <div
-        class="p-2 pb-6 min-w-[200px] flex-shrink-0"
-        {{#if round.isCurrent}} style="border rounded-lg border-color: blue;" {{/if}}
+        class="{{twMerge 'p-2 pb-6 min-w-[200px] flex-shrink-0' (when round.isCurrent 'border rounded-lg border-blue-900/50 bg-blue-900/10')}} "
         {{#if round.isCurrent}}id="current-round"{{/if}}
       >
         <div class="text-center">{{round.name}}</div>

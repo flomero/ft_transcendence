@@ -50,7 +50,7 @@ export class SpeedBoost extends TimeLimitedModifierBase {
       (_, context) => {
         const rampUpFrequencyS =
           context.rampUpFrequency || defaultRegistry.rampUpFrequencyS;
-        return serverTickrateS * rampUpFrequencyS;
+        return Math.ceil(serverTickrateS * rampUpFrequencyS);
       },
       undefined,
     );
@@ -64,6 +64,12 @@ export class SpeedBoost extends TimeLimitedModifierBase {
       },
       undefined,
     );
+
+    const mergedConfig = { ...defaultRegistry };
+    if (customConfig)
+      Object.entries(customConfig).forEach((entry) => {
+        mergedConfig[entry[0]] = entry[1];
+      });
 
     this.configManager.loadComplexConfigIntoContainer(customConfig || {}, this);
   }

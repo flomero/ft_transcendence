@@ -179,9 +179,12 @@ export class SpeedGate extends TimeLimitedModifierBase {
       y: gameSettings.arenaHeight / 2.0 + rndDst * Math.sin(rndAngle),
     };
 
-    let trapezoideAngle = 0;
-    if (gameState.playerCount > 2)
-      trapezoideAngle = game.getRNG().random() * Math.PI * 2.0;
+    const trapezoideAngle =
+      gameState.playerCount === 2
+        ? game.getRNG().randomSign() * Math.PI
+        : game.getRNG().random() * Math.PI * 2.0;
+    // if (gameState.playerCount > 2)
+    //   trapezoideAngle = game.getRNG().random() * Math.PI * 2.0;
 
     const trapezoideDir = {
       x: Math.cos(trapezoideAngle),

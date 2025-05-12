@@ -9,6 +9,7 @@ import {
   gameModeArrToString,
 } from "../../services/config/gameModes";
 import { getTournamentsWithOwners } from "../../services/games/tournament/tournaments";
+import isMemberInAnyTournament from "../../services/games/tournament/tournamentValidation/isMemberInAnyTournament";
 
 const checkRedirects = async (
   request: FastifyRequest,
@@ -26,6 +27,10 @@ const checkRedirects = async (
     {
       check: () => isUserInAnyLobby(request.userId),
       path: (id: string) => `/games/lobby/join/${id}`,
+    },
+    {
+      check: () => isMemberInAnyTournament(request.userId),
+      path: (id: string) => `/games/tournament/join/${id}`,
     },
   ];
 

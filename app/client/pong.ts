@@ -1,6 +1,18 @@
-import type { GameMessage, PongUserInput } from "../types/games/userInput";
+import type {
+  GameMessage,
+  GameStateMessage,
+  PongUserInput,
+  ServerMessage,
+} from "../types/games/userInput";
 import type { PongMinimalGameState } from "../types/games/pong/gameState";
+import type Router from "./router.js";
 import type { BallState } from "../types/games/pong/gameState";
+
+declare global {
+  interface Window {
+    router: Router;
+  }
+}
 
 class PongGame {
   private canvas: HTMLCanvasElement;
@@ -22,6 +34,9 @@ class PongGame {
   private playerCount = 0;
   private referenceTable: string[] = [];
   private tps: number;
+
+  // For portals colorization
+  private portalsWallIDs: number[] = [];
 
   private readonly KEY_MAPPINGS: Record<string, PongUserInput> = {
     ArrowUp: "UP",
@@ -91,44 +106,78 @@ class PongGame {
 
   private handleSocketMessage(event: MessageEvent): void {
     try {
-      const message = JSON.parse(event.data);
+      const message = JSON.parse(event.data) as ServerMessage;
 
-      if (message.type === "gameState") {
-        const prevWalls = this.gameState?.walls || [];
-        this.gameState = message.data as PongMinimalGameState;
-        const currentWalls = this.gameState?.walls || [];
-
-        // Check if walls have changed (either count or properties)
-        if (this.haveWallsChanged(prevWalls, currentWalls)) {
-          this.wallsNeedRedraw = true;
-        }
-
-        if (message.referenceTable && this.playerIndex === -1) {
-          this.referenceTable = message.referenceTable;
-          this.playerIndex = message.referenceTable.indexOf(this.currentUserId);
-          this.playerCount = message.referenceTable.length;
-
-          if (this.playerCount === 2) {
-            this.canvas.width = 800 + this.padding * 2;
-            this.canvas.height = 400 + this.padding * 2;
-            this.wallCanvas.width = this.canvas.width;
-            this.wallCanvas.height = this.canvas.height;
-            this.ratio = (this.canvas.width - this.padding * 2) / 200.0;
-            this.wallsNeedRedraw = true;
-          }
-
-          if (this.playerIndex >= 0 && this.gameState?.paddles) {
-            this.calculateRotationAngle();
-          }
-        }
-      }
-      if (message.type === "gameFinished") {
-        this.displayGameFinishedMessage(message.data.html);
+      switch (message.type) {
+        case "gameState":
+          this.handleGameStateMessage(message);
+          break;
+        case "gameFinished":
+          this.handleGameFinishedMessage(message.data);
+          break;
+        case "redirect":
+          this.handleRedirectMessage(message.data);
+          break;
       }
     } catch (error) {
       if (this.debug)
         console.error("Error processing WebSocket message:", error);
     }
+  }
+
+  private handleGameStateMessage(message: GameStateMessage): void {
+    const prevWalls = this.gameState?.walls || [];
+    this.gameState = message.data as PongMinimalGameState;
+    const currentWalls = this.gameState?.walls || [];
+
+    // For portals colorization
+    if (this.gameState.modifiersState.modifiersState["portals"]) {
+      this.portalsWallIDs = Object.entries(
+        this.gameState.modifiersState.modifiersState["portals"],
+      )
+        .map(([_, wallCorners]: [string, any]) => {
+          const wallIndex = this.gameState?.walls.findIndex(
+            (wall) => wall.x === wallCorners.x && wall.y === wallCorners.y,
+          );
+          return wallIndex ?? -1;
+        })
+        .filter((index) => index !== -1);
+    }
+
+    // Check if walls have changed (either count or properties)
+    if (this.haveWallsChanged(prevWalls, currentWalls)) {
+      this.wallsNeedRedraw = true;
+    }
+
+    if (message.referenceTable && this.playerIndex === -1) {
+      this.referenceTable = message.referenceTable;
+      this.playerIndex = message.referenceTable.indexOf(this.currentUserId);
+      this.playerCount = message.referenceTable.length;
+
+      if (this.playerCount === 2) {
+        this.canvas.width = 800 + this.padding * 2;
+        this.canvas.height = 400 + this.padding * 2;
+        this.wallCanvas.width = this.canvas.width;
+        this.wallCanvas.height = this.canvas.height;
+        this.ratio = (this.canvas.width - this.padding * 2) / 200.0;
+        this.wallsNeedRedraw = true;
+      }
+
+      if (this.playerIndex >= 0 && this.gameState?.paddles) {
+        this.calculateRotationAngle();
+      }
+    }
+  }
+
+  private handleRedirectMessage(url: string): void {
+    setTimeout(() => {
+      this.disconnect();
+      window.router.navigateTo(url);
+    }, 5000);
+  }
+
+  private handleGameFinishedMessage(data: string): void {
+    this.displayGameFinishedMessage(data);
   }
 
   private haveWallsChanged(prevWalls: any[], currentWalls: any[]): boolean {
@@ -378,23 +427,35 @@ class PongGame {
     const shouldRotate = this.playerCount > 2 && this.playerIndex >= 0;
     this.applyCanvasTransformationToContext(this.wallCtx, shouldRotate);
 
-    this.gameState.walls.forEach((wall) => {
+    this.gameState.walls.forEach((wall, wallIndex) => {
       if (wall.doRot) {
         const angle = Math.atan2(wall.dy, wall.dx);
         const x = wall.x * this.ratio;
         const y = wall.y * this.ratio;
         const width = wall.w * this.ratio;
         const height = wall.h * this.ratio;
-
-        this.drawNeonRectangleToContext(
-          this.wallCtx,
-          x,
-          y,
-          width,
-          height,
-          "#ffffff",
-          angle,
-        );
+        if (this.portalsWallIDs.includes(wallIndex)) {
+          this.drawNeonRectangleFromCenter(
+            this.wallCtx,
+            x,
+            y,
+            wall.dx,
+            wall.dy,
+            width / 2.0,
+            height / 2.0,
+            ["#FFA500", "#FFFFFF", "#1E40FF", "#FFFFFF"],
+          );
+        } else {
+          this.drawNeonRectangleToContext(
+            this.wallCtx,
+            x,
+            y,
+            width,
+            height,
+            "#ffffff",
+            angle,
+          );
+        }
       }
     });
 
@@ -562,6 +623,70 @@ class PongGame {
     ctx.restore();
   }
 
+  private drawNeonRectangleFromCenter(
+    ctx: CanvasRenderingContext2D,
+    cx: number,
+    cy: number,
+    dirX: number,
+    dirY: number,
+    halfLengthDir: number,
+    halfLengthNormal: number,
+    colors: [string, string, string, string], // [top, right, bottom, left]
+  ): void {
+    const scale = (x: number, y: number, s: number): [number, number] => [
+      x * s,
+      y * s,
+    ];
+    const add = (
+      a: [number, number],
+      b: [number, number],
+    ): [number, number] => [a[0] + b[0], a[1] + b[1]];
+    const sub = (
+      a: [number, number],
+      b: [number, number],
+    ): [number, number] => [a[0] - b[0], a[1] - b[1]];
+
+    const [normalX, normalY] = [-dirY, dirX]; // Perpendicular
+
+    const dirVec = scale(dirX, dirY, halfLengthDir);
+    const normVec = scale(normalX, normalY, halfLengthNormal);
+
+    // Compute rectangle vertices in clockwise order
+    const p1 = add(add([cx, cy], dirVec), normVec); // top-right
+    const p2 = sub(add([cx, cy], dirVec), normVec); // bottom-right
+    const p3 = sub(sub([cx, cy], dirVec), normVec); // bottom-left
+    const p4 = add(sub([cx, cy], dirVec), normVec); // top-left
+
+    const points: [number, number][][] = [
+      [p4, p1], // top
+      [p1, p2], // right
+      [p2, p3], // bottom
+      [p3, p4], // left
+    ];
+
+    points.forEach(([start, end], i) => {
+      const [r, g, b] = this.parseHexColor(colors[i]);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(start[0], start[1]);
+      ctx.lineTo(end[0], end[1]);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = `rgb(${r}, ${g}, ${b})`;
+      ctx.shadowColor = `rgb(${r}, ${g}, ${b})`;
+      ctx.shadowBlur = 8;
+      ctx.lineJoin = "round";
+      ctx.stroke();
+
+      // Optional bright white highlight
+      ctx.shadowBlur = 0;
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = "#fff";
+      ctx.stroke();
+      ctx.restore();
+    });
+  }
+
   private drawNeonRectangle(
     x: number,
     y: number,
@@ -670,11 +795,11 @@ function initPongGame() {
     throw new Error("Canvas element with id 'gameCanvas' not found");
   } catch (error) {
     const errorMessage = document.createElement("div");
-    errorMessage.textContent = `Error initializing Pong game: ${error}`;
-    errorMessage.style.color = "red";
-    errorMessage.style.fontSize = "20px";
-    errorMessage.style.textAlign = "center";
-    errorMessage.style.marginTop = "20px";
+    // errorMessage.textContent = `Error initializing Pong game: ${error}`;
+    // errorMessage.style.color = "red";
+    // errorMessage.style.fontSize = "20px";
+    // errorMessage.style.textAlign = "center";
+    // errorMessage.style.marginTop = "20px";
     document.body.appendChild(errorMessage);
   }
 }
