@@ -392,19 +392,11 @@ export class SpeedGate extends TimeLimitedModifierBase {
       p1: {
         x: parseFloat(this.portalWalls[0].x.toFixed(3)),
         y: parseFloat(this.portalWalls[0].y.toFixed(3)),
-        dx: parseFloat(this.portalWalls[0].dx.toFixed(3)),
-        dy: parseFloat(this.portalWalls[0].dy.toFixed(3)),
-        w: parseFloat(this.portalWalls[0].width.toFixed(3)),
-        h: parseFloat(this.portalWalls[0].height.toFixed(3)),
       },
 
       p2: {
         x: parseFloat(this.portalWalls[1].x.toFixed(3)),
         y: parseFloat(this.portalWalls[1].y.toFixed(3)),
-        dx: parseFloat(this.portalWalls[1].dx.toFixed(3)),
-        dy: parseFloat(this.portalWalls[1].dy.toFixed(3)),
-        w: parseFloat(this.portalWalls[1].width.toFixed(3)),
-        h: parseFloat(this.portalWalls[1].height.toFixed(3)),
       },
     };
   }
