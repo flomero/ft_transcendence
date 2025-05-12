@@ -116,7 +116,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       },
     },
     powerUpNames: {
-      speedBoost: {},
+      // speedBoost: {},
       // blinkingBall: {
       //   duration: 6,
       //   blinkDuration: 75,
@@ -133,8 +133,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       // shooter: {
       //   chargeRadius: 3.5,
       // },
-      // portals: {
-      // },
+      portals: {},
       // speedGate: {},
       // speedBoost: {},
       // bumperShield: {

@@ -199,6 +199,8 @@ export class Portals extends TimeLimitedModifierBase {
     const ca2 = Math.cos(alpha2);
     const sa2 = Math.sin(alpha2);
 
+    const wallHeight = gameSettings.paddleHeight * 1.25;
+
     // 5. Save portalWalls
     const portalWall1: Rectangle = {
       id: gameState.walls.length,
@@ -213,7 +215,7 @@ export class Portals extends TimeLimitedModifierBase {
       absY: center1.y,
       width:
         (this.portalWallWidthHeightFactor * gameSettings.arenaHeight) / 2.0,
-      height: gameSettings.paddleHeight / 2.0,
+      height: wallHeight,
       doCollision: true,
       doRotation: true,
       isVisible: true,
@@ -235,7 +237,7 @@ export class Portals extends TimeLimitedModifierBase {
       absY: center2.y,
       width:
         (this.portalWallWidthHeightFactor * gameSettings.arenaHeight) / 2.0,
-      height: gameSettings.paddleHeight / 2.0,
+      height: wallHeight,
       doCollision: true,
       doRotation: true,
       isVisible: true,
@@ -334,16 +336,30 @@ export class Portals extends TimeLimitedModifierBase {
       this.deactivate(game);
   }
 
-  // onArenaModification(game: Pong): void {
-  //   if (game.getState().walls.length > 0) {
-  //     this.portalWalls.forEach((portalWall) => {
-  //       const wallID = game.getState().walls.indexOf(portalWall);
-  //       if (wallID < 0) return;
-  //       game.getState().walls.splice(wallID, 1);
-  //     });
-  //     this.portalWalls = [];
-  //   }
+  getState(): Record<string, any> {
+    if (this.portalWalls.length < 2) return {};
 
-  //   this.createPortalWalls(game);
-  // }
+    const wall1 = this.portalWalls[0];
+    const wall2 = this.portalWalls[1];
+
+    return {
+      p1: {
+        x: parseFloat(wall1.x.toFixed(3)),
+        y: parseFloat(wall1.y.toFixed(3)),
+        dx: parseFloat(wall1.dx.toFixed(3)),
+        dy: parseFloat(wall1.dy.toFixed(3)),
+        w: parseFloat(wall1.width.toFixed(3)),
+        h: parseFloat(wall1.height.toFixed(3)),
+      },
+
+      p2: {
+        x: parseFloat(wall2.x.toFixed(3)),
+        y: parseFloat(wall2.y.toFixed(3)),
+        dx: parseFloat(wall2.dx.toFixed(3)),
+        dy: parseFloat(wall2.dy.toFixed(3)),
+        w: parseFloat(wall2.width.toFixed(3)),
+        h: parseFloat(wall2.height.toFixed(3)),
+      },
+    };
+  }
 }
