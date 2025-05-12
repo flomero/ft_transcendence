@@ -20,6 +20,11 @@ import type {
 } from "../../../types/games/pong/gameState";
 import { fastifyInstance } from "../../../app";
 import { ScoredGame } from "./gameModifiers/scoredGame";
+import { Portals } from "./powerUps/portals";
+import { SpeedGate } from "./powerUps/speedGate";
+import { ProtectedPowerUp } from "./powerUps/protectedPowerUp";
+import { Bumper } from "./powerUps/bumper";
+import { BumperShield } from "./powerUps/bumperShield";
 
 const EPSILON = 1e-2;
 
@@ -293,6 +298,111 @@ export abstract class Pong extends GameBase {
         };
       });
 
+    // PORTAL WALLS
+    const portalWallsIDs: number[] = [];
+    // PORTALS
+    this.modifierManager
+      .getModifiers()
+      .filter((modifier) => modifier.name === "portals")
+      .forEach((modifier) => {
+        const portalsModifierWalls = (modifier as Portals).portalWalls;
+        if (!portalsModifierWalls) return;
+
+        portalsModifierWalls.forEach((wall) => {
+          const wallIndex = this.gameState.walls.findIndex(
+            (w) => w.x === wall.x && w.y === wall.y,
+          );
+          if (wallIndex !== -1) portalWallsIDs.push(wallIndex);
+        });
+      });
+    // SPEEDGATE
+    this.modifierManager
+      .getModifiers()
+      .filter((modifier) => modifier.name === "speedGate")
+      .forEach((modifier) => {
+        const speedGateModifierWalls = (modifier as SpeedGate).portalWalls;
+        if (!speedGateModifierWalls) return;
+
+        speedGateModifierWalls
+          .filter((_, index) => index < 2) // Only first 2 walls are portalWalls
+          .forEach((wall) => {
+            const wallIndex = this.gameState.walls.findIndex(
+              (w) => w.x === wall.x && w.y === wall.y,
+            );
+            if (wallIndex !== -1) portalWallsIDs.push(wallIndex);
+          });
+      });
+
+    // ----- //
+
+    // BUMPER WALLS
+    const bumperWallsIDs: number[] = [];
+    // BUMPER
+    this.modifierManager
+      .getModifiers()
+      .filter((modifier) => modifier.name === "bumper")
+      .forEach((modifier) => {
+        const bumperModifierWalls = (modifier as Bumper).bumpers;
+        if (!bumperModifierWalls) return;
+
+        bumperModifierWalls.forEach((wall) => {
+          const wallIndex = this.gameState.walls.findIndex(
+            (w) => w.x === wall.x && w.y === wall.y,
+          );
+          if (wallIndex !== -1) bumperWallsIDs.push(wallIndex);
+        });
+      });
+    // PROTECTED POWER UP
+    this.modifierManager
+      .getModifiers()
+      .filter((modifier) => modifier.name === "protectedPowerUp")
+      .forEach((modifier) => {
+        const protectedPowerUpModifierWalls = (modifier as ProtectedPowerUp)
+          .walls;
+        if (!protectedPowerUpModifierWalls) return;
+
+        protectedPowerUpModifierWalls.forEach((wall) => {
+          const wallIndex = this.gameState.walls.findIndex(
+            (w) => w.x === wall.x && w.y === wall.y,
+          );
+          if (wallIndex !== -1) bumperWallsIDs.push(wallIndex);
+        });
+      });
+    // BUMPER SHIELD
+    this.modifierManager
+      .getModifiers()
+      .filter((modifier) => modifier.name === "bumperShield")
+      .forEach((modifier) => {
+        const bumperShieldModifierWalls = (modifier as BumperShield).walls;
+        if (!bumperShieldModifierWalls) return;
+
+        bumperShieldModifierWalls.forEach((wall) => {
+          const wallIndex = this.gameState.walls.findIndex(
+            (w) => w.x === wall.x && w.y === wall.y,
+          );
+          if (wallIndex !== -1) bumperWallsIDs.push(wallIndex);
+        });
+      });
+    // SPEEDGATE
+    this.modifierManager
+      .getModifiers()
+      .filter((modifier) => modifier.name === "speedGate")
+      .forEach((modifier) => {
+        const speedGateModifierWalls = (modifier as SpeedGate).portalWalls;
+        if (!speedGateModifierWalls) return;
+
+        speedGateModifierWalls
+          .filter((_, index) => index >= 2) // Last 2 walls are bumperWalls
+          .forEach((wall) => {
+            const wallIndex = this.gameState.walls.findIndex(
+              (w) => w.x === wall.x && w.y === wall.y,
+            );
+            if (wallIndex !== -1) bumperWallsIDs.push(wallIndex);
+          });
+      });
+
+    // ----- //
+
     const snapshot = {
       // startDate: gameBaseState.startDate,
       // lastUpdate: gameBaseState.lastUpdate,
@@ -309,6 +419,11 @@ export abstract class Pong extends GameBase {
       scores: this.gameState.scores,
       // results: this.gameState.results,
       // playerCount: this.gameState.playerCount,
+
+      specialWallsIDs: {
+        portal: portalWallsIDs,
+        bumper: bumperWallsIDs,
+      },
     };
 
     return snapshot;

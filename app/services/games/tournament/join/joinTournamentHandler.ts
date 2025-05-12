@@ -3,6 +3,7 @@ import canMemberJoinTournamentCheck from "./canMemberJoinTournamentCheck";
 import { tournaments } from "../tournaments";
 import { getUserById } from "../../../database/user";
 import { getCurrentTournamentInfo } from "../tournamentVisualizer";
+import { TournamentStatus } from "../tournament";
 
 async function joinTournamentHandler(
   request: FastifyRequest<{ Params: { lobbyId: string } }>,
@@ -13,6 +14,9 @@ async function joinTournamentHandler(
     const tournamentId = request.params.lobbyId;
     const tournament = tournaments.get(tournamentId);
     if (!tournament) return reply.notFound("Tournament not found");
+
+    if (tournament.getTournamentStatus() !== TournamentStatus.CREATED)
+      return reply.redirect("/play");
 
     canMemberJoinTournamentCheck(memberId, tournamentId);
     tournament.addMember(memberId);

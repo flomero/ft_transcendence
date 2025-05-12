@@ -29,14 +29,14 @@ export type WallState = {
   doRot: boolean;
 };
 
-// export type ModifierState = {
-//   ticks: number;
-//   duration: number;
-// };
+export type ModifierState = {
+  ticks: number;
+  duration: number;
+};
 
 export type ModifiersState = {
   spawnedPowerUps: { [powerUpName: string]: BallState[] };
-  modifiersState: { [modifierName: string]: Record<string, any> };
+  modifiersState: { [modifierName: string]: ModifierState };
 };
 
 export type PongGameState = GameBaseState & {
@@ -58,5 +58,9 @@ export type PongMinimalGameState = {
   paddles: PaddleState[];
   walls: WallState[];
   scores: number[];
+  specialWallsIDs: {
+    portal: number[];
+    bumper: number[];
+  };
   modifiersState: ModifiersState;
 };

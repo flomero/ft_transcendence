@@ -35,9 +35,6 @@ class PongGame {
   private referenceTable: string[] = [];
   private tps: number;
 
-  // For portals colorization
-  private portalsWallIDs: number[] = [];
-
   private readonly KEY_MAPPINGS: Record<string, PongUserInput> = {
     ArrowUp: "UP",
     ArrowDown: "DOWN",
@@ -130,19 +127,7 @@ class PongGame {
     this.gameState = message.data as PongMinimalGameState;
     const currentWalls = this.gameState?.walls || [];
 
-    // For portals colorization
-    if (this.gameState.modifiersState.modifiersState["portals"]) {
-      this.portalsWallIDs = Object.entries(
-        this.gameState.modifiersState.modifiersState["portals"],
-      )
-        .map(([_, wallCorners]: [string, any]) => {
-          const wallIndex = this.gameState?.walls.findIndex(
-            (wall) => wall.x === wallCorners.x && wall.y === wallCorners.y,
-          );
-          return wallIndex ?? -1;
-        })
-        .filter((index) => index !== -1);
-    }
+    // this.fillModifierWallsIDs();
 
     // Check if walls have changed (either count or properties)
     if (this.haveWallsChanged(prevWalls, currentWalls)) {
@@ -263,6 +248,8 @@ class PongGame {
   private handleKeyUp(event: KeyboardEvent): void {
     const actionType = this.KEY_RELEASE_MAPPINGS[event.key];
     if (actionType) {
+      const target = event.target as HTMLElement;
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") return;
       event.preventDefault();
       this.sendGameInput(actionType);
     }
@@ -434,16 +421,28 @@ class PongGame {
         const y = wall.y * this.ratio;
         const width = wall.w * this.ratio;
         const height = wall.h * this.ratio;
-        if (this.portalsWallIDs.includes(wallIndex)) {
-          this.drawNeonRectangleFromCenter(
+
+        if (this.gameState?.specialWallsIDs.portal.includes(wallIndex)) {
+          // 'portal' effect walls
+          this.drawNeonRectangleToContext(
             this.wallCtx,
             x,
             y,
-            wall.dx,
-            wall.dy,
-            width / 2.0,
-            height / 2.0,
-            ["#FFA500", "#FFFFFF", "#1E40FF", "#FFFFFF"],
+            width,
+            height,
+            "#ffa500",
+            angle,
+          );
+        } else if (this.gameState?.specialWallsIDs.bumper.includes(wallIndex)) {
+          // 'bumper' effects walls
+          this.drawNeonRectangleToContext(
+            this.wallCtx,
+            x,
+            y,
+            width,
+            height,
+            "#bf00ff",
+            angle,
           );
         } else {
           this.drawNeonRectangleToContext(
@@ -543,9 +542,9 @@ class PongGame {
         this.updateScoreDisplay(userId, scores[i] || 0);
       });
     }
-    this.updateTimeDisplay(
-      this.gameState.modifiersState?.modifiersState?.timedGame?.ticks,
-    );
+    const timedGame = this.gameState.modifiersState?.modifiersState?.timedGame;
+    if (!timedGame) return;
+    this.updateTimeDisplay(timedGame.ticks);
   }
 
   private updateTimeDisplay(time: number): void {
@@ -623,69 +622,69 @@ class PongGame {
     ctx.restore();
   }
 
-  private drawNeonRectangleFromCenter(
-    ctx: CanvasRenderingContext2D,
-    cx: number,
-    cy: number,
-    dirX: number,
-    dirY: number,
-    halfLengthDir: number,
-    halfLengthNormal: number,
-    colors: [string, string, string, string], // [top, right, bottom, left]
-  ): void {
-    const scale = (x: number, y: number, s: number): [number, number] => [
-      x * s,
-      y * s,
-    ];
-    const add = (
-      a: [number, number],
-      b: [number, number],
-    ): [number, number] => [a[0] + b[0], a[1] + b[1]];
-    const sub = (
-      a: [number, number],
-      b: [number, number],
-    ): [number, number] => [a[0] - b[0], a[1] - b[1]];
+  // private drawNeonRectangleFromCenter(
+  //   ctx: CanvasRenderingContext2D,
+  //   cx: number,
+  //   cy: number,
+  //   dirX: number,
+  //   dirY: number,
+  //   halfLengthDir: number,
+  //   halfLengthNormal: number,
+  //   colors: [string, string, string, string], // [top, right, bottom, left]
+  // ): void {
+  //   const scale = (x: number, y: number, s: number): [number, number] => [
+  //     x * s,
+  //     y * s,
+  //   ];
+  //   const add = (
+  //     a: [number, number],
+  //     b: [number, number],
+  //   ): [number, number] => [a[0] + b[0], a[1] + b[1]];
+  //   const sub = (
+  //     a: [number, number],
+  //     b: [number, number],
+  //   ): [number, number] => [a[0] - b[0], a[1] - b[1]];
 
-    const [normalX, normalY] = [-dirY, dirX]; // Perpendicular
+  //   const [normalX, normalY] = [-dirY, dirX]; // Perpendicular
 
-    const dirVec = scale(dirX, dirY, halfLengthDir);
-    const normVec = scale(normalX, normalY, halfLengthNormal);
+  //   const dirVec = scale(dirX, dirY, halfLengthDir);
+  //   const normVec = scale(normalX, normalY, halfLengthNormal);
 
-    // Compute rectangle vertices in clockwise order
-    const p1 = add(add([cx, cy], dirVec), normVec); // top-right
-    const p2 = sub(add([cx, cy], dirVec), normVec); // bottom-right
-    const p3 = sub(sub([cx, cy], dirVec), normVec); // bottom-left
-    const p4 = add(sub([cx, cy], dirVec), normVec); // top-left
+  //   // Compute rectangle vertices in clockwise order
+  //   const p1 = add(add([cx, cy], dirVec), normVec); // top-right
+  //   const p2 = sub(add([cx, cy], dirVec), normVec); // bottom-right
+  //   const p3 = sub(sub([cx, cy], dirVec), normVec); // bottom-left
+  //   const p4 = add(sub([cx, cy], dirVec), normVec); // top-left
 
-    const points: [number, number][][] = [
-      [p4, p1], // top
-      [p1, p2], // right
-      [p2, p3], // bottom
-      [p3, p4], // left
-    ];
+  //   const points: [number, number][][] = [
+  //     [p4, p1], // top
+  //     [p1, p2], // right
+  //     [p2, p3], // bottom
+  //     [p3, p4], // left
+  //   ];
 
-    points.forEach(([start, end], i) => {
-      const [r, g, b] = this.parseHexColor(colors[i]);
+  //   points.forEach(([start, end], i) => {
+  //     const [r, g, b] = this.parseHexColor(colors[i]);
 
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(start[0], start[1]);
-      ctx.lineTo(end[0], end[1]);
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = `rgb(${r}, ${g}, ${b})`;
-      ctx.shadowColor = `rgb(${r}, ${g}, ${b})`;
-      ctx.shadowBlur = 8;
-      ctx.lineJoin = "round";
-      ctx.stroke();
+  //     ctx.save();
+  //     ctx.beginPath();
+  //     ctx.moveTo(start[0], start[1]);
+  //     ctx.lineTo(end[0], end[1]);
+  //     ctx.lineWidth = 2;
+  //     ctx.strokeStyle = `rgb(${r}, ${g}, ${b})`;
+  //     ctx.shadowColor = `rgb(${r}, ${g}, ${b})`;
+  //     ctx.shadowBlur = 8;
+  //     ctx.lineJoin = "round";
+  //     ctx.stroke();
 
-      // Optional bright white highlight
-      ctx.shadowBlur = 0;
-      ctx.lineWidth = 1;
-      ctx.strokeStyle = "#fff";
-      ctx.stroke();
-      ctx.restore();
-    });
-  }
+  //     // Optional bright white highlight
+  //     ctx.shadowBlur = 0;
+  //     ctx.lineWidth = 1;
+  //     ctx.strokeStyle = "#fff";
+  //     ctx.stroke();
+  //     ctx.restore();
+  //   });
+  // }
 
   private drawNeonRectangle(
     x: number,

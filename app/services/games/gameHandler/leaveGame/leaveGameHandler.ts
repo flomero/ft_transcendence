@@ -10,23 +10,14 @@ async function leaveGameHandler(
 
   try {
     const gameManager = getGameOfPlayer(userId);
-    if (!gameManager) {
-      return reply.notFound("Game not found");
-    }
-
-    gameValidationCheck(userId, gameManager.getId());
-
-    try {
+    if (gameManager) {
+      gameValidationCheck(userId, gameManager.getId());
       gameManager.leaveGame(userId);
-    } catch (error) {
-      if (error instanceof Error) {
-        return reply.badRequest(error.message);
-      }
     }
 
     return reply.redirect("/play");
   } catch (error) {
-    if (error instanceof Error) return reply.badRequest(error.message);
+    return reply.redirect("/play");
   }
 }
 

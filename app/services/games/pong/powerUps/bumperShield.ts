@@ -12,7 +12,7 @@ export class BumperShield extends ModifierBase {
   protected wallGoalOffsetArenaWidthFactor: number = 0;
   protected speedMultiplier: number = 0;
 
-  protected walls: Rectangle[] = [];
+  walls: Rectangle[] = [];
 
   protected wallsHitCount: number = 0;
   protected wallsHitThresold: number = 0;
@@ -133,16 +133,6 @@ export class BumperShield extends ModifierBase {
     const paddle = gameState.paddles[this.playerId];
     const playerGoalWall = gameState.walls[2 * this.playerId];
 
-    console.log(`Paddle:`);
-    console.dir(paddle, { depth: null });
-    console.log(`Wall:`);
-    console.dir(playerGoalWall, { depth: null });
-
-    console.log(`wallGoallOffset: ${this.wallGoalOffsetArenaWidthFactor}`);
-
-    console.log(`gameSettings:`);
-    console.dir(gameSettings, { depth: null });
-
     // 0. compute center positions
     const centerPos = {
       x:
@@ -159,9 +149,6 @@ export class BumperShield extends ModifierBase {
             playerGoalWall.height / 2.0),
     };
 
-    console.log(`Center pos:`);
-    console.dir(centerPos, { depth: null });
-
     const junctionPos = {
       x:
         centerPos.x +
@@ -176,9 +163,6 @@ export class BumperShield extends ModifierBase {
           gameSettings.arenaWidth) /
           2.0,
     };
-
-    console.log(`Junction pos:`);
-    console.dir(junctionPos, { depth: null });
 
     // 1. Compute wall endpoints
     // 1.1 Left wall
@@ -202,10 +186,6 @@ export class BumperShield extends ModifierBase {
       x: junctionPos.x - rightWallEndpoint.x,
       y: junctionPos.y - rightWallEndpoint.y,
     };
-
-    console.log(`left & right wall endpoints:`);
-    console.dir(leftWallEndpoint, { depth: null });
-    console.dir(rightWallEndpoint, { depth: null });
 
     // 2. Compute the walls
     const totalPossibleWidth = Math.hypot(leftWallDir.x, leftWallDir.y) || 1;
@@ -262,10 +242,6 @@ export class BumperShield extends ModifierBase {
       doResolveCollision: true,
       doRotation: true,
     };
-
-    console.log(`Walls:`);
-    console.dir(leftWall, { depth: null });
-    console.dir(rightWall, { depth: null });
 
     // 3. Add to arrays
     this.walls.push(...[leftWall, rightWall]);
