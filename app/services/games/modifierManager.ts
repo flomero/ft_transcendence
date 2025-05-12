@@ -9,7 +9,7 @@ import {
 import type { RNG } from "./rng";
 import { fastifyInstance } from "../../app";
 
-const modifiersWithState: string[] = ["timedGame", "portals"];
+const modifiersWithState: string[] = ["timedGame", "portals", "speedGate"];
 
 export class ModifierManager {
   // Arrays that maintain the allowed names and their definitions.

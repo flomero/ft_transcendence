@@ -205,8 +205,8 @@ export class SpeedGate extends TimeLimitedModifierBase {
     };
     const legWallWidth = Math.hypot(deltaWidth, portalWallsInnerWidth);
 
-    const gateWallHeight = gameSettings.paddleHeight / 4.0;
-    const legWallHeight = gateWallHeight * 2.0;
+    const gateWallHeight = gameSettings.paddleHeight / 2.0;
+    const legWallHeight = gameSettings.paddleHeight;
 
     // 3. Build walls.
     const smallPortalWall: Rectangle = {
@@ -382,5 +382,30 @@ export class SpeedGate extends TimeLimitedModifierBase {
 
     if (args.ballID === 0 && ++this.portalUseCount >= this.portalUseThreshold)
       this.deactivate(game);
+  }
+
+  getState(): Record<string, any> {
+    if (this.portalWalls.length < 4) return {};
+
+    // order is [smallPortalWall, bigPortalWall, legWall1, legWall2]
+    return {
+      p1: {
+        x: parseFloat(this.portalWalls[0].x.toFixed(3)),
+        y: parseFloat(this.portalWalls[0].y.toFixed(3)),
+        dx: parseFloat(this.portalWalls[0].dx.toFixed(3)),
+        dy: parseFloat(this.portalWalls[0].dy.toFixed(3)),
+        w: parseFloat(this.portalWalls[0].width.toFixed(3)),
+        h: parseFloat(this.portalWalls[0].height.toFixed(3)),
+      },
+
+      p2: {
+        x: parseFloat(this.portalWalls[1].x.toFixed(3)),
+        y: parseFloat(this.portalWalls[1].y.toFixed(3)),
+        dx: parseFloat(this.portalWalls[1].dx.toFixed(3)),
+        dy: parseFloat(this.portalWalls[1].dy.toFixed(3)),
+        w: parseFloat(this.portalWalls[1].width.toFixed(3)),
+        h: parseFloat(this.portalWalls[1].height.toFixed(3)),
+      },
+    };
   }
 }

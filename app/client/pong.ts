@@ -37,6 +37,7 @@ class PongGame {
 
   // For portals colorization
   private portalsWallIDs: number[] = [];
+  private speedGateWallIDs: number[] = [];
 
   private readonly KEY_MAPPINGS: Record<string, PongUserInput> = {
     ArrowUp: "UP",
@@ -135,9 +136,23 @@ class PongGame {
       this.portalsWallIDs = Object.entries(
         this.gameState.modifiersState.modifiersState["portals"],
       )
-        .map(([_, wallCorners]: [string, any]) => {
+        .map(([_, wallState]: [string, any]) => {
           const wallIndex = this.gameState?.walls.findIndex(
-            (wall) => wall.x === wallCorners.x && wall.y === wallCorners.y,
+            (wall) => wall.x === wallState.x && wall.y === wallState.y,
+          );
+          return wallIndex ?? -1;
+        })
+        .filter((index) => index !== -1);
+    }
+
+    // speedGate walls
+    if (this.gameState.modifiersState.modifiersState["speedGate"]) {
+      this.speedGateWallIDs = Object.entries(
+        this.gameState.modifiersState.modifiersState["speedGate"],
+      )
+        .map(([_, wallState]: [string, any]) => {
+          const wallIndex = this.gameState?.walls.findIndex(
+            (wall) => wall.x === wallState.x && wall.y === wallState.y,
           );
           return wallIndex ?? -1;
         })
@@ -444,6 +459,17 @@ class PongGame {
             width / 2.0,
             height / 2.0,
             ["#FFA500", "#FFFFFF", "#1E40FF", "#FFFFFF"],
+          );
+        } else if (this.speedGateWallIDs.includes(wallIndex)) {
+          this.drawNeonRectangleFromCenter(
+            this.wallCtx,
+            x,
+            y,
+            wall.dx,
+            wall.dy,
+            width / 2.0,
+            height / 2.0,
+            ["#FFA500", "#FFFFFF", "#FFFFFF", "#FFFFFF"],
           );
         } else {
           this.drawNeonRectangleToContext(

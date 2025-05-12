@@ -133,8 +133,8 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       // shooter: {
       //   chargeRadius: 3.5,
       // },
-      portals: {},
-      // speedGate: {},
+      // portals: {},
+      speedGate: {},
       // speedBoost: {},
       // bumperShield: {
       //   wallGoalOffsetArenaWidthFactor: 12,
