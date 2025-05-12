@@ -17,7 +17,7 @@ export class Portals extends TimeLimitedModifierBase {
   protected normalOffsetFactor: number = 0;
   protected normalOffsetStandardDeviationFactor: number = 0;
 
-  protected portalWalls: Rectangle[] = [];
+  portalWalls: Rectangle[] = [];
 
   protected teleportationCount: number = 0;
   protected teleportationCountThrehsold: number = 0;
@@ -334,32 +334,5 @@ export class Portals extends TimeLimitedModifierBase {
       ++this.teleportationCount >= this.teleportationCountThrehsold
     )
       this.deactivate(game);
-  }
-
-  getState(): Record<string, any> {
-    if (this.portalWalls.length < 2) return {};
-
-    const wall1 = this.portalWalls[0];
-    const wall2 = this.portalWalls[1];
-
-    return {
-      p1: {
-        x: parseFloat(wall1.x.toFixed(3)),
-        y: parseFloat(wall1.y.toFixed(3)),
-        dx: parseFloat(wall1.dx.toFixed(3)),
-        dy: parseFloat(wall1.dy.toFixed(3)),
-        w: parseFloat(wall1.width.toFixed(3)),
-        h: parseFloat(wall1.height.toFixed(3)),
-      },
-
-      p2: {
-        x: parseFloat(wall2.x.toFixed(3)),
-        y: parseFloat(wall2.y.toFixed(3)),
-        dx: parseFloat(wall2.dx.toFixed(3)),
-        dy: parseFloat(wall2.dy.toFixed(3)),
-        w: parseFloat(wall2.width.toFixed(3)),
-        h: parseFloat(wall2.height.toFixed(3)),
-      },
-    };
   }
 }

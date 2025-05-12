@@ -127,15 +127,14 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       //   totalAngle: 360,
       //   radiusFactor: 72.5,
       // },
-      // bumper: {
-      //   bumperJunctionDistanceFromCenter: 6,
-      // },
+      bumper: {},
       // shooter: {
       //   chargeRadius: 3.5,
       // },
       portals: {},
-      // speedGate: {},
+      speedGate: {},
       // speedBoost: {},
+      // protectedPowerUp: {},
       // bumperShield: {
       //   wallGoalOffsetArenaWidthFactor: 12,
       //   wallTotalWidthArenaWidthFactor: 18,
@@ -336,6 +335,8 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
     gameModeName: "classicPong",
     gameModeConfig: {
       powerUpRadius: 6.5,
+      paddleCoveragePercent: 30,
+      paddleSpeedWidthPercentS: 0.75,
     },
     modifierNames: {
       paceBreaker: {},
@@ -347,7 +348,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       goalReset: {},
       idleWallBounceAcceleration: {},
       powerUpSpawner: {
-        meanDelay: 8.5,
+        meanDelay: 9.5,
         delaySpan: 1.75,
       },
     },
@@ -382,6 +383,8 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
     gameModeName: "multiplayerPong",
     gameModeConfig: {
       powerUpRadius: 6,
+      paddleCoveragePercent: 30,
+      paddleSpeedWidthPercentS: 0.75,
     },
     modifierNames: {
       paceBreaker: {},
@@ -393,7 +396,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       goalReset: {},
       idleWallBounceAcceleration: {},
       powerUpSpawner: {
-        meanDelay: 8.5,
+        meanDelay: 9.5,
         delaySpan: 1.75,
       },
     },
@@ -437,6 +440,8 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
     gameModeName: "multiplayerPong",
     gameModeConfig: {
       powerUpRadius: 6,
+      paddleCoveragePercent: 30,
+      paddleSpeedWidthPercentS: 0.75,
     },
     modifierNames: {
       paceBreaker: {},
@@ -448,7 +453,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       goalReset: {},
       idleWallBounceAcceleration: {},
       powerUpSpawner: {
-        meanDelay: 8.5,
+        meanDelay: 9.5,
         delaySpan: 1.75,
       },
     },

@@ -13,7 +13,7 @@ export class ProtectedPowerUp extends ModifierBase {
   protected wellRadiusWidthFactor: number = 0;
   protected speedMultiplier: number = 0;
 
-  protected walls: Rectangle[] = [];
+  walls: Rectangle[] = [];
 
   protected meanSpawnRadiusHeightFactor: number = 0;
   protected stdDevSpawnRadiusHeightFactor: number = 0;
