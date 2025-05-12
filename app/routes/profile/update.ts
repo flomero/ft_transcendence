@@ -1,5 +1,9 @@
 import type { FastifyPluginAsync } from "fastify";
-import { getUserById, updateUsername } from "../../services/database/user";
+import {
+  getUserById,
+  updateUsername,
+  usernameExists,
+} from "../../services/database/user";
 import { signJWT, verifyJWT } from "../../services/auth/jwt";
 import { updateImage } from "../../services/database/image/image";
 
@@ -11,9 +15,14 @@ const updateProfile: FastifyPluginAsync = async (fastify): Promise<void> => {
 
     let newUsername = request.body as string;
     newUsername = newUsername.trim();
-    if (newUsername.length < 3)
-      return reply.badRequest("Username must be at least 3 characters long");
+    if (newUsername.length < 3 || newUsername.length > 16)
+      return reply.badRequest(
+        "Username must be at least 3 characters long and at most 32 characters long",
+      );
 
+    if (await usernameExists(fastify, newUsername)) {
+      return reply.conflict("Username already taken");
+    }
     if (!(await updateUsername(fastify, request.userId, newUsername)))
       return reply.internalServerError("Failed to update username");
 
