@@ -21,7 +21,7 @@ export class SpeedGate extends TimeLimitedModifierBase {
   protected sizeFactor: number = 0;
   protected speedFactor: number = 0;
 
-  protected portalWalls: Rectangle[] = [];
+  portalWalls: Rectangle[] = [];
 
   constructor(customConfig?: Record<string, any>) {
     super();
@@ -382,22 +382,5 @@ export class SpeedGate extends TimeLimitedModifierBase {
 
     if (args.ballID === 0 && ++this.portalUseCount >= this.portalUseThreshold)
       this.deactivate(game);
-  }
-
-  getState(): Record<string, any> {
-    if (this.portalWalls.length < 4) return {};
-
-    // order is [smallPortalWall, bigPortalWall, legWall1, legWall2]
-    return {
-      p1: {
-        x: parseFloat(this.portalWalls[0].x.toFixed(3)),
-        y: parseFloat(this.portalWalls[0].y.toFixed(3)),
-      },
-
-      p2: {
-        x: parseFloat(this.portalWalls[1].x.toFixed(3)),
-        y: parseFloat(this.portalWalls[1].y.toFixed(3)),
-      },
-    };
   }
 }

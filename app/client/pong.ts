@@ -35,10 +35,6 @@ class PongGame {
   private referenceTable: string[] = [];
   private tps: number;
 
-  // For portals colorization
-  private portalsWallIDs: number[] = [];
-  private speedGateWallIDs: number[] = [];
-
   private readonly KEY_MAPPINGS: Record<string, PongUserInput> = {
     ArrowUp: "UP",
     ArrowDown: "DOWN",
@@ -131,33 +127,7 @@ class PongGame {
     this.gameState = message.data as PongMinimalGameState;
     const currentWalls = this.gameState?.walls || [];
 
-    // For portals colorization
-    if (this.gameState.modifiersState.modifiersState["portals"]) {
-      this.portalsWallIDs = Object.entries(
-        this.gameState.modifiersState.modifiersState["portals"],
-      )
-        .map(([_, wallState]: [string, any]) => {
-          const wallIndex = this.gameState?.walls.findIndex(
-            (wall) => wall.x === wallState.x && wall.y === wallState.y,
-          );
-          return wallIndex ?? -1;
-        })
-        .filter((index) => index !== -1);
-    }
-
-    // speedGate walls
-    if (this.gameState.modifiersState.modifiersState["speedGate"]) {
-      this.speedGateWallIDs = Object.entries(
-        this.gameState.modifiersState.modifiersState["speedGate"],
-      )
-        .map(([_, wallState]: [string, any]) => {
-          const wallIndex = this.gameState?.walls.findIndex(
-            (wall) => wall.x === wallState.x && wall.y === wallState.y,
-          );
-          return wallIndex ?? -1;
-        })
-        .filter((index) => index !== -1);
-    }
+    // this.fillModifierWallsIDs();
 
     // Check if walls have changed (either count or properties)
     if (this.haveWallsChanged(prevWalls, currentWalls)) {
@@ -449,27 +419,28 @@ class PongGame {
         const y = wall.y * this.ratio;
         const width = wall.w * this.ratio;
         const height = wall.h * this.ratio;
-        if (this.portalsWallIDs.includes(wallIndex)) {
-          this.drawNeonRectangleFromCenter(
+
+        if (this.gameState?.specialWallsIDs.portal.includes(wallIndex)) {
+          // 'portal' effect walls
+          this.drawNeonRectangleToContext(
             this.wallCtx,
             x,
             y,
-            wall.dx,
-            wall.dy,
-            width / 2.0,
-            height / 2.0,
-            ["#FFA500", "#FFFFFF", "#1E40FF", "#FFFFFF"],
+            width,
+            height,
+            "#ffa500",
+            angle,
           );
-        } else if (this.speedGateWallIDs.includes(wallIndex)) {
-          this.drawNeonRectangleFromCenter(
+        } else if (this.gameState?.specialWallsIDs.bumper.includes(wallIndex)) {
+          // 'bumper' effects walls
+          this.drawNeonRectangleToContext(
             this.wallCtx,
             x,
             y,
-            wall.dx,
-            wall.dy,
-            width / 2.0,
-            height / 2.0,
-            ["#FFA500", "#FFFFFF", "#FFFFFF", "#FFFFFF"],
+            width,
+            height,
+            "#bf00ff",
+            angle,
           );
         } else {
           this.drawNeonRectangleToContext(
@@ -569,9 +540,9 @@ class PongGame {
         this.updateScoreDisplay(userId, scores[i] || 0);
       });
     }
-    this.updateTimeDisplay(
-      this.gameState.modifiersState?.modifiersState?.timedGame?.ticks,
-    );
+    const timedGame = this.gameState.modifiersState?.modifiersState?.timedGame;
+    if (!timedGame) return;
+    this.updateTimeDisplay(timedGame.ticks);
   }
 
   private updateTimeDisplay(time: number): void {

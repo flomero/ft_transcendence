@@ -7,7 +7,7 @@ import type { Pong } from "../pong";
 export class Bumper extends TimeLimitedModifierBase {
   name = "bumper";
 
-  protected bumpers: Rectangle[] = [];
+  bumpers: Rectangle[] = [];
   protected bumperJunctionDistanceFromCenter: number = 0;
   protected bumperWallJunctionDistance: number = 0;
 
@@ -150,6 +150,8 @@ export class Bumper extends TimeLimitedModifierBase {
           junctionDistanceFromCenter ** 2 + wallJunctionDistance ** 2 / 4.0,
         );
 
+        const bumperHeight = game.getSettings().paddleHeight;
+
         // Calculate the angle for the bumpers based on distances
         // Note: Changed the order of arguments in atan2 to get the correct angle
         const bumperAngle = Math.atan2(
@@ -186,7 +188,7 @@ export class Bumper extends TimeLimitedModifierBase {
           dx: leftDx, // Direction vector
           dy: leftDy,
           width: bumperLength,
-          height: wall.height, // Same height as the original wall
+          height: bumperHeight, // Same height as the original wall
           alpha: leftAngle,
           isVisible: true,
           doRotation: true,
@@ -223,7 +225,7 @@ export class Bumper extends TimeLimitedModifierBase {
           dx: rightDx, // Direction vector
           dy: rightDy,
           width: bumperLength,
-          height: wall.height, // Same height as the original wall
+          height: bumperHeight, // Same height as the original wall
           alpha: rightAngle,
           isVisible: true,
           doRotation: true,

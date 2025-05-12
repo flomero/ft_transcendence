@@ -127,15 +127,14 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       //   totalAngle: 360,
       //   radiusFactor: 72.5,
       // },
-      // bumper: {
-      //   bumperJunctionDistanceFromCenter: 6,
-      // },
+      bumper: {},
       // shooter: {
       //   chargeRadius: 3.5,
       // },
-      // portals: {},
+      portals: {},
       speedGate: {},
       // speedBoost: {},
+      // protectedPowerUp: {},
       // bumperShield: {
       //   wallGoalOffsetArenaWidthFactor: 12,
       //   wallTotalWidthArenaWidthFactor: 18,

@@ -9,7 +9,12 @@ import {
 import type { RNG } from "./rng";
 import { fastifyInstance } from "../../app";
 
-const modifiersWithState: string[] = ["timedGame", "portals", "speedGate"];
+export const portalWallsModifiers: string[] = ["portals", "speedGate"];
+export const bumperWallsModifiers: string[] = [
+  "bumper",
+  "bumperShield",
+  "protectedPowerUp",
+];
 
 export class ModifierManager {
   // Arrays that maintain the allowed names and their definitions.
@@ -167,7 +172,7 @@ export class ModifierManager {
       modifiersState: {
         ...Object.fromEntries(
           this.modifiers
-            .filter((modifier) => modifiersWithState.includes(modifier.name))
+            .filter((modifier) => modifier.name === "timedGame")
             .map((modifiers) => [modifiers.name, modifiers.getState()]),
         ),
       },
