@@ -394,7 +394,7 @@
       }
     }
     
-    console.log('Game settings:', gameSettings); // For debugging
+    console.log('Game settings:', gameSettings);
     
     // Send the data
     fetch('/games/lobby/new', {
@@ -413,15 +413,13 @@
       return response.json();
     })
     .then(data => {
-      // Redirect to the new lobby or show success message
-      window.location.href = `/games/lobby/${data.id}`;
+      // TODO: use router once in ts file
+      window.location.href = `/games/lobby/join/${data.lobbyId}`;
     })
     .catch(error => {
       console.error('Error:', error);
       alert('Error creating lobby: ' + error.message);
     });
-    
-    // Return false to prevent default form submission
     return false;
   }
 </script>
