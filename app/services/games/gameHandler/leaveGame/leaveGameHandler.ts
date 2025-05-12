@@ -16,7 +16,14 @@ async function leaveGameHandler(
 
     gameValidationCheck(userId, gameManager.getId());
 
-    gameManager.leaveGame(userId);
+    try {
+      gameManager.leaveGame(userId);
+    } catch (error) {
+      if (error instanceof Error) {
+        return reply.badRequest(error.message);
+      }
+    }
+
     return reply.redirect("/play");
   } catch (error) {
     if (error instanceof Error) return reply.badRequest(error.message);
