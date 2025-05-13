@@ -237,6 +237,8 @@ class GameManager {
       const lobby = getLobby(this.gameOrigin.lobby.getLobbyId);
       removeMemberFromLobby(lobby.getLobbyId, playerId);
     }
+
+    this.tryCoinFlipGame();
   }
 
   public disqualifyPlayer(playerId: string): void {
@@ -255,6 +257,11 @@ class GameManager {
       return console.error("[removePlayerSocket] Player not found");
     }
     player.ws = undefined;
+  }
+
+  public tryCoinFlipGame(): void {
+    if (this.game.getStatus() === GameStatus.FINISHED) return;
+    if (this.justAisInGame()) this.coinFlipAIGame();
   }
 
   public coinFlipAIGame(): void {
@@ -328,7 +335,11 @@ class GameManager {
   }
 
   public justAisInGame(): boolean {
-    if (this.players.size === 0 && this.aiOpponents.size > 0) {
+    if (
+      this.getPlayersAsArray().filter((player) => !player.leftGame).length ===
+        0 &&
+      this.aiOpponents.size > 0
+    ) {
       return true;
     }
     return false;
