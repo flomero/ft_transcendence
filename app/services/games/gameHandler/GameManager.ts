@@ -257,6 +257,10 @@ class GameManager {
     player.ws = undefined;
   }
 
+  public coinFlipAIGame(): void {
+    this.game.randomizeGame();
+  }
+
   public getPlayerSize() {
     return this.players.size + this.aiOpponents.size;
   }
