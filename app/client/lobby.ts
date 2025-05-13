@@ -175,7 +175,7 @@ class LobbyHandler {
       const response = await fetch(
         `/games/lobby/add-local-player/${this.getLobbyId()}`,
         {
-          method: "GET",
+          method: "POST",
         },
       );
 

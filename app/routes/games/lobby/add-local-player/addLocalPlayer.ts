@@ -5,7 +5,7 @@ import joinLobbySchema from "../../../../schemas/games/lobby/joinLobbySchema";
 const addLocalPlayerToLobby: FastifyPluginAsync = async (
   fastify,
 ): Promise<void> => {
-  fastify.get("/:lobbyId", {
+  fastify.post("/:lobbyId", {
     handler: addLocalPlayerHandler,
     schema: joinLobbySchema,
   });
