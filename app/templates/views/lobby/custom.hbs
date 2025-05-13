@@ -1,7 +1,7 @@
 <div class="container mt-4 form-container">
   <h1>Create New Game Lobby</h1>
   
-  <form id="newLobbyForm" onsubmit="return handleFormSubmit(event)" data-spa-ignore="true">
+  <form class="py-12" id="newLobbyForm" onsubmit="return customFormHandler.handleFormSubmit(event)" data-spa-ignore="true">
     <!-- Basic Settings -->
     <div class="form-card">
       <div class="form-card-header">
@@ -9,7 +9,7 @@
       </div>
       <div class="form-card-body">
         <div class="form-row">
-          <div class="form-col">
+          <div class="form-col" class="hidden">
             <label for="gameName" class="form-label">Game</label>
             <select id="gameName" name="gameName" class="form-select" required>
               {{#each gameNames}}
@@ -30,7 +30,7 @@
           <div class="form-col">
             <label for="playerCount" class="form-label">Player Count</label>
             <div class="form-number-container">
-              <input type="number" id="playerCount" name="playerCount" class="form-input" min="1" max="4" value="2" required>
+              <input type="number" id="playerCount" name="playerCount" class="form-input" min="2"  value="2" required>
             </div>
             <p class="form-help-text">Number of players in the game</p>
           </div>
@@ -48,7 +48,7 @@
           <div class="form-col">
             <label for="ballSpeedWidthPercentS" class="form-label">Ball Speed (% width/s)</label>
             <div class="form-number-container">
-              <input type="number" id="ballSpeedWidthPercentS" name="gameModeConfig.ballSpeedWidthPercentS" class="form-input" min="0" step="0.1" value="30">
+              <input type="number" id="ballSpeedWidthPercentS" name="gameModeConfig.ballSpeedWidthPercentS" class="form-input" min="0" step="0.1" value="52.5">
             </div>
             <p class="form-help-text">How fast the ball moves across the arena</p>
           </div>
@@ -64,7 +64,7 @@
           <div class="form-col">
             <label for="paddleCoveragePercent" class="form-label">Paddle Coverage (%)</label>
             <div class="form-number-container">
-              <input type="number" id="paddleCoveragePercent" name="gameModeConfig.paddleCoveragePercent" class="form-input" min="0" max="100" step="1" value="15">
+              <input type="number" id="paddleCoveragePercent" name="gameModeConfig.paddleCoveragePercent" class="form-input" min="0" max="100" step="1" value="25">
             </div>
             <p class="form-help-text">Percentage of wall covered by paddle</p>
           </div>
@@ -72,7 +72,7 @@
           <div class="form-col">
             <label for="paddleSpeedWidthPercentS" class="form-label">Paddle Speed</label>
             <div class="form-number-container">
-              <input type="number" id="paddleSpeedWidthPercentS" name="gameModeConfig.paddleSpeedWidthPercentS" class="form-input" min="0" step="0.1" value="50">
+              <input type="number" id="paddleSpeedWidthPercentS" name="gameModeConfig.paddleSpeedWidthPercentS" class="form-input" min="0" step="0.1" value="0.8">
             </div>
             <p class="form-help-text">How fast paddles can move (s/width)</p>
           </div>
@@ -80,7 +80,7 @@
           <div class="form-col">
             <label for="paddleVelocityAngularTransmissionPercent" class="form-label">Angular Transmission (%)</label>
             <div class="form-number-container">
-              <input type="number" id="paddleVelocityAngularTransmissionPercent" name="gameModeConfig.paddleVelocityAngularTransmissionPercent" class="form-input" min="0" step="1" value="20">
+              <input type="number" id="paddleVelocityAngularTransmissionPercent" name="gameModeConfig.paddleVelocityAngularTransmissionPercent" class="form-input" min="0" step="1" value="10">
             </div>
             <p class="form-help-text">How much paddle movement affects ball angle</p>
           </div>
@@ -88,7 +88,7 @@
           <div class="form-col">
             <label for="paddleVelocitySpeedTransmissionPercent" class="form-label">Speed Transmission (%)</label>
             <div class="form-number-container">
-              <input type="number" id="paddleVelocitySpeedTransmissionPercent" name="gameModeConfig.paddleVelocitySpeedTransmissionPercent" class="form-input" min="0" step="1" value="20">
+              <input type="number" id="paddleVelocitySpeedTransmissionPercent" name="gameModeConfig.paddleVelocitySpeedTransmissionPercent" class="form-input" min="0" step="1" value="10">
             </div>
             <p class="form-help-text">How much paddle movement affects ball speed</p>
           </div>
@@ -96,14 +96,13 @@
           <div class="form-col">
             <label for="powerUpRadius" class="form-label">Power-up Radius</label>
             <div class="form-number-container">
-              <input type="number" id="powerUpRadius" name="gameModeConfig.powerUpRadius" class="form-input" min="0" step="0.1" value="1">
+              <input type="number" id="powerUpRadius" name="gameModeConfig.powerUpRadius" class="form-input" min="0" step="0.1" value="4.5">
             </div>
             <p class="form-help-text">Size of power-up items</p>
           </div>
         </div>
       </div>
     </div>
-    
     <!-- Game Type Selection -->
     <div class="form-card">
       <div class="form-card-header">
@@ -269,19 +268,19 @@
           <div class="form-row">
             <div class="form-col">
               <label for="speedBoost_spawnWeight" class="form-label">Spawn Weight</label>
-              <input type="number" id="speedBoost_spawnWeight" name="powerUpNames.speedBoost.spawnWeight" class="form-input" min="0" step="0.1" value="1">
+              <input type="number" id="speedBoost_spawnWeight" name="powerUpNames.speedBoost.spawnWeight" class="form-input" min="0" step="0.1" value="1.0">
             </div>
             <div class="form-col">
               <label for="speedBoost_durationS" class="form-label">Duration (seconds)</label>
-              <input type="number" id="speedBoost_durationS" name="powerUpNames.speedBoost.durationS" class="form-input" min="0" step="0.1" value="3">
+              <input type="number" id="speedBoost_durationS" name="powerUpNames.speedBoost.durationS" class="form-input" min="0" step="0.1" value="5">
             </div>
             <div class="form-col">
               <label for="speedBoost_totalRampUpStrength" class="form-label">Boost Strength</label>
-              <input type="number" id="speedBoost_totalRampUpStrength" name="powerUpNames.speedBoost.totalRampUpStrength" class="form-input" min="1" step="0.1" value="1.5">
+              <input type="number" id="speedBoost_totalRampUpStrength" name="powerUpNames.speedBoost.totalRampUpStrength" class="form-input" min="1" step="0.1" value="4.5">
             </div>
             <div class="form-col">
               <label for="speedBoost_rampUpFrequencyS" class="form-label">Ramp Up Frequency (seconds)</label>
-              <input type="number" id="speedBoost_rampUpFrequencyS" name="powerUpNames.speedBoost.rampUpFrequencyS" class="form-input" min="0" step="0.1" value="0.5">
+              <input type="number" id="speedBoost_rampUpFrequencyS" name="powerUpNames.speedBoost.rampUpFrequencyS" class="form-input" min="0" step="0.1" value="0.3">
             </div>
             <div class="form-col">
               <div class="form-check">
@@ -297,11 +296,11 @@
           <div class="form-row">
             <div class="form-col">
               <label for="blinkingBall_spawnWeight" class="form-label">Spawn Weight</label>
-              <input type="number" id="blinkingBall_spawnWeight" name="powerUpNames.blinkingBall.spawnWeight" class="form-input" min="0" step="0.1" value="1">
+              <input type="number" id="blinkingBall_spawnWeight" name="powerUpNames.blinkingBall.spawnWeight" class="form-input" min="0" step="0.1" value="1.0">
             </div>
             <div class="form-col">
               <label for="blinkingBall_durationS" class="form-label">Duration (seconds)</label>
-              <input type="number" id="blinkingBall_durationS" name="powerUpNames.blinkingBall.durationS" class="form-input" min="0" step="0.1" value="3">
+              <input type="number" id="blinkingBall_durationS" name="powerUpNames.blinkingBall.durationS" class="form-input" min="0" step="0.1" value="6">
             </div>
             <div class="form-col">
               <label for="blinkingBall_blinkIntervalS" class="form-label">Blink Interval (seconds)</label>
@@ -309,7 +308,7 @@
             </div>
             <div class="form-col">
               <label for="blinkingBall_blinkDurationS" class="form-label">Blink Duration (seconds)</label>
-              <input type="number" id="blinkingBall_blinkDurationS" name="powerUpNames.blinkingBall.blinkDurationS" class="form-input" min="0" step="0.1" value="0.2">
+              <input type="number" id="blinkingBall_blinkDurationS" name="powerUpNames.blinkingBall.blinkDurationS" class="form-input" min="0" step="0.1" value="0.3">
             </div>
           </div>
         </div>
@@ -349,15 +348,15 @@
           <div class="form-row">
             <div class="form-col">
               <label for="multiBall_spawnWeight" class="form-label">Spawn Weight</label>
-              <input type="number" id="multiBall_spawnWeight" name="powerUpNames.multiBall.spawnWeight" class="form-input" min="0" step="0.1" value="1">
+              <input type="number" id="multiBall_spawnWeight" name="powerUpNames.multiBall.spawnWeight" class="form-input" min="0" step="0.1" value="1.0">
             </div>
             <div class="form-col">
               <label for="multiBall_ballCount" class="form-label">Ball Count</label>
-              <input type="number" id="multiBall_ballCount" name="powerUpNames.multiBall.ballCount" class="form-input" min="1" step="1" value="3">
+              <input type="number" id="multiBall_ballCount" name="powerUpNames.multiBall.ballCount" class="form-input" min="1" step="1" value="8">
             </div>
             <div class="form-col">
               <label for="multiBall_spreadAngleDegrees" class="form-label">Spread Angle (degrees)</label>
-              <input type="number" id="multiBall_spreadAngleDegrees" name="powerUpNames.multiBall.spreadAngleDegrees" class="form-input" min="0" step="1" value="45">
+              <input type="number" id="multiBall_spreadAngleDegrees" name="powerUpNames.multiBall.spreadAngleDegrees" class="form-input" min="0" step="1" value="80">
             </div>
           </div>
         </div>
@@ -367,23 +366,23 @@
           <div class="form-row">
             <div class="form-col">
               <label for="bumper_spawnWeight" class="form-label">Spawn Weight</label>
-              <input type="number" id="bumper_spawnWeight" name="powerUpNames.bumper.spawnWeight" class="form-input" min="0" step="0.1" value="1">
+              <input type="number" id="bumper_spawnWeight" name="powerUpNames.bumper.spawnWeight" class="form-input" min="0" step="0.1" value="1.0">
             </div>
             <div class="form-col">
               <label for="bumper_durationS" class="form-label">Duration (seconds)</label>
-              <input type="number" id="bumper_durationS" name="powerUpNames.bumper.durationS" class="form-input" min="0" step="0.1" value="5">
+              <input type="number" id="bumper_durationS" name="powerUpNames.bumper.durationS" class="form-input" min="0" step="0.1" value="10">
             </div>
             <div class="form-col">
               <label for="bumper_bumperVelocityFactor" class="form-label">Velocity Factor</label>
-              <input type="number" id="bumper_bumperVelocityFactor" name="powerUpNames.bumper.bumperVelocityFactor" class="form-input" min="0" step="0.1" value="1.2">
+              <input type="number" id="bumper_bumperVelocityFactor" name="powerUpNames.bumper.bumperVelocityFactor" class="form-input" min="0" step="0.1" value="12.5">
             </div>
             <div class="form-col">
               <label for="bumper_bumperMaxVelocityFactor" class="form-label">Max Velocity Factor</label>
-              <input type="number" id="bumper_bumperMaxVelocityFactor" name="powerUpNames.bumper.bumperMaxVelocityFactor" class="form-input" min="0" step="0.1" value="2">
+              <input type="number" id="bumper_bumperMaxVelocityFactor" name="powerUpNames.bumper.bumperMaxVelocityFactor" class="form-input" min="0" step="0.1" value="12.5">
             </div>
             <div class="form-col">
               <label for="bumper_bumperAcceleration" class="form-label">Acceleration</label>
-              <input type="number" id="bumper_bumperAcceleration" name="powerUpNames.bumper.bumperAcceleration" class="form-input" min="0" step="0.1" value="0.5">
+              <input type="number" id="bumper_bumperAcceleration" name="powerUpNames.bumper.bumperAcceleration" class="form-input" min="-10" step="0.1" value="-8.5">
             </div>
           </div>
         </div>
@@ -393,11 +392,11 @@
           <div class="form-row">
             <div class="form-col">
               <label for="portals_spawnWeight" class="form-label">Spawn Weight</label>
-              <input type="number" id="portals_spawnWeight" name="powerUpNames.portals.spawnWeight" class="form-input" min="0" step="0.1" value="1">
+              <input type="number" id="portals_spawnWeight" name="powerUpNames.portals.spawnWeight" class="form-input" min="0" step="0.1" value="1.0">
             </div>
             <div class="form-col">
               <label for="portals_durationS" class="form-label">Duration (seconds)</label>
-              <input type="number" id="portals_durationS" name="powerUpNames.portals.durationS" class="form-input" min="0" step="0.1" value="5">
+              <input type="number" id="portals_durationS" name="powerUpNames.portals.durationS" class="form-input" min="0" step="0.1" value="60">
             </div>
           </div>
         </div>
@@ -407,11 +406,11 @@
           <div class="form-row">
             <div class="form-col">
               <label for="speedGate_spawnWeight" class="form-label">Spawn Weight</label>
-              <input type="number" id="speedGate_spawnWeight" name="powerUpNames.speedGate.spawnWeight" class="form-input" min="0" step="0.1" value="1">
+              <input type="number" id="speedGate_spawnWeight" name="powerUpNames.speedGate.spawnWeight" class="form-input" min="0" step="0.1" value="1.0">
             </div>
             <div class="form-col">
               <label for="speedGate_durationS" class="form-label">Duration (seconds)</label>
-              <input type="number" id="speedGate_durationS" name="powerUpNames.speedGate.durationS" class="form-input" min="0" step="0.1" value="5">
+              <input type="number" id="speedGate_durationS" name="powerUpNames.speedGate.durationS" class="form-input" min="0" step="0.1" value="60">
             </div>
           </div>
         </div>
@@ -421,11 +420,11 @@
           <div class="form-row">
             <div class="form-col">
               <label for="protectedPowerUp_spawnWeight" class="form-label">Spawn Weight</label>
-              <input type="number" id="protectedPowerUp_spawnWeight" name="powerUpNames.protectedPowerUp.spawnWeight" class="form-input" min="0" step="0.1" value="1">
+              <input type="number" id="protectedPowerUp_spawnWeight" name="powerUpNames.protectedPowerUp.spawnWeight" class="form-input" min="0" step="0.1" value="1.0">
             </div>
             <div class="form-col">
               <label for="protectedPowerUp_powerUpName" class="form-label">Power-Up Name</label>
-              <input type="text" id="protectedPowerUp_powerUpName" name="powerUpNames.protectedPowerUp.powerUpName" class="form-input" value="default">
+              <input type="text" id="protectedPowerUp_powerUpName" name="powerUpNames.protectedPowerUp.powerUpName" class="form-input" value="bumperShield">
             </div>
           </div>
         </div>
@@ -435,11 +434,11 @@
           <div class="form-row">
             <div class="form-col">
               <label for="bumperShield_spawnWeight" class="form-label">Spawn Weight</label>
-              <input type="number" id="bumperShield_spawnWeight" name="powerUpNames.bumperShield.spawnWeight" class="form-input" min="0" step="0.1" value="1">
+              <input type="number" id="bumperShield_spawnWeight" name="powerUpNames.bumperShield.spawnWeight" class="form-input" min="0" step="0.1" value="0.0">
             </div>
             <div class="form-col">
               <label for="bumperShield_speedMultiplier" class="form-label">Speed Multiplier</label>
-              <input type="number" id="bumperShield_speedMultiplier" name="powerUpNames.bumperShield.speedMultiplier" class="form-input" min="0" step="0.1" value="1.5">
+              <input type="number" id="bumperShield_speedMultiplier" name="powerUpNames.bumperShield.speedMultiplier" class="form-input" min="0" step="0.1" value="8">
             </div>
             <div class="form-col">
               <label for="bumperShield_wallsHitThresold" class="form-label">Walls Hit Threshold</label>
@@ -479,211 +478,4 @@
   </form>
 </div>
 
-<style>
-  .hidden {
-    display: none;
-  }
-  
-  .form-subsection-title {
-    @apply font-medium text-fg;
-  }
-  
-  .text-sm {
-    @apply text-sm;
-  }
-</style>
-
-<script>
-  document.addEventListener('contentLoaded', function() {
-    // Game mode toggle functionality
-    const gameModeRadios = document.querySelectorAll('input[name="gameModeType"]');
-    
-    gameModeRadios.forEach(radio => {
-      radio.addEventListener('change', function() {
-        // Hide all game mode settings
-        document.querySelectorAll('.game-mode-settings').forEach(section => {
-          section.classList.add('hidden');
-        });
-        
-        // Show the selected game mode settings
-        const selectedSettings = document.getElementById(`${this.value}Settings`);
-        if (selectedSettings) {
-          selectedSettings.classList.remove('hidden');
-        }
-      });
-    });
-    
-    // Power-up toggle functionality
-    const powerupToggles = document.querySelectorAll('.powerup-toggle');
-    
-    powerupToggles.forEach(toggle => {
-      toggle.addEventListener('change', function() {
-        const configSection = document.getElementById(`${this.id.replace('Enabled', '')}Config`);
-        if (configSection) {
-          configSection.classList.toggle('hidden', !this.checked);
-        }
-      });
-
-      // Initialize visibility on page load
-      const configSection = document.getElementById(`${toggle.id.replace('Enabled', '')}Config`);
-      if (configSection) {
-        configSection.classList.toggle('hidden', !toggle.checked);
-      }
-    });
-  });
-
-  function handleFormSubmit(event) {
-    event.preventDefault();
-    
-    // Get the form element
-    const form = event.target;
-    const formData = new FormData(form);
-    
-    // Get the selected game mode type
-    const selectedGameModeType = document.querySelector('input[name="gameModeType"]:checked').value;
-    
-    // Initialize the base game settings object with all required fields
-    const gameSettings = {
-      gameName: formData.get('gameName'),
-      gameModeName: formData.get('gameModeName'),
-      playerCount: Number(formData.get('playerCount')),
-      gameModeConfig: {
-        powerUpCapacities: {}
-      },
-      modifierNames: {
-        powerUpSpawner: {
-          meanDelayS: Number(formData.get('modifierNames.powerUpSpawner.meanDelayS')) || 5,
-          delaySpanS: Number(formData.get('modifierNames.powerUpSpawner.delaySpanS')) || 2,
-          positionSamplerStrategyName: formData.get('modifierNames.powerUpSpawner.positionSamplerStrategyName') || "uniformArena"
-        },
-        goalReset: {},
-        paceBreaker: {
-          noResetThresholdS: 10,
-        noPaddleBounceThreshold: 10,
-        twoPaddlesBounceThreshold: 7,
-      onePaddleBounceThreshold: 14
-        }
-      },
-      powerUpNames: {
-      }
-    };
-    
-    // Add specific game mode settings
-    if (selectedGameModeType === 'timedGame') {
-      gameSettings.modifierNames.timedGame = {};
-    } else if (selectedGameModeType === 'scoredGame') {
-      gameSettings.modifierNames.scoredGame = {};
-    } else if (selectedGameModeType === 'survivalGame') {
-      gameSettings.modifierNames.survivalGame = [];
-      gameSettings.modifierNames.elimination = {};
-      
-      // Only include arenaShrink if checkbox is checked
-      if (formData.get('enableArenaShrink')) {
-        gameSettings.modifierNames.arenaShrink = [];
-      }
-    }
-    
-    // Handle power-ups
-    const speedBoostEnabled = document.getElementById('speedBoostEnabled').checked;
-    
-    if (speedBoostEnabled) {
-      gameSettings.powerUpNames.speedBoost = {};
-      gameSettings.gameModeConfig.powerUpCapacities = {
-        speedBoost: Number(formData.get('gameModeConfig.powerUpCapacities.speedBoost')) || 1.5
-      };
-    }
-    
-    // Process form fields to build the nested structure
-    for (const [key, value] of formData.entries()) {
-      // Skip special fields we've already handled
-      if (key === 'gameName' || key === 'gameModeName' || key === 'playerCount' || 
-          key === 'gameModeType' || key === 'enableArenaShrink' ||
-          key.startsWith('powerUpEnabled')) {
-        continue;
-      }
-      
-      // Skip fields for non-selected game modes
-      if ((key.startsWith('modifierNames.timedGame') && selectedGameModeType !== 'timedGame') ||
-          (key.startsWith('modifierNames.scoredGame') && selectedGameModeType !== 'scoredGame') ||
-          (key.startsWith('modifierNames.survivalGame') || key.startsWith('modifierNames.elimination')) && 
-            selectedGameModeType !== 'survivalGame' ||
-          (key.startsWith('modifierNames.arenaShrink') && 
-            (selectedGameModeType !== 'survivalGame' || !formData.get('enableArenaShrink')))) {
-        continue;
-      }
-      
-      // Skip power-up configuration if power-up is not enabled
-      if (key.startsWith('powerUpNames.speedBoost') && !speedBoostEnabled) {
-        continue;
-      }
-      
-      // Process nested path
-      if (key.includes('.')) {
-        const parts = key.split('.');
-        let current = gameSettings;
-        
-        // Navigate the path and create objects as needed
-        for (let i = 0; i < parts.length - 1; i++) {
-          const part = parts[i];
-          
-          // Skip if we're already at a non-object
-          if (typeof current !== 'object' || current === null) {
-            break;
-          }
-          
-          // Create the path if it doesn't exist
-          if (!(part in current)) {
-            current[part] = isNaN(Number(parts[i + 1])) ? {} : [];
-          }
-          
-          current = current[part];
-        }
-        
-        // Set the value if we have a valid path
-        if (typeof current === 'object' && current !== null) {
-          const lastKey = parts[parts.length - 1];
-          
-          // Convert values to appropriate types
-          if (value === 'true') {
-            current[lastKey] = true;
-          } else if (value === 'false') {
-            current[lastKey] = false;
-          } else if (!isNaN(value) && value !== '') {
-            current[lastKey] = Number(value);
-          } else {
-            current[lastKey] = value;
-          }
-        }
-      }
-    }
-    
-    console.log('Game settings:', gameSettings);
-    
-    // Send the data
-    fetch('/games/lobby/new', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(gameSettings)
-    })
-    .then(response => {
-      if (!response.ok) {
-        return response.json().then(err => {
-          throw new Error(err.message || 'Network response was not ok');
-        });
-      }
-      return response.json();
-    })
-    .then(data => {
-      // Redirect to the new lobby or show success message
-      window.location.href = `/games/lobby/join/${data.lobbyId}`;
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('Error creating lobby: ' + error.message);
-    });
-    
-    return false;
-  }
-</script>
+<script type="module" src="/js/custom.js"></script>

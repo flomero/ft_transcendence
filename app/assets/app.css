@@ -379,4 +379,8 @@
   .form-check-input:disabled {
     @apply cursor-not-allowed opacity-50;
   }
+
+  .form-subsection-title {
+    @apply text-fg font-medium;
+  }
 }
