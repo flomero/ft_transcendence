@@ -28,12 +28,12 @@ class Chat {
           this.handleRoomUpdate(data);
         }
       } catch (error) {
-        console.error("Error processing socket message:", error);
+        // console.error("Error processing socket message:", error);
       }
     };
 
     this.socket.onerror = (error) => {
-      console.error("WebSocket error:", error);
+      // console.error("WebSocket error:", error);
     };
   }
 
@@ -113,7 +113,7 @@ class Chat {
 
     fetch("/chat/-1", {}).then((r) => {
       if (!r.ok) {
-        console.error("Error clearing current room:", r.status);
+        // console.error("Error clearing current room:", r.status);
       }
     });
   };
@@ -144,7 +144,7 @@ class Chat {
       .then(() => {
         form.reset();
       })
-      .catch((error) => console.error("Error sending message:", error));
+      .catch((error) => console.info(""));
   };
 
   selectRoom = (event: Event): void => {
@@ -159,7 +159,7 @@ class Chat {
       clickedRoom.querySelector(".chat-room-name p")?.textContent || "";
 
     if (!roomId) {
-      console.error("No room ID found");
+      // console.error("No room ID found");
       return;
     }
 
@@ -222,14 +222,14 @@ class Chat {
           }, 300);
         }, 300);
       })
-      .catch((error) => console.error("Error fetching room:", error));
+      .catch((error) => console.info(""));
   }
 
   showInviteButtons() {
     const chatRoomsView = document.getElementById("chat-rooms");
 
     if (!chatRoomsView) {
-      console.error("Chat rooms view not found");
+      // console.error("Chat rooms view not found");
       return;
     }
     const inviteIcons = chatRoomsView.querySelectorAll(
@@ -243,7 +243,7 @@ class Chat {
   hideInviteButtons() {
     const chatRoomsView = document.getElementById("chat-rooms");
     if (!chatRoomsView) {
-      console.error("Chat rooms view not found");
+      // console.error("Chat rooms view not found");
       return;
     }
     const inviteIcons = chatRoomsView.querySelectorAll(
@@ -262,18 +262,18 @@ class Chat {
 
     const roomDiv = button.closest("[data-room-id]");
     if (!roomDiv) {
-      console.error("No room element found");
+      // console.error("No room element found");
       return;
     }
     const roomId = roomDiv.getAttribute("data-room-id");
     if (!roomId) {
-      console.error("No room ID found");
+      // console.error("No room ID found");
       return;
     }
 
     const svgs = button.querySelectorAll("svg");
     if (svgs.length < 2) {
-      console.error("SVG icons not found");
+      // console.error("SVG icons not found");
       return;
     }
     const inviteIcon = svgs[0];
@@ -295,13 +295,13 @@ class Chat {
         waitId = match[1];
         endpoint = "/games/tournament/";
       } else {
-        console.error("No match UUID found");
+        // console.error("No match UUID found");
         return;
       }
     }
 
     if (!waitId) {
-      console.error("No match UUID found");
+      // console.error("No match UUID found");
       return;
     }
 
