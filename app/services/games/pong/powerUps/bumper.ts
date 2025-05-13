@@ -17,6 +17,9 @@ export class Bumper extends TimeLimitedModifierBase {
   protected bumperMaxVelocityFactor: number = 0;
   protected bumperAcceleration: number = 0;
 
+  protected bounceCounter: number = 0;
+  protected bounceThreshold: number = 10;
+
   constructor(customConfig?: Record<string, any>) {
     super();
 
@@ -126,8 +129,10 @@ export class Bumper extends TimeLimitedModifierBase {
 
     // Convert percentages to actual distances based on arena dimensions
     const junctionDistanceFromCenter =
-      (this.bumperJunctionDistanceFromCenter * game.getSettings().arenaHeight) /
-      2.0;
+      ((this.bumperJunctionDistanceFromCenter *
+        game.getSettings().arenaHeight) /
+        2.0) *
+      (1 + (this.bounceCounter + 1) / this.bounceThreshold);
 
     // Array.from({ length: gameState.playerCount }).forEach((_, index) => {
     //   const wallID = 2 * index + 1;
@@ -140,7 +145,10 @@ export class Bumper extends TimeLimitedModifierBase {
         const sa = parseFloat(Math.sin(wall.alpha).toFixed(3));
 
         const wallJunctionDistance =
-          this.bumperWallJunctionDistance * wall.width;
+          (this.bumperWallJunctionDistance *
+            wall.width *
+            (this.bounceThreshold - this.bounceCounter)) /
+          this.bounceThreshold;
         // Calculate junction point for the bumpers
         const junctionX = wall.x - junctionDistanceFromCenter * ca;
         const junctionY = wall.y - junctionDistanceFromCenter * sa;
@@ -256,6 +264,14 @@ export class Bumper extends TimeLimitedModifierBase {
     if (game.getState().balls.length === 0) return;
     game.getState().balls[args.ballID].speed +=
       this.velocityFactor * game.getState().balls[args.ballID].speed;
+
+    if (args.ballID === 0 && ++this.bounceCounter >= this.bounceThreshold) {
+      this.deactivate(game);
+      return;
+    }
+
+    this.clearWalls(game);
+    this.createBumperWalls(game);
   }
 
   onUpdate(game: Pong): void {
@@ -277,12 +293,7 @@ export class Bumper extends TimeLimitedModifierBase {
   }
 
   onDeactivation(game: Pong): void {
-    if (game.getState().walls.length > 0)
-      this.bumpers.forEach((bumperWall) => {
-        const wallID = game.getState().walls.indexOf(bumperWall);
-        if (wallID < 0) return;
-        game.getState().walls.splice(wallID, 1);
-      });
+    this.clearWalls(game);
     game.getModifierManager().deletePowerUp(this);
   }
 
@@ -293,6 +304,11 @@ export class Bumper extends TimeLimitedModifierBase {
   }
 
   onArenaModification(game: Pong): void {
+    this.clearWalls(game);
+    this.createBumperWalls(game);
+  }
+
+  protected clearWalls(game: Pong) {
     if (game.getState().walls.length > 0) {
       this.bumpers.forEach((bumperWall) => {
         const wallID = game.getState().walls.indexOf(bumperWall);
@@ -301,7 +317,5 @@ export class Bumper extends TimeLimitedModifierBase {
       });
       this.bumpers = [];
     }
-
-    this.createBumperWalls(game);
   }
 }
