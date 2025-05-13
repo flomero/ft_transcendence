@@ -30,14 +30,14 @@ export const createLocalPlayer = async (
     return;
   }
 
-  const image_uuid = await saveImage(fastify, localPlayerImage);
+  const image_id = await saveImage(fastify, localPlayerImage);
   await insertUserIfNotExists(fastify, {
     id: "localPlayer",
     username: "localPlayer",
-    image_id: image_uuid,
+    image_id: image_id,
   });
 
-  localPlayerWithImage.image_uuid = image_uuid;
+  localPlayerWithImage.image_id = image_id;
 };
 
 // export default createAIOpponents;

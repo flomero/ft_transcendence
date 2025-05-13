@@ -44,7 +44,7 @@ async function joinLobbyHandler(
   if (lobby.members) {
     for (const lobbyUsers of lobby.members) {
       if (lobbyUsers.isLocal) {
-        lobbyUsers.image_id = localPlayerWithImage.image_uuid;
+        lobbyUsers.image_id = localPlayerWithImage.image_id;
         lobbyUsers.username = localPlayerWithImage.userName;
       }
     }
@@ -54,6 +54,7 @@ async function joinLobbyHandler(
   const data = {
     title: "Lobby | ft_transcendence",
     lobby: lobby,
+    isFull: realLobby.isLobbyFull(),
     isReady: realLobby.getMember(userId)?.isReady || false,
     isOwner: realLobby.isMemberOwner(userId),
     allMembersReady:

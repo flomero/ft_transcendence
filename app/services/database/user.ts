@@ -27,10 +27,12 @@ export function userToUserWithImage(user: User): UserWithImage {
 export const localPlayerWithImage = {
   userId: "localPlayer",
   userName: "- Local -",
+  username: "- Local -",
   imageUrl: `/image/`,
   online: true,
-  image_uuid: randomUUID(),
-};
+  image_id: randomUUID(),
+  id: randomUUID(),
+} satisfies UserWithImage | User;
 
 // export async function localUserWithImage(fastify: FastifyInstance, localUser: User): Promise<UserWithImage> {
 //   const sql = "SELECT * FROM users WHERE id = ?";
@@ -120,7 +122,7 @@ export async function getUserWithImage(
   let userWithImage: UserWithImage | undefined;
   if (userID.startsWith("#")) {
     userWithImage = localPlayerWithImage;
-    userWithImage.imageUrl += localPlayerWithImage.image_uuid;
+    userWithImage.imageUrl += localPlayerWithImage.image_id;
   } else {
     user = await getUserById(fastify, userID);
     if (user === null || user === undefined) return;

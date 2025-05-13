@@ -39,6 +39,6 @@ export default fp(async (fastify) => {
 
     const sql = `SELECT * FROM users WHERE id = ?`;
     const localPlayer = await fastify.sqlite.get(sql, "localPlayer");
-    if (localPlayer) localPlayerWithImage.image_uuid = localPlayer.image_id;
+    if (localPlayer) localPlayerWithImage.image_id = localPlayer.image_id;
   });
 });

@@ -103,7 +103,7 @@ class Lobby {
     };
 
     this.sendMessageToAllMembers(
-      JSON.stringify({ type: "addedLocalPlayer", data: localPlayerID }),
+      JSON.stringify({ type: "addedAI", data: localPlayerID }),
     );
     this.lobbyMembers.set(localPlayerID, newMember);
   }
