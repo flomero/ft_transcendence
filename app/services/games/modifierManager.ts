@@ -98,7 +98,8 @@ export class ModifierManager {
 
     const pdfArray: number[] = this.availablePowerUps
       .filter((name) => !this.unavailablePowerUps.includes(name))
-      .map((name) => registryPowerUps[name].spawnWeight);
+      .map((name) => registryPowerUps[name].spawnWeight)
+      .filter((probability) => probability > 0.0);
 
     // Compute total density
     const totalDensity = pdfArray.reduce((acc, val) => acc + val, 0);
@@ -209,6 +210,14 @@ export class ModifierManager {
       return false;
     }
 
+    this.spawnPowerUp(powerUpName, position);
+
+    this.trigger("onPowerUpSpawn");
+
+    return true;
+  }
+
+  spawnPowerUp(powerUpName: string, position: { x: number; y: number }) {
     // Update counter & availability
     this.powerUpCounters[powerUpName]++;
     this.updateAvailability(powerUpName);
@@ -228,10 +237,6 @@ export class ModifierManager {
         doGoal: false,
       } as Ball,
     ]);
-
-    this.trigger("onPowerUpSpawn");
-
-    return true;
   }
 
   // Handle power-up deletion
@@ -321,5 +326,9 @@ export class ModifierManager {
 
   getCDF(): number[] {
     return this.cumulativeDensityFunction;
+  }
+
+  getAvailablePowerUps(): string[] {
+    return this.availablePowerUps;
   }
 }

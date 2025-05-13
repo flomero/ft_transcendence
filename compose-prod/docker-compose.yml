@@ -21,12 +21,16 @@ services:
         container_name: nginx
         volumes:
             - ./nginx.conf:/etc/nginx/conf.d/default.conf
+            - ./grafana.conf:/etc/nginx/conf.d/grafana.conf
+            - ./prometheus.conf:/etc/nginx/conf.d/prometheus.conf
             - nginx-ssl:/etc/ssl
         depends_on:
             - app
         ports:
-            - 80:80
-            - 443:443
+            - "80:80"
+            - "443:443"
+            - "4000:4000"
+            - "9090:9090"
         command: |
             bash -c "if [ ! -f /etc/ssl/nginx.key ] || [ ! -f /etc/ssl/nginx.crt ]; then \
                 openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/nginx.key -out /etc/ssl/nginx.crt -subj '/CN=localhost'; \
@@ -39,8 +43,6 @@ services:
             - ../monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
             - ../monitoring/prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml
             - prometheus-data:/prometheus
-        ports:
-            - "9090:9090"
         restart: unless-stopped
         command:
             - "--config.file=/etc/prometheus/prometheus.yml"
@@ -52,8 +54,6 @@ services:
         container_name: alertmanager
         volumes:
             - ../monitoring/alertmanager:/etc/alertmanager
-        env_file: # <— simplest, guaranteed to work
-            - .env
         command:
             - "--config.file=/etc/alertmanager/alertmanager.yml"
         ports:
@@ -66,12 +66,10 @@ services:
         volumes:
             - grafana-data:/var/lib/grafana
             - ../monitoring/grafana/provisioning:/etc/grafana/provisioning
-        ports:
-            - "4000:3000"
         restart: unless-stopped
         environment:
-            - GF_SECURITY_ADMIN_USER=admin
-            - GF_SECURITY_ADMIN_PASSWORD=your_secure_password
+            - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER}
+            - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
 
     node-exporter:
         image: prom/node-exporter:v1.9.1

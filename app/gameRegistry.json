@@ -50,7 +50,7 @@
         },
 
         "customizableSettings": {
-          "ballSpeedWidthPercentS": 52.5,
+          "ballSpeedWidthPercentS": 55,
           "ballRadius": 0.625,
           "ballResetSampler": "biasedGaussianCA",
           "paddleCoveragePercent": 25,
@@ -182,12 +182,12 @@
         "className": "Bumper",
         "spawnWeight": 1.0,
         "selfActivation": false,
-        "durationS": 10,
+        "durationS": 120,
         "bumperJunctionDistanceFromCenterPercent": 12,
         "bumperWallJunctionDistancePercent": 90,
-        "bumperVelocityPercent": 12.5,
-        "bumperMaxVelocityPercent": 12.5,
-        "bumperAccelerationPercentS": -8.5
+        "bumperVelocityPercent": 10,
+        "bumperMaxVelocityPercent": 50,
+        "bumperAccelerationPercentS": 0.0
       },
 
       "portals": {

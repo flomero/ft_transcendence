@@ -170,6 +170,33 @@ class LobbyHandler {
     }
   }
 
+  public async addLocalPlayer(): Promise<void> {
+    try {
+      const response = await fetch(
+        `/games/lobby/add-local-player/${this.getLobbyId()}`,
+        {
+          method: "POST",
+        },
+      );
+
+      if (!response.ok) {
+        const msg = await response.text();
+        const data = JSON.parse(msg);
+        throw new Error(
+          data?.message || `Failed to add AI opponent: ${response.statusText}`,
+        );
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        this.handleError(error);
+      } else {
+        this.handleError(
+          new Error("Failed to add AI opponent. Please try again later."),
+        );
+      }
+    }
+  }
+
   public async unsetReady(): Promise<void> {
     this.toggleReadyState(false);
   }

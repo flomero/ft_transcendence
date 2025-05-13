@@ -6,4 +6,5 @@ export type LobbyMember = {
   isReady: boolean;
   socket?: WebSocket;
   isAi: boolean;
+  isLocal: boolean;
 };

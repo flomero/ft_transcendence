@@ -100,9 +100,9 @@ export const getMatchHistoryService = async (
     (a, b) => Date.parse(b.matchDate) - Date.parse(a.matchDate),
   );
 
-  fastify.log.debug(
-    `Match history for user ${userId}: ${JSON.stringify(result)}`,
-  );
+  // fastify.log.debug(
+  //   `Match history for user ${userId}: ${JSON.stringify(result)}`,
+  // );
 
   return result;
 };

@@ -87,6 +87,8 @@ export class ModifierBase {
   onArenaModification(game: Pong): void {}
   onBallOutOfBounds(game: Pong, args: { ballID: number }): void {}
 
+  onRandomizeGame(game: Pong): void {}
+
   // Getters & Setters
   getName(): string {
     return this.name;

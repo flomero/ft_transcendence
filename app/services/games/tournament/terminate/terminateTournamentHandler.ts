@@ -2,7 +2,7 @@ import type { FastifyRequest, FastifyReply } from "fastify";
 import canTournamentBeLeftCheck from "../../lobby/leave/canTournamentBeLeftCheck";
 import { tournaments } from "../tournaments";
 
-async function leaveTournamentHandler(
+async function terminateTournamentHandler(
   request: FastifyRequest<{ Params: { lobbyId: string } }>,
   reply: FastifyReply,
 ) {
@@ -12,7 +12,7 @@ async function leaveTournamentHandler(
 
     canTournamentBeLeftCheck(userId, tournamentId);
     const tournamentManager = tournaments.get(tournamentId);
-    tournamentManager?.removeMemberSave(userId);
+    tournamentManager?.terminate(userId);
     return reply.code(201).send({ tournamentId: tournamentId });
   } catch (error) {
     if (error instanceof Error) return reply.badRequest(error.message);
@@ -20,4 +20,4 @@ async function leaveTournamentHandler(
   }
 }
 
-export default leaveTournamentHandler;
+export default terminateTournamentHandler;
