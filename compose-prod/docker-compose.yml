@@ -54,8 +54,6 @@ services:
         container_name: alertmanager
         volumes:
             - ../monitoring/alertmanager:/etc/alertmanager
-        env_file: # <— simplest, guaranteed to work
-            - .env
         command:
             - "--config.file=/etc/alertmanager/alertmanager.yml"
         ports:
@@ -70,8 +68,8 @@ services:
             - ../monitoring/grafana/provisioning:/etc/grafana/provisioning
         restart: unless-stopped
         environment:
-            - GF_SECURITY_ADMIN_USER=admin
-            - GF_SECURITY_ADMIN_PASSWORD=your_secure_password
+            - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER}
+            - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
 
     node-exporter:
         image: prom/node-exporter:v1.9.1
