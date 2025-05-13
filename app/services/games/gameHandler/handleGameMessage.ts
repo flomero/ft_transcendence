@@ -9,7 +9,7 @@ const handleGameMessage = (
 ) => {
   const gameManager = gameManagers.get(gameManagerId);
   if (gameManager === undefined) return;
-  const player = gameManager.getPlayer(userId);
+  let player = gameManager.getPlayer(userId);
   if (player === undefined) return;
   try {
     validGameMessageCheck(message);
@@ -17,6 +17,10 @@ const handleGameMessage = (
 
     switch (messageObj.type) {
       case "userInput":
+        if (messageObj.options.isLocal) {
+          player = gameManager.getPlayer("#" + userId);
+          if (!player) return;
+        }
         messageObj.options.playerId = player.id;
         gameManager.handleAction(messageObj);
         break;
