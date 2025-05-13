@@ -74,7 +74,7 @@
             <div class="form-number-container">
               <input type="number" id="paddleSpeedWidthPercentS" name="gameModeConfig.paddleSpeedWidthPercentS" class="form-input" min="0" step="0.1" value="50">
             </div>
-            <p class="form-help-text">How fast paddles can move</p>
+            <p class="form-help-text">How fast paddles can move (s/width)</p>
           </div>
           
           <div class="form-col">
@@ -201,94 +201,249 @@
         <h2 class="form-section-title mb-0">Power-Ups</h2>
       </div>
       <div class="form-card-body">
-        <!-- Power-Up Spawner -->
-        <div class="mb-4">
-          <h3 class="form-subsection-title">Power-Up Spawning</h3>
-          <div class="form-row">
-            <div class="form-col">
-              <label for="meanDelayS" class="form-label">Mean Delay (seconds)</label>
-              <div class="form-number-container">
-                <input type="number" id="meanDelayS" name="modifierNames.powerUpSpawner.meanDelayS" class="form-input" min="0" step="0.5" value="5">
-              </div>
-              <p class="form-help-text">Average time between power-up spawns</p>
-            </div>
-            
-            <div class="form-col">
-              <label for="delaySpanS" class="form-label">Delay Variation (seconds)</label>
-              <div class="form-number-container">
-                <input type="number" id="delaySpanS" name="modifierNames.powerUpSpawner.delaySpanS" class="form-input" min="0" step="0.5" value="2">
-              </div>
-              <p class="form-help-text">Random variation in spawn timing</p>
-            </div>
-            
-            <div class="form-col">
-              <label for="positionSamplerStrategyName" class="form-label">Spawn Pattern</label>
-              <select id="positionSamplerStrategyName" name="modifierNames.powerUpSpawner.positionSamplerStrategyName" class="form-select">
-                {{#each positionSamplers}}
-                  <option value="{{this}}">{{formatName this}}</option>
-                {{/each}}
-              </select>
-              <p class="form-help-text">How power-ups are positioned on the field</p>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Available Power-Ups Selection -->
+        <!-- Power-Up Selection -->
         <div class="mb-4">
           <h3 class="form-subsection-title">Available Power-Ups</h3>
           <p class="form-help-text mb-3">Select which power-ups will appear in the game</p>
-          
-          <div class="form-row mb-2">
+          <div class="form-row">
             <div class="form-col">
               <div class="form-check">
-                <input type="checkbox" id="speedBoostEnabled" name="powerUpEnabled.speedBoost" class="form-check-input powerup-toggle" checked>
+                <input type="checkbox" id="speedBoostEnabled" name="powerUpEnabled.speedBoost" class="form-check-input powerup-toggle">
                 <label for="speedBoostEnabled" class="form-check-label">Speed Boost</label>
+              </div>
+            </div>
+            <div class="form-col">
+              <div class="form-check">
+                <input type="checkbox" id="blinkingBallEnabled" name="powerUpEnabled.blinkingBall" class="form-check-input powerup-toggle">
+                <label for="blinkingBallEnabled" class="form-check-label">Blinking Ball</label>
+              </div>
+            </div>
+            <div class="form-col">
+              <div class="form-check">
+                <input type="checkbox" id="shooterEnabled" name="powerUpEnabled.shooter" class="form-check-input powerup-toggle">
+                <label for="shooterEnabled" class="form-check-label">Shooter</label>
+              </div>
+            </div>
+            <div class="form-col">
+              <div class="form-check">
+                <input type="checkbox" id="multiBallEnabled" name="powerUpEnabled.multiBall" class="form-check-input powerup-toggle">
+                <label for="multiBallEnabled" class="form-check-label">Multi Ball</label>
+              </div>
+            </div>
+            <div class="form-col">
+              <div class="form-check">
+                <input type="checkbox" id="bumperEnabled" name="powerUpEnabled.bumper" class="form-check-input powerup-toggle">
+                <label for="bumperEnabled" class="form-check-label">Bumper</label>
+              </div>
+            </div>
+            <div class="form-col">
+              <div class="form-check">
+                <input type="checkbox" id="portalsEnabled" name="powerUpEnabled.portals" class="form-check-input powerup-toggle">
+                <label for="portalsEnabled" class="form-check-label">Portals</label>
+              </div>
+            </div>
+            <div class="form-col">
+              <div class="form-check">
+                <input type="checkbox" id="speedGateEnabled" name="powerUpEnabled.speedGate" class="form-check-input powerup-toggle">
+                <label for="speedGateEnabled" class="form-check-label">Speed Gate</label>
+              </div>
+            </div>
+            <div class="form-col">
+              <div class="form-check">
+                <input type="checkbox" id="protectedPowerUpEnabled" name="powerUpEnabled.protectedPowerUp" class="form-check-input powerup-toggle">
+                <label for="protectedPowerUpEnabled" class="form-check-label">Protected Power-Up</label>
+              </div>
+            </div>
+            <div class="form-col">
+              <div class="form-check">
+                <input type="checkbox" id="bumperShieldEnabled" name="powerUpEnabled.bumperShield" class="form-check-input powerup-toggle">
+                <label for="bumperShieldEnabled" class="form-check-label">Bumper Shield</label>
               </div>
             </div>
           </div>
         </div>
-        
-        <!-- Speed Boost Configuration -->
-        <div class="powerup-config" id="speedBoostConfig">
+
+        <!-- Power-Up Configurations -->
+        <div class="powerup-config hidden" id="speedBoostConfig">
           <h3 class="form-subsection-title">Speed Boost Configuration</h3>
           <div class="form-row">
             <div class="form-col">
-              <label for="spawnWeight" class="form-label">Spawn Weight</label>
-              <div class="form-number-container">
-                <input type="number" id="spawnWeight" name="powerUpNames.speedBoost.spawnWeight" class="form-input" min="0" step="0.1" value="1">
-              </div>
-              <p class="form-help-text">Relative chance of spawning (higher = more frequent)</p>
+              <label for="speedBoost_spawnWeight" class="form-label">Spawn Weight</label>
+              <input type="number" id="speedBoost_spawnWeight" name="powerUpNames.speedBoost.spawnWeight" class="form-input" min="0" step="0.1" value="1">
             </div>
-            
             <div class="form-col">
-              <div class="form-check mt-4">
-                <input type="checkbox" id="selfActivation" name="powerUpNames.speedBoost.selfActivation" class="form-check-input" value="true">
-                <label for="selfActivation" class="form-check-label">Self Activation</label>
-                <p class="form-help-text">Activates immediately when collected</p>
+              <label for="speedBoost_durationS" class="form-label">Duration (seconds)</label>
+              <input type="number" id="speedBoost_durationS" name="powerUpNames.speedBoost.durationS" class="form-input" min="0" step="0.1" value="3">
+            </div>
+            <div class="form-col">
+              <label for="speedBoost_totalRampUpStrength" class="form-label">Boost Strength</label>
+              <input type="number" id="speedBoost_totalRampUpStrength" name="powerUpNames.speedBoost.totalRampUpStrength" class="form-input" min="1" step="0.1" value="1.5">
+            </div>
+            <div class="form-col">
+              <label for="speedBoost_rampUpFrequencyS" class="form-label">Ramp Up Frequency (seconds)</label>
+              <input type="number" id="speedBoost_rampUpFrequencyS" name="powerUpNames.speedBoost.rampUpFrequencyS" class="form-input" min="0" step="0.1" value="0.5">
+            </div>
+            <div class="form-col">
+              <div class="form-check">
+                <input type="checkbox" id="speedBoost_selfActivation" name="powerUpNames.speedBoost.selfActivation" class="form-check-input">
+                <label for="speedBoost_selfActivation" class="form-check-label">Self Activation</label>
               </div>
             </div>
-            
+          </div>
+        </div>
+
+        <div class="powerup-config hidden" id="blinkingBallConfig">
+          <h3 class="form-subsection-title">Blinking Ball Configuration</h3>
+          <div class="form-row">
             <div class="form-col">
-              <label for="boostDurationS" class="form-label">Duration (seconds)</label>
-              <div class="form-number-container">
-                <input type="number" id="boostDurationS" name="powerUpNames.speedBoost.durationS" class="form-input" min="0" step="0.1" value="3">
-              </div>
+              <label for="blinkingBall_spawnWeight" class="form-label">Spawn Weight</label>
+              <input type="number" id="blinkingBall_spawnWeight" name="powerUpNames.blinkingBall.spawnWeight" class="form-input" min="0" step="0.1" value="1">
             </div>
-            
             <div class="form-col">
-              <label for="totalRampUpStrength" class="form-label">Boost Strength</label>
-              <div class="form-number-container">
-                <input type="number" id="totalRampUpStrength" name="powerUpNames.speedBoost.totalRampUpStrength" class="form-input" min="1" step="0.1" value="1.5">
-              </div>
-              <p class="form-help-text">Speed multiplier (1.5 = 50% faster)</p>
+              <label for="blinkingBall_durationS" class="form-label">Duration (seconds)</label>
+              <input type="number" id="blinkingBall_durationS" name="powerUpNames.blinkingBall.durationS" class="form-input" min="0" step="0.1" value="3">
             </div>
-            
             <div class="form-col">
-              <label for="rampUpFrequencyS" class="form-label">Ramp Up Frequency (seconds)</label>
-              <div class="form-number-container">
-                <input type="number" id="rampUpFrequencyS" name="powerUpNames.speedBoost.rampUpFrequencyS" class="form-input" min="0" step="0.1" value="0.5">
-              </div>
-              <p class="form-help-text">How quickly speed increases to maximum</p>
+              <label for="blinkingBall_blinkIntervalS" class="form-label">Blink Interval (seconds)</label>
+              <input type="number" id="blinkingBall_blinkIntervalS" name="powerUpNames.blinkingBall.blinkIntervalS" class="form-input" min="0" step="0.1" value="0.5">
+            </div>
+            <div class="form-col">
+              <label for="blinkingBall_blinkDurationS" class="form-label">Blink Duration (seconds)</label>
+              <input type="number" id="blinkingBall_blinkDurationS" name="powerUpNames.blinkingBall.blinkDurationS" class="form-input" min="0" step="0.1" value="0.2">
+            </div>
+          </div>
+        </div>
+
+        <div class="powerup-config hidden" id="shooterConfig">
+          <h3 class="form-subsection-title">Shooter Configuration</h3>
+          <div class="form-row">
+            <div class="form-col">
+              <label for="shooter_spawnWeight" class="form-label">Spawn Weight</label>
+              <input type="number" id="shooter_spawnWeight" name="powerUpNames.shooter.spawnWeight" class="form-input" min="0" step="0.1" value="1">
+            </div>
+            <div class="form-col">
+              <label for="shooter_durationS" class="form-label">Duration (seconds)</label>
+              <input type="number" id="shooter_durationS" name="powerUpNames.shooter.durationS" class="form-input" min="0" step="0.1" value="3">
+            </div>
+            <div class="form-col">
+              <label for="shooter_chargeDurationS" class="form-label">Charge Duration (seconds)</label>
+              <input type="number" id="shooter_chargeDurationS" name="powerUpNames.shooter.chargeDurationS" class="form-input" min="0" step="0.1" value="1">
+            </div>
+            <div class="form-col">
+              <label for="shooter_chargeRadiusS" class="form-label">Charge Radius</label>
+              <input type="number" id="shooter_chargeRadiusS" name="powerUpNames.shooter.chargeRadiusS" class="form-input" min="0" step="0.1" value="1">
+            </div>
+            <div class="form-col">
+              <label for="shooter_shootAdditionalVelocityS" class="form-label">Additional Velocity</label>
+              <input type="number" id="shooter_shootAdditionalVelocityS" name="powerUpNames.shooter.shootAdditionalVelocityS" class="form-input" min="0" step="0.1" value="1">
+            </div>
+            <div class="form-col">
+              <label for="shooter_playerSamplerStrategyName" class="form-label">Player Sampler Strategy</label>
+              <input type="text" id="shooter_playerSamplerStrategyName" name="powerUpNames.shooter.playerSamplerStrategyName" class="form-input" value="default">
+            </div>
+          </div>
+        </div>
+
+        <div class="powerup-config hidden" id="multiBallConfig">
+          <h3 class="form-subsection-title">Multi Ball Configuration</h3>
+          <div class="form-row">
+            <div class="form-col">
+              <label for="multiBall_spawnWeight" class="form-label">Spawn Weight</label>
+              <input type="number" id="multiBall_spawnWeight" name="powerUpNames.multiBall.spawnWeight" class="form-input" min="0" step="0.1" value="1">
+            </div>
+            <div class="form-col">
+              <label for="multiBall_ballCount" class="form-label">Ball Count</label>
+              <input type="number" id="multiBall_ballCount" name="powerUpNames.multiBall.ballCount" class="form-input" min="1" step="1" value="3">
+            </div>
+            <div class="form-col">
+              <label for="multiBall_spreadAngleDegrees" class="form-label">Spread Angle (degrees)</label>
+              <input type="number" id="multiBall_spreadAngleDegrees" name="powerUpNames.multiBall.spreadAngleDegrees" class="form-input" min="0" step="1" value="45">
+            </div>
+          </div>
+        </div>
+
+        <div class="powerup-config hidden" id="bumperConfig">
+          <h3 class="form-subsection-title">Bumper Configuration</h3>
+          <div class="form-row">
+            <div class="form-col">
+              <label for="bumper_spawnWeight" class="form-label">Spawn Weight</label>
+              <input type="number" id="bumper_spawnWeight" name="powerUpNames.bumper.spawnWeight" class="form-input" min="0" step="0.1" value="1">
+            </div>
+            <div class="form-col">
+              <label for="bumper_durationS" class="form-label">Duration (seconds)</label>
+              <input type="number" id="bumper_durationS" name="powerUpNames.bumper.durationS" class="form-input" min="0" step="0.1" value="5">
+            </div>
+            <div class="form-col">
+              <label for="bumper_bumperVelocityFactor" class="form-label">Velocity Factor</label>
+              <input type="number" id="bumper_bumperVelocityFactor" name="powerUpNames.bumper.bumperVelocityFactor" class="form-input" min="0" step="0.1" value="1.2">
+            </div>
+            <div class="form-col">
+              <label for="bumper_bumperMaxVelocityFactor" class="form-label">Max Velocity Factor</label>
+              <input type="number" id="bumper_bumperMaxVelocityFactor" name="powerUpNames.bumper.bumperMaxVelocityFactor" class="form-input" min="0" step="0.1" value="2">
+            </div>
+            <div class="form-col">
+              <label for="bumper_bumperAcceleration" class="form-label">Acceleration</label>
+              <input type="number" id="bumper_bumperAcceleration" name="powerUpNames.bumper.bumperAcceleration" class="form-input" min="0" step="0.1" value="0.5">
+            </div>
+          </div>
+        </div>
+
+        <div class="powerup-config hidden" id="portalsConfig">
+          <h3 class="form-subsection-title">Portals Configuration</h3>
+          <div class="form-row">
+            <div class="form-col">
+              <label for="portals_spawnWeight" class="form-label">Spawn Weight</label>
+              <input type="number" id="portals_spawnWeight" name="powerUpNames.portals.spawnWeight" class="form-input" min="0" step="0.1" value="1">
+            </div>
+            <div class="form-col">
+              <label for="portals_durationS" class="form-label">Duration (seconds)</label>
+              <input type="number" id="portals_durationS" name="powerUpNames.portals.durationS" class="form-input" min="0" step="0.1" value="5">
+            </div>
+          </div>
+        </div>
+
+        <div class="powerup-config hidden" id="speedGateConfig">
+          <h3 class="form-subsection-title">Speed Gate Configuration</h3>
+          <div class="form-row">
+            <div class="form-col">
+              <label for="speedGate_spawnWeight" class="form-label">Spawn Weight</label>
+              <input type="number" id="speedGate_spawnWeight" name="powerUpNames.speedGate.spawnWeight" class="form-input" min="0" step="0.1" value="1">
+            </div>
+            <div class="form-col">
+              <label for="speedGate_durationS" class="form-label">Duration (seconds)</label>
+              <input type="number" id="speedGate_durationS" name="powerUpNames.speedGate.durationS" class="form-input" min="0" step="0.1" value="5">
+            </div>
+          </div>
+        </div>
+
+        <div class="powerup-config hidden" id="protectedPowerUpConfig">
+          <h3 class="form-subsection-title">Protected Power-Up Configuration</h3>
+          <div class="form-row">
+            <div class="form-col">
+              <label for="protectedPowerUp_spawnWeight" class="form-label">Spawn Weight</label>
+              <input type="number" id="protectedPowerUp_spawnWeight" name="powerUpNames.protectedPowerUp.spawnWeight" class="form-input" min="0" step="0.1" value="1">
+            </div>
+            <div class="form-col">
+              <label for="protectedPowerUp_powerUpName" class="form-label">Power-Up Name</label>
+              <input type="text" id="protectedPowerUp_powerUpName" name="powerUpNames.protectedPowerUp.powerUpName" class="form-input" value="default">
+            </div>
+          </div>
+        </div>
+
+        <div class="powerup-config hidden" id="bumperShieldConfig">
+          <h3 class="form-subsection-title">Bumper Shield Configuration</h3>
+          <div class="form-row">
+            <div class="form-col">
+              <label for="bumperShield_spawnWeight" class="form-label">Spawn Weight</label>
+              <input type="number" id="bumperShield_spawnWeight" name="powerUpNames.bumperShield.spawnWeight" class="form-input" min="0" step="0.1" value="1">
+            </div>
+            <div class="form-col">
+              <label for="bumperShield_speedMultiplier" class="form-label">Speed Multiplier</label>
+              <input type="number" id="bumperShield_speedMultiplier" name="powerUpNames.bumperShield.speedMultiplier" class="form-input" min="0" step="0.1" value="1.5">
+            </div>
+            <div class="form-col">
+              <label for="bumperShield_wallsHitThresold" class="form-label">Walls Hit Threshold</label>
+              <input type="number" id="bumperShield_wallsHitThresold" name="powerUpNames.bumperShield.wallsHitThresold" class="form-input" min="0" step="1" value="3">
             </div>
           </div>
         </div>
@@ -339,7 +494,7 @@
 </style>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('contentLoaded', function() {
     // Game mode toggle functionality
     const gameModeRadios = document.querySelectorAll('input[name="gameModeType"]');
     
@@ -363,17 +518,17 @@
     
     powerupToggles.forEach(toggle => {
       toggle.addEventListener('change', function() {
-        const powerupName = this.id.replace('Enabled', '');
-        const configSection = document.getElementById(`${powerupName}Config`);
-        
+        const configSection = document.getElementById(`${this.id.replace('Enabled', '')}Config`);
         if (configSection) {
-          if (this.checked) {
-            configSection.classList.remove('hidden');
-          } else {
-            configSection.classList.add('hidden');
-          }
+          configSection.classList.toggle('hidden', !this.checked);
         }
       });
+
+      // Initialize visibility on page load
+      const configSection = document.getElementById(`${toggle.id.replace('Enabled', '')}Config`);
+      if (configSection) {
+        configSection.classList.toggle('hidden', !toggle.checked);
+      }
     });
   });
 
@@ -401,25 +556,15 @@
           delaySpanS: Number(formData.get('modifierNames.powerUpSpawner.delaySpanS')) || 2,
           positionSamplerStrategyName: formData.get('modifierNames.powerUpSpawner.positionSamplerStrategyName') || "uniformArena"
         },
-        goalReset: {
-          delayS: Number(formData.get('modifierNames.goalReset.delayS')) || 1
-        },
+        goalReset: {},
         paceBreaker: {
-          noResetThreshold: 3,
-          noPaddleBounceThreshold: 5
+          noResetThresholdS: 10,
+        noPaddleBounceThreshold: 10,
+        twoPaddlesBounceThreshold: 7,
+      onePaddleBounceThreshold: 14
         }
       },
-      // Include an empty object for all possible powerUps to satisfy schema
       powerUpNames: {
-        speedBoost: {},
-        blinkingBall: {},
-        shooter: {},
-        multiBall: {},
-        bumper: {},
-        portals: {},
-        speedGate: {},
-        protectedPowerUp: {},
-        bumperShield: {}
       }
     };
     
