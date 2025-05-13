@@ -21,6 +21,7 @@ class Lobby {
       userState: "notInLobby",
       isReady: true,
       isAi: false,
+      isLocal: false,
     };
 
     this.lobbyMembers.set(memberId, newMember);
@@ -28,6 +29,9 @@ class Lobby {
     this.stateLobby = "open";
     this.gameSettings = gameSettings;
     this.memberLimits = this.getMemberLimits();
+    this.printLobbyMembers();
+
+    this.addLocalPlayer(memberId);
     this.printLobbyMembers();
   }
 
@@ -39,6 +43,7 @@ class Lobby {
       userState: "notInLobby",
       isReady: false,
       isAi: false,
+      isLocal: false,
     };
 
     this.lobbyMembers.set(memberId, newMember);
@@ -56,6 +61,7 @@ class Lobby {
       userState: "notInLobby",
       isReady: true,
       isAi: true,
+      isLocal: false,
     };
 
     this.sendMessageToAllMembers(
@@ -65,6 +71,27 @@ class Lobby {
       this.getNumberOfAiOpponents().toString(),
       newAiOpponent,
     );
+  }
+
+  // memberId of the player that adds the local player
+  public addLocalPlayer(memberId: string) {
+    // Check if there isn't another one with #memberId already
+    const localPlayerID = "#" + memberId;
+    this.canLocalPlayerBeAddedCheck(localPlayerID);
+
+    const newMember: LobbyMember = {
+      id: localPlayerID,
+      userState: "notInLobby",
+      isReady: true,
+      isAi: false,
+      isLocal: true,
+    };
+
+    // sendMessage
+    this.sendMessageToAllMembers(
+      JSON.stringify({ type: "addedLocalPlayer", data: localPlayerID }),
+    );
+    this.lobbyMembers.set(localPlayerID, newMember);
   }
 
   private canAIBeAddedCheck(memberId: string): void {
@@ -80,6 +107,20 @@ class Lobby {
       throw new Error(
         `[addAiOpponent] Only ${aiOpponents.length} AI opponents can be added`,
       );
+  }
+
+  private canLocalPlayerBeAddedCheck(memberId: string): void {
+    if (Object.values(this.lobbyMembers).length >= this.memberLimits.max)
+      throw new Error(
+        "[addLocalPlayer] Local player cannot be added to a full lobby",
+      );
+
+    for (const lobbyMember of Object.keys(this.lobbyMembers)) {
+      if (lobbyMember === memberId)
+        throw new Error(
+          "[addLocalPlayer] can't add more than 1 local player per player",
+        );
+    }
   }
 
   private getNumberOfAiOpponents(): number {
@@ -241,7 +282,11 @@ class Lobby {
 
   public allMembersConnectedToSocket(): boolean {
     for (const member of this.lobbyMembers.values()) {
-      if (member.socket === undefined && member.isAi === false) {
+      if (
+        member.socket === undefined &&
+        member.isAi === false &&
+        member.isLocal === false
+      ) {
         return false;
       }
     }

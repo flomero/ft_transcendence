@@ -4,8 +4,7 @@ import { gameManagers } from "../lobby/start/startLobbyHandler";
 import { PongMinimalGameState } from "../../../types/games/pong/gameState";
 import GameManager from "./GameManager";
 import { FastifyInstance } from "fastify";
-import { userToUserWithImage } from "../../../services/database/user";
-import { getUserById } from "../../../services/database/user";
+import { getUserWithImage } from "../../../services/database/user";
 
 const gameLoop = async (gameManagerId: string, fastify: FastifyInstance) => {
   const gameManager = gameManagers.get(gameManagerId);
@@ -51,9 +50,9 @@ const sendGameWinner = async (
   const winnerId = getGameWinner(gameManager.game, playerIdReferenceTable);
   if (winnerId === null) return;
 
-  const user = await getUserById(fastify, winnerId);
-  if (user === null || user === undefined) return;
-  const userWithImage = userToUserWithImage(user);
+  const userWithImage = await getUserWithImage(fastify, winnerId);
+  if (!userWithImage) return;
+
   const html = await fastify.view("components/game/winner", {
     user: userWithImage,
     isTournament: gameManager.gameOrigin?.type === "tournament",

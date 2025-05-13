@@ -30,16 +30,20 @@ class PongGame {
   private padding = 20;
   gameSocket: WebSocket;
   private currentUserId: string;
-  private playerIndex = -1; // -1 means not determined yet
   private playerCount = 0;
   private referenceTable: string[] = [];
   private tps: number;
+
+  private playerIndex: number[] = Array.from<number>({ length: 2 }); // -1 means not determined yet
+  private hasLocal: boolean = false;
 
   private readonly KEY_MAPPINGS: Record<string, PongUserInput> = {
     ArrowUp: "UP",
     ArrowDown: "DOWN",
     Space: "SPACE",
     " ": "SPACE",
+    s: "LOCAL_UP",
+    w: "LOCAL_DOWN",
   };
 
   private readonly KEY_RELEASE_MAPPINGS: Record<string, PongUserInput> = {
@@ -47,9 +51,14 @@ class PongGame {
     ArrowDown: "STOP_DOWN",
     Space: "STOP_SPACE",
     " ": "STOP_SPACE",
+    s: "LOCAL_STOP_UP",
+    w: "LOCAL_STOP_DOWN",
   };
 
   constructor(canvasId: string) {
+    this.playerIndex[0] = -1;
+    this.playerIndex[1] = -1;
+
     const path = window.location.pathname;
     this.gameId = path.split("/").pop() || "";
     if (!this.gameId) throw new Error("No gameId provided in URL parameters");
@@ -134,10 +143,16 @@ class PongGame {
       this.wallsNeedRedraw = true;
     }
 
-    if (message.referenceTable && this.playerIndex === -1) {
+    if (message.referenceTable && this.playerIndex[0] === -1) {
       this.referenceTable = message.referenceTable;
-      this.playerIndex = message.referenceTable.indexOf(this.currentUserId);
+
+      this.playerIndex[0] = message.referenceTable.indexOf(this.currentUserId);
       this.playerCount = message.referenceTable.length;
+      this.hasLocal = message.referenceTable.includes("#" + this.currentUserId);
+      if (this.hasLocal)
+        this.playerIndex[1] = message.referenceTable.indexOf(
+          "#" + this.currentUserId,
+        );
 
       if (this.playerCount === 2) {
         this.canvas.width = 800 + this.padding * 2;
@@ -148,7 +163,7 @@ class PongGame {
         this.wallsNeedRedraw = true;
       }
 
-      if (this.playerIndex >= 0 && this.gameState?.paddles) {
+      if (this.playerIndex[0] >= 0 && this.gameState?.paddles) {
         this.calculateRotationAngle();
       }
     }
@@ -203,12 +218,12 @@ class PongGame {
   }
 
   private calculateRotationAngle(): void {
-    if (this.playerIndex < 0 || !this.gameState?.paddles) {
+    if (this.playerIndex[0] < 0 || !this.gameState?.paddles) {
       return;
     }
 
     const paddle = this.gameState.paddles.find(
-      (p) => p.id === this.playerIndex,
+      (p) => p.id === this.playerIndex[0],
     );
     if (!paddle || paddle.a === undefined) return;
     const targetAngle = Math.PI;
@@ -219,7 +234,7 @@ class PongGame {
     if (this.rotationAngle < -Math.PI) this.rotationAngle += Math.PI * 2;
 
     console.log(
-      `Player ${this.playerIndex} rotation: ${this.rotationAngle.toFixed(2)} radians`,
+      `Player ${this.playerIndex[0]} rotation: ${this.rotationAngle.toFixed(2)} radians`,
     );
   }
 
@@ -238,6 +253,7 @@ class PongGame {
   }
 
   private handleKeyDown(event: KeyboardEvent): void {
+    if (!this.hasLocal && ["w", "s"].includes(event.key)) return;
     const actionType = this.KEY_MAPPINGS[event.key];
     if (actionType) {
       event.preventDefault();
@@ -246,6 +262,7 @@ class PongGame {
   }
 
   private handleKeyUp(event: KeyboardEvent): void {
+    if (!this.hasLocal && ["w", "s"].includes(event.key)) return;
     const actionType = this.KEY_RELEASE_MAPPINGS[event.key];
     if (actionType) {
       const target = event.target as HTMLElement;
@@ -267,6 +284,18 @@ class PongGame {
       },
     };
 
+    if (this.hasLocal) {
+      if (action.options.type?.startsWith("LOCAL_"))
+        action.options.isLocal = true;
+
+      if (action.options.type === "LOCAL_UP") action.options.type = "UP";
+      if (action.options.type === "LOCAL_DOWN") action.options.type = "DOWN";
+      if (action.options.type === "LOCAL_STOP_UP")
+        action.options.type = "STOP_UP";
+      if (action.options.type === "LOCAL_STOP_DOWN")
+        action.options.type = "STOP_DOWN";
+    }
+
     this.gameSocket.send(JSON.stringify(action));
   }
 
@@ -280,7 +309,7 @@ class PongGame {
     this.ctx.save();
     this.ctx.translate(this.padding, this.padding);
 
-    const shouldRotate = this.playerCount > 2 && this.playerIndex >= 0;
+    const shouldRotate = this.playerCount > 2 && this.playerIndex[0] >= 0;
 
     this.applyCanvasTransformation(shouldRotate);
 
@@ -324,14 +353,17 @@ class PongGame {
 
     // Add rotation debug info
     this.ctx.fillText(
-      `Player Index: ${this.playerIndex}, Rotation: ${this.rotationAngle.toFixed(2)} rad (${((this.rotationAngle * 180) / Math.PI).toFixed(2)}°)`,
+      `Player Index: ${this.playerIndex[0]}, Rotation: ${this.rotationAngle.toFixed(2)} rad (${((this.rotationAngle * 180) / Math.PI).toFixed(2)}°)`,
       10,
       80,
     );
 
     // Add paddle position debug info if available
-    if (this.playerIndex >= 0 && this.gameState?.paddles[this.playerIndex]) {
-      const paddle = this.gameState.paddles[this.playerIndex];
+    if (
+      this.playerIndex[0] >= 0 &&
+      this.gameState?.paddles[this.playerIndex[0]]
+    ) {
+      const paddle = this.gameState.paddles[this.playerIndex[0]];
       this.ctx.fillText(
         `Paddle Pos: x=${paddle.x.toFixed(1)}, y=${paddle.y.toFixed(1)}, alpha=${paddle.a.toFixed(3)} rad`,
         10,
@@ -397,7 +429,11 @@ class PongGame {
       const height = paddle.h * this.ratio;
 
       const paddleColor =
-        paddle.id === this.playerIndex ? "#ff00ff" : "#00ffff";
+        paddle.id === this.playerIndex[0]
+          ? "#ff00ff"
+          : this.hasLocal && paddle.id === this.playerIndex[1]
+            ? "#ffff00"
+            : "#00ffff";
 
       this.drawNeonRectangle(x, y, width, height, paddleColor, angle);
     }
@@ -411,7 +447,7 @@ class PongGame {
     this.wallCtx.save();
     this.wallCtx.translate(this.padding, this.padding);
 
-    const shouldRotate = this.playerCount > 2 && this.playerIndex >= 0;
+    const shouldRotate = this.playerCount > 2 && this.playerIndex[0] >= 0;
     this.applyCanvasTransformationToContext(this.wallCtx, shouldRotate);
 
     this.gameState.walls.forEach((wall, wallIndex) => {
@@ -773,7 +809,7 @@ class PongGame {
       ctx.rotate(this.rotationAngle);
       ctx.translate(-paddedWidth / 2, -paddedHeight / 2);
     } else {
-      const classicRotate = this.playerIndex === 1;
+      const classicRotate = this.playerIndex[0] === 1;
       if (classicRotate) {
         ctx.translate(paddedWidth, paddedHeight);
         ctx.rotate(Math.PI);

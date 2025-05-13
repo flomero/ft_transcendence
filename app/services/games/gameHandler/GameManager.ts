@@ -107,7 +107,10 @@ class GameManager {
   }
 
   public allPlayersAreConnected(): boolean {
-    for (const player of this.players.values()) {
+    const remotePlayers = this.players
+      .values()
+      .filter((player) => !player.playerUUID.startsWith("#"));
+    for (const player of remotePlayers) {
       if (player.ws === undefined) {
         return false;
       }
@@ -213,6 +216,7 @@ class GameManager {
   }
 
   public disqualifyNotConnectedPlayers(): void {
+    console.log(`[disqualifyNotConnectedPlayers]`);
     for (const player of this.players.values()) {
       if (player.ws === undefined || player.ws.readyState !== WebSocket.OPEN) {
         this.game.eliminate(player.id);
@@ -279,12 +283,18 @@ class GameManager {
 
   public connectedNumberOfPlayersInGame() {
     let count = 0;
-    for (const player of this.players.values()) {
+    const remotePlayers = this.players
+      .values()
+      .filter((player) => !player.playerUUID.startsWith("#"));
+    const localPlayersCount = Array.from(this.players.values())
+      .filter((player) => player.playerUUID.startsWith("#"))
+      .map((player) => player).length;
+    for (const player of remotePlayers) {
       if (player.ws !== undefined && player.ws.readyState === WebSocket.OPEN) {
         count++;
       }
     }
-    return count + this.aiOpponents.size;
+    return count + this.aiOpponents.size + localPlayersCount;
   }
 
   public isUserConnected(userId: string): boolean {
@@ -340,6 +350,13 @@ class GameManager {
       return console.error("[setTimeOut] Player not found");
     }
     player.timeOut = timeOut;
+  }
+
+  public hasLocalPlayer(): boolean {
+    for (const player of this.players.keys())
+      if (player.startsWith("#")) return true;
+
+    return false;
   }
 }
 
