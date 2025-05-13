@@ -1,5 +1,3 @@
-import { changeClasses } from "./utils.js";
-
 interface ViewTransition {
   ready: Promise<void>;
 }
@@ -31,14 +29,14 @@ export class TransitionManager {
         await callback();
       }).ready;
     }
-    changeClasses(this.container, ["fade-in"], ["fade-out"]);
+    // changeClasses(this.container, ["fade-in"], ["fade-out"]);
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    // await new Promise((resolve) => setTimeout(resolve, 5));
 
     await callback();
 
-    void this.container.offsetWidth;
+    // void this.container.offsetWidth;
 
-    changeClasses(this.container, ["fade-out"], ["fade-in"]);
+    // changeClasses(this.container, ["fade-out"], ["fade-in"]);
   }
 }

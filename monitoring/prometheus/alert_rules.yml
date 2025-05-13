@@ -1,0 +1,42 @@
+# ../monitoring/prometheus/alert_rules.yml
+groups:
+  - name: basic
+    rules:
+      # Any target that disappears from the /metrics scrape
+      - alert: InstanceDown
+        expr: up == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Instance {{ $labels.instance }} is down"
+          description: "{{ $labels.instance }} of job {{ $labels.job }} has been unreachable for more than 2 minutes."
+
+      # Warn if a node keeps > 80 % CPU for 5 minutes
+      - alert: HostHighCpuLoad
+        expr: 100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU on {{ $labels.instance }}"
+          description: "CPU has been over 80 % for 5 minutes (current = {{ $value | printf \"%.1f\" }} %)."
+
+      - alert: HeartbeatEveryMinute
+        expr: vector(1)         # always true
+        for: 0m                 # fire immediately
+        labels:
+          severity: info
+          heartbeat: "true"     # handy for routing
+        annotations:
+          summary: "Prometheus heartbeat"
+          description: "Prometheus liveness pulse (value={{ $value }})."
+
+      - alert: FastifyAppDown          # any name you like
+        expr: up{job="fastify_app"} == 0
+        for: 1m                        # wait 1 minute before firing
+        labels:
+          severity: critical
+        annotations:
+          summary: "fastify_app is down"
+          description: "Prometheus has not scraped metrics from fastify_app ({{ $labels.instance }}) for 1 minute."

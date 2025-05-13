@@ -1,19 +1,23 @@
-{{#each tournaments as |tournament|}}
-  <div class="mb-8">
-    <div class="mb-4">
-      <h2 class="text-xl font-bold">Tournament {{tournament.id}}</h2>
-      <div class="text-sm text-gray-600">
-        <span>Type: {{tournament.type}}</span> |
-        <span>Players: {{tournament.playerCount}}</span>
-      </div>
-    </div>
+{{#if tournaments.length}}
+    {{#each tournaments as |tournament|}}
+        {{#if tournament.rounds.length}}
+            <div class="mb-8">
+                <div class="mb-4">
+                    <h2 class="text-xl font-bold">Tournament {{tournament.id}}</h2>
+                    <div class="text-sm text-gray-600">
+                        <span>Type: {{tournament.type}}</span> |
+                        <span>Players: {{tournament.playerCount}}</span>
+                    </div>
+                </div>
 
-    {{> components/tournament-view/tournament-bracket rounds=tournament.rounds}}
-  </div>
-{{/each}}
-
-{{debug}}
+                {{> components/tournament-view/tournament-bracket rounds=tournament.rounds}}
+            </div>
+        {{/if}}
+    {{/each}}
+{{else}}
+    <p class="text-gray-500 text-center p-5">Currently, there are no tournaments running.</p>
+{{/if}}
 
 <script>
-  window.__TOURNAMENTS__ = {{{json tournaments}}};
+    window.__TOURNAMENTS__ = {{{json tournaments}}};
 </script>
