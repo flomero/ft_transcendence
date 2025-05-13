@@ -27,9 +27,11 @@ const page: FastifyPluginAsync = async (fastify): Promise<void> => {
     if (gameManager.hasLocalPlayer()) {
       let localPlayer = { ...localPlayerWithImage };
       localPlayer.userId = `#${request.userId}`;
-      localPlayer.imageUrl += localPlayerWithImage.image_id;
+      localPlayer.imageUrl = "/image/" + localPlayerWithImage.image_id;
+      localPlayer.userName = "Local B";
       usersWithImages.push(localPlayer);
-      console.dir(localPlayer);
+      usersWithImages[0].userName = "Local A";
+      usersWithImages[0].imageUrl = "/public/ws.png";
     }
 
     const data = {

@@ -42,8 +42,6 @@ class PongGame {
     ArrowDown: "DOWN",
     Space: "SPACE",
     " ": "SPACE",
-    s: "LOCAL_UP",
-    w: "LOCAL_DOWN",
   };
 
   private readonly KEY_RELEASE_MAPPINGS: Record<string, PongUserInput> = {
@@ -51,8 +49,24 @@ class PongGame {
     ArrowDown: "STOP_DOWN",
     Space: "STOP_SPACE",
     " ": "STOP_SPACE",
-    s: "LOCAL_STOP_UP",
-    w: "LOCAL_STOP_DOWN",
+  };
+
+  private readonly LOCAL_KEY_MAPPINGS: Record<string, PongUserInput> = {
+    ArrowUp: "LOCAL_DOWN",
+    ArrowDown: "LOCAL_UP",
+    Space: "SPACE",
+    " ": "SPACE",
+    w: "UP",
+    s: "DOWN",
+  };
+
+  private readonly LOCAL_KEY_RELEASE_MAPPINGS: Record<string, PongUserInput> = {
+    ArrowUp: "LOCAL_STOP_DOWN",
+    ArrowDown: "LOCAL_STOP_UP",
+    Space: "STOP_SPACE",
+    " ": "STOP_SPACE",
+    w: "STOP_UP",
+    s: "STOP_DOWN",
   };
 
   constructor(canvasId: string) {
@@ -253,8 +267,9 @@ class PongGame {
   }
 
   private handleKeyDown(event: KeyboardEvent): void {
-    if (!this.hasLocal && ["w", "s"].includes(event.key)) return;
-    const actionType = this.KEY_MAPPINGS[event.key];
+    const actionType = this.hasLocal
+      ? this.LOCAL_KEY_MAPPINGS[event.key]
+      : this.KEY_MAPPINGS[event.key];
     if (actionType) {
       event.preventDefault();
       this.sendGameInput(actionType);
@@ -262,8 +277,9 @@ class PongGame {
   }
 
   private handleKeyUp(event: KeyboardEvent): void {
-    if (!this.hasLocal && ["w", "s"].includes(event.key)) return;
-    const actionType = this.KEY_RELEASE_MAPPINGS[event.key];
+    const actionType = this.hasLocal
+      ? this.LOCAL_KEY_RELEASE_MAPPINGS[event.key]
+      : this.KEY_RELEASE_MAPPINGS[event.key];
     if (actionType) {
       const target = event.target as HTMLElement;
       if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") return;
