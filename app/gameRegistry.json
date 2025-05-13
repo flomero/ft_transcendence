@@ -50,7 +50,7 @@
         },
 
         "customizableSettings": {
-          "ballSpeedWidthPercentS": 52.5,
+          "ballSpeedWidthPercentS": 55,
           "ballRadius": 0.625,
           "ballResetSampler": "biasedGaussianCA",
           "paddleCoveragePercent": 25,
