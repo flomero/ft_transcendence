@@ -65,6 +65,10 @@ export abstract class GameBase {
 
   abstract eliminate(playerID: number): void;
 
+  randomizeGame(): void {
+    this.modifierManager.trigger("onRandomizeGame");
+  }
+
   abstract getResults(): number[];
   abstract getScores(): number[];
   abstract getSettings(): Record<string, any>;

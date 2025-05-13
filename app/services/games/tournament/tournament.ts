@@ -60,7 +60,7 @@ export class Tournament {
   >();
 
   // The current round being played
-  protected currentRound: Round = {};
+  currentRound: Round = {};
 
   // Track which matches have been completed
   protected completedMatches: Set<string> = new Set<string>();

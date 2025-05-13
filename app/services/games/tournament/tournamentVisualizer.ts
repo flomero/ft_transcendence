@@ -146,7 +146,7 @@ export async function hydrateMatchStartTimes(
   rows.forEach((row) => {
     const match = gameId2Match.get(row.id);
     if (match) match.startTime = row.matchDate; // Use matchDate instead of start_time
-    console.log(`Match ${row.id} start time: ${row.matchDate}`);
+    // console.log(`Match ${row.id} start time: ${row.matchDate}`);
   });
 
   return tourney;
@@ -219,7 +219,7 @@ export const getCurrentTournamentInfo = async (
   tournament = await hydrateMatchStartTimes(tournament, fastify);
   tournament = await hydratePlayerScores(tournament, fastify);
 
-  console.log(`TournamentInfos from tournamentVisualizer:`);
-  console.dir(tournament, { depth: null });
+  // console.log(`TournamentInfos from tournamentVisualizer:`);
+  // console.dir(tournament, { depth: null });
   return tournament;
 };

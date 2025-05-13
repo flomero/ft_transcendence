@@ -24,6 +24,7 @@ import {
 import { sendSystemMessageToUser } from "../../chat/live";
 import { getUserById, User } from "../../database/user";
 import { tournaments } from "./tournaments";
+import { gameManagers } from "../lobby/start/startLobbyHandler";
 
 const sleep = (ms: number): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, ms));
@@ -43,6 +44,7 @@ class TournamentManager {
     PLAYER: 0,
     AI: 1,
   } as const;
+  private terminatedTournament: boolean = false;
 
   constructor(
     tournamentConfigKey: TournamentConfigKey,
@@ -188,6 +190,7 @@ class TournamentManager {
     if (this.tournament === undefined)
       return console.error("Tournament is not started");
     const brackets = this.tournament.bracketManager.executeStrategy();
+    this.tournament.currentRound = brackets;
     this.currentRoundIndex++;
     this.sendMessageToAll({ type: "update" });
     await sleep(10000);
@@ -195,6 +198,7 @@ class TournamentManager {
   }
 
   private async createMatches(brackets: Round): Promise<void> {
+    if (this.terminatedTournament === true) return;
     Object.entries(brackets).forEach(([matchID, match]: [string, Match]) => {
       this.tournament?.matchWinnerManager.execute(
         "initializeMatch",
@@ -321,10 +325,45 @@ class TournamentManager {
     }
   }
 
+  public terminate(ownerId: string): void {
+    if (this.ownerId !== ownerId) {
+      throw new Error(
+        `[terminate] Only the owner can terminate the tournament`,
+      );
+    }
+    this.terminatedTournament = true;
+    this.removeGameOriginOfRunningGames();
+    this.disconnectAllMembersFromSochet();
+    tournaments.delete(this.tournamentId);
+  }
+
+  public removeGameOriginOfRunningGames(): void {
+    if (!this.tournament) return;
+
+    Object.entries(this.tournament.currentRound)
+      .filter(([_, match]) => match.winner === "")
+      .map(([matchID, _]: [string, Match]) => {
+        const gameIDs = this.gameManagerIdToTorunGameId.get(matchID);
+        if (!gameIDs || gameIDs.length === 0) return;
+        const gameId = gameIDs[gameIDs.length - 1];
+        const gameManger = gameManagers.get(gameId);
+        if (gameManger) gameManger.gameOrigin = undefined;
+      });
+  }
+
+  public disconnectAllMembersFromSochet(): void {
+    for (const member of this.tournamentMembers.values()) {
+      if (member.webSocket) {
+        member.webSocket.close();
+      }
+    }
+  }
+
   public async notifyGameCompleted(
     gameManagerId: string,
     gameResult: GameResult,
   ): Promise<void> {
+    if (this.terminatedTournament === true) return;
     const isMatchOver = this.notifyMatchWinnder(gameManagerId, gameResult);
 
     this.fastify.log.info(`Game finished: ${gameManagerId}`);

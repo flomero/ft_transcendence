@@ -1,0 +1,22 @@
+# ../monitoring/alertmanager/alertmanager.yml
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: discord
+  routes:
+    - match:
+        heartbeat: "true"
+      receiver: discord
+      repeat_interval: 1m       # <-- one notification per minute
+      group_interval: 1m        # keep it in its own group
+      group_wait: 0s
+
+receivers:
+  - name: discord
+    discord_configs:
+      - webhook_url: ${DISCORD_WEBHOOK_URL}
+        send_resolved: true
+        title:  '{{ .CommonLabels.alertname }} ({{ .CommonLabels.severity }})'
+        content: '{{ .CommonAnnotations.summary }}'
+        message: '{{ .CommonAnnotations.description }}'

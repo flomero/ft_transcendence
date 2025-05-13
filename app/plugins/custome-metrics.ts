@@ -8,7 +8,6 @@ import {
   PublicLobbies,
 } from "../services/games/lobby/new/newLobbyHandler";
 
-// Extend FastifyInstance to include prisma
 declare module "fastify" {
   interface FastifyInstance {
     customMetrics: CustomMetrics;
@@ -86,6 +85,44 @@ export default fp(async (fastify: FastifyInstance) => {
     },
   });
 
+  const userCountGauge = new Gauge({
+    name: "user_count",
+    help: "Current number of users in the database",
+    async collect() {
+      try {
+        const result = await fastify.sqlite.get<{ count: number }>(
+          "SELECT COUNT(*) as count FROM users",
+        );
+        if (!result) {
+          throw new Error("Failed to get user count");
+        }
+        this.set(result.count);
+      } catch (error) {
+        console.error("Error getting user count:", error);
+        this.set(0);
+      }
+    },
+  });
+
+  const matchCountGauge = new Gauge({
+    name: "match_count",
+    help: "Current number of matches in the database",
+    async collect() {
+      try {
+        const result = await fastify.sqlite.get<{ count: number }>(
+          "SELECT COUNT(*) as count FROM matches",
+        );
+        if (!result) {
+          throw new Error("Failed to get match count");
+        }
+        this.set(result.count);
+      } catch (error) {
+        console.error("Error getting match count:", error);
+        this.set(0);
+      }
+    },
+  });
+
   const customMetrics: CustomMetrics = {
     countJwtVerify: (status: "success" | "failure") => {
       jwtVerifyCounter.inc({ status });
@@ -114,6 +151,14 @@ export default fp(async (fastify: FastifyInstance) => {
       const value = await activeLobbiesGauge.get();
       return value.values[0].value;
     },
+    getUserCount: async () => {
+      const value = await userCountGauge.get();
+      return value.values[0].value;
+    },
+    getMatchCount: async () => {
+      const value = await matchCountGauge.get();
+      return value.values[0].value;
+    },
   };
 
   fastify.decorate("customMetrics", customMetrics);
@@ -128,4 +173,6 @@ interface CustomMetrics {
   getOnlineUsers(): Promise<number>;
   getActiveGames(): Promise<number>;
   getActiveLobbies(): Promise<number>;
+  getUserCount(): Promise<number>;
+  getMatchCount(): Promise<number>;
 }

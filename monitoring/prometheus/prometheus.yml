@@ -15,3 +15,11 @@ scrape_configs:
     static_configs:
       - targets: [ 'app:3000' ]
     metrics_path: '/metrics'
+
+rule_files:
+  - alert_rules.yml                 # <- new
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: [ "alertmanager:9093" ]
