@@ -37,9 +37,27 @@ services:
         container_name: prometheus
         volumes:
             - ../monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+            - ../monitoring/prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml
             - prometheus-data:/prometheus
         ports:
             - "9090:9090"
+        restart: unless-stopped
+        command:
+            - "--config.file=/etc/prometheus/prometheus.yml"
+            - "--storage.tsdb.retention.time=90d" # Retain time-series data for 90 days before automatic deletion to manage storage usage.
+            - "--storage.tsdb.path=/prometheus" #Specify the directory where Prometheus stores its time-series database.
+
+    alertmanager:
+        image: prom/alertmanager:v0.28.0
+        container_name: alertmanager
+        volumes:
+            - ../monitoring/alertmanager:/etc/alertmanager
+        env_file: # <— simplest, guaranteed to work
+            - .env
+        command:
+            - "--config.file=/etc/alertmanager/alertmanager.yml"
+        ports:
+            - "9093:9093"
         restart: unless-stopped
 
     grafana:
