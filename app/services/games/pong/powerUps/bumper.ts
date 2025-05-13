@@ -265,7 +265,7 @@ export class Bumper extends TimeLimitedModifierBase {
     game.getState().balls[args.ballID].speed +=
       this.velocityFactor * game.getState().balls[args.ballID].speed;
 
-    if (++this.bounceCounter >= this.bounceThreshold) {
+    if (args.ballID === 0 && ++this.bounceCounter >= this.bounceThreshold) {
       this.deactivate(game);
       return;
     }

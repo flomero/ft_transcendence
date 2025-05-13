@@ -98,7 +98,8 @@ export class ModifierManager {
 
     const pdfArray: number[] = this.availablePowerUps
       .filter((name) => !this.unavailablePowerUps.includes(name))
-      .map((name) => registryPowerUps[name].spawnWeight);
+      .map((name) => registryPowerUps[name].spawnWeight)
+      .filter((probability) => probability > 0.0);
 
     // Compute total density
     const totalDensity = pdfArray.reduce((acc, val) => acc + val, 0);
