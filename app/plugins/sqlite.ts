@@ -6,6 +6,7 @@ import {
   createAIOpponents,
   createLocalPlayer,
 } from "../services/games/aiOpponent/createAIOpponents";
+import { localPlayerWithImage } from "../services/database/user";
 
 /**
  * This plugins adds sqlite3 support
@@ -35,5 +36,9 @@ export default fp(async (fastify) => {
     });
     await createAIOpponents(fastify);
     await createLocalPlayer(fastify);
+
+    const sql = `SELECT * FROM users WHERE id = ?`;
+    const localPlayer = await fastify.sqlite.get(sql, "localPlayer");
+    if (localPlayer) localPlayerWithImage.image_uuid = localPlayer.image_id;
   });
 });
