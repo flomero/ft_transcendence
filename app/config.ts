@@ -270,7 +270,9 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       speedBoost: {},
       blinkingBall: {},
       multiBall: {},
-      bumper: {},
+      bumper: {
+        bumperJunctionDistanceFromCenter: 6,
+      },
       shooter: {
         chargeRadius: 3.5,
       },
@@ -317,7 +319,9 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       speedBoost: {},
       blinkingBall: {},
       multiBall: {},
-      bumper: {},
+      bumper: {
+        bumperJunctionDistanceFromCenter: 6,
+      },
       shooter: {
         chargeRadius: 3.5,
       },
