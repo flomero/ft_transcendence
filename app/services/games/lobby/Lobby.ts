@@ -5,6 +5,7 @@ import { randomUUID } from "node:crypto";
 import MinAndMaxPlayers from "../../../types/games/lobby/MinAndMaxPlayers";
 import aiOpponents from "../aiOpponent/aiOpponents";
 import { fastifyInstance } from "../../../app";
+import { GAME_MODES } from "../../../schemas/games/lobby/newLobbySchema";
 
 class Lobby {
   private lobbyId: string = randomUUID();
@@ -31,7 +32,6 @@ class Lobby {
     this.memberLimits = this.getMemberLimits();
     this.printLobbyMembers();
 
-    this.addLocalPlayer(memberId);
     this.printLobbyMembers();
   }
 
@@ -73,27 +73,6 @@ class Lobby {
     );
   }
 
-  // memberId of the player that adds the local player
-  public addLocalPlayer(memberId: string) {
-    // Check if there isn't another one with #memberId already
-    const localPlayerID = "#" + memberId;
-    this.canLocalPlayerBeAddedCheck(localPlayerID);
-
-    const newMember: LobbyMember = {
-      id: localPlayerID,
-      userState: "notInLobby",
-      isReady: true,
-      isAi: false,
-      isLocal: true,
-    };
-
-    // sendMessage
-    this.sendMessageToAllMembers(
-      JSON.stringify({ type: "addedLocalPlayer", data: localPlayerID }),
-    );
-    this.lobbyMembers.set(localPlayerID, newMember);
-  }
-
   private canAIBeAddedCheck(memberId: string): void {
     if (this.isMemberOwner(memberId) === false) {
       throw new Error(
@@ -109,14 +88,44 @@ class Lobby {
       );
   }
 
-  private canLocalPlayerBeAddedCheck(memberId: string): void {
-    if (Object.values(this.lobbyMembers).length >= this.memberLimits.max)
+  // memberId of the player that adds the local player
+  public addLocalPlayer(memberId: string) {
+    // Check if there isn't another one with #memberId already
+    const localPlayerID = "#" + memberId;
+    this.canLocalPlayerBeAddedCheck(localPlayerID, memberId);
+
+    const newMember: LobbyMember = {
+      id: localPlayerID,
+      userState: "notInLobby",
+      isReady: true,
+      isAi: false,
+      isLocal: true,
+    };
+
+    this.sendMessageToAllMembers(
+      JSON.stringify({ type: "addedLocalPlayer", data: localPlayerID }),
+    );
+    this.lobbyMembers.set(localPlayerID, newMember);
+  }
+
+  private canLocalPlayerBeAddedCheck(
+    localPlayerId: string,
+    memberId: string,
+  ): void {
+    if (this.isMemberOwner(memberId) === false) {
+      throw new Error(
+        "[addLocalPlayer] Member who wants to add Local Player got to be the Owner of the lobby",
+      );
+    } else if (Object.values(this.lobbyMembers).length >= this.memberLimits.max)
       throw new Error(
         "[addLocalPlayer] Local player cannot be added to a full lobby",
       );
-
+    else if (this.gameSettings.gameModeName !== GAME_MODES.CLASSIC)
+      throw new Error(
+        "[addLocalPlayer] Local player cannot be added to a non-classic game mode",
+      );
     for (const lobbyMember of Object.keys(this.lobbyMembers)) {
-      if (lobbyMember === memberId)
+      if (lobbyMember === localPlayerId)
         throw new Error(
           "[addLocalPlayer] can't add more than 1 local player per player",
         );
