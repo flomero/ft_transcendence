@@ -154,14 +154,6 @@ export class Tournament {
       }
 
       gameNum++;
-      console.log(`COUNTER: ${this.counter}`);
-      if (++this.counter === 29) {
-        console.log(`\n--------------\n`);
-        console.log(`Tournament infos after 29 games`);
-        const tournamentInfos = this.getCurrentTournamentInfos();
-        console.dir(tournamentInfos, { depth: null });
-        console.log(`\n--------------\n`);
-      }
     }
 
     // Mark this match as completed

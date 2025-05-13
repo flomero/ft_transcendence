@@ -121,8 +121,6 @@ export class BumperShield extends ModifierBase {
       this.playerId = players[rndID];
     }
 
-    console.log(`pID: ${this.playerId}`);
-
     this.createWalls(game);
   }
 

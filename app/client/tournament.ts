@@ -133,8 +133,6 @@ class TournamentBracket {
   private drawLines() {
     if (!this.bracket || !this.svg) return;
 
-    console.log("Drawing tournament lines...");
-    console.dir(this.edges, { depth: null });
     const width = this.bracket.scrollWidth;
     const height = this.bracket.scrollHeight;
 
@@ -149,9 +147,6 @@ class TournamentBracket {
     for (const [tid, from, to, offset = 0] of this.edges) {
       const fromId = `${tid}-${from}`;
       const toId = `${tid}-${to}`;
-
-      console.log(`drawing tournament lines for ${fromId}`);
-      console.log(`drawing tournament lines for ${toId}`);
 
       const aEl = document.getElementById(fromId);
       const bEl = document.getElementById(toId);
