@@ -117,8 +117,8 @@ class PongGame {
           break;
       }
     } catch (error) {
-      if (this.debug)
-        console.error("Error processing WebSocket message:", error);
+      // if (this.debug)
+      //   console.error("Error processing WebSocket message:", error);
     }
   }
 

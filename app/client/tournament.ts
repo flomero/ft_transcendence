@@ -185,7 +185,7 @@ class TournamentHandler {
     console.log("Connecting to tournament...");
     const tournamentId = window.location.pathname.split("/").pop();
     if (!tournamentId) {
-      console.error("Tournament ID not found in URL");
+      // console.error("Tournament ID not found in URL");
       return;
     }
 
@@ -207,7 +207,7 @@ class TournamentHandler {
     };
 
     this.socket.onerror = (error) => {
-      console.error("WebSocket error:", error);
+      // console.error("WebSocket error:", error);
     };
   }
 

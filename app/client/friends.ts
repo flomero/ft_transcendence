@@ -20,14 +20,14 @@ class FriendsManager {
     const userID = element.getAttribute("data-id");
 
     if (!userID) {
-      console.error("No user ID found on element");
+      // console.error("No user ID found on element");
       return;
     }
     await this.sendFriendRequest(userID);
     const btnElement = element;
     const msgElement = element.nextElementSibling as HTMLElement;
     if (!msgElement || !msgElement.classList.contains("request-sent")) {
-      console.error("Could not find message element");
+      // console.error("Could not find message element");
       return;
     }
     btnElement.classList.add("fade-transition", "fade-out");
@@ -52,7 +52,7 @@ class FriendsManager {
     const userID = element.getAttribute("data-id");
 
     if (!userID) {
-      console.error("No user ID found on element");
+      // console.error("No user ID found on element");
       return;
     }
     await this.acceptFriendRequest(userID);
@@ -70,7 +70,7 @@ class FriendsManager {
     const userID = element.getAttribute("data-id");
 
     if (!userID) {
-      console.error("No user ID found on element");
+      // console.error("No user ID found on element");
       return;
     }
     await this.declineFriendRequest(userID);
@@ -88,7 +88,7 @@ class FriendsManager {
     const userID = element.getAttribute("data-id");
 
     if (!userID) {
-      console.error("No user ID found on element");
+      // console.error("No user ID found on element");
       return;
     }
     await this.removeFriend(userID);
@@ -106,7 +106,7 @@ class FriendsManager {
     const userID = element.getAttribute("data-id");
 
     if (!userID) {
-      console.error("No user ID found on element");
+      // console.error("No user ID found on element");
       return;
     }
     await this.blockUser(userID);
@@ -124,7 +124,7 @@ class FriendsManager {
     const userID = element.getAttribute("data-id");
 
     if (!userID) {
-      console.error("No user ID found on element");
+      // console.error("No user ID found on element");
       return;
     }
     await this.unblockUser(userID);
@@ -149,7 +149,7 @@ class FriendsManager {
       .then((html) => {
         const container = document.getElementById("friends-search-results");
         if (!container) {
-          console.error("Search results container not found");
+          // console.error("Search results container not found");
           return;
         }
         container.innerHTML = html;
