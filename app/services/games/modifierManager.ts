@@ -209,6 +209,14 @@ export class ModifierManager {
       return false;
     }
 
+    this.spawnPowerUp(powerUpName, position);
+
+    this.trigger("onPowerUpSpawn");
+
+    return true;
+  }
+
+  spawnPowerUp(powerUpName: string, position: { x: number; y: number }) {
     // Update counter & availability
     this.powerUpCounters[powerUpName]++;
     this.updateAvailability(powerUpName);
@@ -228,10 +236,6 @@ export class ModifierManager {
         doGoal: false,
       } as Ball,
     ]);
-
-    this.trigger("onPowerUpSpawn");
-
-    return true;
   }
 
   // Handle power-up deletion
@@ -321,5 +325,9 @@ export class ModifierManager {
 
   getCDF(): number[] {
     return this.cumulativeDensityFunction;
+  }
+
+  getAvailablePowerUps(): string[] {
+    return this.availablePowerUps;
   }
 }

@@ -18,6 +18,8 @@ export class PowerUpSpawner extends TimeLimitedModifierBase {
   >;
   protected positionSamplerStrategyName: string = "";
 
+  protected mayhemChance: number = 0.01; // <-- if triggered spawn EVERY powerUps available.
+
   constructor(customConfig?: Record<string, any>) {
     super();
 
@@ -67,6 +69,12 @@ export class PowerUpSpawner extends TimeLimitedModifierBase {
   }
 
   onDeactivation(game: Pong): void {
+    const isMayhem = game.getRNG().random() < this.mayhemChance;
+    if (isMayhem) {
+      this.handleMayhem(game);
+      return;
+    }
+
     const sampledPosition: { x: number; y: number } =
       this.positionSampler.executeStrategy(game);
 
@@ -89,5 +97,15 @@ export class PowerUpSpawner extends TimeLimitedModifierBase {
   onResuming(game: GameBase): void {
     this.status = ModifierStatus.ACTIVE;
     fastifyInstance.log.debug("PowerUpSpawner RESUMED");
+  }
+
+  protected handleMayhem(game: Pong) {
+    const availablePowerUps = game.getModifierManager().getAvailablePowerUps();
+
+    availablePowerUps.forEach((powerUpName) => {
+      const rndPosition = this.positionSampler.executeStrategy(game);
+
+      game.getModifierManager().spawnPowerUp(powerUpName, rndPosition);
+    });
   }
 }
