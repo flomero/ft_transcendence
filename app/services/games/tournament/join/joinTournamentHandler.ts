@@ -3,7 +3,7 @@ import canMemberJoinTournamentCheck from "./canMemberJoinTournamentCheck";
 import { tournaments } from "../tournaments";
 import { getUserById } from "../../../database/user";
 import { getCurrentTournamentInfo } from "../tournamentVisualizer";
-import { TournamentStatus } from "../tournament";
+import { TournamentStatus } from "../tournament"; // tournament status is declared in two files in services/games/tournament/tournament.ts and types/tournament/tournament.ts, lets kick out one of them.
 
 async function joinTournamentHandler(
   request: FastifyRequest<{ Params: { lobbyId: string } }>,
@@ -15,7 +15,11 @@ async function joinTournamentHandler(
     const tournament = tournaments.get(tournamentId);
     if (!tournament) return reply.notFound("Tournament not found");
 
-    if (tournament.getTournamentStatus() !== TournamentStatus.CREATED)
+    const tournamentStatus = tournament.getTournamentStatus();
+    if (
+      tournamentStatus !== TournamentStatus.CREATED &&
+      tournamentStatus !== undefined
+    )
       return reply.redirect("/play");
 
     canMemberJoinTournamentCheck(memberId, tournamentId);
