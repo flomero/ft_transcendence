@@ -422,4 +422,8 @@ export class RoundRobin implements ITournamentBracketGenerator {
       seeding: new Map(),
     };
   }
+
+  getEliminatedPlayers(): string[] {
+    return [];
+  }
 }

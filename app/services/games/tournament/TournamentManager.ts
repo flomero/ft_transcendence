@@ -359,6 +359,56 @@ class TournamentManager {
     }
   }
 
+  public leaveTournament(memberId: string): void {
+    this.canTournamentBeLeavedCheck(memberId);
+
+    this.removeMemberSave(memberId);
+
+    if (this.getNumberOfPlayers() === 0) {
+      this.terminate(memberId);
+    }
+  }
+
+  public canTournamentBeLeavedCheck(memberId: string): void {
+    // that function throws
+    if (this.tournamentMembers.has(memberId) === false) {
+      throw new Error(
+        `[canTournamentBeLeavedCheck] Member: ${memberId} does not exist`,
+      );
+    } else if (this.tournament?.getStatus() === TournamentStatus.CREATED) {
+      throw new Error(
+        `[canTournamentBeLeavedCheck] Tournament is already finished`,
+      );
+    } else if (this.isPlayerEliminated(memberId) === false) {
+      throw new Error(
+        `[canTournamentBeLeavedCheck] Member has to play games in the tournament still`,
+      );
+    }
+  }
+
+  private isPlayerEliminated(playerId: string): boolean {
+    const eliminatedPlayer = this.tournament?.bracketManager.execute(
+      "getEliminatedPlayers",
+    );
+
+    if (eliminatedPlayer === undefined) return false;
+
+    for (const player of eliminatedPlayer) {
+      if (player === playerId) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public canTournamentBeLeaved(memberId: string): boolean {
+    if (this.tournamentMembers.has(memberId) === false) return false;
+    else if (this.tournament?.getStatus() === TournamentStatus.CREATED)
+      return false;
+    else if (this.isPlayerEliminated(memberId) === false) return false;
+    return true;
+  }
+
   public async notifyGameCompleted(
     gameManagerId: string,
     gameResult: GameResult,

@@ -36,4 +36,5 @@ export interface ITournamentBracketGenerator {
     allMatchesResults: TournamentResults,
   ): TournamentRankings;
   getCompleteBracket(): TournamentBracket;
+  getEliminatedPlayers(): string[];
 }

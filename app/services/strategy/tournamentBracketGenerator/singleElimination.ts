@@ -40,6 +40,8 @@ export class SingleElimination implements ITournamentBracketGenerator {
   protected currentRoundIndex: number = -1;
   protected matchResults: Map<string, Match> = new Map();
 
+  protected eliminatedPlayers: string[] = [];
+
   // Track ranked players by match ID
   protected matchRankedPlayers: Map<string, string[]> = new Map();
 
@@ -154,6 +156,7 @@ export class SingleElimination implements ITournamentBracketGenerator {
         this.pushPlayerToNextMatch(player, nextMatchID);
       } else {
         // All other players are eliminated
+        this.eliminatedPlayers.push(player);
         this.playersLastRound[player] = this.currentRoundIndex;
       }
     });
@@ -459,5 +462,9 @@ export class SingleElimination implements ITournamentBracketGenerator {
       rounds: this.rounds,
       seeding: this.nextMatchSeeding,
     };
+  }
+
+  getEliminatedPlayers(): string[] {
+    return this.eliminatedPlayers;
   }
 }
