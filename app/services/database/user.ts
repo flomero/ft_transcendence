@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import type { UUID } from "node:crypto";
+import { randomUUID, type UUID } from "node:crypto";
 import { userIsOnline } from "../chat/live";
 
 export interface User {
@@ -24,11 +24,49 @@ export function userToUserWithImage(user: User): UserWithImage {
   };
 }
 
+export const localPlayerWithImage = {
+  userId: "localPlayer",
+  userName: "- Local -",
+  username: "- Local -",
+  imageUrl: `/image/`,
+  online: true,
+  image_id: randomUUID(),
+  id: randomUUID(),
+} satisfies UserWithImage | User;
+
+// export async function localUserWithImage(fastify: FastifyInstance, localUser: User): Promise<UserWithImage> {
+//   const sql = "SELECT * FROM users WHERE id = ?";
+//   const user = await fastify.sqlite.get(sql, "localPlayer");
+
+//   if (!user)
+//     return {
+//       userId: localUser.id,
+//       userName: localUser.username + " - Local",
+//       imageUrl: `/image/${localUser.image_id}`,
+//       online: true,
+//     };
+
+//   return {
+//     userId: localUser.id,
+//     userName: localUser.username + " - Local",
+//     imageUrl: `/image/${user.image_id}`,
+//     online: true,
+//   };
+// }
+
 export function usersToUserWithImages(users: User[]): UserWithImage[] {
   return users.map(userToUserWithImage);
 }
 
 export async function getUserById(
+  fastify: FastifyInstance,
+  userId: string,
+): Promise<User | undefined> {
+  const sql = "SELECT * FROM users WHERE id = ?";
+  return await fastify.sqlite.get(sql, userId);
+}
+
+export async function getLocalPlayerByUserId(
   fastify: FastifyInstance,
   userId: string,
 ): Promise<User | undefined> {
@@ -74,4 +112,23 @@ export async function updateUsername(
     UPDATE users SET username = ? WHERE id = ?`;
   const result = await fastify.sqlite.run(sql, [newUsername, userId]);
   return (result?.changes ?? 0) > 0;
+}
+
+export async function getUserWithImage(
+  fastify: FastifyInstance,
+  userID: string,
+): Promise<UserWithImage | undefined> {
+  let user: User | undefined;
+  let userWithImage: UserWithImage | undefined;
+  if (userID.startsWith("#")) {
+    userWithImage = localPlayerWithImage;
+    userWithImage.imageUrl += localPlayerWithImage.image_id;
+  } else {
+    user = await getUserById(fastify, userID);
+    if (user === null || user === undefined) return;
+
+    userWithImage = userToUserWithImage(user);
+  }
+
+  return userWithImage;
 }

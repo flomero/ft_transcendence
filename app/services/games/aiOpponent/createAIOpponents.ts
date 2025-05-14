@@ -1,9 +1,16 @@
 import type { FastifyInstance } from "fastify";
-import { insertUserIfNotExists, userExists } from "../../database/user";
+import {
+  insertUserIfNotExists,
+  localPlayerWithImage,
+  userExists,
+} from "../../database/user";
 import { saveImage } from "../../database/image/image";
 import aiOpponents from "./aiOpponents";
+import { localPlayerImage } from "./localPlayer";
 
-const createAIOpponents = async (fastify: FastifyInstance): Promise<void> => {
+export const createAIOpponents = async (
+  fastify: FastifyInstance,
+): Promise<void> => {
   for (let i = 0; i < aiOpponents.length; i++) {
     if (await userExists(fastify, i.toString())) {
       continue;
@@ -16,4 +23,21 @@ const createAIOpponents = async (fastify: FastifyInstance): Promise<void> => {
   }
 };
 
-export default createAIOpponents;
+export const createLocalPlayer = async (
+  fastify: FastifyInstance,
+): Promise<void> => {
+  if (await userExists(fastify, "localPlayer")) {
+    return;
+  }
+
+  const image_id = await saveImage(fastify, localPlayerImage);
+  await insertUserIfNotExists(fastify, {
+    id: "localPlayer",
+    username: "localPlayer",
+    image_id: image_id,
+  });
+
+  localPlayerWithImage.image_id = image_id;
+};
+
+// export default createAIOpponents;

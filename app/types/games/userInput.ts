@@ -7,6 +7,10 @@ export const pongUserInputs = {
   STOP_DOWN: "STOP_DOWN",
   SPACE: "SPACE",
   STOP_SPACE: "STOP_SPACE",
+  LOCAL_UP: "LOCAL_UP",
+  LOCAL_DOWN: "LOCAL_DOWN",
+  LOCAL_STOP_UP: "LOCAL_STOP_UP",
+  LOCAL_STOP_DOWN: "LOCAL_STOP_DOWN",
 } as const;
 
 export type PongUserInput =
@@ -16,6 +20,7 @@ export interface UserInput {
   type?: PongUserInput;
   playerId: number;
   timestamp: number;
+  isLocal?: boolean;
 }
 
 export interface GameMessage {

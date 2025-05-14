@@ -3,6 +3,7 @@ import isUserInGame from "../../../services/games/gameHandler/isUserInGame";
 import { gameManagers } from "../../../services/games/lobby/start/startLobbyHandler";
 import {
   getUserById,
+  localPlayerWithImage,
   type User,
   usersToUserWithImages,
 } from "../../../services/database/user";
@@ -22,13 +23,23 @@ const page: FastifyPluginAsync = async (fastify): Promise<void> => {
       const user = await getUserById(fastify, userId);
       if (user) users.push(user);
     }
+    let usersWithImages = usersToUserWithImages(users);
+    if (gameManager.hasLocalPlayer()) {
+      let localPlayer = { ...localPlayerWithImage };
+      localPlayer.userId = `#${request.userId}`;
+      localPlayer.imageUrl = "/image/" + localPlayerWithImage.image_id;
+      localPlayer.userName = "Local B";
+      usersWithImages.push(localPlayer);
+      usersWithImages[0].userName = "Local A";
+      usersWithImages[0].imageUrl = "/public/ws.png";
+    }
 
     const data = {
       title: "Game | ft_transcendence",
       gameId: gameId,
       userId: request.userId,
       tps: GAME_REGISTRY.pong.serverTickrateS,
-      users: usersToUserWithImages(users),
+      users: usersWithImages,
     };
 
     reply.header("X-Page-Title", "Game | ft_transcendence");

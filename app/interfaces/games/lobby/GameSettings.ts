@@ -1,6 +1,6 @@
 import type { GAME_MODES } from "../../../schemas/games/lobby/newLobbySchema";
 
-type GameMode = (typeof GAME_MODES)[keyof typeof GAME_MODES];
+export type GameMode = (typeof GAME_MODES)[keyof typeof GAME_MODES];
 
 interface PowerUpCapacities {
   [powerUpName: string]: number;

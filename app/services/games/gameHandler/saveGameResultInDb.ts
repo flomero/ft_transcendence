@@ -4,6 +4,7 @@ import type GameManager from "./GameManager";
  * Main function to save game results to the database
  */
 const saveGameResultInDb = async (gameManager: GameManager, db: Database) => {
+  if (gameManager.hasLocalPlayer()) return;
   await savePlayerScoresAndResultToDatabase(gameManager, db);
   await saveAIScoresAndResultToDatabase(gameManager, db);
   await updateMatchStatusToFinished(gameManager, db);

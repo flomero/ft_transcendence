@@ -8,6 +8,7 @@ const addGameToDatabase = async (
   gameSettings: GameSettings,
 ) => {
   try {
+    if (gameManager.hasLocalPlayer()) return;
     await addMatchToDatabase(gameManager, db, gameSettings);
     await addUserMatchesToDB(gameManager, db);
     await addAIToDatabase(gameManager, db);

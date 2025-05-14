@@ -1,10 +1,11 @@
-import type { FastifyRequest, FastifyReply } from "fastify";
+import { type FastifyRequest, type FastifyReply } from "fastify";
 import { isUserInAnyLobby } from "../lobbyVaidation/isUserInAnyLobby";
 import { isLobbyRegistered } from "../lobbyVaidation/isLobbyRegistered";
 import addUserToExistingLobby from "./addUserToExistingLobby";
 import isLobbyOpen from "../lobbyVaidation/isLobbyOpen";
 import getLobbyById from "../getters/getLobbyById";
 import { getLobby } from "../lobbyWebsocket/getLobby";
+import { localPlayerWithImage } from "../../../database/user";
 
 async function joinLobbyHandler(
   request: FastifyRequest<{ Params: { lobbyId: string } }>,
@@ -39,10 +40,21 @@ async function joinLobbyHandler(
   if (lobby === null) {
     return reply.notFound("Lobby not found");
   }
+
+  if (lobby.members) {
+    for (const lobbyUsers of lobby.members) {
+      if (lobbyUsers.isLocal) {
+        lobbyUsers.image_id = localPlayerWithImage.image_id;
+        lobbyUsers.username = localPlayerWithImage.userName;
+      }
+    }
+  }
+
   const realLobby = getLobby(lobbyId);
   const data = {
     title: "Lobby | ft_transcendence",
     lobby: lobby,
+    isFull: realLobby.isLobbyFull(),
     isReady: realLobby.getMember(userId)?.isReady || false,
     isOwner: realLobby.isMemberOwner(userId),
     allMembersReady:

@@ -107,7 +107,10 @@ class GameManager {
   }
 
   public allPlayersAreConnected(): boolean {
-    for (const player of this.players.values()) {
+    const remotePlayers = this.players
+      .values()
+      .filter((player) => !player.playerUUID.startsWith("#"));
+    for (const player of remotePlayers) {
       if (player.ws === undefined) {
         return false;
       }
@@ -213,6 +216,7 @@ class GameManager {
   }
 
   public disqualifyNotConnectedPlayers(): void {
+    console.log(`[disqualifyNotConnectedPlayers]`);
     for (const player of this.players.values()) {
       if (player.ws === undefined || player.ws.readyState !== WebSocket.OPEN) {
         this.game.eliminate(player.id);
@@ -237,6 +241,8 @@ class GameManager {
       const lobby = getLobby(this.gameOrigin.lobby.getLobbyId);
       removeMemberFromLobby(lobby.getLobbyId, playerId);
     }
+
+    this.tryCoinFlipGame();
   }
 
   public disqualifyPlayer(playerId: string): void {
@@ -255,6 +261,11 @@ class GameManager {
       return console.error("[removePlayerSocket] Player not found");
     }
     player.ws = undefined;
+  }
+
+  public tryCoinFlipGame(): void {
+    if (this.game.getStatus() === GameStatus.FINISHED) return;
+    if (this.justAisInGame()) this.coinFlipAIGame();
   }
 
   public coinFlipAIGame(): void {
@@ -283,12 +294,18 @@ class GameManager {
 
   public connectedNumberOfPlayersInGame() {
     let count = 0;
-    for (const player of this.players.values()) {
+    const remotePlayers = this.players
+      .values()
+      .filter((player) => !player.playerUUID.startsWith("#"));
+    const localPlayersCount = Array.from(this.players.values())
+      .filter((player) => player.playerUUID.startsWith("#"))
+      .map((player) => player).length;
+    for (const player of remotePlayers) {
       if (player.ws !== undefined && player.ws.readyState === WebSocket.OPEN) {
         count++;
       }
     }
-    return count + this.aiOpponents.size;
+    return count + this.aiOpponents.size + localPlayersCount;
   }
 
   public isUserConnected(userId: string): boolean {
@@ -328,7 +345,11 @@ class GameManager {
   }
 
   public justAisInGame(): boolean {
-    if (this.players.size === 0 && this.aiOpponents.size > 0) {
+    if (
+      this.getPlayersAsArray().filter((player) => !player.leftGame).length ===
+        0 &&
+      this.aiOpponents.size > 0
+    ) {
       return true;
     }
     return false;
@@ -344,6 +365,13 @@ class GameManager {
       return console.error("[setTimeOut] Player not found");
     }
     player.timeOut = timeOut;
+  }
+
+  public hasLocalPlayer(): boolean {
+    for (const player of this.players.keys())
+      if (player.startsWith("#")) return true;
+
+    return false;
   }
 }
 
