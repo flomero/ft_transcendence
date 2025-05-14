@@ -133,6 +133,7 @@ class TournamentManager {
       );
       return;
     }
+
     const member = this.tournamentMembers.get(memberId);
     member?.webSocket?.close();
     this.tournamentMembers.delete(memberId);
@@ -365,16 +366,16 @@ class TournamentManager {
   }
 
   public canTournamentBeLeavedCheck(memberId: string): void {
-    // that function throws
     if (this.tournamentMembers.has(memberId) === false) {
       throw new Error(
         `[canTournamentBeLeavedCheck] Member: ${memberId} does not exist`,
       );
     } else if (this.tournament?.getStatus() === TournamentStatus.CREATED) {
-      throw new Error(
-        `[canTournamentBeLeavedCheck] Tournament is already finished`,
-      );
-    } else if (this.isPlayerEliminated(memberId) === false) {
+      throw new Error(`[canTournamentBeLeavedCheck] started already`);
+    } else if (
+      this.tournament !== undefined &&
+      this.isPlayerEliminated(memberId) === false
+    ) {
       throw new Error(
         `[canTournamentBeLeavedCheck] Member has to play games in the tournament still`,
       );
