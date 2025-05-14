@@ -182,7 +182,6 @@ class TournamentManager {
       return false;
     if (this.tournament?.getStatus() === TournamentStatus.FINISHED)
       return false;
-    if (this.allMembersAreConnected() === false) return false;
     return true;
   }
 
