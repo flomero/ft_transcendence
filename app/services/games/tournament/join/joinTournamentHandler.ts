@@ -12,7 +12,7 @@ async function joinTournamentHandler(
     const memberId = request.userId;
     const tournamentId = request.params.lobbyId;
     const tournament = tournaments.get(tournamentId);
-    if (!tournament) return reply.notFound("Tournament not found");
+    if (!tournament) return reply.redirect("/play");
 
     canMemberJoinTournamentCheck(memberId, tournamentId);
     tournament.addMember(memberId);
