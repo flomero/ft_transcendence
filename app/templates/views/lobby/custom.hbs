@@ -559,7 +559,7 @@
               <input type="number" id="portals_normalOffsetStandardDeviationFactor" name="powerUpNames.portals.normalOffsetStandardDeviationFactor" class="form-input" min="0.25" step="0.25" value="3.5">
             </div>
 
-            <!-- useWallSide -->
+            {{!-- <!-- useWallSide -->
             <div class="form-col">
               <label for="portals_useWallSide" class="form-label">Use Wall Side</label>
               <input type="checkbox" id="portals_useWallSide" name="powerUpNames.portals.useWallSide" class="form-input">
@@ -569,7 +569,7 @@
             <div class="form-col">
               <label for="portals_useBothSides" class="form-label">Use Both Wall Sides</label>
               <input type="checkbox" id="portals_useBothSides" name="powerUpNames.portals.useBothSides" class="form-input">
-            </div>
+            </div> --}}
 
             <!-- teleportationCountThreshold -->
             <div class="form-col">
@@ -809,6 +809,64 @@
             </div>
           </div>
         </div>
+
+        <!-- powerUpCapacities -->
+          <div class="form-row">
+
+            <!-- speedBoost -->
+            <div class="form-col">
+              <label for="powerUpCapacities_speedBoost" class="form-label">Speed Boost</label>
+              <input type="number" id="powerUpCapacities_speedBoost" name="gameModeConfig.powerUpCapacities.speedBoost" class="form-input" min="1" step="1" value="1">
+            </div>
+
+            <!-- blinkingBall -->
+            <div class="form-col">
+              <label for="powerUpCapacities_blinkingBall" class="form-label">Blinking Ball</label>
+              <input type="number" id="powerUpCapacities_blinkingBall" name="gameModeConfig.powerUpCapacities.blinkingBall" class="form-input" min="1" step="1" value="1">
+            </div>
+
+            <!-- shooter -->
+            <div class="form-col">
+              <label for="powerUpCapacities_shooter" class="form-label">Shooter</label>
+              <input type="number" id="powerUpCapacities_shooter" name="gameModeConfig.powerUpCapacities.shooter" class="form-input" min="1" step="1" value="1">
+            </div>
+
+            <!-- multiBall -->
+            <div class="form-col">
+              <label for="powerUpCapacities_multiBall" class="form-label">Multi Ball</label>
+              <input type="number" id="powerUpCapacities_multiBall" name="gameModeConfig.powerUpCapacities.multiBall" class="form-input" min="1" step="1" value="1">
+            </div>
+
+            <!-- bumper -->
+            <div class="form-col">
+              <label for="powerUpCapacities_bumper" class="form-label">Bumper</label>
+              <input type="number" id="powerUpCapacities_bumper" name="gameModeConfig.powerUpCapacities.bumper" class="form-input" min="1" step="1" value="1">
+            </div>
+
+            <!-- portals -->
+            <div class="form-col">
+              <label for="powerUpCapacities_portals" class="form-label">Portals</label>
+              <input type="number" id="powerUpCapacities_portals" name="gameModeConfig.powerUpCapacities.portals" class="form-input" min="1" step="1" value="1">
+            </div>
+
+            <!-- speedGate -->
+            <div class="form-col">
+              <label for="powerUpCapacities_speedGate" class="form-label">Speed Gate</label>
+              <input type="number" id="powerUpCapacities_speedGate" name="gameModeConfig.powerUpCapacities.speedGate" class="form-input" min="1" step="1" value="1">
+            </div>
+
+            <!-- protectedPowerUp -->
+            <div class="form-col">
+              <label for="powerUpCapacities_protectedPowerUp" class="form-label">Protected Power Up</label>
+              <input type="number" id="powerUpCapacities_protectedPowerUp" name="gameModeConfig.powerUpCapacities.protectedPowerUp" class="form-input" min="1" step="1" value="1">
+            </div>
+
+            <!-- bumperShield -->
+            <div class="form-col">
+              <label for="powerUpCapacities_bumperShield" class="form-label">Bumper Shield</label>
+              <input type="number" id="powerUpCapacities_bumperShield" name="gameModeConfig.powerUpCapacities.bumperShield" class="form-input" min="1" step="1" value="1">
+            </div>
+          </div>
       </div>
     </div>
 
