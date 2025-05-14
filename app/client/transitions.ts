@@ -14,7 +14,7 @@ export class TransitionManager {
   constructor(containerId = "app-content") {
     this.container = document.getElementById(containerId) as HTMLElement;
     if (!this.container) {
-      console.warn("Container element not found, transitions will not work");
+      // console.warn("Container element not found, transitions will not work");
     }
   }
 

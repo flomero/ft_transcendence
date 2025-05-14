@@ -230,7 +230,7 @@ class Router {
 
       this.isInitialLoad = false;
     } catch (error) {
-      console.error("Error loading route:", error);
+      // console.error("Error loading route:", error);
     } finally {
       this.hideLoader();
     }
@@ -244,7 +244,7 @@ class Router {
       try {
         await matchedRoute.handler.onExit();
       } catch (error) {
-        console.error("Error in route exit handler:", error);
+        // console.error("Error in route exit handler:", error);
       }
     }
   }
@@ -275,7 +275,7 @@ class Router {
       });
 
       if (!response.ok) {
-        console.error("Fetch error:", response.status, response.statusText);
+        // console.error("Fetch error:", response.status, response.statusText);
         // this.displayError(response.status, response.statusText);
         // return { html: null, responseOk: response.ok };
       }
@@ -331,7 +331,7 @@ class Router {
       const html = await response.text();
       return { html: html, responseOk: response.ok };
     } catch (error) {
-      console.error("Fetch error:", error);
+      // console.error("Fetch error:", error);
       return { html: null, responseOk: false };
     }
   }

@@ -2,7 +2,11 @@ import sqlite3 from "sqlite3";
 import fp from "fastify-plugin";
 import { open, type Database } from "sqlite";
 import path from "node:path";
-import createAIOpponents from "../services/games/aiOpponent/createAIOpponents";
+import {
+  createAIOpponents,
+  createLocalPlayer,
+} from "../services/games/aiOpponent/createAIOpponents";
+import { localPlayerWithImage } from "../services/database/user";
 
 /**
  * This plugins adds sqlite3 support
@@ -31,5 +35,10 @@ export default fp(async (fastify) => {
       migrationsPath: path.resolve(__dirname, "../../database/migrations"),
     });
     await createAIOpponents(fastify);
+    await createLocalPlayer(fastify);
+
+    const sql = `SELECT * FROM users WHERE id = ?`;
+    const localPlayer = await fastify.sqlite.get(sql, "localPlayer");
+    if (localPlayer) localPlayerWithImage.image_id = localPlayer.image_id;
   });
 });
