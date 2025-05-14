@@ -55,7 +55,7 @@ export class GoalReset extends ModifierBase {
   }
 
   onBallOutOfBounds(game: Pong, args: { ballID: number }): void {
-    console.dir(game.getState().balls[args.ballID], { depth: null });
+    // console.dir(game.getState().balls[args.ballID], { depth: null });
 
     game.getModifierManager().trigger("onBallReset", { ballID: args.ballID });
     this.ticks = this.delay;

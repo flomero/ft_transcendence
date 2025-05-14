@@ -172,7 +172,7 @@ async function hydrateTournamentPlayers(
 
   /** 2 ─ Fetch them all at once */
   const ids = [...pendingIds];
-  console.dir(ids);
+  // console.dir(ids);
   const placeholders = ids.map(() => "?").join(",");
   type Row = {
     id: string;
@@ -187,9 +187,9 @@ async function hydrateTournamentPlayers(
     `,
     ids,
   );
-  console.dir(rows);
+  // console.dir(rows);
   const byId = new Map(rows.map((r) => [r.id, r]));
-  console.dir(byId, { depth: null });
+  // console.dir(byId, { depth: null });
 
   /** 3 ─ Merge back into every player slot */
   const applyRow = (p: PlayerInfos) => {

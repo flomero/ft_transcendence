@@ -129,7 +129,7 @@ export class RoundRobin implements ITournamentBracketGenerator {
     };
 
     fastifyInstance.log.info(`${matchID} finished, results:`);
-    console.dir(gameResult, { depth: null });
+    // console.dir(gameResult, { depth: null });
 
     // Remove from active matches when complete
     this.activeMatches.delete(matchID);

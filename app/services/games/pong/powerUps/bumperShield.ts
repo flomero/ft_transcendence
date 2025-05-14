@@ -116,7 +116,7 @@ export class BumperShield extends ModifierBase {
       })
         .map((_, index) => index)
         .filter((index) => !game.isEliminated(index));
-      console.dir(players, { depth: null });
+      // console.dir(players, { depth: null });
       const rndID = game.getRNG().randomInt(players.length - 1);
       this.playerId = players[rndID];
     }
