@@ -13,6 +13,8 @@ import {
   GAME_MODES,
   GAME_NAMES,
 } from "../../../schemas/games/lobby/newLobbySchema";
+import { STRATEGY_REGISTRY } from "../../../services/strategy/strategyRegistryLoader";
+import { GAME_REGISTRY } from "../../../types/games/gameRegistry";
 
 const page: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.get("/", async (request, reply) => {
@@ -76,14 +78,12 @@ const page: FastifyPluginAsync = async (fastify): Promise<void> => {
       title: "Create Custom Game Lobby | ft_transcendence",
       gameNames: Object.values(GAME_NAMES),
       gameModes: Object.values(GAME_MODES),
-      positionSamplers: [
-        "biasedGaussianCATester",
-        "biasedQuadrantGaussianRATester",
-        "elipticGaussianRA",
-        "flowerGaussianCA",
-        "uniformCA",
-        "uniformRA",
-      ],
+      positionSamplers: Object.keys(
+        STRATEGY_REGISTRY.pongPowerUpPositionSampler,
+      ),
+      ballResetSamplers: Object.keys(STRATEGY_REGISTRY.pongBallResetSampler),
+      playerSamplers: Object.keys(STRATEGY_REGISTRY.pongPlayerSampler),
+      powerUpNames: Object.keys(GAME_REGISTRY.pong.powerUps),
     };
     reply.header("X-Page-Title", "Create Custom Game Lobby | ft_transcendence");
     const viewOptions = request.isAjax() ? {} : { layout: "layouts/main" };

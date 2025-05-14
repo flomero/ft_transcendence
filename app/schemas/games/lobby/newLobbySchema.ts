@@ -37,9 +37,9 @@ const powerUpCapacitiesSchema = S.object()
 
 // GameModeConfig
 const gameModeConfigSchema = S.object()
-  .prop("ballSpeedWidthPercentS", S.number())
-  .prop("ballRadius", S.number())
-  .prop("ballResetSampler", S.string())
+  .prop("ballSpeedWidthPercentS", S.number().minimum(0.001))
+  .prop("ballRadius", S.number().minimum(0.001))
+  .prop("ballResetSampler", BallResetSamplerStrategies)
   .prop("paddleCoveragePercent", S.number().minimum(0).maximum(100))
   .prop("paddleSpeedWidthPercentS", S.number().minimum(0.01))
   .prop("paddleVelocityAngularTransmissionPercent", S.number())
@@ -54,10 +54,10 @@ const powerUpSpawnerSchema = S.object()
   .prop("positionSamplerStrategyName", PositionSamplerStrategies)
   .prop("mayhemChance", S.number().minimum(0.001).maximum(100));
 
-const timedGameSchema = S.object().prop("duration", S.number().minimum(0));
+const timedGameSchema = S.object().prop("duration", S.number().minimum(0.001));
 const scoredGameSchema = S.object().prop(
   "goalObjective",
-  S.number().minimum(0),
+  S.integer().minimum(1),
 );
 const eliminationSchema = S.object().prop("threshold", S.integer().minimum(1));
 const goalResetSchema = S.object().prop("delay", S.number().minimum(0.001));
@@ -88,7 +88,7 @@ const modifierNamesSchema = S.object()
 const speedBoostSchema = S.object()
   .prop("spawnWeight", S.number().minimum(0.001))
   .prop("duration", S.number().minimum(0.001))
-  .prop("rampUpStrengthFactor", S.number())
+  .prop("rampUpStrengthFactor", S.number().minimum(0.01))
   .prop("rampUpFrequency", S.number().minimum(0.001));
 
 const blinkingBallSchema = S.object()
@@ -164,8 +164,8 @@ const speedGateSchema = S.object()
     "stdDevSpeedGateDstFromCenterFactor",
     S.number().minimum(0.001).maximum(100),
   )
-  .prop("sizeFactor", S.number().minimum(0.001).maximum(100))
-  .prop("speedFactor", S.number().minimum(0.001).maximum(100));
+  .prop("sizeFactor", S.number().minimum(0.001))
+  .prop("speedFactor", S.number().minimum(0.001));
 
 const protectedPowerUpSchema = S.object()
   .prop("spawnWeight", S.number().minimum(0.001))
