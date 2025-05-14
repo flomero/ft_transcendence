@@ -15,7 +15,7 @@ route:
 receivers:
   - name: discord
     discord_configs:
-      - webhook_url: ${DISCORD_WEBHOOK_URL}
+      - webhook_url: https://discord.com/api/webhooks/1371589374650613862/MFK7vWEfz6T5KtvUpT01-qzO4xAMPAtpEA9D1yQw1rFerNfviDO13uxVKgxdraKnb408
         send_resolved: true
         title:  '{{ .CommonLabels.alertname }} ({{ .CommonLabels.severity }})'
         content: '{{ .CommonAnnotations.summary }}'
