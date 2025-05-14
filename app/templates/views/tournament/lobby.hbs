@@ -48,7 +48,10 @@
   {{/unless}}
   {{#if info}}
     {{> components/tournament-view/tournament-bracket rounds=info.rounds}}
-    <button class="text-sm text-fg-muted underline italic cursor-pointer" onclick="tournamentHandler.leaveTournament(event)">Leave</button>
+
+    {{#if canLeave}}
+      <button class="text-sm text-fg-muted underline italic cursor-pointer" onclick="tournamentHandler.leaveTournament(event)">Leave</button>
+    {{/if}}
   {{/if}}
 <!--  {{#if lobbyString}}-->
 <!--    <pre class="mt-8 p-1 bg-bg-muted rounded w-full text-wrap break-words">-->
