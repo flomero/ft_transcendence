@@ -713,11 +713,11 @@ export type TOURNAMENT_CONFIGS_REGISTRY_TYPE = {
 };
 
 export const TOURNAMENT_CONFIGS_REGISTRY: TOURNAMENT_CONFIGS_REGISTRY_TYPE = {
-  roundRobin: {
-    bracketType: "roundRobin",
-    matchWinner: "bestOfX",
-    possiblePlayerCount: [3, 4, 5, 6],
-  },
+  // roundRobin: {
+  //   bracketType: "roundRobin",
+  //   matchWinner: "bestOfX",
+  //   possiblePlayerCount: [3, 4, 5, 6],
+  // },
 
   singleElimination: {
     bracketType: "singleElimination",
@@ -726,19 +726,19 @@ export const TOURNAMENT_CONFIGS_REGISTRY: TOURNAMENT_CONFIGS_REGISTRY_TYPE = {
     possiblePlayerCount: [4, 8, 16, 32],
   },
 
-  doubleElimination: {
-    bracketType: "doubleElimination",
-    matchWinner: "bestOfX",
-    initialSeedingMethod: "random",
-    possiblePlayerCount: [4, 8, 16, 32],
-  },
+  // doubleElimination: {
+  //   bracketType: "doubleElimination",
+  //   matchWinner: "bestOfX",
+  //   initialSeedingMethod: "random",
+  //   possiblePlayerCount: [4, 8, 16, 32],
+  // },
 
-  swissRound: {
-    bracketType: "swissRound",
-    matchWinner: "bestOfX",
-    initialSeedingMethod: "random",
-    possiblePlayerCount: Array.from({ length: 15 }).map(
-      (_, index) => 2 * (index + 1),
-    ),
-  },
+  // swissRound: {
+  //   bracketType: "swissRound",
+  //   matchWinner: "bestOfX",
+  //   initialSeedingMethod: "random",
+  //   possiblePlayerCount: Array.from({ length: 15 }).map(
+  //     (_, index) => 2 * (index + 1),
+  //   ),
+  // },
 };
