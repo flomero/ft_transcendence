@@ -77,7 +77,8 @@
         "className": "PowerUpSpawner",
         "meanDelayS": 10,
         "delaySpanS": 2,
-        "positionSampler": "elipticGaussianRA"
+        "positionSampler": "elipticGaussianRA",
+        "mayhemChancePercent": 1
       },
 
       "timedGame": {
@@ -187,7 +188,8 @@
         "bumperWallJunctionDistancePercent": 90,
         "bumperVelocityPercent": 10,
         "bumperMaxVelocityPercent": 50,
-        "bumperAccelerationPercentS": 0.0
+        "bumperAccelerationPercentS": 0.0,
+        "bounceThreshold": -1
       },
 
       "portals": {

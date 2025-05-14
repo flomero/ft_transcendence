@@ -20,7 +20,7 @@ export class Portals extends TimeLimitedModifierBase {
   portalWalls: Rectangle[] = [];
 
   protected teleportationCount: number = 0;
-  protected teleportationCountThrehsold: number = 0;
+  protected teleportationCountThreshold: number = 0;
 
   constructor(customConfig?: Record<string, any>) {
     super();
@@ -122,7 +122,7 @@ export class Portals extends TimeLimitedModifierBase {
     );
 
     this.configManager.registerPropertyConfig(
-      "teleportationCountThrehsold",
+      "teleportationCountThreshold",
       (value) => value,
       undefined,
     );
@@ -331,7 +331,7 @@ export class Portals extends TimeLimitedModifierBase {
 
     if (
       args.ballID === 0 &&
-      ++this.teleportationCount >= this.teleportationCountThrehsold
+      ++this.teleportationCount >= this.teleportationCountThreshold
     )
       this.deactivate(game);
   }
