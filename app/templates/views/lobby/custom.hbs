@@ -167,7 +167,7 @@
             <div class="form-col">
               <label for="duration" class="form-label">Duration (seconds)</label>
               <div class="form-number-container">
-                <input type="number" id="duration" name="modifierNames.timedGame.duration" class="form-input" min="1" step="10" value="300">
+                <input type="number" id="duration" name="modifierNames.timedGame.duration" class="form-input" min="1" step="1" value="300">
               </div>
             </div>
           </div>
@@ -343,7 +343,7 @@
             <!-- rampUpFrequency -->
             <div class="form-col">
               <label for="speedBoost_rampUpFrequency" class="form-label">Ramp Up Frequency (seconds)</label>
-              <input type="number" id="speedBoost_rampUpFrequency" name="powerUpNames.speedBoost.rampUpFrequency" class="form-input" min="0.025" step="0.025" value="0.33">
+              <input type="number" id="speedBoost_rampUpFrequency" name="powerUpNames.speedBoost.rampUpFrequency" class="form-input" min="0.01" step="0.01" value="0.33">
             </div>
           </div>
         </div>
@@ -544,7 +544,7 @@
             <!-- directionalOffsetStandardDeviationFactor -->
             <div class="form-col">
               <label for="portals_directionalOffsetStandardDeviationFactor" class="form-label">Standard Direction Offset Deviation (%)</label>
-              <input type="number" id="portals_directionalOffsetStandardDeviationFactor" name="powerUpNames.portals.directionalOffsetStandardDeviationFactor" class="form-input" min="0.25" step="0.25" value="3.55">
+              <input type="number" id="portals_directionalOffsetStandardDeviationFactor" name="powerUpNames.portals.directionalOffsetStandardDeviationFactor" class="form-input" min="0.25" step="0.25" value="3.5">
             </div>
 
             <!-- normalOffsetFactor -->
@@ -744,13 +744,15 @@
       </div>
     </div>
 
-    <!-- Goal Reset -->
+    <!-- Additional Settings -->
     <div class="form-card">
       <div class="form-card-header">
         <h2 class="form-section-title mb-0">Additional Settings</h2>
       </div>
       <div class="form-card-body">
         <div class="mb-4">
+
+          <!-- goalReset -->
           <h3 class="form-subsection-title">Goal Reset</h3>
           <div class="form-row">
 
@@ -761,6 +763,49 @@
                 <input type="number" id="goalReset_delay" name="modifierNames.goalReset.delay" class="form-input" min="0.1" step="0.1" value="1.5">
               </div>
               <p class="form-help-text">Time to wait before resetting after a goal</p>
+            </div>
+          </div>
+
+          <!-- powerUpSpawner -->
+          <div class="form-col">
+            <div class="form-check">
+                <input type="checkbox" id="powerUpSpawnerEnabled" name="powerUpEnabled.powerUpSpawner" class="form-check-input powerup-toggle">
+                <label for="powerUpSpawnerEnabled" class="form-check-label">Power Up Spawner</label>
+              </div>
+          </div>
+
+
+          <!-- powerUpSpawner configuration -->
+          <div class="powerup-config hidden" id="powerUpSpawnerConfig">
+          <h3 class="form-subsection-title">Power Up Spawner Configuration</h3>
+          <div class="form-row">
+
+            <!-- meanDelay -->
+            <div class="form-col">
+              <label for="powerUpSpawner_meanDelay" class="form-label">Average Delay (seconds)</label>
+              <input type="number" id="powerUpSpawner_meanDelay" name="modifierNames.powerUpSpawner.meanDelay" class="form-input" min="0.1" step="0.1" value="10.0">
+            </div>
+
+            <!-- delaySpan -->
+            <div class="form-col">
+              <label for="powerUpSpawner_delaySpan" class="form-label">Standard Delay Deviation (seconds)</label>
+              <input type="number" id="powerUpSpawner_delaySpan" name="modifierNames.powerUpSpawner.delaySpan" class="form-input" min="0.1" step="0.1" value="1.5">
+            </div>
+
+            <!-- positionSamplerStrategyName -->
+            <div class="form-col">
+              <label for="powerUpSpawner_positionSamplerStrategyName" class="form-label">Postion Sampler</label>
+              <select id="positionSampler" name="modifierNames.powerUpSpawner.positionSamplerStrategyName" class="form-select" required>
+                {{#each positionSamplers}}
+                  <option value="{{this}}">{{formatName this}}</option>
+                {{/each}}
+              </select>
+            </div>
+
+            <!-- mayhemChance -->
+            <div class="form-col">
+              <label for="bumperShield_mayhemChance" class="form-label">Mayhem Chance (%)</label>
+              <input type="number" id="bumperShield_mayhemChance" name="powerUpNames.bumperShield.mayhemChance" class="form-input" min="0.01" step="0.01" value="1">
             </div>
           </div>
         </div>

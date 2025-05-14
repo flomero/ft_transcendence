@@ -110,7 +110,7 @@ const multiBallSchema = S.object()
   .prop("duration", S.number().minimum(0.001))
   .prop("ballCount", S.integer().minimum(1).maximum(36))
   .prop("totalAngle", S.number().minimum(0.001).maximum(360))
-  .prop("radiusFactor", S.number().minimum(0.001).maximum(1));
+  .prop("radiusFactor", S.number().minimum(0.001));
 
 const bumperSchema = S.object()
   .prop("spawnWeight", S.number().minimum(0.001))
@@ -123,7 +123,7 @@ const bumperSchema = S.object()
   .prop("bumperVelocityFactor", S.number().minimum(0.001))
   .prop("bumperMaxVelocityFactor", S.number().minimum(0.001))
   .prop("bumperAcceleration", S.number())
-  .prop("bounceThreshold", S.integer().minimum(1));
+  .prop("bounceThreshold", S.integer().minimum(-1));
 
 const portalsSchema = S.object()
   .prop("spawnWeight", S.number().minimum(0.001))
@@ -180,12 +180,12 @@ const protectedPowerUpSchema = S.object()
   );
 
 const bumperShieldSchema = S.object()
-  .prop("spawnWeight", S.number().minimum(0.001))
+  .prop("spawnWeight", S.number().minimum(0))
   .prop("speedMultiplier", S.number().minimum(0.001))
   .prop("wallsHitThresold", S.integer().minimum(1))
   .prop("wallTotalWidthArenaWidthFactor", S.number().minimum(0.001))
   .prop("wallJunctionArenaWidthFactor", S.number().minimum(0.001))
-  .prop("wallGoalOffsetArenaWidthFactor", S.number().minimum(0.001));
+  .prop("wallGoalOffsetArenaWidthFactor", S.number().minimum(0));
 
 // The powerUpNames schema with NO required fields, since powers are optional
 const powerUpNamesSchema = S.object()
