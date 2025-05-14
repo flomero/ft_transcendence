@@ -206,7 +206,11 @@ export const gameSettingsSchema = S.object()
   .prop("gameModeConfig", gameModeConfigSchema.required())
   .prop("modifierNames", modifierNamesSchema.required())
   .prop("powerUpNames", powerUpNamesSchema.required())
-  .prop("playerCount", S.integer().minimum(1).maximum(16).required());
+  .prop("playerCount", S.integer().minimum(2).maximum(16).required())
+  .ifThen(
+    S.object().prop("gameModeName", S.const("classicPong")),
+    S.object().prop("playerCount", S.const(2)),
+  );
 
 export const newLobbySchema = {
   body: gameSettingsSchema,
