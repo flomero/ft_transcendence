@@ -42,6 +42,7 @@ async function joinTournamentHandler(
       canStart: tournament.canTournamentBeStarted(),
       info: info,
       lobbyString: JSON.stringify(info),
+      canLeave: tournament.canTournamentBeLeaved(memberId),
     };
     reply.header("X-Page-Title", "Tournament Lobby | ft_transcendence");
     const viewOptions = request.isAjax() ? {} : { layout: "layouts/main" };

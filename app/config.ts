@@ -514,7 +514,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       paddleCoveragePercent: 22.5,
       paddleSpeedWidthPercentS: 0.8,
       paddleVelocityAngularTransmissionPercent: 5,
-      paddleVelocitySpeedTransmissionPercent: 20,
+      paddleVelocitySpeedTransmissionPercent: 40,
     },
     modifierNames: {
       paceBreaker: {},
@@ -566,7 +566,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       paddleCoveragePercent: 22.5,
       paddleSpeedWidthPercentS: 0.8,
       paddleVelocityAngularTransmissionPercent: 5,
-      paddleVelocitySpeedTransmissionPercent: 17.5,
+      paddleVelocitySpeedTransmissionPercent: 40,
       powerUpRadius: 3.75,
     },
     modifierNames: {
@@ -622,7 +622,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       paddleCoveragePercent: 22.5,
       paddleSpeedWidthPercentS: 0.755,
       paddleVelocityAngularTransmissionPercent: 90,
-      paddleVelocitySpeedTransmissionPercent: 12.5,
+      paddleVelocitySpeedTransmissionPercent: 25,
     },
     modifierNames: {
       paceBreaker: {},
@@ -649,7 +649,7 @@ export const GAMEMODE_REGISTRY: GAMEMODE_REGISTRY_TYPE = {
       paddleCoveragePercent: 22.5,
       paddleSpeedWidthPercentS: 0.755,
       paddleVelocityAngularTransmissionPercent: 90,
-      paddleVelocitySpeedTransmissionPercent: 12.5,
+      paddleVelocitySpeedTransmissionPercent: 25,
       powerUpRadius: 2.75,
     },
     modifierNames: {

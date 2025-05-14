@@ -34,6 +34,8 @@ export class SwissRound implements ITournamentBracketGenerator {
   protected rng: RNG = new RNG();
   protected userSampler: StrategyManager<IUserSampler, "sampleUser">;
 
+  protected eliminatedPlayers: string[] = [];
+
   // Track current round
   protected currentRoundIndex: number = -1;
 
@@ -582,6 +584,7 @@ export class SwissRound implements ITournamentBracketGenerator {
       }
 
       if (stats.losses >= this.roundCount) {
+        this.eliminatedPlayers.push(playerId);
         stats.eliminated = true;
         fastifyInstance.log.debug(
           `Player ${playerId} has been ELIMINATED with ${stats.losses} losses`,
@@ -675,5 +678,9 @@ export class SwissRound implements ITournamentBracketGenerator {
       rounds: this.allRounds,
       seeding: new Map(),
     };
+  }
+
+  getEliminatedPlayers(): string[] {
+    return this.eliminatedPlayers;
   }
 }

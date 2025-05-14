@@ -691,4 +691,8 @@ export class DoubleElimination implements ITournamentBracketGenerator {
       seeding: this.nextMatchSeeding,
     };
   }
+
+  getEliminatedPlayers(): string[] {
+    return Array.from<string>(this.eliminatedPlayers);
+  }
 }
