@@ -9,7 +9,7 @@
       </div>
       <div class="form-card-body">
         <div class="form-row">
-          <div class="form-col" class="hidden">
+          <div class="form-col hidden">
             <label for="gameName" class="form-label">Game</label>
             <select id="gameName" name="gameName" class="form-select" required>
               {{#each gameNames}}
@@ -239,14 +239,6 @@
               <div class="form-check">
                 <input type="checkbox" id="speedBoostEnabled" name="powerUpEnabled.speedBoost" class="form-check-input powerup-toggle">
                 <label for="speedBoostEnabled" class="form-check-label">Speed Boost</label>
-              </div>
-            </div>
-
-            <!-- speedBoost -->
-            <div class="form-col">
-              <div class="form-check">
-                <input type="checkbox" id="blinkingBallEnabled" name="powerUpEnabled.blinkingBall" class="form-check-input powerup-toggle">
-                <label for="blinkingBallEnabled" class="form-check-label">Blinking Ball</label>
               </div>
             </div>
 
@@ -867,6 +859,7 @@
               <input type="number" id="powerUpCapacities_bumperShield" name="gameModeConfig.powerUpCapacities.bumperShield" class="form-input" min="1" step="1" value="1">
             </div>
           </div>
+      </div>
       </div>
     </div>
 
