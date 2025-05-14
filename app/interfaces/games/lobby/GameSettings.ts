@@ -22,6 +22,7 @@ interface PowerUpSpawner {
   meanDelay?: number;
   delaySpan?: number;
   positionSamplerStrategyName?: string;
+  mayhemChance?: number;
 }
 
 interface TimedGame {
@@ -47,6 +48,8 @@ interface IdleWallBounceAcceleration {
 interface PaceBreaker {
   noResetThreshold?: number;
   noPaddleBounceThreshold?: number;
+  twoPaddlesBounceThreshold?: number;
+  onePaddleBounceThreshold?: number;
 }
 
 interface ModifierNames {
@@ -67,7 +70,7 @@ interface SpeedBoost {
   spawnWeight?: number;
   duration?: number;
   rampUpStrengthFactor?: number;
-  rampUpStrength?: number;
+  rampUpFrequency?: number;
 }
 
 interface BlinkingBall {
@@ -102,6 +105,7 @@ interface Bumper {
   bumperVelocityFactor?: number;
   bumperMaxVelocityFactor?: number;
   bumperAcceleration?: number;
+  bounceThreshold?: number;
 }
 
 interface Portals {
@@ -114,7 +118,7 @@ interface Portals {
   normalOffsetStandardDeviationFactor?: number;
   useWallSide?: boolean;
   useBothSides?: boolean;
-  teleportationCountThrehsold?: number;
+  teleportationCountThreshold?: number;
 }
 
 interface SpeedGate {

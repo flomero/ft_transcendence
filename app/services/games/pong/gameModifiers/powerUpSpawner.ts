@@ -24,6 +24,7 @@ export class PowerUpSpawner extends TimeLimitedModifierBase {
     super();
 
     const serverTickrateS = GAME_REGISTRY.pong.serverTickrateS;
+    const defaultRegistry = GAME_REGISTRY.pong.gameModifiers[this.name];
 
     // Register transformations for properties
     this.configManager.registerPropertyConfig(
@@ -38,17 +39,25 @@ export class PowerUpSpawner extends TimeLimitedModifierBase {
       (delaySpan) => delaySpan / serverTickrateS,
     );
 
-    const defaultConfig = {
-      meanDelay: GAME_REGISTRY.pong.gameModifiers[this.name].meanDelayS,
-      delaySpan: GAME_REGISTRY.pong.gameModifiers[this.name].delaySpanS,
-      positionSamplerStrategyName:
-        GAME_REGISTRY.pong.gameModifiers[this.name].positionSampler,
-    };
-    this.configManager.loadSimpleConfigIntoContainer(defaultConfig, this);
+    this.configManager.registerPropertyConfig(
+      "positionSamplerStrategyName",
+      (_, context) =>
+        context.positionSamplerStrategyName || defaultRegistry.positionSampler,
+    );
 
-    // Apply custom configuration if provided
+    this.configManager.registerPropertyConfig("mayhemChance", (_, context) => {
+      const mayhemChance =
+        context.mayhemChance || defaultRegistry.mayhemChancePercent;
+      return mayhemChance / 100.0;
+    });
+
+    const mergedConfig = { ...defaultRegistry };
     if (customConfig)
-      this.configManager.loadSimpleConfigIntoContainer(customConfig, this);
+      Object.entries(customConfig).forEach(([key, value]) => {
+        mergedConfig[key] = value;
+      });
+
+    this.configManager.loadComplexConfigIntoContainer(mergedConfig, this);
 
     this.positionSampler = new StrategyManager(
       this.positionSamplerStrategyName,

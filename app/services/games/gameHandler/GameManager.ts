@@ -216,7 +216,7 @@ class GameManager {
   }
 
   public disqualifyNotConnectedPlayers(): void {
-    console.log(`[disqualifyNotConnectedPlayers]`);
+    // console.log(`[disqualifyNotConnectedPlayers]`);
     for (const player of this.players.values()) {
       if (player.ws === undefined || player.ws.readyState !== WebSocket.OPEN) {
         this.game.eliminate(player.id);

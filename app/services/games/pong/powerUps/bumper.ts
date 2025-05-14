@@ -18,7 +18,7 @@ export class Bumper extends TimeLimitedModifierBase {
   protected bumperAcceleration: number = 0;
 
   protected bounceCounter: number = 0;
-  protected bounceThreshold: number = 10;
+  protected bounceThreshold: number = -1;
 
   constructor(customConfig?: Record<string, any>) {
     super();
@@ -107,6 +107,12 @@ export class Bumper extends TimeLimitedModifierBase {
       undefined,
     );
 
+    this.configManager.registerPropertyConfig(
+      "bounceThreshold",
+      (value) => value,
+      undefined,
+    );
+
     const mergedConfig = { ...defaultRegistry };
     if (customConfig)
       Object.entries(customConfig).forEach((entry) => {
@@ -128,11 +134,12 @@ export class Bumper extends TimeLimitedModifierBase {
     }
 
     // Convert percentages to actual distances based on arena dimensions
-    const junctionDistanceFromCenter =
-      ((this.bumperJunctionDistanceFromCenter *
-        game.getSettings().arenaHeight) /
-        2.0) *
-      (1 + (this.bounceCounter + 1) / this.bounceThreshold);
+    let junctionDistanceFromCenter =
+      (this.bumperJunctionDistanceFromCenter * game.getSettings().arenaHeight) /
+      2.0;
+    if (this.bounceThreshold > 0)
+      junctionDistanceFromCenter *=
+        1 + (this.bounceCounter + 1) / this.bounceThreshold;
 
     // Array.from({ length: gameState.playerCount }).forEach((_, index) => {
     //   const wallID = 2 * index + 1;
@@ -144,11 +151,10 @@ export class Bumper extends TimeLimitedModifierBase {
         const ca = parseFloat(Math.cos(wall.alpha).toFixed(3));
         const sa = parseFloat(Math.sin(wall.alpha).toFixed(3));
 
-        const wallJunctionDistance =
-          (this.bumperWallJunctionDistance *
-            wall.width *
-            (this.bounceThreshold - this.bounceCounter)) /
-          this.bounceThreshold;
+        let wallJunctionDistance = this.bumperWallJunctionDistance * wall.width;
+        if (this.bounceThreshold > 0)
+          wallJunctionDistance *=
+            (this.bounceThreshold - this.bounceCounter) / this.bounceThreshold;
         // Calculate junction point for the bumpers
         const junctionX = wall.x - junctionDistanceFromCenter * ca;
         const junctionY = wall.y - junctionDistanceFromCenter * sa;
@@ -265,13 +271,15 @@ export class Bumper extends TimeLimitedModifierBase {
     game.getState().balls[args.ballID].speed +=
       this.velocityFactor * game.getState().balls[args.ballID].speed;
 
-    if (args.ballID === 0 && ++this.bounceCounter >= this.bounceThreshold) {
-      this.deactivate(game);
-      return;
+    if (this.bounceThreshold > 0 && args.ballID === 0) {
+      if (++this.bounceCounter >= this.bounceThreshold) {
+        this.deactivate(game);
+        return;
+      } else {
+        this.clearWalls(game);
+        this.createBumperWalls(game);
+      }
     }
-
-    this.clearWalls(game);
-    this.createBumperWalls(game);
   }
 
   onUpdate(game: Pong): void {
